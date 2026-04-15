@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Carousel.css";
 
-const API_BASE = "http://72.61.236.154:8000/api";
+const API_BASE = "https://api.octosofttechnologies.in/api";
 
 export default function HomePage({ courses = [] }) {
   const categories = [

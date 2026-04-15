@@ -33,8 +33,8 @@ export default function StudentMyCourses() {
       if (!studentId) throw new Error("Student ID not found. Please login again.");
 
       const [dashRes, coursesRes] = await Promise.all([
-        fetch(`http://72.61.236.154:8000/api/student/dashboard/${studentId}`),
-        fetch(`http://72.61.236.154:8000/api/courses`)
+        fetch(`https://api.octosofttechnologies.in/api/student/dashboard/${studentId}`),
+        fetch(`https://api.octosofttechnologies.in/api/courses`)
       ]);
 
       if (!dashRes.ok) throw new Error("Failed to fetch dashboard data");
@@ -48,7 +48,7 @@ export default function StudentMyCourses() {
 
       if (dash.enrolledCourses?.length > 0) {
         const courseDetailsPromises = dash.enrolledCourses.map(enrolled =>
-          fetch(`http://72.61.236.154:8000/api/courses/${enrolled.courseId}`)
+          fetch(`https://api.octosofttechnologies.in/api/courses/${enrolled.courseId}`)
             .then(res => res.ok ? res.json() : null)
             .then(courseData => ({
               ...enrolled,

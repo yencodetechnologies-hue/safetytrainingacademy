@@ -132,7 +132,7 @@ export default function LlndResults() {
   });
 
   useEffect(() => {
-  fetch("http://72.61.236.154:8000/api/flow/llnd-results")
+  fetch("https://api.octosofttechnologies.in/api/flow/llnd-results")
     .then(res => res.json())
     .then(res => {
       setData(res);

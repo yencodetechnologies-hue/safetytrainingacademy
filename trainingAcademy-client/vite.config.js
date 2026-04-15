@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://72.61.236.154:8000',
+        target: 'https://api.octosofttechnologies.in',
         changeOrigin: true,
         secure: false,
       }

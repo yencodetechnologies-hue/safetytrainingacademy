@@ -30,7 +30,7 @@ const Payment = () => {
     try {
       setLoading(true);
 
-      const res = await axios.get("http://72.61.236.154:8000/api/flow/payments");
+      const res = await axios.get("https://api.octosofttechnologies.in/api/flow/payments");
 
       setPayments(res.data.payments);
       setStats(res.data.stats);
@@ -44,7 +44,7 @@ const Payment = () => {
 
   const handleVerify = async () => {
     await axios.put(
-      `http://72.61.236.154:8000/api/flow/payment/${selectedPayment.enrollmentId}/${selectedPayment.itemId}`,
+      `https://api.octosofttechnologies.in/api/flow/payment/${selectedPayment.enrollmentId}/${selectedPayment.itemId}`,
       { status: "success" }
     );
 
@@ -65,7 +65,7 @@ const Payment = () => {
       }
 
       await axios.put(
-        `http://72.61.236.154:8000/api/flow/payment/${selectedPayment.enrollmentId}/${selectedPayment.itemId}`,
+        `https://api.octosofttechnologies.in/api/flow/payment/${selectedPayment.enrollmentId}/${selectedPayment.itemId}`,
         {
           status: "failed",
           reason: rejectionReason

@@ -29,7 +29,7 @@ function RegisterForm() {
             try {
 
                 const res = await axios.post(
-                    "http://72.61.236.154:8000/api/auth/register",
+                    "https://api.octosofttechnologies.in/api/auth/register",
                     values
                 )
 

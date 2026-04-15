@@ -20,7 +20,7 @@ export default function StudentDashboard() {
     const fetchDashboard = async () => {
       try {
         const res = await fetch(
-          `http://72.61.236.154:8000/api/student/dashboard/${studentId}`
+          `https://api.octosofttechnologies.in/api/student/dashboard/${studentId}`
         );
         if (!res.ok) throw new Error("Failed to fetch data");
         const resData = await res.json();
@@ -46,7 +46,7 @@ export default function StudentDashboard() {
     const fetchDashboard = async () => {
       try {
         const res = await fetch(
-          `http://72.61.236.154:8000/api/student/dashboard/${studentId}`
+          `https://api.octosofttechnologies.in/api/student/dashboard/${studentId}`
         );
         if (!res.ok) throw new Error("Failed to fetch data");
         const resData = await res.json();

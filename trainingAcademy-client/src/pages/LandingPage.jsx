@@ -22,7 +22,7 @@ function LandingPage() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get("http://72.61.236.154:8000/api/courses"); // change your API
+        const res = await axios.get("https://api.octosofttechnologies.in/api/courses"); // change your API
         setCourses(res.data);
         const uniqueCategories = [...new Set(res.data.map(c => c.category))];
         setCategories(uniqueCategories);

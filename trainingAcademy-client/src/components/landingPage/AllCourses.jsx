@@ -15,7 +15,7 @@ function AllCourses() {
   const selectedCategory = params.get("category");
 
   useEffect(() => {
-    fetch("http://72.61.236.154:8000/api/courses")
+    fetch("https://api.octosofttechnologies.in/api/courses")
       .then(res => res.json())
       .then(data => {
         setCourses(data);
