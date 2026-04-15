@@ -1,0 +1,154 @@
+.course-detail-hero{
+background:#0b1a33;
+padding:60px 0;
+color:white;
+}
+
+.course-hero-container{
+max-width:1200px;
+margin:auto;
+padding:0 20px;
+}
+
+/* BACK BUTTON */
+
+.back-btn{
+background:none;
+border:none;
+color:#9ca3af;
+font-size:14px;
+margin-bottom:20px;
+cursor:pointer;
+}
+
+/* BADGES */
+
+.hero-badges-container{
+display:flex;
+gap:10px;
+margin-bottom:20px;
+flex-wrap:wrap;
+}
+.hero-badges-container>span{
+color:white !important;}
+
+.badge{
+padding:6px 14px;
+border-radius:20px;
+font-size:13px;
+font-weight:600;
+}
+
+.badge.blue{
+background:#0ea5e9;
+}
+
+.badge.purple{
+background:#9333ea ; 
+}
+
+.badge.red{
+background:#ef4444;
+}
+
+/* TITLE */
+
+.hero-title{
+font-size:40px;
+font-weight:700;
+margin-bottom:15px;
+line-height:1.2;
+}
+
+/* META INFO */
+
+.hero-meta{
+display:flex;
+gap:20px;
+font-size:15px;
+color:#cbd5f5;
+margin-bottom:25px;
+flex-wrap:wrap;
+}
+
+/* SEARCH */
+
+.hero-search input{
+width:500px;
+max-width:100%;
+padding:14px 20px;
+border-radius:30px;
+border:none;
+background:#1e293b;
+color:white;
+outline:none;
+}
+
+
+/* ----------------------------- */
+/* TABLET */
+/* ----------------------------- */
+
+@media (max-width:1024px){
+
+.hero-title{
+font-size:32px;
+}
+
+.hero-meta{
+gap:15px;
+}
+
+.hero-search input{
+width:100%;
+}
+
+}
+
+
+/* ----------------------------- */
+/* MOBILE */
+/* ----------------------------- */
+
+@media (max-width:768px){
+
+.course-detail-hero{
+padding:40px 0;
+}
+
+.hero-title{
+font-size:26px;
+}
+
+.hero-meta{
+flex-direction:column;
+gap:8px;
+}
+
+.hero-search input{
+width:100%;
+}
+
+}
+
+
+/* ----------------------------- */
+/* SMALL MOBILE */
+/* ----------------------------- */
+
+@media (max-width:480px){
+
+.hero-title{
+font-size:22px;
+}
+
+.badge{
+font-size:11px;
+padding:5px 10px;
+}
+
+.back-btn{
+font-size:12px;
+}
+
+}

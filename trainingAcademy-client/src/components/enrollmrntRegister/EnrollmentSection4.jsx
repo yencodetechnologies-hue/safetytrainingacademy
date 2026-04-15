@@ -1,0 +1,229 @@
+import "../../styles/EnrollmentSection4.css"
+
+const INDIGENOUS_OPTIONS = [
+    "Aboriginal but not Torres Strait Islander origin",
+    "Torres Strait Islander but not Aboriginal origin",
+    "Both Aboriginal and Torres Strait Islander origin",
+    "Neither Aboriginal nor Torres Strait Islander origin",
+    "Prefer not to say",
+]
+
+const DISABILITY_TYPES = [
+    "Hearing / deafness",
+    "Mental illness",
+    "Physical",
+    "Acquired brain impairment",
+    "Intellectual",
+    "Vision",
+    "Learning",
+    "Medical condition",
+]
+
+function EnrollmentSection4({ data, setData, prev, next }) {
+
+    const set = (key, value) => setData(p => ({ ...p, [key]: value }))
+
+    const toggleDisability = (type) => {
+        const current = data.disabilityTypes || []
+        if (current.includes(type)) {
+            set("disabilityTypes", current.filter(t => t !== type))
+        } else {
+            set("disabilityTypes", [...current, type])
+        }
+    }
+
+    const speaksOtherLang = data.speaksOtherLanguage === "yes"
+    const hasDisability = data.hasDisability === "yes"
+
+    const handleNext = () => {
+        if (!data.countryOfBirth?.trim()) {
+            alert("Please enter your Country of Birth.")
+            return
+        }
+        if (!data.speaksOtherLanguage) {
+            alert("Please select if you speak a language other than English at home.")
+            return
+        }
+        if (speaksOtherLang && !data.otherLanguage?.trim()) {
+            alert("Please enter the language you speak at home.")
+            return
+        }
+        if (!data.indigenousStatus) {
+            alert("Please select your Indigenous Status.")
+            return
+        }
+        if (!data.hasDisability) {
+            alert("Please select if you have a disability, impairment or long-term condition.")
+            return
+        }
+        next()
+    }
+
+    return (
+        <div className="s4-page">
+
+            {/* SECTION HEADER */}
+            <div className="s4-section-header">
+                <h2 className="s4-section-header-text">
+                    SECTION 4 — ADDITIONAL INFORMATION
+                </h2>
+            </div>
+
+            {/* MAIN CARD */}
+            <div className="s4-card">
+
+                {/* ROW 1 — Country of Birth + Language */}
+                <div className="s4-row-2">
+
+                    <div className="s4-field">
+                        <label className="s4-label">
+                            Country of Birth <span className="s4-required">*</span>
+                        </label>
+                        <input
+                            className="s4-input"
+                            value={data.countryOfBirth || ""}
+                            onChange={e => set("countryOfBirth", e.target.value)}
+                        />
+                    </div>
+
+                    <div className="s4-field">
+                        <label className="s4-label">
+                            Do you speak a language other than English at home?
+                            <span className="s4-required"> *</span>
+                        </label>
+                        <div className="s4-radio-row">
+                            <label className="s4-radio-label">
+                                <input
+                                    type="radio"
+                                    name="s4-language"
+                                    value="no"
+                                    checked={data.speaksOtherLanguage === "no"}
+                                    onChange={() => set("speaksOtherLanguage", "no")}
+                                    className="s4-radio"
+                                />
+                                No
+                            </label>
+                            <label className="s4-radio-label">
+                                <input
+                                    type="radio"
+                                    name="s4-language"
+                                    value="yes"
+                                    checked={data.speaksOtherLanguage === "yes"}
+                                    onChange={() => set("speaksOtherLanguage", "yes")}
+                                    className="s4-radio"
+                                />
+                                Yes
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* Language (if Yes) */}
+                {speaksOtherLang && (
+                    <div className="s4-field s4-field-full">
+                        <label className="s4-label">
+                            Language (if Yes) <span className="s4-required">*</span>
+                        </label>
+                        <input
+                            className="s4-input-full"
+                            value={data.otherLanguage || ""}
+                            onChange={e => set("otherLanguage", e.target.value)}
+                        />
+                    </div>
+                )}
+
+                {/* ROW 2 — Indigenous Status + Disability */}
+                <div className="s4-row-2" style={{ marginTop: 8 }}>
+
+                    <div className="s4-field">
+                        <label className="s4-label">
+                            Indigenous Status <span className="s4-required">*</span>
+                        </label>
+                        <select
+                            className="s4-select"
+                            value={data.indigenousStatus || ""}
+                            onChange={e => set("indigenousStatus", e.target.value)}
+                        >
+                            <option value="">Select...</option>
+                            {INDIGENOUS_OPTIONS.map(opt => (
+                                <option key={opt}>{opt}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="s4-field">
+                        <label className="s4-label">
+                            Do you consider yourself to have a disability, impairment
+                            or long-term condition?
+                            <span className="s4-required"> *</span>
+                        </label>
+                        <div className="s4-radio-row">
+                            <label className="s4-radio-label">
+                                <input
+                                    type="radio"
+                                    name="s4-disability"
+                                    value="no"
+                                    checked={data.hasDisability === "no"}
+                                    onChange={() => set("hasDisability", "no")}
+                                    className="s4-radio"
+                                />
+                                No
+                            </label>
+                            <label className="s4-radio-label">
+                                <input
+                                    type="radio"
+                                    name="s4-disability"
+                                    value="yes"
+                                    checked={data.hasDisability === "yes"}
+                                    onChange={() => set("hasDisability", "yes")}
+                                    className="s4-radio"
+                                />
+                                Yes
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            {/* DISABILITY SUPPLEMENT — expand if Yes */}
+            {hasDisability && (
+                <div className="s4-disability-box">
+
+                    <h4 className="s4-disability-title">Disability Supplement (if Yes)</h4>
+                    <p className="s4-disability-hint">Select all that apply.</p>
+
+                    <div className="s4-checkbox-grid">
+                        {DISABILITY_TYPES.map(type => (
+                            <label key={type} className="s4-checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={(data.disabilityTypes || []).includes(type)}
+                                    onChange={() => toggleDisability(type)}
+                                />
+                                {type}
+                            </label>
+                        ))}
+                    </div>
+
+                    <div className="s4-field s4-field-full" style={{ marginTop: 16 }}>
+                        <label className="s4-label">Other / Notes</label>
+                        <textarea
+                            className="s4-textarea"
+                            rows={3}
+                            placeholder="If you need support adjustments, describe them here."
+                            value={data.disabilityNotes || ""}
+                            onChange={e => set("disabilityNotes", e.target.value)}
+                        />
+                    </div>
+
+                </div>
+            )}
+
+        </div>
+    )
+}
+
+export default EnrollmentSection4

@@ -1,0 +1,26 @@
+.adv-bar{
+    display: block !important;
+    position: relative;
+}
+.tru-bar {
+    position: absolute;
+    top: -90px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 75%;
+    z-index: 10;
+}
+@media (max-width: 768px) {
+    .adv-bar {
+        position: static;
+    }
+
+    .tru-bar {
+        position: static;
+        top: auto;
+        left: auto;
+        transform: none;
+        width: 100%;
+        padding: 0px;
+    }
+}

@@ -1,0 +1,41 @@
+/* ===== VOC PAGE ===== */
+.voc-page {
+    min-height: 100vh;
+    background: #f8fafc;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.voc-container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 16px 16px 60px;
+}
+
+/* Done screen */
+.voc-done {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 60px 32px;
+    text-align: center;
+}
+
+.voc-done-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.voc-done h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 12px;
+}
+
+.voc-done p {
+    font-size: 15px;
+    color: #555;
+    line-height: 1.6;
+}

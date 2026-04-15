@@ -1,0 +1,43 @@
+.week-navigation{
+     display: "flex";
+      gap: "10px"; 
+      align-items: "center" ;
+}
+.week-navigation>button{
+    background:#7b2ff7;
+    color:white;
+    border:none;
+    padding:5px 10px;
+    border-radius:6px;
+    cursor:pointer;
+}
+.week-navigation>span{
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.calandar-dates{
+    border:1px solid #eee;
+    border-radius:12px;
+    padding:15px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+}
+.calendar-day{
+    color:#777;
+}
+.booking-count{
+    color:#7b2ff7;
+    bottom:1px;
+}
+.calandar-dates>h3,p{
+    margin:8px 0;
+
+}
+.calandar-div{
+    background: white;
+    padding: 33px;
+    margin: 33px;
+    border-radius: 10px;
+}

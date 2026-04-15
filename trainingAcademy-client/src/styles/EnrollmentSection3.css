@@ -1,0 +1,305 @@
+/* ===== ENROLLMENT SECTION 3 — EDUCATION & EMPLOYMENT ===== */
+
+.s3-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    font-family: 'Segoe UI', sans-serif;
+    color: #1a1a1a;
+}
+
+/* Section Header */
+.s3-section-header {
+    background: #EBF4FF;
+    border: 1px solid #BFDBFE;
+    border-radius: 10px;
+    padding: 18px 24px;
+    margin-bottom: 20px;
+}
+
+.s3-section-header-text {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1e3a5f;
+    letter-spacing: 0.3px;
+}
+
+/* Card */
+.s3-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.s3-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 8px;
+}
+
+.s3-info-text {
+    font-size: 13.5px;
+    color: #555;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.s3-subtitle {
+    font-size: 13.5px;
+    color: #555;
+    margin: 0 0 16px;
+}
+
+.s3-hint {
+    font-size: 13px;
+    color: #888;
+    margin: 8px 0 0;
+    line-height: 1.5;
+}
+
+.s3-divider {
+    border: none;
+    border-top: 1px solid #f0f0f0;
+    margin: 16px 0;
+}
+
+/* Radio grid — 2 columns */
+.s3-radio-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 24px;
+    margin-bottom: 12px;
+}
+
+.s3-radio-row {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.s3-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 14px;
+    color: #222;
+    cursor: pointer;
+}
+
+.s3-radio {
+    accent-color: #7c3aed;
+    cursor: pointer;
+}
+
+/* Field */
+.s3-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+    flex: 1;
+}
+
+.s3-field-full {
+    width: 100%;
+    flex: unset;
+}
+
+.s3-label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #111;
+}
+
+.s3-required {
+    color: #dc2626;
+    margin-left: 2px;
+}
+
+/* Inputs */
+.s3-input {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    font-size: 14px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.s3-input:focus {
+    border-color: #7c3aed;
+    background: #fff;
+}
+
+.s3-input-full {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    font-size: 14px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.s3-input-full:focus {
+    border-color: #7c3aed;
+    background: #fff;
+}
+
+.s3-textarea {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    font-size: 14px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.s3-textarea:focus {
+    border-color: #7c3aed;
+    background: #fff;
+}
+
+.s3-file-input {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    font-size: 13.5px;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+/* Checkbox */
+.s3-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: #333;
+    cursor: pointer;
+    margin-top: 12px;
+}
+
+.s3-checkbox-label input[type="checkbox"] {
+    accent-color: #7c3aed;
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+/* Two column row */
+.s3-row-2 {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* Qualification expand box */
+.s3-qual-box {
+    margin-top: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 20px 20px 16px;
+    background: #fafafa;
+}
+
+.s3-qual-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 14px;
+}
+
+.s3-checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+}
+
+/* Footer Nav */
+.s3-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    padding-bottom: 16px;
+}
+
+.s3-prev-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 11px 22px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+
+.s3-prev-btn:hover {
+    background: #f3f4f6;
+}
+
+.s3-next-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #7c3aed;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+
+.s3-next-btn:hover {
+    background: #6d28d9;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .s3-radio-grid,
+    .s3-checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .s3-row-2 {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .s3-card {
+        padding: 20px 16px;
+    }
+
+    .s3-qual-box {
+        padding: 16px 14px;
+    }
+}

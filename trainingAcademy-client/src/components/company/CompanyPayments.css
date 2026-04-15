@@ -1,0 +1,245 @@
+/* ── Payments.css ── */
+
+.py-wrapper {
+  padding: 2rem 2.5rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f5f5ff;
+  min-height: 100vh;
+}
+
+.py-page-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #7c3aed;
+  margin: 0 0 4px;
+}
+
+.py-page-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 1.5rem;
+  line-height: 1.6;
+  max-width: 900px;
+}
+
+/* ── Main Card ── */
+.py-card {
+  background: #fff;
+  border: 0.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+}
+
+.py-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.py-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.py-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  margin: 0 0 4px;
+}
+
+.py-card-heading svg {
+  width: 16px;
+  height: 16px;
+  color: #374151;
+  flex-shrink: 0;
+}
+
+.py-card-desc {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.55;
+}
+
+.py-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+.py-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0.5px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  color: #374151;
+}
+
+.py-btn-icon:hover {
+  background: #f3f4f6;
+}
+
+.py-btn-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.py-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 14px;
+  border: 0.5px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.py-btn-outline:hover {
+  background: #f3f4f6;
+}
+
+.py-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+  background: #1f2937;
+  font-size: 13px;
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.py-btn-primary:hover {
+  background: #111827;
+}
+
+.py-btn-primary:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* ── Table ── */
+.py-table-wrap {
+  overflow-x: auto;
+  border-top: 0.5px solid #e5e7eb;
+  padding-top: 4px;
+}
+
+.py-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.py-table th {
+  text-align: left;
+  font-weight: 500;
+  color: #6b7280;
+  padding: 10px 12px;
+  border-bottom: 0.5px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.py-table th.right,
+.py-table td.right {
+  text-align: right;
+}
+
+.py-table td {
+  padding: 12px 12px;
+  color: #111;
+  border-bottom: 0.5px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.py-table tr:last-child td {
+  border-bottom: none;
+}
+
+.py-table tr.py-row-paid td {
+  color: #9ca3af;
+}
+
+.py-col-check {
+  width: 36px;
+}
+
+.py-checkbox {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: #1f2937;
+}
+
+/* Badge */
+.py-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.py-badge-pending {
+  background: #f3f4f6;
+  color: #374151;
+  border: 0.5px solid #e5e7eb;
+}
+
+.py-badge-paid {
+  background: #1f2937;
+  color: #fff;
+}
+
+.py-balance-bold {
+  font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .py-wrapper {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 580px) {
+  .py-wrapper {
+    padding: 1rem;
+  }
+
+  .py-card {
+    padding: 1rem;
+  }
+
+  .py-card-top {
+    flex-direction: column;
+  }
+
+  .py-card-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
