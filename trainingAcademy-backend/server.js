@@ -15,7 +15,7 @@ dotenv.config();
 connectDB();
 
 const app = express();
-const allowedOrigins = ["http://localhost:5173","https://safety-training-academy.netlify.app","http://72.61.236.154:8000/","http://72.61.236.154:8000"];
+const allowedOrigins = ["http://localhost:5173","https://safety-training-academy.netlify.app","http://72.61.236.154:8000/","http://72.61.236.154:8000","https://safetytrainingacademy.vercel.app"];
 
 app.use(cors({
   origin: function (origin, callback) {
