@@ -97,14 +97,16 @@ function AddCompanyModal({ onClose, onAdd, editData, onUpdate }) {
             const token = localStorage.getItem("token");
             if (editData) {
                 const res = await axios.put(
-                    `http://localhost:8000/api/companies/${editData._id}`,
+                    `https://api.octosofttechnologies.in
+/api/companies/${editData._id}`,
                     { companyName: form.name, email: form.email, mobileNumber: form.mobile },
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 onUpdate(res.data.data);
             } else {
                 const res = await axios.post(
-                    "http://localhost:8000/api/companies",
+                    "https://api.octosofttechnologies.in
+/api/companies",
                     { companyName: form.name, email: form.email, mobileNumber: form.mobile, password: form.password },
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
@@ -218,7 +220,8 @@ export default function Companies() {
         const fetchCompanies = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const res = await axios.get("http://localhost:8000/api/companies", {
+                const res = await axios.get("https://api.octosofttechnologies.in
+/api/companies", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setCompanies(res.data.data);
@@ -247,7 +250,8 @@ export default function Companies() {
         try {
             const token = localStorage.getItem("token");
             const res = await axios.patch(
-                `http://localhost:8000/api/companies/${id}/toggle-status`,
+                `https://api.octosofttechnologies.in
+/api/companies/${id}/toggle-status`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -263,7 +267,8 @@ export default function Companies() {
         if (!window.confirm("Are you sure?")) return;
         try {
             const token = localStorage.getItem("token");
-            await axios.delete(`http://localhost:8000/api/companies/${id}`, {
+            await axios.delete(`https://api.octosofttechnologies.in
+/api/companies/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setCompanies((prev) => prev.filter((c) => c._id !== id));

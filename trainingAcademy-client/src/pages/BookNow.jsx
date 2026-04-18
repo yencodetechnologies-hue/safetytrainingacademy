@@ -56,7 +56,7 @@ function BookNow() {
     useEffect(() => {
         if (!enrollId) return;
         setIsLoading(true);
-        fetch(`http://localhost:8000/api/book-now/check-role?id=${enrollId}`)
+        fetch(`https://api.octosofttechnologies.in/api/book-now/check-role?id=${enrollId}`)
             .then(res => res.json())
             .then(data => {
                 if (data.role === "company" || data.role === "Company") {
@@ -107,7 +107,7 @@ function BookNow() {
             formData.append("transactionId", paymentData.transactionId || "");
             formData.append("slipUrl", slipUrl);
 
-            const res = await fetch("http://localhost:8000/api/flow/create", {
+            const res = await fetch("https://api.octosofttechnologies.in/api/flow/create", {
                 method: "POST",
                 body: formData,
             });
@@ -121,7 +121,7 @@ function BookNow() {
 
     const sendBookingEmail = async () => {
         try {
-            await fetch("http://localhost:8000/api/booking-email/send-confirmation", {
+            await fetch("https://api.octosofttechnologies.in/api/booking-email/send-confirmation", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -175,7 +175,7 @@ function BookNow() {
                     formData.append("startTime", selectedSession?.startTime);
                     formData.append("endTime", selectedSession?.endTime);
  
-                    const res = await fetch("http://localhost:8000/api/enroll/enrollment", {
+                    const res = await fetch("https://api.octosofttechnologies.in/api/enroll/enrollment", {
                         method: "POST",
                         body: formData,
                     });
@@ -234,7 +234,7 @@ function BookNow() {
                 formData.append("startTime", selectedSession?.startTime);
                 formData.append("endTime", selectedSession?.endTime);
  
-                const res = await fetch("http://localhost:8000/api/enroll/enrollment", {
+                const res = await fetch("https://api.octosofttechnologies.in/api/enroll/enrollment", {
                     method: "POST",
                     body: formData,
                 });

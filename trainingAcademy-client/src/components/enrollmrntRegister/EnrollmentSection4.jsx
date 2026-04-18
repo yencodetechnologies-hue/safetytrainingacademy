@@ -149,7 +149,7 @@ function EnrollmentSection4({ data, setData, prev, next }) {
 
         // ✅ உடனே save
         try {
-            await fetch("http://localhost:8000/api/enrollment-form/section", {
+            await fetch("https://api.octosofttechnologies.in0/api/enrollment-form/section", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

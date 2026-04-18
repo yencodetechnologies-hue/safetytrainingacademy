@@ -137,7 +137,7 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
         clearKeys.forEach(key => set(key, null))
         if (fileUrl) {
             try {
-                await fetch("http://localhost:8000/api/enrollment-form/section5-file", {
+                await fetch("https://api.octosofttechnologies.in/api/enrollment-form/section5-file", {
                     method: "DELETE",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ studentId: data.userId, fileUrl, fileType })

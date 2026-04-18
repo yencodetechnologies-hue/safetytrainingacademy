@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import "../styles/Profile.css"
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:8000/api"
+const API = import.meta.env.VITE_API_URL || "https://api.octosofttechnologies.in/api"
 
 // ── Field component — outside StudentProfile to prevent focus loss ──────────
 // Inside-ல் வச்சா ஒவ்வொரு keystroke-லயும் remount ஆகி focus போகும்

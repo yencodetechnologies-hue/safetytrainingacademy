@@ -132,7 +132,8 @@ export default function LlndResults() {
   });
 
   useEffect(() => {
-  fetch("http://localhost:8000/api/flow/llnd-results")
+  fetch("https://api.octosofttechnologies.in
+/api/flow/llnd-results")
     .then(res => res.json())
     .then(res => {
       setData(res);
