@@ -3,8 +3,7 @@ import { useFormik } from "formik"
 import axios from "axios"
 import { useState, useEffect } from "react"
 
-const API = "https://api.octosofttechnologies.in
-/api"
+const API = "https://api.octosofttechnologies.in/api"
 
 // ─── helpers ───────────────────────────────────────────────────────
 const toYMD = (d) => new Date(d).toISOString().split("T")[0]

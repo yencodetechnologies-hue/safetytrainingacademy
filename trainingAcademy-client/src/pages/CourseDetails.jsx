@@ -21,14 +21,12 @@ function CourseDetails() {
 
     useEffect(() => {
 
-        axios.get(`https://api.octosofttechnologies.in
-/api/courses/${courseId}`)
+        axios.get(`https://api.octosofttechnologies.in/api/courses/${courseId}`)
             .then(res => {
                 setCourse(res.data)
             })
 
-        axios.get(`https://api.octosofttechnologies.in
-/api/courses`)
+        axios.get(`https://api.octosofttechnologies.in/api/courses`)
             .then(res => {
                 setCourses(res.data)
             })

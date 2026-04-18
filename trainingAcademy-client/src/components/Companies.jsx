@@ -247,8 +247,7 @@ export default function Companies() {
         try {
             const token = localStorage.getItem("token");
             const res = await axios.patch(
-                `https://api.octosofttechnologies.in
-/api/companies/${id}/toggle-status`,
+                `https://api.octosofttechnologies.in/api/companies/${id}/toggle-status`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -264,8 +263,7 @@ export default function Companies() {
         if (!window.confirm("Are you sure?")) return;
         try {
             const token = localStorage.getItem("token");
-            await axios.delete(`https://api.octosofttechnologies.in
-/api/companies/${id}`, {
+            await axios.delete(`https://api.octosofttechnologies.in/api/companies/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setCompanies((prev) => prev.filter((c) => c._id !== id));

@@ -41,10 +41,8 @@ const [userDetails, setUserDetails] = useState({
       if (!studentId) throw new Error("Student ID not found. Please login again.");
 
       const [dashRes, coursesRes] = await Promise.all([
-        fetch(`https://api.octosofttechnologies.in
-/api/student/dashboard/${studentId}`),
-        fetch(`https://api.octosofttechnologies.in
-/api/courses`)
+        fetch(`https://api.octosofttechnologies.in/api/student/dashboard/${studentId}`),
+        fetch(`https://api.octosofttechnologies.in/api/courses`)
       ]);
 
       if (!dashRes.ok) throw new Error("Failed to fetch dashboard data");
@@ -58,8 +56,7 @@ const [userDetails, setUserDetails] = useState({
 
       if (dash.enrolledCourses?.length > 0) {
         const courseDetailsPromises = dash.enrolledCourses.map(enrolled =>
-          fetch(`https://api.octosofttechnologies.in
-/api/courses/${enrolled.courseId}`)
+          fetch(`https://api.octosofttechnologies.in/api/courses/${enrolled.courseId}`)
             .then(res => res.ok ? res.json() : null)
             .then(courseData => ({
               ...enrolled,

@@ -24,8 +24,7 @@ function LoginForm() {
     onSubmit: async (values) => {
       try {
         const res = await axios.post(
-          "https://api.octosofttechnologies.in
-/api/auth/login",
+          "https://api.octosofttechnologies.in/api/auth/login",
           values
         );
         localStorage.setItem("token", res.data.token);

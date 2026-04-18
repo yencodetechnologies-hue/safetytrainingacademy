@@ -15,8 +15,7 @@ function AllCourses() {
   const selectedCategory = params.get("category");
 
   useEffect(() => {
-    fetch("https://api.octosofttechnologies.in
-/api/courses")
+    fetch("https://api.octosofttechnologies.in/api/courses")
       .then(res => res.json())
       .then(data => {
         setCourses(data);
