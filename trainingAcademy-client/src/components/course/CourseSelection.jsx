@@ -35,8 +35,7 @@ function CourseSelection({
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const res = await axios.get("https://api.octosofttechnologies.in
-/api/courses")
+                const res = await axios.get("https://api.octosofttechnologies.in/api/courses")
                 const fetchedCourses = res.data
                 setCourses(fetchedCourses)
 

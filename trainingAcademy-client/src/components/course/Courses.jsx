@@ -29,8 +29,7 @@ function Courses() {
  
     const fetchCourses = async () => {
         try {
-            const res = await axios.get("https://api.octosofttechnologies.in
-/api/courses");
+            const res = await axios.get("https://api.octosofttechnologies.in/api/courses");
             setCourses(res.data);
         } catch (error) {
             console.log(error);
