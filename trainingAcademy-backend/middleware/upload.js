@@ -25,9 +25,18 @@ const enrollmentStorage = new CloudinaryStorage({
     allowed_formats: ["jpg", "png", "jpeg", "webp", "pdf"]
   }
 })
+const galleryStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "gallery",
+    allowed_formats: ["jpg", "png", "jpeg", "webp", "svg"]
+  }
+})
 
+
+const uploadGallery = multer({ storage: galleryStorage })
 const uploadEnrollment = multer({ storage: enrollmentStorage })
 const uploadCourse = multer({ storage: courseStorage })
 const uploadPayment = multer({ storage: paymentStorage })
 
-module.exports = { uploadCourse, uploadPayment, uploadEnrollment }
+module.exports = { uploadCourse, uploadPayment, uploadEnrollment, uploadGallery,  }

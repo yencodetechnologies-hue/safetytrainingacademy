@@ -1,6 +1,7 @@
 import "../../styles/Navbar.css"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
+import Student from "../../components/Profile"
 
 function Navbar({ user }) {
     const navigate = useNavigate()
@@ -14,6 +15,11 @@ function Navbar({ user }) {
     const closeSidebar = () => {
         setSidebarOpen(false)
         document.body.classList.remove("sidebar-open")
+    }
+
+    const goProfile = () => {
+        navigate("/student/profile")
+        closeSidebar()
     }
 
     return (
@@ -31,7 +37,10 @@ function Navbar({ user }) {
                     </span>
                     <span><i className="fa-regular fa-bell"></i></span>
                     <span><i className="fa-solid fa-gear"></i></span>
-                    <span><i className="fa-regular fa-user"></i></span>
+                    {/* ✅ Mobile: user icon → profile */}
+                    <span onClick={goProfile}>
+                        <i className="fa-regular fa-user"></i>
+                    </span>
                 </div>
             </div>
 
@@ -51,8 +60,10 @@ function Navbar({ user }) {
                     {/* Desktop icons */}
                     <div className="desktop-icons">
                         <span><i className="fa-regular fa-bell"></i></span>
-                        <span><i className="fa-solid fa-gear"></i></span>
-                        <span><i className="fa-regular fa-user"></i></span>
+                        {/* ✅ Desktop: user icon → profile */}
+                        <span onClick={goProfile} style={{ cursor: "pointer" }}>
+                            <i className="fa-regular fa-user"></i>
+                        </span>
                     </div>
 
                     {/* Mobile burger icon */}

@@ -10,7 +10,8 @@ const enrollmentRoutes = require("./routes/enrollmentFlowRoutes");
 const studentDashboardRoutes = require("./routes/studentDashboardRoutes");
 const bookingEmailRoutes = require("./routes/bookingEmailRoutes");
 const paymentRouter = require("./routes/paymentRouter");
-
+const enrollmentLinksRouter = require("./routes/enrollmentLinks");
+const galleryRouter = require("./routes/gallery")
 dotenv.config();
 connectDB();
 
@@ -49,6 +50,8 @@ app.use("/api/flow", enrollmentRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/student", studentDashboardRoutes);
 app.use("/api/booking-email", bookingEmailRoutes);
+app.use("/api/enrollment-links", enrollmentLinksRouter);
+app.use("/api/gallery", galleryRouter)
 
 const PORT = process.env.PORT || 8000;
 

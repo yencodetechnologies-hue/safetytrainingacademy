@@ -1,5 +1,6 @@
 const EnrollmentForm = require("../models/EnrollmentForm");
 const EnrollmentFlow = require("../models/EnrollmentFlows");
+const cloudinary = require("../config/cloudinary")
 
 const createEnrollmentForm = async (req, res) => {
   try {
@@ -101,10 +102,11 @@ const createEnrollmentForm = async (req, res) => {
       { new: true, upsert: true }
     )
 
-    await EnrollmentFlow.findOneAndUpdate(
-      { studentId: data.userId, status: "active" },
-      { enrollmentFormId: form._id, currentStep: 4 }
-    )
+  await EnrollmentFlow.findOneAndUpdate(
+  { studentId: data.userId },           // status condition நீக்கு
+  { enrollmentFormId: form._id, currentStep: 5 },
+  { sort: { createdAt: -1 } }           // latest flow மட்டும்
+)
 
     res.status(201).json({ message: "Enrollment form submitted successfully" })
 
@@ -168,25 +170,31 @@ const saveSection = async (req, res) => {
       }
     }
 
-   if (section === "2" || section === 2) {
-  updateFields = {
-    "usi.number": sectionData.usi,
-    "usi.permission": sectionData.usiPermission,
-    "usi.staApplication": sectionData.staApplication,  // ✅ nested
-    "usi.staAuthoriseName": sectionData.staAuthoriseName,
-    "usi.staConsent": sectionData.staConsent,
-    "usi.staTownOfBirth": sectionData.staTownOfBirth,
-    "usi.staOverseasTown": sectionData.staOverseasTown,
-    "usi.staIdType": sectionData.staIdType,
-  }
+if (section === "2" || section === 2) {
+    updateFields = {
+        "usi.number": sectionData.usiNumber,        // ✅ usiNumber — string மட்டும்
+        "usi.permission": sectionData.usiPermission,
+        "usi.staApplication": sectionData.staApplication,
+        "usi.staAuthoriseName": sectionData.staAuthoriseName,
+        "usi.staConsent": sectionData.staConsent,
+        "usi.staTownOfBirth": sectionData.staTownOfBirth,
+        "usi.staOverseasTown": sectionData.staOverseasTown,
+        "usi.staIdType": sectionData.staIdType,
+        
+    }
 }
 
     if (section === "3" || section === 3) {
       updateFields = {
         education: sectionData.education,
-        qualifications: sectionData.qualifications,
+        qualifications: {
+          hasQualification: sectionData.qualifications?.hasQualification,
+          types: sectionData.qualifications?.types,
+          details: sectionData.qualifications?.details || "",  // ✅ NEW
+        },
         employment: sectionData.employment,
         trainingReason: sectionData.trainingReason,
+        trainingReasonOther: sectionData.trainingReasonOther,  // ✅ NEW
       }
     }
 
@@ -213,8 +221,143 @@ const saveSection = async (req, res) => {
     res.status(500).json({ message: "Server error" })
   }
 }
+const saveSection2File = async (req, res) => {
+  try {
+    const { studentId } = req.body;
+    const staIdFileUrl = req.file?.path || null;
 
-module.exports = { createEnrollmentForm, getEnrollmentForms, updateEnrollmentStatus, saveSection }
+    if (!studentId) return res.status(400).json({ message: "studentId required" });
+    if (!staIdFileUrl) return res.status(400).json({ message: "File required" });
+
+    const form = await EnrollmentForm.findOneAndUpdate(
+      { studentId },
+      { $set: { "usi.staIdFileUrl": staIdFileUrl } },
+      { new: true, upsert: true }
+    );
+
+    res.json({ message: "File uploaded", staIdFileUrl });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+const saveSection3File = async (req, res) => {
+  try {
+    const { studentId, qualificationDetails } = req.body
+    const qualificationFileUrl = req.file?.path || null
+
+    if (!studentId) return res.status(400).json({ message: "studentId required" })
+
+    const updateFields = {
+      "qualifications.details": qualificationDetails || "",
+    }
+
+    if (qualificationFileUrl) {
+      updateFields["qualifications.evidenceUrl"] = qualificationFileUrl  // ✅ singular
+    }
+
+    const form = await EnrollmentForm.findOneAndUpdate(
+      { studentId },
+      { $set: updateFields },
+      { new: true, upsert: true }
+    )
+
+    res.json({ 
+      message: "File saved", 
+      qualificationFileUrl,
+      qualificationDetails 
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: "Server error" })
+  }
+}
+const deleteSection2File = async (req, res) => {
+  try {
+    const { studentId, fileUrl } = req.body
+    if (!studentId || !fileUrl) return res.status(400).json({ message: "Required" })
+
+    const parts = fileUrl.split("/")
+    const filename = parts[parts.length - 1].split(".")[0]
+    const publicId = `enrollment-docs/${filename}`
+
+    await cloudinary.uploader.destroy(publicId)
+
+    await EnrollmentForm.findOneAndUpdate(
+      { studentId },
+      { $set: { "usi.staIdFileUrl": null } }
+    )
+
+    res.json({ message: "File deleted" })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: "Server error" })
+  }
+}
+const deleteSection3File = async (req, res) => {
+  try {
+    const { studentId, fileUrl } = req.body
+    if (!studentId || !fileUrl) return res.status(400).json({ message: "Required" })
+
+    const parts = fileUrl.split("/")
+    const filename = parts[parts.length - 1].split(".")[0]
+    const publicId = `enrollment-docs/${filename}`
+
+    await cloudinary.uploader.destroy(publicId)
+
+    await EnrollmentForm.findOneAndUpdate(
+      { studentId },
+      { $set: { "qualifications.evidenceUrl": null } }
+    )
+
+    res.json({ message: "File deleted" })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: "Server error" })
+  }
+}
+const deleteSection5File = async (req, res) => {
+  try {
+    const { studentId, fileUrl, fileType } = req.body
+    if (!studentId || !fileUrl) return res.status(400).json({ message: "Required" })
+
+    const parts = fileUrl.split("/")
+    const filename = parts[parts.length - 1].split(".")[0]
+    const publicId = `enrollment-docs/${filename}`
+
+    await cloudinary.uploader.destroy(publicId)
+
+    const fieldMap = {
+      idDocument: "idDocumentUrl",
+      photoDocument: "photoDocumentUrl",
+      signature: "signatureUrl"
+    }
+
+    const field = fieldMap[fileType]
+    if (field) {
+      await EnrollmentForm.findOneAndUpdate(
+        { studentId },
+        { $set: { [field]: null } }
+      )
+    }
+
+    res.json({ message: "File deleted" })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: "Server error" })
+  }
+}
+module.exports = {
+  createEnrollmentForm,
+  getEnrollmentForms,
+  updateEnrollmentStatus,
+  saveSection,
+  saveSection2File,
+  saveSection3File,
+  deleteSection2File,
+  deleteSection3File,
+  deleteSection5File
+}
 
 
 

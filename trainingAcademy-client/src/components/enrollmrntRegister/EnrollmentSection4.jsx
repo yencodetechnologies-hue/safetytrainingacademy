@@ -141,15 +141,43 @@ function EnrollmentSection4({ data, setData, prev, next }) {
                             Indigenous Status <span className="s4-required">*</span>
                         </label>
                         <select
-                            className="s4-select"
-                            value={data.indigenousStatus || ""}
-                            onChange={e => set("indigenousStatus", e.target.value)}
-                        >
-                            <option value="">Select...</option>
-                            {INDIGENOUS_OPTIONS.map(opt => (
-                                <option key={opt}>{opt}</option>
-                            ))}
-                        </select>
+    className="s4-select"
+    value={data.indigenousStatus || ""}
+    onChange={async (e) => {
+        const value = e.target.value
+        set("indigenousStatus", value)
+
+        // ✅ உடனே save
+        try {
+            await fetch("http://localhost:8000/api/enrollment-form/section", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    studentId: data.userId,
+                    section: 4,
+                    language: {
+                        countryOfBirth: data.countryOfBirth,
+                        otherLanguage: data.otherLanguage,
+                        speaksOtherLanguage: data.speaksOtherLanguage,
+                        indigenousStatus: value,  // ✅ new value
+                    },
+                    specialNeeds: {
+                        hasDisability: data.hasDisability === "yes",
+                        types: data.disabilityTypes,
+                        other: data.disabilityNotes
+                    }
+                })
+            })
+        } catch (err) {
+            console.error("Save error:", err)
+        }
+    }}
+>
+    <option value="">Select...</option>
+    {INDIGENOUS_OPTIONS.map(opt => (
+        <option key={opt}>{opt}</option>
+    ))}
+</select>
                     </div>
 
                     <div className="s4-field">

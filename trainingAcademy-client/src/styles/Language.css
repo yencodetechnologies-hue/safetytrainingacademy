@@ -186,8 +186,8 @@
 
   .prev-btn,
   .next-btn {
-    width: 100%;
-  }
+margin: 10px;  
+}
 
   .language-footer span {
     text-align: center;

@@ -154,7 +154,7 @@ body {
 
 .btn-refresh:hover {
   background: var(--gray-100);
-  border-color: var(--gray-300);
+  border-color: var(--gray-300, #d1d5db);
 }
 
 .btn-add {
@@ -354,12 +354,12 @@ body {
 
 .card-btn.edit:hover {
   background: var(--gray-100);
-  border-color: var(--gray-300);
+  border-color: var(--gray-300, #d1d5db);
 }
 
 .card-btn.deactivate:hover {
   background: var(--gray-100);
-  border-color: var(--gray-300);
+  border-color: var(--gray-300, #d1d5db);
 }
 
 .card-btn.delete {
@@ -373,7 +373,7 @@ body {
   border-color: var(--red);
 }
 
-/* ── Modal ── */
+/* ── Modal Overlay ── */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -388,22 +388,23 @@ body {
 
 @keyframes fadeIn {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
 .modal {
   background: var(--white);
   border-radius: var(--card-radius);
   width: 100%;
-  max-width: 440px;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
   animation: slideUp 0.2s ease;
-  overflow: hidden;
 }
 
 @keyframes slideUp {
   from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
 
 .modal-header {
@@ -412,6 +413,10 @@ body {
   justify-content: space-between;
   padding: 20px 24px 16px;
   border-bottom: 1px solid var(--gray-200);
+  position: sticky;
+  top: 0;
+  background: var(--white);
+  z-index: 1;
 }
 
 .modal-header h3 {
@@ -441,15 +446,26 @@ body {
   padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+}
+
+/* ── Modal Form Fields ── */
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .modal-label {
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--gray-700);
-  margin-bottom: 4px;
   display: block;
+}
+
+.modal-req {
+  color: var(--red);
+  margin-left: 2px;
 }
 
 .modal-input {
@@ -461,20 +477,141 @@ body {
   border: 1.5px solid var(--gray-200);
   border-radius: 8px;
   outline: none;
-  transition: border-color var(--transition);
-  margin-top: 4px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  background: var(--white);
 }
 
 .modal-input:focus {
   border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
+/* ── Modal 2-column row ── */
+.modal-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── Upload toggle tabs ── */
+.modal-upload-toggle {
+  display: flex;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.modal-toggle-btn {
+  flex: 1;
+  padding: 8px 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font);
+  border: none;
+  cursor: pointer;
+  background: var(--white);
+  color: var(--gray-500);
+  transition: background var(--transition), color var(--transition);
+}
+
+.modal-toggle-btn.active {
+  background: var(--purple);
+  color: var(--white);
+}
+
+.modal-toggle-btn:not(.active):hover {
+  background: var(--gray-100);
+}
+
+/* ── Dropzone ── */
+.modal-dropzone {
+  border: 2px dashed var(--gray-200);
+  border-radius: 8px;
+  padding: 22px 16px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--gray-50);
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.modal-dropzone:hover {
+  border-color: var(--purple);
+  background: var(--purple-light);
+}
+
+.modal-dropzone-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.modal-dropzone-icon {
+  font-size: 1.8rem;
+  margin-bottom: 4px;
+}
+
+.modal-dropzone-text {
+  font-size: 0.87rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.modal-dropzone-hint {
+  font-size: 0.75rem;
+  color: var(--gray-400);
+}
+
+.modal-dropzone-selected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.modal-dropzone-filename {
+  font-size: 0.87rem;
+  font-weight: 600;
+  color: var(--purple);
+}
+
+/* ── Image Preview ── */
+.modal-preview {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1.5px solid var(--gray-200);
+  margin-top: 4px;
+}
+
+.modal-preview-img {
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Error ── */
+.modal-error {
+  background: var(--red-bg);
+  color: var(--red);
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+/* ── Modal Footer ── */
 .modal-footer {
   padding: 16px 24px 20px;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   border-top: 1px solid var(--gray-200);
+  position: sticky;
+  bottom: 0;
+  background: var(--white);
 }
 
 .modal-btn {
@@ -508,72 +645,69 @@ body {
   transform: translateY(-1px);
 }
 
+.modal-btn.save:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* ============================
    Responsive Breakpoints
    ============================ */
 
-/* Large desktop */
 @media (min-width: 1024px) {
   .gallery-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-/* Tablet */
 @media (max-width: 1023px) and (min-width: 640px) {
   .gallery-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-
   .gallery-page {
     padding: 28px 20px 48px;
   }
 }
 
-/* Mobile */
 @media (max-width: 639px) {
   .gallery-page {
     padding: 20px 16px 40px;
   }
-
   .gallery-page-title {
     font-size: 1.6rem;
   }
-
   .gallery-panel {
     padding: 20px 16px 24px;
   }
-
   .gallery-panel-header {
     flex-direction: column;
     align-items: stretch;
   }
-
   .gallery-panel-actions {
     justify-content: flex-end;
   }
-
   .gallery-grid {
     grid-template-columns: 1fr;
   }
-
   .btn-refresh,
   .btn-add {
     font-size: 0.82rem;
     padding: 8px 13px;
   }
-
   .gallery-stats-card {
     max-width: 100%;
   }
+  /* Stack 2-col row on mobile */
+  .modal-row-2 {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* Very small screens */
 @media (max-width: 380px) {
   .gallery-panel-actions {
     flex-wrap: wrap;
   }
-
   .gallery-card-btns {
     flex-wrap: wrap;
   }

@@ -19,7 +19,7 @@ function Hero() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await fetch("https://api.octosofttechnologies.in/api/courses")
+        const res = await fetch("http://localhost:8000/api/courses")
         if (!res.ok) throw new Error("Failed to fetch courses")
         const data = await res.json()
         setAllCourses(data)

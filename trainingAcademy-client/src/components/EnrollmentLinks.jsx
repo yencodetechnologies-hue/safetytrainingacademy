@@ -1,124 +1,34 @@
 // EnrollmentLinks.jsx
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import QRCode from "qrcode";
 import "../styles/EnrollmentLinks.css";
 
-// ── Dummy Data ────────────────────────────────────────────────────────────────
-const INITIAL_LINKS = [
-  {
-    id: "d4998e50",
-    name: "Company portal — Safety Training",
-    course: "Any course",
-    usage: 0,
-    maxUses: null,
-    expires: null,
-    status: "Active",
-    payLater: true,
-    agent: false,
-    description: "Permanent link for employees to enrol; fees billed to the company.",
-    createdAt: "26/03/2026 03:49 pm",
-    students: [],
-  },
-  {
-    id: "0fe13702",
-    name: "Agent Link",
-    course: "Any course",
-    usage: 5,
-    maxUses: null,
-    expires: null,
-    status: "Active",
-    payLater: true,
-    agent: true,
-    description: "Link for agents to enrol students.",
-    createdAt: "20/03/2026 10:12 am",
-    students: [
-      { name: "John Smith",   email: "john@example.com",   date: "22/03/2026" },
-      { name: "Sara Lee",     email: "sara@example.com",   date: "23/03/2026" },
-      { name: "Mike Chen",    email: "mike@example.com",   date: "24/03/2026" },
-      { name: "Priya Nair",   email: "priya@example.com",  date: "25/03/2026" },
-      { name: "Tom Brown",    email: "tom@example.com",    date: "26/03/2026" },
-    ],
-  },
-  {
-    id: "9187ff32",
-    name: "Company portal — ydmart",
-    course: "Any course",
-    usage: 0,
-    maxUses: null,
-    expires: null,
-    status: "Active",
-    payLater: true,
-    agent: false,
-    description: "YDMart staff portal link.",
-    createdAt: "21/03/2026 09:00 am",
-    students: [],
-  },
-  {
-    id: "bc8b8d3c",
-    name: "STA Form Payment",
-    course: "Any course",
-    usage: 2,
-    maxUses: 1000,
-    expires: "31/12/2026",
-    status: "Active",
-    payLater: false,
-    agent: false,
-    description: "Standard payment enrollment form.",
-    createdAt: "01/01/2026 08:00 am",
-    students: [
-      { name: "Alice Wong",  email: "alice@example.com",  date: "10/03/2026" },
-      { name: "Bob Kumar",   email: "bob@example.com",    date: "15/03/2026" },
-    ],
-  },
-  {
-    id: "b0176bbf",
-    name: "STA Form PayLater",
-    course: "Any course",
-    usage: 63,
-    maxUses: 1000,
-    expires: "31/12/2026",
-    status: "Active",
-    payLater: true,
-    agent: false,
-    description: "Pay later enrollment form for STA.",
-    createdAt: "01/01/2026 08:30 am",
-    students: [],
-  },
-];
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-// ── Simple QR placeholder (SVG grid) ─────────────────────────────────────────
-function QRPlaceholder({ value }) {
-  // deterministic-ish pattern from string hash
-  const hash = value.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-  const cells = 21;
-  const size = 168;
-  const cell = size / cells;
-  const rects = [];
-  for (let r = 0; r < cells; r++) {
-    for (let c = 0; c < cells; c++) {
-      const edge =
-        (r < 7 && c < 7) ||
-        (r < 7 && c >= cells - 7) ||
-        (r >= cells - 7 && c < 7);
-      const on = edge
-        ? ((r === 0 || r === 6 || c === 0 || c === 6) && (r < 7 && c < 7)) ||
-          ((r === 0 || r === 6 || c === cells - 1 || c === cells - 7) && (r < 7 && c >= cells - 7)) ||
-          ((r === cells - 7 || r === cells - 1 || c === 0 || c === 6) && (r >= cells - 7 && c < 7)) ||
-          (r >= 2 && r <= 4 && c >= 2 && c <= 4 && r < 7 && c < 7) ||
-          (r >= 2 && r <= 4 && c >= cells - 5 && c <= cells - 3 && r < 7) ||
-          (r >= cells - 5 && r <= cells - 3 && c >= 2 && c <= 4)
-        : ((hash * (r * cells + c + 1)) % 7) > 3;
-      if (on) {
-        rects.push(
-          <rect key={`${r}-${c}`} x={c * cell} y={r * cell} width={cell - 0.5} height={cell - 0.5} fill="#000" />
-        );
-      }
-    }
-  }
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} xmlns="http://www.w3.org/2000/svg">
-      <rect width={size} height={size} fill="white" />
-      {rects}
-    </svg>
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const enrollUrl = (id) =>
+  `${import.meta.env.VITE_ENROLL_BASE_URL || "https://safetytrainingacademy.edu.au/enroll"}/${id}`;
+
+const formatDate = (iso) => {
+  if (!iso) return "N/A";
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-AU", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+  }) + " " + d.toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit" });
+};
+
+// ── Real QR Code (canvas → img) ───────────────────────────────────────────────
+function QRImage({ value, size = 168 }) {
+  const [src, setSrc] = useState("");
+  useEffect(() => {
+    QRCode.toDataURL(value, { width: size, margin: 2, color: { dark: "#000", light: "#fff" } })
+      .then(setSrc)
+      .catch(console.error);
+  }, [value, size]);
+  return src ? (
+    <img src={src} alt="QR Code" width={size} height={size} style={{ display: "block" }} />
+  ) : (
+    <div style={{ width: size, height: size, background: "#f0f0f0", borderRadius: 8 }} />
   );
 }
 
@@ -135,35 +45,40 @@ function Toast({ message }) {
 // ── Create Modal ──────────────────────────────────────────────────────────────
 function CreateModal({ onClose, onCreate }) {
   const [form, setForm] = useState({
-    name: "",
-    description: "",
-    payLater: false,
-    agent: false,
-    course: "",
-    maxUses: "",
-    expires: "",
+    name: "", description: "", payLater: false, agent: false,
+    course: "", maxUses: "", expires: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  const handleCreate = () => {
-    if (!form.name.trim()) return;
-    const id = Math.random().toString(16).slice(2, 10);
-    onCreate({
-      id,
-      name: form.name,
-      course: form.course || "Any course",
-      usage: 0,
-      maxUses: form.maxUses ? parseInt(form.maxUses) : null,
-      expires: form.expires || null,
-      status: "Active",
-      payLater: form.payLater,
-      agent: form.agent,
-      description: form.description,
-      createdAt: new Date().toLocaleDateString("en-AU") + " " + new Date().toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit" }),
-      students: [],
-    });
-    onClose();
+  const handleCreate = async () => {
+    if (!form.name.trim()) { setError("Link name is required"); return; }
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/enrollment-links`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          description: form.description,
+          course: form.course || "Any course",
+          maxUses: form.maxUses || null,
+          expires: form.expires || null,
+          payLater: form.payLater,
+          agent: form.agent,
+        }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      onCreate(data.data);
+      onClose();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -177,39 +92,26 @@ function CreateModal({ onClose, onCreate }) {
           <button className="el-modal-close" onClick={onClose}>×</button>
         </div>
         <div className="el-modal-body">
+          {error && <div className="el-error">{error}</div>}
           <div className="el-field">
             <label>Link Name <span className="req">*</span></label>
-            <input
-              className="el-input"
-              placeholder="e.g., January 2025 Batch"
-              value={form.name}
-              onChange={(e) => set("name", e.target.value)}
-            />
+            <input className="el-input" placeholder="e.g., January 2025 Batch"
+              value={form.name} onChange={(e) => set("name", e.target.value)} />
           </div>
           <div className="el-field">
             <label>Description</label>
-            <textarea
-              className="el-textarea"
-              placeholder="Optional description..."
-              value={form.description}
-              onChange={(e) => set("description", e.target.value)}
-            />
+            <textarea className="el-textarea" placeholder="Optional description..."
+              value={form.description} onChange={(e) => set("description", e.target.value)} />
           </div>
           <div className="el-toggles">
             <label className="el-toggle-item">
-              <input
-                type="checkbox"
-                checked={form.payLater}
-                onChange={(e) => set("payLater", e.target.checked)}
-              />
+              <input type="checkbox" checked={form.payLater}
+                onChange={(e) => set("payLater", e.target.checked)} />
               🕐 Pay Later
             </label>
             <label className="el-toggle-item">
-              <input
-                type="checkbox"
-                checked={form.agent}
-                onChange={(e) => set("agent", e.target.checked)}
-              />
+              <input type="checkbox" checked={form.agent}
+                onChange={(e) => set("agent", e.target.checked)} />
               👤 Agent
             </label>
           </div>
@@ -219,7 +121,8 @@ function CreateModal({ onClose, onCreate }) {
           </p>
           <div className="el-field">
             <label>Pre-select Course (Optional)</label>
-            <select className="el-select" value={form.course} onChange={(e) => set("course", e.target.value)}>
+            <select className="el-select" value={form.course}
+              onChange={(e) => set("course", e.target.value)}>
               <option value="">Any course</option>
               <option value="Safety Training">Safety Training</option>
               <option value="Fire Warden">Fire Warden</option>
@@ -229,28 +132,21 @@ function CreateModal({ onClose, onCreate }) {
           <div className="el-row-2">
             <div className="el-field">
               <label>Max Uses</label>
-              <input
-                className="el-input"
-                placeholder="Unlimited"
-                type="number"
-                value={form.maxUses}
-                onChange={(e) => set("maxUses", e.target.value)}
-              />
+              <input className="el-input" placeholder="Unlimited" type="number"
+                value={form.maxUses} onChange={(e) => set("maxUses", e.target.value)} />
             </div>
             <div className="el-field">
               <label>Expires At</label>
-              <input
-                className="el-input"
-                type="date"
-                value={form.expires}
-                onChange={(e) => set("expires", e.target.value)}
-              />
+              <input className="el-input" type="date" value={form.expires}
+                onChange={(e) => set("expires", e.target.value)} />
             </div>
           </div>
         </div>
         <div className="el-modal-footer">
           <button className="el-btn-cancel" onClick={onClose}>Cancel</button>
-          <button className="el-btn-primary" onClick={handleCreate}>+ Create Link</button>
+          <button className="el-btn-primary" onClick={handleCreate} disabled={loading}>
+            {loading ? "Creating..." : "+ Create Link"}
+          </button>
         </div>
       </div>
     </div>
@@ -259,13 +155,26 @@ function CreateModal({ onClose, onCreate }) {
 
 // ── View Modal ────────────────────────────────────────────────────────────────
 function ViewModal({ link, onClose }) {
-  const url = `https://safetytrainingacademy.edu.au/enroll/${link.id}`;
+  const url = enrollUrl(link._id);
   const [copied, setCopied] = useState(false);
+  const qrRef = useRef(null);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(url).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+  };
+
+  const handleDownloadQR = async () => {
+    try {
+      const dataUrl = await QRCode.toDataURL(url, { width: 512, margin: 2 });
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `qr-${link._id}.png`;
+      a.click();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -280,8 +189,8 @@ function ViewModal({ link, onClose }) {
         </div>
         <div className="el-modal-body">
           <div className="el-qr-wrap">
-            <div className="el-qr-box">
-              <QRPlaceholder value={link.id} />
+            <div className="el-qr-box" ref={qrRef}>
+              <QRImage value={url} size={168} />
             </div>
           </div>
           <div className="el-url-block">
@@ -293,12 +202,12 @@ function ViewModal({ link, onClose }) {
               </button>
               <button className="el-icon-btn" title="Open" onClick={() => window.open(url, "_blank")}>↗</button>
             </div>
-            <div className="el-url-created">Created at: {link.createdAt}</div>
+            <div className="el-url-created">Created at: {formatDate(link.createdAt)}</div>
           </div>
           <div className="el-info-grid">
             <div className="el-info-item">
               <label>Unique Code:</label>
-              <span style={{ fontFamily: "monospace" }}>{link.id}</span>
+              <span style={{ fontFamily: "monospace" }}>{link._id}</span>
             </div>
             <div className="el-info-item">
               <label>Status:</label>
@@ -323,9 +232,7 @@ function ViewModal({ link, onClose }) {
             {link.payLater && <span className="el-badge pay-later">Pay Later</span>}
             {link.agent    && <span className="el-badge agent">Agent</span>}
           </div>
-          <div className="el-enrolled-head">
-            👥 Enrolled Students ({link.students.length})
-          </div>
+          <div className="el-enrolled-head">👥 Enrolled Students ({link.students.length})</div>
           {link.students.length === 0 ? (
             <div className="el-empty-students">
               <div className="el-empty-icon">👥</div>
@@ -333,13 +240,7 @@ function ViewModal({ link, onClose }) {
             </div>
           ) : (
             <table className="el-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Name</th><th>Email</th><th>Date</th></tr></thead>
               <tbody>
                 {link.students.map((s, i) => (
                   <tr key={i}>
@@ -354,7 +255,7 @@ function ViewModal({ link, onClose }) {
         </div>
         <div className="el-modal-footer">
           <button className="el-btn-cancel" onClick={onClose}>Close</button>
-          <button className="el-btn-dark">⬇ Download QR</button>
+          <button className="el-btn-dark" onClick={handleDownloadQR}>⬇ Download QR</button>
         </div>
       </div>
     </div>
@@ -381,13 +282,7 @@ function StudentsModal({ link, onClose }) {
             </div>
           ) : (
             <table className="el-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Enrolled</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Name</th><th>Email</th><th>Enrolled</th></tr></thead>
               <tbody>
                 {link.students.map((s, i) => (
                   <tr key={i}>
@@ -410,8 +305,29 @@ function StudentsModal({ link, onClose }) {
 
 // ── Edit Modal ────────────────────────────────────────────────────────────────
 function EditModal({ link, onClose, onSave }) {
-  const [expires, setExpires] = useState(link.expires || "");
-  const [maxUses, setMaxUses] = useState(link.maxUses ? String(link.maxUses) : "");
+  const [expires, setExpires]  = useState(link.expires || "");
+  const [maxUses, setMaxUses]  = useState(link.maxUses ? String(link.maxUses) : "");
+  const [loading, setLoading]  = useState(false);
+  const [error, setError]      = useState("");
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/enrollment-links/${link._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ expires: expires || null, maxUses: maxUses || null }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      onSave(data.data);
+      onClose();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="el-overlay" onClick={onClose}>
@@ -424,40 +340,23 @@ function EditModal({ link, onClose, onSave }) {
           <button className="el-modal-close" onClick={onClose}>×</button>
         </div>
         <div className="el-modal-body">
+          {error && <div className="el-error">{error}</div>}
           <div className="el-field">
             <label>Expiry Date</label>
-            <input
-              className="el-input"
-              type="date"
-              value={expires}
-              onChange={(e) => setExpires(e.target.value)}
-            />
+            <input className="el-input" type="date" value={expires}
+              onChange={(e) => setExpires(e.target.value)} />
             <p style={{ fontSize: 11.5, color: "var(--gray-400)", marginTop: 4 }}>Leave blank for no expiry.</p>
           </div>
           <div className="el-field">
             <label>Max Uses</label>
-            <input
-              className="el-input"
-              type="number"
-              placeholder="Unlimited"
-              value={maxUses}
-              onChange={(e) => setMaxUses(e.target.value)}
-            />
+            <input className="el-input" type="number" placeholder="Unlimited"
+              value={maxUses} onChange={(e) => setMaxUses(e.target.value)} />
           </div>
         </div>
         <div className="el-modal-footer">
           <button className="el-btn-cancel" onClick={onClose}>Cancel</button>
-          <button
-            className="el-btn-primary"
-            onClick={() => {
-              onSave(link.id, {
-                expires: expires || null,
-                maxUses: maxUses ? parseInt(maxUses) : null,
-              });
-              onClose();
-            }}
-          >
-            ✏️ Save & Regenerate
+          <button className="el-btn-primary" onClick={handleSave} disabled={loading}>
+            {loading ? "Saving..." : "✏️ Save & Regenerate"}
           </button>
         </div>
       </div>
@@ -465,8 +364,25 @@ function EditModal({ link, onClose, onSave }) {
   );
 }
 
-// ── Delete Confirm Modal ──────────────────────────────────────────────────────
+// ── Delete Modal ──────────────────────────────────────────────────────────────
 function DeleteModal({ link, onClose, onDelete }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/enrollment-links/${link._id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      onDelete(link._id);
+      onClose();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="el-overlay" onClick={onClose}>
       <div className="el-modal" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
@@ -476,13 +392,13 @@ function DeleteModal({ link, onClose, onDelete }) {
         </div>
         <div className="el-modal-body">
           <p style={{ fontSize: 13.5, color: "var(--gray-600)", lineHeight: 1.6 }}>
-            Are you sure you want to delete this enrollment link? This action cannot be undone.
+            Are you sure you want to delete <strong>{link.name}</strong>? This action cannot be undone.
           </p>
         </div>
         <div className="el-modal-footer">
           <button className="el-btn-cancel" onClick={onClose}>Cancel</button>
-          <button className="el-btn-danger" onClick={() => { onDelete(link.id); onClose(); }}>
-            🗑 Delete
+          <button className="el-btn-danger" onClick={handleDelete} disabled={loading}>
+            {loading ? "Deleting..." : "🗑 Delete"}
           </button>
         </div>
       </div>
@@ -492,46 +408,58 @@ function DeleteModal({ link, onClose, onDelete }) {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function EnrollmentLinks() {
-  const [links, setLinks]         = useState(INITIAL_LINKS);
-  const [modal, setModal]         = useState(null); // null | { type, link? }
-  const [toast, setToast]         = useState(null);
+  const [links,   setLinks]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modal,   setModal]   = useState(null);
+  const [toast,   setToast]   = useState(null);
 
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(null), 2800);
   };
 
-  const openModal = (type, link = null) => setModal({ type, link });
+  const openModal  = (type, link = null) => setModal({ type, link });
   const closeModal = () => setModal(null);
+
+  // ── Fetch all ──
+  useEffect(() => {
+    fetch(`${API}/enrollment-links`)
+      .then((r) => r.json())
+      .then((d) => { if (d.success) setLinks(d.data); })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   // ── Handlers ──
   const handleCreate = (newLink) => {
-    setLinks((prev) => [...prev, newLink]);
+    setLinks((prev) => [newLink, ...prev]);
     showToast("Enrollment link created successfully");
   };
 
   const handleDelete = (id) => {
-    setLinks((prev) => prev.filter((l) => l.id !== id));
+    setLinks((prev) => prev.filter((l) => l._id !== id));
     showToast("Enrollment link deleted");
   };
 
-  const handleToggleStatus = (id) => {
-    setLinks((prev) =>
-      prev.map((l) =>
-        l.id === id ? { ...l, status: l.status === "Active" ? "Inactive" : "Active" } : l
-      )
-    );
-    showToast("Link status updated");
+  const handleToggleStatus = async (id) => {
+    try {
+      const res  = await fetch(`${API}/enrollment-links/${id}/toggle-status`, { method: "PATCH" });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      setLinks((prev) => prev.map((l) => (l._id === id ? data.data : l)));
+      showToast("Link status updated");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleEdit = (id, updates) => {
-    setLinks((prev) => prev.map((l) => (l.id === id ? { ...l, ...updates } : l)));
+  const handleEdit = (updatedLink) => {
+    setLinks((prev) => prev.map((l) => (l._id === updatedLink._id ? updatedLink : l)));
     showToast("Link updated successfully");
   };
 
   const handleCopyUrl = (id) => {
-    const url = `safetytrainingacademy.edu.au/enroll/${id}`;
-    navigator.clipboard.writeText(url).catch(() => {});
+    navigator.clipboard.writeText(enrollUrl(id)).catch(() => {});
     showToast("URL copied to clipboard");
   };
 
@@ -540,10 +468,16 @@ export default function EnrollmentLinks() {
   const activeLinks = links.filter((l) => l.status === "Active").length;
   const totalUsage  = links.reduce((sum, l) => sum + l.usage, 0);
 
-  const usageDisplay = (link) => {
-    if (link.maxUses) return `${link.usage} / ${link.maxUses}`;
-    return String(link.usage);
-  };
+  const usageDisplay = (link) =>
+    link.maxUses ? `${link.usage} / ${link.maxUses}` : String(link.usage);
+
+  if (loading) {
+    return (
+      <div className="el-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 300 }}>
+        <p style={{ color: "var(--gray-400)" }}>Loading enrollment links…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="el-page">
@@ -589,70 +523,75 @@ export default function EnrollmentLinks() {
           <h2>Enrollment Links ({totalLinks})</h2>
           <p>Manage your enrollment links and QR codes.</p>
         </div>
-        <table className="el-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Course</th>
-              <th>Usage</th>
-              <th>Expires</th>
-              <th>Status</th>
-              <th style={{ textAlign: "right" }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {links.map((link) => (
-              <tr key={link.id}>
-                <td>
-                  <div className="el-link-name">{link.name}</div>
-                  <div className="el-link-code">{link.id}</div>
-                </td>
-                <td><span className="el-course-text">{link.course}</span></td>
-                <td>{usageDisplay(link)}</td>
-                <td>{link.expires || "N/A"}</td>
-                <td>
-                  <span className={`el-badge ${link.status === "Active" ? "active" : "inactive"}`}>
-                    {link.status}
-                  </span>
-                  {link.payLater && <span className="el-badge pay-later">Pay Later</span>}
-                  {link.agent    && <span className="el-badge agent">Agent</span>}
-                </td>
-                <td>
-                  <div className="el-actions">
-                    {/* View */}
-                    <button className="el-icon-btn" title="View" onClick={() => openModal("view", link)}>👁</button>
-                    {/* Students */}
-                    <button className="el-icon-btn purple-icon" title="Students" onClick={() => openModal("students", link)}>👥</button>
-                    {/* Copy URL */}
-                    <button className="el-icon-btn" title="Copy URL" onClick={() => handleCopyUrl(link.id)}>⧉</button>
-                    {/* Download QR */}
-                    <button className="el-icon-btn" title="Download QR">⬇</button>
-                    {/* Edit */}
-                    <button className="el-icon-btn" title="Edit" onClick={() => openModal("edit", link)}>✏️</button>
-                    {/* Toggle status */}
-                    <button
-                      className={`el-icon-btn ${link.status === "Active" ? "red" : "purple-icon"}`}
-                      title={link.status === "Active" ? "Deactivate" : "Activate"}
-                      onClick={() => handleToggleStatus(link.id)}
-                    >
-                      {link.status === "Active" ? "⊗" : "✓"}
-                    </button>
-                    {/* Delete */}
-                    <button className="el-icon-btn red" title="Delete" onClick={() => openModal("delete", link)}>🗑</button>
-                  </div>
-                </td>
+        {links.length === 0 ? (
+          <div className="el-empty-students" style={{ padding: "40px 0" }}>
+            <div className="el-empty-icon">🔗</div>
+            No enrollment links yet. Create one to get started.
+          </div>
+        ) : (
+          <table className="el-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Course</th>
+                <th>Usage</th>
+                <th>Expires</th>
+                <th>Status</th>
+                <th style={{ textAlign: "right" }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {links.map((link) => (
+                <tr key={link._id}>
+                  <td>
+                    <div className="el-link-name">{link.name}</div>
+                    <div className="el-link-code">{link._id}</div>
+                  </td>
+                  <td><span className="el-course-text">{link.course}</span></td>
+                  <td>{usageDisplay(link)}</td>
+                  <td>{link.expires || "N/A"}</td>
+                  <td>
+                    <span className={`el-badge ${link.status === "Active" ? "active" : "inactive"}`}>
+                      {link.status}
+                    </span>
+                    {link.payLater && <span className="el-badge pay-later">Pay Later</span>}
+                    {link.agent    && <span className="el-badge agent">Agent</span>}
+                  </td>
+                  <td>
+                    <div className="el-actions">
+                      <button className="el-icon-btn" title="View"      onClick={() => openModal("view",     link)}>👁</button>
+                      <button className="el-icon-btn purple-icon" title="Students" onClick={() => openModal("students", link)}>👥</button>
+                      <button className="el-icon-btn" title="Copy URL"  onClick={() => handleCopyUrl(link._id)}>⧉</button>
+                      <button className="el-icon-btn" title="Download QR" onClick={async () => {
+                        const url = enrollUrl(link._id);
+                        const dataUrl = await QRCode.toDataURL(url, { width: 512, margin: 2 });
+                        const a = document.createElement("a");
+                        a.href = dataUrl; a.download = `qr-${link._id}.png`; a.click();
+                      }}>⬇</button>
+                      <button className="el-icon-btn" title="Edit"      onClick={() => openModal("edit",     link)}>✏️</button>
+                      <button
+                        className={`el-icon-btn ${link.status === "Active" ? "red" : "purple-icon"}`}
+                        title={link.status === "Active" ? "Deactivate" : "Activate"}
+                        onClick={() => handleToggleStatus(link._id)}
+                      >
+                        {link.status === "Active" ? "⊗" : "✓"}
+                      </button>
+                      <button className="el-icon-btn red" title="Delete" onClick={() => openModal("delete", link)}>🗑</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Modals */}
-      {modal?.type === "create"   && <CreateModal onClose={closeModal} onCreate={handleCreate} />}
-      {modal?.type === "view"     && <ViewModal link={modal.link} onClose={closeModal} />}
+      {modal?.type === "create"   && <CreateModal  onClose={closeModal} onCreate={handleCreate} />}
+      {modal?.type === "view"     && <ViewModal     link={modal.link} onClose={closeModal} />}
       {modal?.type === "students" && <StudentsModal link={modal.link} onClose={closeModal} />}
-      {modal?.type === "edit"     && <EditModal link={modal.link} onClose={closeModal} onSave={handleEdit} />}
-      {modal?.type === "delete"   && <DeleteModal link={modal.link} onClose={closeModal} onDelete={handleDelete} />}
+      {modal?.type === "edit"     && <EditModal     link={modal.link} onClose={closeModal} onSave={handleEdit} />}
+      {modal?.type === "delete"   && <DeleteModal   link={modal.link} onClose={closeModal} onDelete={handleDelete} />}
 
       {/* Toast */}
       {toast && <Toast message={toast} />}

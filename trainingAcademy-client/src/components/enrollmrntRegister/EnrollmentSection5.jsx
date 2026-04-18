@@ -25,13 +25,23 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
         if (!canvas) return
         const ctx = canvas.getContext("2d")
         const img = new Image()
-        img.crossOrigin = "anonymous" 
+        img.crossOrigin = "anonymous"
         img.onload = () => {
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
             setHasSignature(true)
         }
         img.src = data.signatureUrl
     }, [data.signatureUrl])
+
+    useEffect(() => {
+        const today = new Date().toISOString().split("T")[0]
+        const fullName = [data.title, data.givenName, data.middleName, data.surname].filter(Boolean).join(" ")
+        setData(prev => ({
+            ...prev,
+            studentName: prev.studentName || fullName,
+            declarationDate: prev.declarationDate || today
+        }))
+    }, [])
 
     const getPos = (e, canvas) => {
         const rect = canvas.getBoundingClientRect()
@@ -121,6 +131,28 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
             return
         }
         setShowToast(true)
+    }
+
+    const handleDelete = async (fileUrl, fileType, clearKeys) => {
+        clearKeys.forEach(key => set(key, null))
+        if (fileUrl) {
+            try {
+                await fetch("http://localhost:8000/api/enrollment-form/section5-file", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId: data.userId, fileUrl, fileType })
+                })
+            } catch (err) {
+                console.error("Delete error:", err)
+            }
+        }
+    }
+
+    const deleteButtonStyle = {
+        position: "absolute", top: -8, right: -8,
+        background: "red", color: "#fff", border: "none",
+        borderRadius: "50%", width: 20, height: 20,
+        cursor: "pointer", fontSize: 12, zIndex: 1
     }
 
     return (
@@ -312,7 +344,6 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
                         {data.idDocument ? (
                             <p className="s5-file-name">✅ {data.idDocument.name}</p>
                         ) : data.idDocumentUrl ? (
-                            // ✅ already uploaded
                             <p className="s5-file-name">✅ Already uploaded</p>
                         ) : (
                             <>
@@ -334,9 +365,7 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
                 <div className="s5-upload-card">
                     <div className="s5-upload-card-header">
                         <span className="s5-upload-icon">🖼️</span>
-                        <span className="s5-upload-label">
-                            Upload a Photo
-                        </span>
+                        <span className="s5-upload-label">Upload a Photo</span>
                     </div>
                     <p className="s5-upload-hint">Example: Upload a Photo.</p>
                     <div
@@ -346,7 +375,6 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
                         {data.photoDocument ? (
                             <p className="s5-file-name">✅ {data.photoDocument.name}</p>
                         ) : data.photoDocumentUrl ? (
-                            // ✅ already uploaded
                             <p className="s5-file-name">✅ Already uploaded</p>
                         ) : (
                             <>
@@ -371,16 +399,20 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
                 Ensure documents are clear and readable. Accepted: PDF, JPG, PNG. Max 5MB per file.
             </p>
 
-            {/* ✅ PREVIEW — local file or saved Cloudinary URL */}
+            {/* ✅ PREVIEW with DELETE buttons */}
             {(data.idDocument || data.photoDocument || data.signature ||
               data.idDocumentUrl || data.photoDocumentUrl || data.signatureUrl) && (
                 <div className="s5-preview-section">
                     <h4 className="s5-card-title">Preview</h4>
                     <div className="s5-preview-row">
 
-                        {/* Signature — canvas draw இருந்தா data.signature, இல்லன்னா URL */}
+                        {/* Signature */}
                         {(data.signature || data.signatureUrl) && (
-                            <div className="s5-preview-item">
+                            <div className="s5-preview-item" style={{ position: "relative" }}>
+                                <button
+                                    onClick={() => handleDelete(data.signatureUrl, "signature", ["signature", "signatureUrl"])}
+                                    style={deleteButtonStyle}
+                                >✕</button>
                                 <p className="s5-preview-label">Online Signature</p>
                                 <img
                                     src={data.signature || data.signatureUrl}
@@ -392,56 +424,44 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
 
                         {/* ID Document */}
                         {(data.idDocument || data.idDocumentUrl) && (
-                            <div className="s5-preview-item">
+                            <div className="s5-preview-item" style={{ position: "relative" }}>
+                                <button
+                                    onClick={() => handleDelete(data.idDocumentUrl, "idDocument", ["idDocument", "idDocumentUrl"])}
+                                    style={deleteButtonStyle}
+                                >✕</button>
                                 <p className="s5-preview-label">ID Document</p>
                                 {data.idDocument ? (
                                     data.idDocument.type === "application/pdf" ? (
                                         <p className="s5-preview-pdf">📄 {data.idDocument.name}</p>
                                     ) : (
-                                        <img
-                                            src={URL.createObjectURL(data.idDocument)}
-                                            alt="ID"
-                                            className="s5-preview-img"
-                                        />
+                                        <img src={URL.createObjectURL(data.idDocument)} alt="ID" className="s5-preview-img" />
                                     )
                                 ) : data.idDocumentUrl?.endsWith(".pdf") ? (
-                                    <a href={data.idDocumentUrl} target="_blank" rel="noreferrer" className="s5-preview-pdf">
-                                        📄 View ID Document
-                                    </a>
+                                    <a href={data.idDocumentUrl} target="_blank" rel="noreferrer" className="s5-preview-pdf">📄 View ID Document</a>
                                 ) : (
-                                    <img
-                                        src={data.idDocumentUrl}
-                                        alt="ID"
-                                        className="s5-preview-img"
-                                    />
+                                    <img src={data.idDocumentUrl} alt="ID" className="s5-preview-img" />
                                 )}
                             </div>
                         )}
 
                         {/* Photo */}
                         {(data.photoDocument || data.photoDocumentUrl) && (
-                            <div className="s5-preview-item">
+                            <div className="s5-preview-item" style={{ position: "relative" }}>
+                                <button
+                                    onClick={() => handleDelete(data.photoDocumentUrl, "photoDocument", ["photoDocument", "photoDocumentUrl"])}
+                                    style={deleteButtonStyle}
+                                >✕</button>
                                 <p className="s5-preview-label">Photo</p>
                                 {data.photoDocument ? (
                                     data.photoDocument.type === "application/pdf" ? (
                                         <p className="s5-preview-pdf">📄 {data.photoDocument.name}</p>
                                     ) : (
-                                        <img
-                                            src={URL.createObjectURL(data.photoDocument)}
-                                            alt="Photo"
-                                            className="s5-preview-img"
-                                        />
+                                        <img src={URL.createObjectURL(data.photoDocument)} alt="Photo" className="s5-preview-img" />
                                     )
                                 ) : data.photoDocumentUrl?.endsWith(".pdf") ? (
-                                    <a href={data.photoDocumentUrl} target="_blank" rel="noreferrer" className="s5-preview-pdf">
-                                        📄 View Photo
-                                    </a>
+                                    <a href={data.photoDocumentUrl} target="_blank" rel="noreferrer" className="s5-preview-pdf">📄 View Photo</a>
                                 ) : (
-                                    <img
-                                        src={data.photoDocumentUrl}
-                                        alt="Photo"
-                                        className="s5-preview-img"
-                                    />
+                                    <img src={data.photoDocumentUrl} alt="Photo" className="s5-preview-img" />
                                 )}
                             </div>
                         )}

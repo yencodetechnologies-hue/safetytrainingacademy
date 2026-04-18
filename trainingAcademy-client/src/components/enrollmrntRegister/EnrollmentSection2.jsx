@@ -1,8 +1,33 @@
 import "../../styles/EnrollmentSection2.css"
 
-function EnrollmentSection2({ data, setData, prev, next }) {
+function EnrollmentSection2({ data, setData, prev, next, userId }) {
 
     const set = (key, value) => setData(p => ({ ...p, [key]: value }))
+
+    const handleFileUpload = async (file) => {
+        if (!file) return;
+
+        set("staIdFile", file);
+
+        const fd = new FormData();
+        fd.append("staIdFile", file);
+        fd.append("studentId", data.userId);
+
+        try {
+            const res = await fetch("http://localhost:8000/api/enrollment-form/section2-file", {
+                method: "POST",
+                body: fd
+            });
+            const result = await res.json();
+            if (res.ok) {
+                set("staIdFileUrl", result.staIdFileUrl);
+            } else {
+                alert("File upload failed: " + result.message);
+            }
+        } catch (err) {
+            alert("Upload error: " + err.message);
+        }
+    }
 
     return (
         <div className="usi-page">
@@ -145,21 +170,117 @@ function EnrollmentSection2({ data, setData, prev, next }) {
                         We will also need to verify your identity to create your USI.
                     </p>
 
-                    <div className="usi-row">
-                        <select
-                            className="usi-input"
-                            value={data.staIdType || ""}
-                            onChange={e => set("staIdType", e.target.value)}
-                        >
-                            <option value="">Select...</option>
-                            <option>Passport</option>
-                            <option>Driving Licence</option>
-                        </select>
-                        <input
-                            type="file"
-                            className="usi-input"
-                            onChange={e => set("staIdFile", e.target.files[0])}
-                        />
+                    {/* ✅ Identity verify row */}
+                    <div className="usi-row" style={{ alignItems: "flex-start" }}>
+
+                        {/* Dropdown */}
+                        <div>
+                            <label>Identity Document Type</label>
+                            <select
+                                className="usi-input"
+                                value={data.staIdType || ""}
+                                onChange={e => set("staIdType", e.target.value)}
+                            >
+                                <option value="">Select...</option>
+                                <option>Passport</option>
+                                <option>Driving Licence</option>
+                            </select>
+                        </div>
+
+                        {/* Upload + Preview */}
+                        <div className="usi-upload-wrapper">
+                            <label>Upload ID document <span className="usi-required">*</span></label>
+
+                            {/* Dropzone */}
+                            <div
+                                className={`usi-dropzone ${(data.staIdFile || data.staIdFileUrl) ? "usi-dropzone-active" : ""}`}
+                                onClick={() => document.getElementById("sta-id-input").click()}
+                            >
+                                {data.staIdFile ? (
+                                    <p className="usi-file-name">✅ {data.staIdFile.name}</p>
+                                ) : data.staIdFileUrl ? (
+                                    <p className="usi-file-name">✅ Already uploaded</p>
+                                ) : (
+                                    <>
+                                        <span className="usi-dropzone-arrow">↑</span>
+                                        <p className="usi-dropzone-text">Click to upload</p>
+                                        <p className="usi-dropzone-hint">PDF, JPG, PNG (max 5MB)</p>
+                                    </>
+                                )}
+                            </div>
+
+                            <input
+                                id="sta-id-input"
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                style={{ display: "none" }}
+                                onChange={e => handleFileUpload(e.target.files[0])}
+                            />
+
+                            {/* ✅ Preview + X */}
+                            {(data.staIdFile || data.staIdFileUrl) && (
+                                <div className="usi-file-preview">
+
+                                    <button
+                                        className="usi-remove-btn"
+                                        onClick={async () => {
+                                            const fileUrl = data.staIdFileUrl
+
+                                            // ✅ Local state clear
+                                            set("staIdFile", null)
+                                            set("staIdFileUrl", null)
+                                            document.getElementById("sta-id-input").value = ""
+
+                                            // ✅ Backend delete
+                                            if (fileUrl) {
+                                                try {
+                                                    await fetch("http://localhost:8000/api/enrollment-form/section2-file", {
+                                                        method: "DELETE",
+                                                        headers: { "Content-Type": "application/json" },
+                                                        body: JSON.stringify({
+                                                            studentId: data.userId,
+                                                            fileUrl
+                                                        })
+                                                    })
+                                                } catch (err) {
+                                                    console.error("Delete error:", err)
+                                                }
+                                            }
+                                        }}
+                                    >✕</button>
+
+                                    {data.staIdFile ? (
+                                        data.staIdFile.type === "application/pdf" ? (
+                                            <p className="usi-preview-pdf">📄 {data.staIdFile.name}</p>
+                                        ) : (
+                                            <img
+                                                src={URL.createObjectURL(data.staIdFile)}
+                                                alt="ID Preview"
+                                                className="usi-preview-img"
+                                            />
+                                        )
+                                    ) : data.staIdFileUrl?.endsWith(".pdf") ? (
+                                        <a
+                                            href={data.staIdFileUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="usi-preview-pdf"
+                                        >
+                                            📄 View Document
+                                        </a>
+                                    ) : (
+                                        <img
+                                            src={data.staIdFileUrl}
+                                            alt="ID Preview"
+                                            className="usi-preview-img"
+                                        />
+                                    )}
+
+                                </div>
+                            )}
+
+                        </div>
+
                     </div>
 
                 </div>

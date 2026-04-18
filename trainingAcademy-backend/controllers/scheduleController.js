@@ -81,7 +81,6 @@ const toggleSession = async(req,res)=>{
 
 const getCourseSchedules = async (req, res) => {
   try {
-
     const now = new Date()
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -93,19 +92,35 @@ const getCourseSchedules = async (req, res) => {
 
     const filteredSchedules = schedules.map(schedule => {
 
-      // if not today → keep all sessions
-      if (schedule.date.toDateString() !== now.toDateString()) {
-        return schedule
-      }
+      const isToday = schedule.date.toDateString() === now.toDateString()
 
-      // 🔥 filter sessions for today
+      // Not today → keep all active sessions as-is
+      if (!isToday) return schedule
+
+      // Today → filter sessions smartly
       const filteredSessions = schedule.sessions.filter(session => {
 
-        const [hours, minutes] = session.startTime.split(":")
-        const sessionTime = new Date(schedule.date)
-        sessionTime.setHours(hours, minutes, 0, 0)
+        // Parse startTime
+        const [startH, startM] = session.startTime.split(":").map(Number)
+        const sessionStart = new Date(schedule.date)
+        sessionStart.setHours(startH, startM, 0, 0)
 
-        return sessionTime > now // only future sessions
+        // Parse endTime
+        const [endH, endM] = session.endTime.split(":").map(Number)
+        const sessionEnd = new Date(schedule.date)
+        sessionEnd.setHours(endH, endM, 0, 0)
+
+        const isEnded    = now >= sessionEnd           // 5:00 PM கடந்துட்டா → hide
+        const isUpcoming = sessionStart > now          // இன்னும் ஆரம்பிக்கல
+        const isBookable = session.availableSlots > 0  // slots இருக்கா
+
+        // ✅ Show if:
+        // - Session ended → always hide (9-5 na 5 கடந்தா போச்சு)
+        // - Not ended + upcoming → show
+        // - Not ended + started but slots available → show (last-minute booking)
+        if (isEnded) return false
+        return isUpcoming || isBookable
+
       })
 
       return {
@@ -113,7 +128,7 @@ const getCourseSchedules = async (req, res) => {
         sessions: filteredSessions
       }
 
-    }).filter(schedule => schedule.sessions.length > 0) // remove empty days
+    }).filter(schedule => schedule.sessions.length > 0)
 
     res.json(filteredSchedules)
 

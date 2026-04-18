@@ -10,7 +10,7 @@ function CoursesSection() {
 
     useEffect(() => {
 
-        axios.get("https://api.octosofttechnologies.in/api/courses")
+        axios.get("http://localhost:8000/api/courses")
             .then(res => setCourses(res.data))
 
     }, [])

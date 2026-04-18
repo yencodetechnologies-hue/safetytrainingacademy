@@ -5,7 +5,7 @@ const Payment = require('../models/Payment');
 const client = rapid.createClient(
   process.env.EWAY_API_KEY,
   process.env.EWAY_API_PASSWORD,
-  'sandbox'
+  process.env.EWAY_ENVIRONMENT || 'Sandbox'  // ← .env இருந்து படிக்கும்
 );
 
 exports.createPayment = async (req, res) => {
@@ -15,8 +15,6 @@ exports.createPayment = async (req, res) => {
       cardName, cardNumber, expiryMonth, expiryYear, cvv,
       currency = 'AUD', userId, description
     } = req.body;
-
-    console.log('📥 Payment request received:', { amount, email, name });
 
     const payment = new Payment({
       transactionId: `eway_${Date.now()}`,
@@ -29,80 +27,59 @@ exports.createPayment = async (req, res) => {
     });
     await payment.save();
 
-    // ✅ Use the exact format from eWAY documentation
     const requestData = {
-  Customer: {
-    Reference: name,
-    Email: email,
-    FirstName: name,
-    LastName: name,
-    Phone: phone,
-    CardDetails: {
-      Name: cardName,
-      Number: cardNumber.replace(/\s/g, ''),
-      ExpiryMonth: expiryMonth,
-      ExpiryYear: expiryYear.slice(-2),
-      CVN: cvv
-    }
-  },
-  Payment: {
-    TotalAmount: Math.round(parseFloat(amount) * 100),
-    CurrencyCode: currency
-  },
-  TransactionType: 'Purchase'
-};
+      Customer: {
+        Reference: name,
+        Email: email,
+        FirstName: name,
+        LastName: name,
+        Phone: phone,
+        CardDetails: {
+          Name: cardName,
+          Number: cardNumber.replace(/\s/g, ''),
+          ExpiryMonth: expiryMonth,
+          ExpiryYear: expiryYear.slice(-2),
+          CVN: cvv
+        }
+      },
+      Payment: {
+        TotalAmount: Math.round(parseFloat(amount) * 100),
+        CurrencyCode: currency
+      },
+      TransactionType: 'Purchase'
+    };
 
-    console.log('📤 Sending to eWAY');
-    
-    // ✅ Use DirectPayment method instead of createTransaction
-   client.createTransaction(requestData, async (error, response) => {
-  try {
-    if (error) {
-      console.error("❌ eWAY Error:", error);
-      payment.status = "failed";
+    // ✅ Promise style — callback இல்லை
+    const response = await client.createTransaction(requestData);
+
+    console.log("✅ eWAY Response:", JSON.stringify(response, null, 2));
+
+    // ✅ Error check
+    if (response.get('Errors')) {
+      payment.status = 'failed';
       await payment.save();
-
-      return res.status(500).json({
-        success: false,
-        message: error.message
-      });
-    }
-
-    console.log("✅ Response received:", response);
-
-    if (response.Errors) {
-      console.error("❌ Errors:", response.Errors);
-      payment.status = "failed";
-      await payment.save();
-
       return res.status(400).json({
         success: false,
-        message: response.Errors
+        message: response.get('Errors')
       });
     }
 
-    const isApproved = response.TransactionStatus;
+    const isApproved = response.get('TransactionStatus');
 
-    payment.gatewayTransactionId = String(response.TransactionID || "");
-    payment.status = isApproved ? "completed" : "failed";
-    payment.authorizationCode = response.AuthorisationCode || "";
+    payment.gatewayTransactionId = String(response.get('TransactionID') || '');
+    payment.status = isApproved ? 'completed' : 'failed';
+    payment.authorizationCode = response.get('AuthorisationCode') || '';
     await payment.save();
 
     return res.json({
       success: isApproved,
       transactionId: payment.transactionId,
       status: payment.status,
-      message: isApproved ? "Payment successful" : "Payment declined"
+      message: isApproved ? 'Payment successful' : 'Payment declined'
     });
 
-  } catch (err) {
-    console.error("❌ Callback error:", err);
-    res.status(500).json({ success: false, message: "Processing error" });
-  }
-});
-
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ eWAY Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

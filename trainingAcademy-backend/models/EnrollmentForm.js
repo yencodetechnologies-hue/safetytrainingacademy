@@ -48,6 +48,7 @@ const EnrollmentFormSchema = new mongoose.Schema({
     number: String,
     permission: Boolean,
     staApplication: String,
+      staIdFileUrl: String, 
 
     // if applying via institute
     applyViaInstitute: {
@@ -113,10 +114,13 @@ staIdType: String,
     schoolCountry: String,
   },
 
-  qualifications: {
+qualifications: {
     hasQualification: Boolean,
-    types: [String], // multiple select
-  },
+    types: [String],
+    details: String,        // ✅ ADD THIS
+    evidenceUrl: String,
+     evidenceUrls: [String],    // ✅ ADD THIS
+},
 
   employment: {
     status: String,

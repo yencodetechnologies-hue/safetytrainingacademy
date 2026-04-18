@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import "./StudentMyCourses.css";
 import { useNavigate } from "react-router-dom";
 import LLNDAssessment from "../llnd/LLNDAssessment";
+import Payment from "../../components/Payment";
 
 const statusColors = {
   Active: "status-active",
@@ -17,7 +18,8 @@ export default function StudentMyCourses() {
   const [search, setSearch] = useState("");
   const [selectedDates, setSelectedDates] = useState({});
   const [showAssessment, setShowAssessment] = useState(false);
-
+  const [showPayment, setShowPayment] = useState(false);        // ✅ ADD
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
   const [browseCourses, setBrowseCourses] = useState([]);
   const [enrolledCourseDetails, setEnrolledCourseDetails] = useState([]);
@@ -26,6 +28,12 @@ export default function StudentMyCourses() {
 
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
+  const [paymentData, setPaymentData] = useState({})
+const [userDetails, setUserDetails] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || ""
+})
 
   const fetchData = async () => {
     try {
@@ -33,8 +41,8 @@ export default function StudentMyCourses() {
       if (!studentId) throw new Error("Student ID not found. Please login again.");
 
       const [dashRes, coursesRes] = await Promise.all([
-        fetch(`https://api.octosofttechnologies.in/api/student/dashboard/${studentId}`),
-        fetch(`https://api.octosofttechnologies.in/api/courses`)
+        fetch(`http://localhost:8000/api/student/dashboard/${studentId}`),
+        fetch(`http://localhost:8000/api/courses`)
       ]);
 
       if (!dashRes.ok) throw new Error("Failed to fetch dashboard data");
@@ -48,7 +56,7 @@ export default function StudentMyCourses() {
 
       if (dash.enrolledCourses?.length > 0) {
         const courseDetailsPromises = dash.enrolledCourses.map(enrolled =>
-          fetch(`https://api.octosofttechnologies.in/api/courses/${enrolled.courseId}`)
+          fetch(`http://localhost:8000/api/courses/${enrolled.courseId}`)
             .then(res => res.ok ? res.json() : null)
             .then(courseData => ({
               ...enrolled,
@@ -97,6 +105,40 @@ export default function StudentMyCourses() {
       />
     );
   }
+if (showPayment && selectedCourse) {
+    return (
+        <div style={{ padding: "24px" }}>
+            <button
+                onClick={() => { setShowPayment(false); setSelectedCourse(null) }}
+                style={{ marginBottom: 16, cursor: "pointer", padding: "8px 16px" }}
+            >
+                ← Back
+            </button>
+            <Payment
+                selectedCourse={selectedCourse}
+                setUserDetails={setUserDetails}       // ✅ now defined
+                setPaymentData={setPaymentData}       // ✅ now defined
+                coursePrice={selectedCourse?.sellingPrice || selectedCourse?.price}
+                isCompanyEnroll={false}
+                triggerValidation={false}
+                setIsValid={() => {}}
+                onCardPayment={() => {}}
+            />
+            <div style={{ marginTop: 24, textAlign: "right" }}>
+                <button
+                    className="mc-btn mc-btn--purple"
+                    onClick={() => {
+                        setShowPayment(false)
+                        setSelectedCourse(null)
+                        fetchData()
+                    }}
+                >
+                    Submit Payment
+                </button>
+            </div>
+        </div>
+    )
+}
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -266,7 +308,13 @@ export default function StudentMyCourses() {
                       <p className="mc-price-label">Price</p>
                       <p className="mc-price">{course.price}</p>
                     </div>
-                    <button className="mc-btn mc-btn--purple mc-btn--sm">
+                    <button
+                      className="mc-btn mc-btn--purple mc-btn--sm"
+                      onClick={() => {
+                        setSelectedCourse(course)      // ✅ selected course set
+                        setShowPayment(true)           // ✅ payment show
+                      }}
+                    >
                       ↑ Enroll &amp; Pay
                     </button>
                   </div>

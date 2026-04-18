@@ -120,5 +120,16 @@ padding:20px;
 .title{
 font-size:26px;
 }
+.step{
+    width:40px;
+height:40px;        
+
+}
+.stepper{
+    padding:0px;
+}
+.stepper-wo-pbar{
+    margin-top: 15px;
+}
 
 }

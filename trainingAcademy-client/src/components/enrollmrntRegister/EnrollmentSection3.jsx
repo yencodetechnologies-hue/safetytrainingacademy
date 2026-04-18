@@ -73,6 +73,7 @@ function EnrollmentSection3({ data, setData, prev, next }) {
         next()
     }
 
+
     return (
         <div className="s3-page">
 
@@ -263,15 +264,105 @@ function EnrollmentSection3({ data, setData, prev, next }) {
 
                         <div className="s3-field s3-field-full" style={{ marginTop: 12 }}>
                             <label className="s3-label">Upload qualification evidence</label>
+
+                            {/* ✅ Multiple files support */}
                             <input
                                 type="file"
                                 className="s3-file-input"
                                 accept=".jpg,.jpeg,.png,.pdf"
-                                onChange={e => set("qualificationFile", e.target.files[0])}
+                                multiple
+                                onChange={async (e) => {
+                                    const file = e.target.files[0]  // single file
+                                    if (!file) return
+
+                                    set("qualificationFile", file)
+
+                                    const fd = new FormData()
+                                    fd.append("studentId", data.userId)
+                                    fd.append("qualificationFile", file)
+                                    fd.append("qualificationDetails", data.qualificationDetails || "")
+
+                                    const res = await fetch("http://localhost:8000/api/enrollment-form/section3-file", {
+                                        method: "POST",
+                                        body: fd
+                                    })
+                                    const result = await res.json()
+                                    if (res.ok) {
+                                        set("qualificationFileUrl", result.qualificationFileUrl)
+                                    }
+                                }}
                             />
+
                             <p className="s3-hint">
-                                Certificate, Statement of Attainment, Transcript, or overseas equivalent.
+                                Certificate, Statement of Attainment, Transcript, or overseas equivalent. Multiple files allowed.
                             </p>
+
+                            {/* ✅ Multiple previews */}
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 8 }}>
+                                {(data.qualificationFiles || []).map((item, index) => (
+                                    <div key={index} style={{ position: "relative" }}>
+                                        <button
+                                            onClick={() => setData(prev => ({
+                                                ...prev,
+                                                qualificationFiles: prev.qualificationFiles.filter((_, i) => i !== index)
+                                            }))}
+                                            style={{ position: "absolute", top: -8, right: -8, background: "red", color: "#fff", border: "none", borderRadius: "50%", width: 20, height: 20, cursor: "pointer", fontSize: 12 }}
+                                        >✕</button>
+                                        {item.file?.type === "application/pdf" ? (
+                                            <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ color: "blue" }}>
+                                                📄 {item.file.name}
+                                            </a>
+                                        ) : (
+                                            <img
+                                                src={item.url || URL.createObjectURL(item.file)}
+                                                alt={`Qualification ${index + 1}`}
+                                                style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 8, border: "1px solid #ddd" }}
+                                            />
+                                        )}
+                                    </div>
+                                ))}
+
+                                {/* ✅ Saved URLs from DB (page reload) */}
+                                {/* ✅ Saved URLs from DB (page reload) */}
+                                {!data.qualificationFiles?.length && data.qualificationFileUrl && (
+                                    <div style={{ position: "relative", display: "inline-block" }}>
+                                        {/* ✅ DELETE BUTTON */}
+                                        <button
+                                            onClick={async () => {
+                                                const fileUrl = data.qualificationFileUrl
+                                                set("qualificationFileUrl", null)
+                                                set("qualificationFile", null)
+
+                                                if (fileUrl) {
+                                                    try {
+                                                        await fetch("http://localhost:8000/api/enrollment-form/section3-file", {
+                                                            method: "DELETE",
+                                                            headers: { "Content-Type": "application/json" },
+                                                            body: JSON.stringify({
+                                                                studentId: data.userId,
+                                                                fileUrl
+                                                            })
+                                                        })
+                                                    } catch (err) {
+                                                        console.error("Delete error:", err)
+                                                    }
+                                                }
+                                            }}
+                                            style={{
+                                                position: "absolute", top: -8, right: -8,
+                                                background: "red", color: "#fff", border: "none",
+                                                borderRadius: "50%", width: 20, height: 20,
+                                                cursor: "pointer", fontSize: 12, zIndex: 1
+                                            }}
+                                        >✕</button>
+                                        <img
+                                            src={data.qualificationFileUrl}
+                                            alt="Uploaded qualification"
+                                            style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 8, border: "1px solid #ddd" }}
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}
@@ -387,7 +478,7 @@ function EnrollmentSection3({ data, setData, prev, next }) {
             </div>
 
             {/* FOOTER */}
-            
+
         </div>
     )
 }

@@ -3,6 +3,7 @@ margin-top:20px;
 display:flex;
 flex-direction:column;
 gap:15px;
+margin-bottom: 15px;
 }
 
 .numeracy-title{
@@ -86,8 +87,13 @@ font-size: 14px;
 color:#6b7280;
 font-size:14px;
 }
+.num-ques-m{
+    display: none;
+}
 @media(max-width:768px){
 
-
+.num-ques-l{
+    display: none;
+}
 
 }

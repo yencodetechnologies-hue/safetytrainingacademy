@@ -1,10 +1,44 @@
 import { useState } from "react"
 import "../styles/Payment.css"
 import { useEffect } from "react"
+import * as Yup from "yup"
+import Loading from "../components/Loading"
 
-function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, coursePrice, setIsValid, triggerValidation, isCompanyEnroll, setPaymentData }) {
+// ── Yup Schemas ───────────────────────────────────────────────────
+const personalSchema = Yup.object({
+    name:   Yup.string().trim().required("Full name is required"),
+    phone:  Yup.string().trim().required("Phone number is required"),
+    email:  Yup.string().trim().required("Email is required").email("Enter a valid email"),
+    agreed: Yup.boolean().oneOf([true], "Please agree to the terms and conditions"),
+})
 
-    const [paymentMethod, setPaymentMethod] = useState("bank")
+const bankSchema = Yup.object({
+    transactionId: Yup.string().trim().required("Transaction ID is required"),
+    paymentSlip:   Yup.mixed().required("Payment slip is required"),
+})
+
+const cardSchema = Yup.object({
+    cardName:    Yup.string().trim().required("Name on card is required"),
+    cardNumber:  Yup.string().trim().required("Card number is required"),
+    expiryMonth: Yup.string().required("Expiry month is required"),
+    expiryYear:  Yup.string().required("Expiry year is required"),
+    cvv:         Yup.string().trim().required("CVV is required"),
+})
+
+async function runSchema(schema, values) {
+    try {
+        await schema.validate(values, { abortEarly: false })
+        return {}
+    } catch (err) {
+        const errs = {}
+        err.inner.forEach(e => { errs[e.path] = e.message })
+        return errs
+    }
+}
+
+function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, coursePrice, setIsValid, triggerValidation, isCompanyEnroll, setPaymentData, onCardPayment }) {
+
+    const [paymentMethod, setPaymentMethod] = useState("Bank Transfer")
 
     // Personal Details State
     const [name, setName] = useState("")
@@ -25,15 +59,13 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
     const [errors, setErrors] = useState({})
     const [touched, setTouched] = useState(false)
 
-    // ✅ eWAY Payment Status State (NEW - no UI change, just state)
-    const [paymentStatus, setPaymentStatus] = useState(null) // null | "loading" | "success" | "error"
+    // eWAY Payment Status State
+    const [paymentStatus, setPaymentStatus] = useState(null)
     const [paymentError, setPaymentError] = useState("")
     const [ewayTransactionId, setEwayTransactionId] = useState("")
 
-    // Errors State
     useEffect(() => {
         if (!name && !email && !phone) return
-
         setUserDetails(prev => ({
             ...prev,
             name,
@@ -57,9 +89,7 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
             expiryYear,
             cvv
         };
-
         setPaymentData(fullData);
-
     }, [
         name, email, phone, agreed,
         paymentMethod,
@@ -68,39 +98,50 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
         expiryMonth, expiryYear, cvv
     ]);
 
-    
+    // ── FIX 1: overrideValues support — checkbox/file stale state bypass ──
+    const getFullErrors = async (overrideValues = {}) => {
+        const vals = {
+            name, phone, email, agreed,
+            transactionId, paymentSlip,
+            cardName, cardNumber, expiryMonth, expiryYear, cvv,
+            ...overrideValues,
+        }
+
+        const personalErrors = await runSchema(personalSchema, {
+            name: vals.name, phone: vals.phone,
+            email: vals.email, agreed: vals.agreed,
+        })
+
+        let methodErrors = {}
+        if (!isCompanyEnroll) {
+            if (paymentMethod === "Bank Transfer") {
+                methodErrors = await runSchema(bankSchema, {
+                    transactionId: vals.transactionId,
+                    paymentSlip:   vals.paymentSlip,
+                })
+            } else if (paymentMethod === "Card Payment") {
+                methodErrors = await runSchema(cardSchema, {
+                    cardName:    vals.cardName,
+                    cardNumber:  vals.cardNumber,
+                    expiryMonth: vals.expiryMonth,
+                    expiryYear:  vals.expiryYear,
+                    cvv:         vals.cvv,
+                })
+            }
+        }
+
+        return { ...personalErrors, ...methodErrors }
+    }
+
     const validate = () => {
-        const newErrors = {}
-
-        if (!name.trim()) newErrors.name = "Full name is required"
-        if (!phone.trim()) newErrors.phone = "Phone number is required"
-        if (!email.trim()) newErrors.email = "Email is required"
-        else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Enter a valid email"
-        if (!agreed) newErrors.agreed = "Please agree to the terms"
-
-        if (paymentMethod === "Bank Transfer") {
-            if (!isCompanyEnroll && !transactionId.trim()) newErrors.transactionId = "Transaction ID is required"
-            if (!isCompanyEnroll && !paymentSlip) newErrors.paymentSlip = "Payment slip is required"
-        }
-
-        if (paymentMethod === "Card Payment") {
-            if (!isCompanyEnroll && !cardName.trim()) newErrors.cardName = "Name on card is required"
-            if (!isCompanyEnroll && !cardNumber.trim()) newErrors.cardNumber = "Card number is required"
-            if (!isCompanyEnroll && !expiryMonth) newErrors.expiryMonth = "Expiry month is required"
-            if (!isCompanyEnroll && !expiryYear) newErrors.expiryYear = "Expiry year is required"
-            if (!isCompanyEnroll && !cvv.trim()) newErrors.cvv = "CVV is required"
-        }
-
-        // ONLY show errors when triggered
-        if (triggerValidation) {
-            setErrors(newErrors)
-        }
-
-        return Object.keys(newErrors).length === 0
+        getFullErrors().then(errs => {
+            if (triggerValidation) setErrors(errs)
+            if (setIsValid) setIsValid(Object.keys(errs).length === 0)
+        })
+        return Object.keys(errors).length === 0
     }
 
     const handleContinue = () => {
-
         setTouched(true)
         if (validate()) {
             setUserDetails(prev => ({
@@ -110,32 +151,34 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
                 phone
             }))
         }
-
     }
 
+    // ── FIX 2: triggerValidation false-ஆ இருக்கும்போது errors set பண்ணாதே ──
+    // Page load-ல் triggerValidation=false → errors காட்டாது
+    // Pay Now click பண்ணா triggerValidation=true → errors காட்டும்
     useEffect(() => {
-        const isValid = validate()
-        if (setIsValid) setIsValid(isValid)
+        getFullErrors().then(errs => {
+            if (setIsValid) setIsValid(Object.keys(errs).length === 0)
+            if (triggerValidation) setErrors(errs)
+        })
     }, [name, phone, email, agreed, transactionId, paymentSlip, cardName, cardNumber, expiryMonth, expiryYear, cvv, paymentMethod, triggerValidation])
 
-    // ✅ eWAY Card Payment Handler (NEW)
-    const handleCardPayment = async () => {
-        // Re-use existing validate logic
-        const newErrors = {}
-        if (!name.trim()) newErrors.name = "Full name is required"
-        if (!phone.trim()) newErrors.phone = "Phone number is required"
-        if (!email.trim()) newErrors.email = "Email is required"
-        else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Enter a valid email"
-        if (!agreed) newErrors.agreed = "Please agree to the terms"
-        if (!cardName.trim()) newErrors.cardName = "Name on card is required"
-        if (!cardNumber.trim()) newErrors.cardNumber = "Card number is required"
-        if (!expiryMonth) newErrors.expiryMonth = "Expiry month is required"
-        if (!expiryYear) newErrors.expiryYear = "Expiry year is required"
-        if (!cvv.trim()) newErrors.cvv = "CVV is required"
+    // ── onBlur: field touch பண்ணா மட்டும் அந்த field error காட்டு ──
+    // overrideValues → checkbox/file latest value direct pass பண்ண
+    const handleBlur = async (field, overrideValues = {}) => {
+        const allErrors = await getFullErrors(overrideValues)
+        setErrors(prev => ({
+            ...prev,
+            [field]: allErrors[field] || undefined,
+        }))
+    }
 
+    // eWAY Card Payment Handler
+    const handleCardPayment = async () => {
+        const newErrors = await getFullErrors()
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors)
-            return
+            return false
         }
 
         setPaymentStatus("loading")
@@ -164,37 +207,45 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
             if (result.success) {
                 setPaymentStatus("success")
                 setEwayTransactionId(result.transactionId)
-                // Update paymentData with eWAY transaction info
                 setPaymentData(prev => ({
                     ...prev,
                     ewayTransactionId: result.transactionId,
                     paymentConfirmed: true,
                 }))
-                // Move to next step after short delay
-                setTimeout(() => onNext(), 1500)
+                return true
             } else {
                 setPaymentStatus("error")
-                setPaymentError(result.message || "Payment failed. Please try again.")
+                setPaymentError(result.message || "Your card was declined. Please contact your bank or try a different payment method.")
+                return false
             }
         } catch (err) {
             setPaymentStatus("error")
             setPaymentError("Network error. Please check your connection and try again.")
+            return false
         }
     }
+
+    useEffect(() => {
+        if (onCardPayment) {
+            onCardPayment({
+                trigger: handleCardPayment,
+                paymentMethod,
+                paymentStatus
+            })
+        }
+    }, [paymentMethod, paymentStatus, name, phone, email, agreed, cardName, cardNumber, expiryMonth, expiryYear, cvv])
 
     return (
 
         <div className="payment-wrapper">
 
             {/* Step Header */}
-
             <div className="payment-header">
                 <h3>Step 2: Payment</h3>
                 <p>Enter your details and choose your payment method</p>
             </div>
 
             {/* Personal Details */}
-
             <div className="payment-card">
 
                 <h4>Personal Details</h4>
@@ -206,8 +257,10 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
                         placeholder="Enter your full name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        onBlur={() => handleBlur("name")}
+                        className={errors.name ? "input-error" : ""}
                     />
-                    {errors.name && <span className="error-text">{errors.name}</span>}
+                    {errors.name && <span className="error-text">⚠ {errors.name}</span>}
                 </div>
 
                 <div className="form-group">
@@ -217,8 +270,10 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
                         placeholder="+61 xxx xxx xxx"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
+                        onBlur={() => handleBlur("phone")}
+                        className={errors.phone ? "input-error" : ""}
                     />
-                    {errors.phone && <span className="error-text">{errors.phone}</span>}
+                    {errors.phone && <span className="error-text">⚠ {errors.phone}</span>}
                 </div>
 
                 <div className="form-group">
@@ -228,24 +283,29 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
                         placeholder="your.email@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        onBlur={() => handleBlur("email")}
+                        className={errors.email ? "input-error" : ""}
                     />
-                    {errors.email && <span className="error-text">{errors.email}</span>}
+                    {errors.email && <span className="error-text">⚠ {errors.email}</span>}
                 </div>
 
                 <div className="terms">
                     <input
                         type="checkbox"
                         checked={agreed}
-                        onChange={(e) => setAgreed(e.target.checked)}
+                        onChange={(e) => {
+                            setAgreed(e.target.checked)
+                            // ✅ FIX: latest checked value pass — stale state bypass
+                            handleBlur("agreed", { agreed: e.target.checked })
+                        }}
                     />
                     <span>I agree to the terms and conditions and understand my information will be used for enrollment purposes</span>
                 </div>
-                {errors.agreed && <span className="error-text">{errors.agreed}</span>}
+                {errors.agreed && <span className="error-text">⚠ {errors.agreed}</span>}
 
             </div>
 
             {/* Order Summary */}
-
             <div className="summary-card">
 
                 <h4>Order Summary</h4>
@@ -266,9 +326,7 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
 
                 <div className="summary-row total">
                     <span>Total:</span>
-                    <span>
-                        ${coursePrice || selectedCourse?.sellingPrice || "0"}
-                    </span>
+                    <span>${coursePrice || selectedCourse?.sellingPrice || "0"}</span>
                 </div>
 
             </div>
@@ -304,7 +362,6 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
                 </div>
             )}
 
-
             {/* Bank Details */}
             {!isCompanyEnroll && paymentMethod === "Bank Transfer" && (
                 <div className="bank-details">
@@ -338,17 +395,24 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
                             placeholder="Enter your bank transaction ID"
                             value={transactionId}
                             onChange={(e) => setTransactionId(e.target.value)}
+                            onBlur={() => handleBlur("transactionId")}
+                            className={errors.transactionId ? "input-error" : ""}
                         />
-                        {errors.transactionId && <span className="error-text">{errors.transactionId}</span>}
+                        {errors.transactionId && <span className="error-text">⚠ {errors.transactionId}</span>}
                     </div>
 
                     <div className="form-group">
                         <label>Payment slip upload *</label>
                         <input
                             type="file"
-                            onChange={(e) => setPaymentSlip(e.target.files[0])}
+                            onChange={(e) => {
+                                setPaymentSlip(e.target.files[0])
+                                // ✅ FIX: file object pass — stale state bypass
+                                handleBlur("paymentSlip", { paymentSlip: e.target.files[0] })
+                            }}
+                            className={errors.paymentSlip ? "input-error" : ""}
                         />
-                        {errors.paymentSlip && <span className="error-text">{errors.paymentSlip}</span>}
+                        {errors.paymentSlip && <span className="error-text">⚠ {errors.paymentSlip}</span>}
                     </div>
 
                     <p className="bank-note">
@@ -358,9 +422,7 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
                 </div>
             )}
 
-
             {/* Card Payment */}
-
             {!isCompanyEnroll && paymentMethod === "Card Payment" && (
 
                 <div className="card-payment">
@@ -382,8 +444,10 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
                             placeholder="JOHN SMITH"
                             value={cardName}
                             onChange={(e) => setCardName(e.target.value)}
+                            onBlur={() => handleBlur("cardName")}
+                            className={errors.cardName ? "input-error" : ""}
                         />
-                        {errors.cardName && <span className="error-text">{errors.cardName}</span>}
+                        {errors.cardName && <span className="error-text">⚠ {errors.cardName}</span>}
                     </div>
 
                     <div className="form-group">
@@ -393,32 +457,44 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
                             placeholder="4111 1111 1111 1111"
                             value={cardNumber}
                             onChange={(e) => setCardNumber(e.target.value)}
+                            onBlur={() => handleBlur("cardNumber")}
+                            className={errors.cardNumber ? "input-error" : ""}
                         />
-                        {errors.cardNumber && <span className="error-text">{errors.cardNumber}</span>}
+                        {errors.cardNumber && <span className="error-text">⚠ {errors.cardNumber}</span>}
                     </div>
 
                     <div className="card-row">
 
                         <div className="form-group">
                             <label>Expiry Month *</label>
-                            <select value={expiryMonth} onChange={(e) => setExpiryMonth(e.target.value)}>
+                            <select
+                                value={expiryMonth}
+                                onChange={(e) => setExpiryMonth(e.target.value)}
+                                onBlur={() => handleBlur("expiryMonth")}
+                                className={errors.expiryMonth ? "input-error" : ""}
+                            >
                                 <option value="">MM</option>
                                 {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map(m => (
                                     <option key={m} value={m}>{m}</option>
                                 ))}
                             </select>
-                            {errors.expiryMonth && <span className="error-text">{errors.expiryMonth}</span>}
+                            {errors.expiryMonth && <span className="error-text">⚠ {errors.expiryMonth}</span>}
                         </div>
 
                         <div className="form-group">
                             <label>Expiry Year *</label>
-                            <select value={expiryYear} onChange={(e) => setExpiryYear(e.target.value)}>
+                            <select
+                                value={expiryYear}
+                                onChange={(e) => setExpiryYear(e.target.value)}
+                                onBlur={() => handleBlur("expiryYear")}
+                                className={errors.expiryYear ? "input-error" : ""}
+                            >
                                 <option value="">YY</option>
                                 {["2025", "2026", "2027", "2028", "2029"].map(y => (
                                     <option key={y} value={y}>{y}</option>
                                 ))}
                             </select>
-                            {errors.expiryYear && <span className="error-text">{errors.expiryYear}</span>}
+                            {errors.expiryYear && <span className="error-text">⚠ {errors.expiryYear}</span>}
                         </div>
 
                     </div>
@@ -430,8 +506,10 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
                             placeholder="???"
                             value={cvv}
                             onChange={(e) => setCvv(e.target.value)}
+                            onBlur={() => handleBlur("cvv")}
+                            className={errors.cvv ? "input-error" : ""}
                         />
-                        {errors.cvv && <span className="error-text">{errors.cvv}</span>}
+                        {errors.cvv && <span className="error-text">⚠ {errors.cvv}</span>}
                     </div>
 
                     <div className="card-logos">
@@ -440,44 +518,52 @@ function Payment({ selectedCourse, setUserDetails, onNext, onPrev, courseDate, c
                         <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png" alt="master" />
                     </div>
 
-                    {/* ✅ eWAY Status Messages (NEW - shown only after Pay Now click) */}
+                    {/* ✅ Success Message */}
                     {paymentStatus === "success" && (
                         <div className="payment-success">
                             ✅ Payment Successful! Transaction ID: <strong>{ewayTransactionId}</strong>
                         </div>
                     )}
 
+                    {/* ✅ Error Card */}
                     {paymentStatus === "error" && (
-                        <div className="payment-error">
-                            ❌ {paymentError}
+                        <div className="payment-error-card">
+                            <div className="payment-error-card-header">
+                                <div className="payment-error-card-title">
+                                    <span>⚠️</span>
+                                    <strong>Payment failed</strong>
+                                </div>
+                                <button
+                                    className="payment-error-close"
+                                    onClick={() => setPaymentStatus(null)}
+                                >✕</button>
+                            </div>
+                            <p className="payment-error-message">
+                                {paymentError || "Your card was declined. Please contact your bank or try a different payment method."}
+                            </p>
+                            <button
+                                className="try-again-btn"
+                                onClick={() => setPaymentStatus(null)}
+                            >
+                                Try again
+                            </button>
                         </div>
                     )}
 
-                    {/* ✅ Pay Now Button (NEW) */}
-                    <button
-                        className="pay-now-btn"
-                        onClick={handleCardPayment}
-                        disabled={paymentStatus === "loading" || paymentStatus === "success"}
-                    >
-                        {paymentStatus === "loading"
-                            ? "⏳ Processing Payment..."
-                            : paymentStatus === "success"
-                            ? "✅ Payment Complete"
-                            : `💳 Pay Now $${coursePrice || selectedCourse?.sellingPrice || "0"}`}
-                    </button>
+                    {/* Loading handled by Loading component (full screen) */}
 
                 </div>
 
             )}
 
-            {/* Warning */}
+            {paymentStatus === "loading" && <Loading message="Processing your payment" sub="Please wait, do not close this page" />}
 
+            {/* Warning */}
             <div className="payment-warning">
                 Note: After completing the payment step, you will proceed to the LLND Assessment and then the Enrollment Form.
             </div>
 
-            {/* Buttons */}
-
+            {/* Buttons - intentionally empty, BookNow controls navigation */}
 
         </div>
 

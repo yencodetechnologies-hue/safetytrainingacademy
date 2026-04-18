@@ -173,16 +173,16 @@ function Numeracy({ next }) {
                     Previous
                 </button>
 
-                <span>
-                    Question {index + 1} of 3
-                </span>
+                <div>
+                    <span className="num-ques-m">LLN</span> <span className="num-ques-l">Question</span> {index + 1} of 3
+                </div>
 
                 <button
                     className="numeracy-next-btn"
                     onClick={handleNext}
                 >
 
-                    {index === 2 ? "Submit Section" : "Next"}
+                    {index === 2 ? "Submit" : "Next"}
 
                 </button>
 

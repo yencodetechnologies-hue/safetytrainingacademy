@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import "./ReorderCourseModal.css";
 
-const API = "https://api.octosofttechnologies.in/api/courses";
+const API = "http://localhost:8000/api/courses";
 
 export default function ReorderCourseModal({ isOpen, onClose, courses, refreshCourses }) {
     const [selectedCategory, setSelectedCategory] = useState(null);

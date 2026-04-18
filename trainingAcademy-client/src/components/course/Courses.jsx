@@ -29,7 +29,7 @@ function Courses() {
  
     const fetchCourses = async () => {
         try {
-            const res = await axios.get("https://api.octosofttechnologies.in/api/courses");
+            const res = await axios.get("http://localhost:8000/api/courses");
             setCourses(res.data);
         } catch (error) {
             console.log(error);
@@ -55,7 +55,7 @@ function Courses() {
         const confirmDelete = window.confirm("Are you sure you want to delete this course?");
         if (!confirmDelete) return;
         try {
-            await axios.delete(`https://api.octosofttechnologies.in/api/courses/${id}`);
+            await axios.delete(`http://localhost:8000/api/courses/${id}`);
             fetchCourses();
         } catch (err) {
             console.log(err);

@@ -49,6 +49,7 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
         qualificationLevels: [],
         qualificationDetails: "",
         qualificationFile: null,
+        qualificationFileUrl: null, 
         employmentStatus: "",
         employerName: "",
         supervisorName: "",
@@ -131,15 +132,23 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
             }
         }
 
+        
+            
         if (sectionNumber === 2) {
-            payload = {
-                studentId,
-                section: 2,
-                usi: formData.usi,
-                usiPermission: formData.usiPermission,
-                staApplication: formData.staApplication,
-            }
-        }
+    payload = {
+        studentId,
+        section: 2,
+        // ✅ flat-ஆக அனுப்புங்கள் — object இல்லை
+        usiNumber: formData.usi,
+        usiPermission: formData.usiPermission,
+        staApplication: formData.staApplication,
+        staAuthoriseName: formData.staAuthoriseName,
+        staConsent: formData.staConsent,
+        staTownOfBirth: formData.staTownOfBirth,
+        staOverseasTown: formData.staOverseasTown,
+        staIdType: formData.staIdType,
+    }
+}
 
         if (sectionNumber === 3) {
             payload = {
@@ -155,7 +164,8 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
                 },
                 qualifications: {
                     hasQualification: formData.hasQualifications === "yes",
-                    types: formData.qualificationLevels
+                    types: formData.qualificationLevels,
+                    details: formData.qualificationDetails || "",
                 },
                 employment: {
                     status: formData.employmentStatus,
@@ -168,6 +178,7 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
                     }
                 },
                 trainingReason: formData.trainingReason,
+                trainingReasonOther: formData.trainingReasonOther || "", 
             }
         }
 
@@ -191,7 +202,7 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
 
 
         try {
-            const res = await fetch("https://api.octosofttechnologies.in/api/enrollment-form/section", {
+            const res = await fetch("http://localhost:8000/api/enrollment-form/section", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
@@ -201,6 +212,32 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
             console.error(`Section ${sectionNumber} save error:`, err)
         }
     }
+    // saveSectionToBackend function கீழே, return-க்கு மேலே இதை add பண்ணுங்க
+
+const saveSection3File = async () => {
+    const studentId = formData.userId
+    if (!studentId) return
+    if (formData.hasQualifications !== "yes") return
+
+    const fd = new FormData()
+    fd.append("studentId", studentId)
+    fd.append("qualificationDetails", formData.qualificationDetails || "")
+
+    if (formData.qualificationFile instanceof File) {
+        fd.append("qualificationFile", formData.qualificationFile)
+    }
+
+    try {
+        const res = await fetch("http://localhost:8000/api/enrollment-form/section3-file", {
+            method: "POST",
+            body: fd
+        })
+        const data = await res.json()
+        console.log("Section 3 file saved:", data)
+    } catch (err) {
+        console.error("Section 3 file save error:", err)
+    }
+}
 
     // Autofill user details
     useEffect(() => {
@@ -232,6 +269,7 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
             gender: savedFormData.personalDetails?.gender || prev.gender,
             email: savedFormData.personalDetails?.email || prev.email,
             homePhone: savedFormData.personalDetails?.homePhone || prev.homePhone,
+        workPhone: savedFormData.personalDetails?.workPhone || prev.workPhone, 
             mobilePhone: savedFormData.personalDetails?.mobilePhone || prev.mobilePhone,
             residentialAddress: savedFormData.address?.residential?.address || prev.residentialAddress,
             suburb: savedFormData.address?.residential?.suburb || prev.suburb,
@@ -270,15 +308,18 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
             staApplication: savedFormData.usi?.staApplication ?? prev.staApplication ?? "no",
             speaksOtherLanguage: savedFormData.language?.speaksOtherLanguage ?? prev.speaksOtherLanguage ?? "",
             indigenousStatus: savedFormData.language?.indigenousStatus ?? prev.indigenousStatus ?? "",
-            staAuthoriseName: savedFormData.staAuthoriseName || prev.staAuthoriseName,
-            staConsent: savedFormData.staConsent || prev.staConsent,
-            staTownOfBirth: savedFormData.staTownOfBirth || prev.staTownOfBirth,
-            staOverseasTown: savedFormData.staOverseasTown || prev.staOverseasTown,
-            staIdType: savedFormData.staIdType || prev.staIdType,
+            staAuthoriseName: savedFormData.usi?.staAuthoriseName || prev.staAuthoriseName,
+            staConsent: savedFormData.usi?.staConsent ?? prev.staConsent,
+            staTownOfBirth: savedFormData.usi?.staTownOfBirth || prev.staTownOfBirth,
+            staOverseasTown: savedFormData.usi?.staOverseasTown || prev.staOverseasTown,
+            staIdType: savedFormData.usi?.staIdType || prev.staIdType,
+            qualificationDetails: savedFormData.qualifications?.details || prev.qualificationDetails,
+            qualificationFileUrl: savedFormData.qualifications?.evidenceUrl || prev.qualificationFileUrl,
             // savedFormData useEffect-ல் கடைசியில் add பண்ணுங்க
             signatureUrl: savedFormData.signatureUrl ?? prev.signatureUrl ?? null,
             idDocumentUrl: savedFormData.idDocumentUrl ?? prev.idDocumentUrl ?? null,
             photoDocumentUrl: savedFormData.photoDocumentUrl ?? prev.photoDocumentUrl ?? null,
+            staIdFileUrl: savedFormData.usi?.staIdFileUrl || prev.staIdFileUrl,
         }));
     }, [savedFormData]);
 
@@ -330,7 +371,7 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
             for (let [key, value] of fd.entries()) {
             }
 
-            const res = await fetch("https://api.octosofttechnologies.in/api/enrollment-form", {
+            const res = await fetch("http://localhost:8000/api/enrollment-form", {
                 method: "POST",
                 body: fd // ✅ Content-Type header வேண்டாம்
             })
@@ -381,6 +422,7 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
                 <EnrollmentSection2
                     data={formData}
                     setData={setFormData}
+                    userId={formData.userId}
                     prev={() => setSection(1)}
                     next={async () => {
                         await saveSectionToBackend(2) // ✅
@@ -395,7 +437,11 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
                     setData={setFormData}
                     prev={() => setSection(2)}
                     next={async () => {
-                        await saveSectionToBackend(3) // ✅
+                        console.log("Section 3 Next clicked")
+    console.log("qualificationFile:", formData.qualificationFile)
+    console.log("hasQualifications:", formData.hasQualifications)
+                        await saveSectionToBackend(3)
+                        await saveSection3File() // ✅
                         setSection(4)
                     }}
                 />
