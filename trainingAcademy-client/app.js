@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000"
+const API_URL = "https://api.octosofttechnologies.in"
 
 async function loadForm() {
     const params = new URLSearchParams(window.location.search)
