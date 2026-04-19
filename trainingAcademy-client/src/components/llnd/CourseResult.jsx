@@ -89,7 +89,7 @@ function CourseResult({ onRetry, onContinue, data }) {
                                 answers: data.answers || []  
                             };
 
-                            const res = await fetch(`${API_URL}/api/flow/llnd`, {
+                            const res = await fetch(`https://api.octosofttechnologies.in/api/flow/llnd`, {
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json"

@@ -175,7 +175,7 @@ export default function CompanyViewModal({ company, onClose }) {
             try {
                 const token = localStorage.getItem("token");
                 const res = await axios.get(
-                    `${API_URL}/api/companies/${company._id}/details`,
+                    `https://api.octosofttechnologies.in/api/companies/${company._id}/details`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 setData(res.data.data);

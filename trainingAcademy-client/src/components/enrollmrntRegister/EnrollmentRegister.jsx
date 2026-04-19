@@ -203,7 +203,7 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
 
 
         try {
-            const res = await fetch(`${API_URL}/api/enrollment-form/section`, {
+            const res = await fetch(`https://api.octosofttechnologies.in/api/enrollment-form/section`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
@@ -229,7 +229,7 @@ const saveSection3File = async () => {
     }
 
     try {
-        const res = await fetch(`${API_URL}/api/enrollment-form/section3-file`, {
+        const res = await fetch(`https://api.octosofttechnologies.in/api/enrollment-form/section3-file`, {
             method: "POST",
             body: fd
         })
@@ -372,7 +372,7 @@ const saveSection3File = async () => {
             for (let [key, value] of fd.entries()) {
             }
 
-            const res = await fetch(`${API_URL}/api/enrollment-form`, {
+            const res = await fetch(`https://api.octosofttechnologies.in/api/enrollment-form`, {
                 method: "POST",
                 body: fd // ✅ Content-Type header வேண்டாம்
             })

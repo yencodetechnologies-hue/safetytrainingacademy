@@ -52,7 +52,7 @@ export default function EnrollmentSuccess({ enrollmentData, onBackToHome }) {
 
   const handleGoToDashboard = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/auth/auto-login`, {
+      const res = await fetch(`https://api.octosofttechnologies.in/api/auth/auto-login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

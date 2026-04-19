@@ -30,7 +30,7 @@ function RegisterForm() {
             try {
 
                 const res = await axios.post(
-                    `${API_URL}/api/auth/register`,
+                    `https://api.octosofttechnologies.in/api/auth/register`,
                     values
                 )
 

@@ -4,7 +4,7 @@ import QRCode from "qrcode";
 import "../styles/EnrollmentLinks.css";
 import { API_URL } from "../data/service";
 
-const API = import.meta.env.VITE_API_URL || `${API_URL}/api`;
+const API = import.meta.env.VITE_API_URL || `https://api.octosofttechnologies.in/api`;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const enrollUrl = (id) =>

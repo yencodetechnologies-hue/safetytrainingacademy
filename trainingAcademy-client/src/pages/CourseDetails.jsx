@@ -23,12 +23,12 @@ function CourseDetails() {
 
     useEffect(() => {
 
-        axios.get(`${API_URL}/api/courses/${courseId}`)
+        axios.get(`https://api.octosofttechnologies.in/api/courses/${courseId}`)
             .then(res => {
                 setCourse(res.data)
             })
 
-        axios.get(`${API_URL}/api/courses`)
+        axios.get(`https://api.octosofttechnologies.in/api/courses`)
             .then(res => {
                 setCourses(res.data)
             })

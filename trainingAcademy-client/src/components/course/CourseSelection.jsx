@@ -36,7 +36,7 @@ function CourseSelection({
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const res = await axios.get(`${API_URL}/api/courses`)
+                const res = await axios.get(`https://api.octosofttechnologies.in/api/courses`)
                 const fetchedCourses = res.data
                 setCourses(fetchedCourses)
 
@@ -49,7 +49,7 @@ function CourseSelection({
                         setSelectedCourse(selected)
 
                         const slotRes = await axios.get(
-                            `${API_URL}/api/schedules/course/${courseId}`
+                            `https://api.octosofttechnologies.in/api/schedules/course/${courseId}`
                         )
                         setSlots(slotRes.data)
                     }
@@ -76,7 +76,7 @@ function CourseSelection({
 
         try {
             const res = await axios.get(
-                `${API_URL}/api/schedules/course/${courseId}`
+                `https://api.octosofttechnologies.in/api/schedules/course/${courseId}`
             )
             setSlots(res.data)
         } catch (err) {
@@ -87,7 +87,7 @@ function CourseSelection({
     useEffect(() => {
     if (selectedCourse?._id && slots.length === 0) {
         axios.get(
-            `${API_URL}/api/schedules/course/${selectedCourse._id}`
+            `https://api.octosofttechnologies.in/api/schedules/course/${selectedCourse._id}`
         )
         .then(res => setSlots(res.data))
         .catch(err => console.log(err))

@@ -6,7 +6,7 @@ async function loadForm() {
     if (!id) return
 
     try {
-        const res = await fetch(`${API_URL}/api/enrollment-form/${id}`)
+        const res = await fetch(`https://api.octosofttechnologies.in/api/enrollment-form/${id}`)
         const data = await res.json()
         fillForm(data)
     } catch (err) {

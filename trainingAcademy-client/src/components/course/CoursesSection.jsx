@@ -11,7 +11,7 @@ function CoursesSection() {
 
     useEffect(() => {
 
-        axios.get(`${API_URL}/api/courses`) 
+        axios.get(`https://api.octosofttechnologies.in/api/courses`) 
             .then(res => setCourses(res.data))
 
     }, [])

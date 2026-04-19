@@ -4,7 +4,7 @@ import axios from "axios"
 import { useState, useEffect } from "react"
 import { API_URL } from "../data/service"
 
-const API = `${API_URL}/api`
+const API = `https://api.octosofttechnologies.in/api`
 
 // ─── helpers ───────────────────────────────────────────────────────
 const toYMD = (d) => new Date(d).toISOString().split("T")[0]

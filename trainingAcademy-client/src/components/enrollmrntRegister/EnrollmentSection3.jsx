@@ -283,7 +283,7 @@ function EnrollmentSection3({ data, setData, prev, next }) {
                                     fd.append("qualificationFile", file)
                                     fd.append("qualificationDetails", data.qualificationDetails || "")
 
-                                    const res = await fetch(`${API_URL}/api/enrollment-form/section3-file`, {
+                                    const res = await fetch(`https://api.octosofttechnologies.in/api/enrollment-form/section3-file`, {
                                         method: "POST",
                                         body: fd
                                     })
@@ -336,7 +336,7 @@ function EnrollmentSection3({ data, setData, prev, next }) {
 
                                                 if (fileUrl) {
                                                     try {
-                                                        await fetch(`${API_URL}/api/enrollment-form/section3-file`, {
+                                                        await fetch(`https://api.octosofttechnologies.in/api/enrollment-form/section3-file`, {
                                                             method: "DELETE",
                                                             headers: { "Content-Type": "application/json" },
                                                             body: JSON.stringify({

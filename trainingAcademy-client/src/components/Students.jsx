@@ -5,7 +5,7 @@ import { API_URL } from "../data/service";
 
 
 const ITEMS_PER_PAGE = 10;
-const API_BASE = `${API_URL}/api`;
+const API_BASE = `https://api.octosofttechnologies.in/api`;
 
 // ─── Badge Components ───────────────────────────────────────────────────────
 

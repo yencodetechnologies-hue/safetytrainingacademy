@@ -100,14 +100,14 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
                 if (editCourse) {
 
                     await axios.put(
-                        `${API_URL}/api/courses/${editCourse._id}`,
+                        `https://api.octosofttechnologies.in/api/courses/${editCourse._id}`,
                         formData
                     )
 
                 } else {
 
                     await axios.post(
-                        `${API_URL}/api/courses`,
+                        `https://api.octosofttechnologies.in/api/courses`,
                         formData
                     )
 
