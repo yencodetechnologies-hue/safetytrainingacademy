@@ -3,7 +3,8 @@ import sliderOne from "../../assets/Slider1.jpeg"
 import sliderTwo from "../../assets/Slider2.jpeg"
 import sliderThree from "../../assets/Slider3.jpeg"
 import { useNavigate } from "react-router-dom"
-import { useState, useEffect, useRef } from "react"
+import { API_URL } from "../../data/service"
+import { useState,useRef,useEffect } from "react"
 
 function Hero() {
   const navigate = useNavigate()
@@ -19,7 +20,7 @@ function Hero() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await fetch("https://api.octosofttechnologies.in/api/courses")
+        const res = await fetch(`${API_URL}/api/courses`)
         if (!res.ok) throw new Error("Failed to fetch courses")
         const data = await res.json()
         setAllCourses(data)
@@ -64,11 +65,11 @@ function Hero() {
       />
 
       <div className="hero-overlay"></div>
-       <div className="announcement-bar">
-          <p>🔥 SUNDAY CLASSES AVAILABLE • ENROLL NOW • LIMITED SEATS 🔥     NATIONALLY RECOGNIZED CERTIFICATES •      GET CERTIFIED WITH CREDENTIALS THAT ARE RECOGNIZED ACROSS ALL STATES AND TERRITORIES </p>
-        </div>
+      <div className="announcement-bar">
+        <p>🔥 SUNDAY CLASSES AVAILABLE • ENROLL NOW • LIMITED SEATS 🔥     NATIONALLY RECOGNIZED CERTIFICATES •      GET CERTIFIED WITH CREDENTIALS THAT ARE RECOGNIZED ACROSS ALL STATES AND TERRITORIES </p>
+      </div>
       <div className="hero-container">
-       
+
         {/* LEFT */}
         <div className="hero-left">
           <h1>

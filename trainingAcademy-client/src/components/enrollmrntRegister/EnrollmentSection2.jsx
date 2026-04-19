@@ -1,4 +1,6 @@
 import "../../styles/EnrollmentSection2.css"
+import { useState } from "react"
+import { API_URL } from "../../data/service"
 
 function EnrollmentSection2({ data, setData, prev, next, userId }) {
 
@@ -14,7 +16,7 @@ function EnrollmentSection2({ data, setData, prev, next, userId }) {
         fd.append("studentId", data.userId);
 
         try {
-            const res = await fetch("https://api.octosofttechnologies.in/api/enrollment-form/section2-file", {
+            const res = await fetch(`${API_URL}/api/enrollment-form/section2-file`, {
                 method: "POST",
                 body: fd
             });
@@ -234,7 +236,7 @@ function EnrollmentSection2({ data, setData, prev, next, userId }) {
                                             // ✅ Backend delete
                                             if (fileUrl) {
                                                 try {
-                                                    await fetch("https://api.octosofttechnologies.in/api/enrollment-form/section2-file", {
+                                                    await fetch(`${API_URL}/api/enrollment-form/section2-file`, {
                                                         method: "DELETE",
                                                         headers: { "Content-Type": "application/json" },
                                                         body: JSON.stringify({

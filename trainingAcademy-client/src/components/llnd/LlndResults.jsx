@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "../../styles/LlndResults.css";
 import { useSearchParams } from "react-router-dom";
+import { API_URL } from "../../data/service";
 
 const PAGE_SIZE = 10;
 
@@ -132,7 +133,7 @@ export default function LlndResults() {
   });
 
   useEffect(() => {
-  fetch("https://api.octosofttechnologies.in/api/flow/llnd-results")
+  fetch(`${API_URL}/api/flow/llnd-results`)
     .then(res => res.json())
     .then(res => {
       setData(res);

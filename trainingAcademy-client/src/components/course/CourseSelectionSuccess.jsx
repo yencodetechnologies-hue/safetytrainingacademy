@@ -3,6 +3,7 @@ import "./CourseSelectionSuccess.css";
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import { API_URL } from "../../data/service";
 
 export default function EnrollmentSuccess({ enrollmentData, onBackToHome }) {
   const [visible, setVisible] = useState(false);
@@ -51,7 +52,7 @@ export default function EnrollmentSuccess({ enrollmentData, onBackToHome }) {
 
   const handleGoToDashboard = async () => {
     try {
-      const res = await fetch("https://api.octosofttechnologies.in/api/auth/auto-login", {
+      const res = await fetch(`${API_URL}/api/auth/auto-login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

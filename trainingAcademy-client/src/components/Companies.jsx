@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import "../styles/Companies.css";
 import axios from "axios";
-import CompanyViewModal from "./CompanyViewModal"; // ← import the new modal
-
+import CompanyViewModal from "./CompanyViewModal"; 
+import { API_URL } from "../data/service";
 const PAGE_SIZE = 10;
 
 /* ── Icons ── */
@@ -97,14 +97,14 @@ function AddCompanyModal({ onClose, onAdd, editData, onUpdate }) {
             const token = localStorage.getItem("token");
             if (editData) {
                 const res = await axios.put(
-                    `https://api.octosofttechnologies.in/api/companies/${editData._id}`,
+                    `${API_URL}/api/companies/${editData._id}`,
                     { companyName: form.name, email: form.email, mobileNumber: form.mobile },
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 onUpdate(res.data.data);
             } else {
                 const res = await axios.post(
-                    "https://api.octosofttechnologies.in/api/companies",
+                    `${API_URL}/api/companies`,
                     { companyName: form.name, email: form.email, mobileNumber: form.mobile, password: form.password },
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
@@ -218,7 +218,7 @@ export default function Companies() {
         const fetchCompanies = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const res = await axios.get("https://api.octosofttechnologies.in/api/companies", {
+                const res = await axios.get(`${API_URL}/api/companies`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setCompanies(res.data.data);
@@ -247,7 +247,7 @@ export default function Companies() {
         try {
             const token = localStorage.getItem("token");
             const res = await axios.patch(
-                `https://api.octosofttechnologies.in/api/companies/${id}/toggle-status`,
+                `${API_URL}/api/companies/${id}/toggle-status`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -263,7 +263,7 @@ export default function Companies() {
         if (!window.confirm("Are you sure?")) return;
         try {
             const token = localStorage.getItem("token");
-            await axios.delete(`https://api.octosofttechnologies.in/api/companies/${id}`, {
+            await axios.delete(`${API_URL}/api/companies/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setCompanies((prev) => prev.filter((c) => c._id !== id));

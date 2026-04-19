@@ -10,7 +10,8 @@ const {
   saveSection3File,
   deleteSection2File  ,
   deleteSection3File,
-  deleteSection5File// ✅ NEW
+  deleteSection5File,
+  getEnrollmentFormById// ✅ NEW
 } = require("../controllers/enrollmentFormController");
 const { uploadEnrollment } = require("../middleware/upload");
 
@@ -41,5 +42,6 @@ router.get("/", getEnrollmentForms);
 router.patch("/:id/status", updateEnrollmentStatus);
 router.delete("/section3-file", deleteSection3File)
 router.delete("/section5-file", deleteSection5File)
+router.get("/:id", getEnrollmentFormById);
 
 module.exports = router;

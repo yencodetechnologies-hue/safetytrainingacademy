@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Carousel.css";
+import { API_URL } from "../data/service";
 
-const API_BASE = "https://api.octosofttechnologies.in/api";
+const API_BASE = `${API_URL}/api`;
 
 export default function HomePage({ courses = [] }) {
   const categories = [

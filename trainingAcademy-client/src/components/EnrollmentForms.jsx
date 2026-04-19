@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import "../styles/EnrollmentForms.css";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
+import { API_URL } from "../data/service";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -51,7 +52,7 @@ function EnrollmentModal({ form, onClose, onStatusChange }) {
     setUpdating(true);
     try {
       await axios.patch(
-        `https://api.octosofttechnologies.in/api/enrollment-form/${form.id}/status`,
+        `${API_URL}/api/enrollment-form/${form.id}/status`,
         { status }
       );
       onStatusChange(form.id, status);
@@ -427,7 +428,7 @@ function EnrollmentForms() {
 
   const fetchForms = async () => {
     try {
-      const res = await axios.get("https://api.octosofttechnologies.in/api/enrollment-form");
+      const res = await axios.get(`${API_URL}/api/enrollment-form`);
       const formatted = res.data.map((item) => ({
         id: item._id,
         date: new Date(item.createdAt).toLocaleDateString(),

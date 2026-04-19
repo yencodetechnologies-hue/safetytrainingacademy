@@ -9,6 +9,8 @@ import CourseDetailsHero from "../components/course/CourseDetailHero"
 import ViewDetailsLeft from "../components/ViewDetailsLeft"
 import ViewDetailsRight from "../components/ViewDetailsRight"
 import Footer from "../components/landingPage/Footer"
+import { API_URL } from "../data/service"
+
 function CourseDetails() {
 
     const { id } = useParams()
@@ -21,12 +23,12 @@ function CourseDetails() {
 
     useEffect(() => {
 
-        axios.get(`https://api.octosofttechnologies.in/api/courses/${courseId}`)
+        axios.get(`${API_URL}/api/courses/${courseId}`)
             .then(res => {
                 setCourse(res.data)
             })
 
-        axios.get(`https://api.octosofttechnologies.in/api/courses`)
+        axios.get(`${API_URL}/api/courses`)
             .then(res => {
                 setCourses(res.data)
             })

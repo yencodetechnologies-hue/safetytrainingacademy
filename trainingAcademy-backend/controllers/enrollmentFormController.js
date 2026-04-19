@@ -347,6 +347,17 @@ const deleteSection5File = async (req, res) => {
     res.status(500).json({ message: "Server error" })
   }
 }
+const getEnrollmentFormById = async (req, res) => {
+    try {
+        const form = await EnrollmentForm.findById(req.params.id)
+        if (!form) return res.status(404).json({ message: "Not found" })
+        res.json(form)
+    } catch (err) {
+        res.status(500).json({ message: err.message })
+    }
+}
+
+
 module.exports = {
   createEnrollmentForm,
   getEnrollmentForms,
@@ -356,7 +367,8 @@ module.exports = {
   saveSection3File,
   deleteSection2File,
   deleteSection3File,
-  deleteSection5File
+  deleteSection5File,
+  getEnrollmentFormById
 }
 
 

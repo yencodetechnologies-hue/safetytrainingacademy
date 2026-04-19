@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "../styles/CompanyViewModal.css"
+import { API_URL } from "../data/service";
 
 /* ── Icons ── */
 const CloseIcon = () => (
@@ -174,7 +175,7 @@ export default function CompanyViewModal({ company, onClose }) {
             try {
                 const token = localStorage.getItem("token");
                 const res = await axios.get(
-                    `https://api.octosofttechnologies.in/api/companies/${company._id}/details`,
+                    `${API_URL}/api/companies/${company._id}/details`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 setData(res.data.data);

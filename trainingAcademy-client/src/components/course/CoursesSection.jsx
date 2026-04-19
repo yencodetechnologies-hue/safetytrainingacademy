@@ -2,7 +2,8 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import CourseCard from "./CourseCard"
 import "../../styles/CoursesSection.css"
-import { div } from "framer-motion/client"
+import { div, i } from "framer-motion/client"
+import { API_URL } from "../../data/service"
 function CoursesSection() {
     const [courses, setCourses] = useState([])
 
@@ -10,7 +11,7 @@ function CoursesSection() {
 
     useEffect(() => {
 
-        axios.get("https://api.octosofttechnologies.in/api/courses")
+        axios.get(`${API_URL}/api/courses`) 
             .then(res => setCourses(res.data))
 
     }, [])

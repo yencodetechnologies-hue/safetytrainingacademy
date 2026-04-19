@@ -4,6 +4,7 @@ import PublicNavbar from "../PublicNavbar";
 import Footer from "./Footer";
 import CourseCard from "../course/CourseCard";
 import "../../styles/AllCourses.css";
+import { API_URL } from "../../data/service";
 
 function AllCourses() {
   const [courses, setCourses] = useState([]);
@@ -15,7 +16,7 @@ function AllCourses() {
   const selectedCategory = params.get("category");
 
   useEffect(() => {
-    fetch("https://api.octosofttechnologies.in/api/courses")
+    fetch(`${API_URL}/api/courses`)
       .then(res => res.json())
       .then(data => {
         setCourses(data);

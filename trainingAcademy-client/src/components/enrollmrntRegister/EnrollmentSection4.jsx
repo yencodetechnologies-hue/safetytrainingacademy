@@ -1,4 +1,6 @@
 import "../../styles/EnrollmentSection4.css"
+import { useState } from "react"
+import { API_URL } from "../../data/service"
 
 const INDIGENOUS_OPTIONS = [
     "Aboriginal but not Torres Strait Islander origin",
@@ -149,7 +151,7 @@ function EnrollmentSection4({ data, setData, prev, next }) {
 
         // ✅ உடனே save
         try {
-            await fetch("https://api.octosofttechnologies.in0/api/enrollment-form/section", {
+            await fetch(`${API_URL}/api/enrollment-form/section`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

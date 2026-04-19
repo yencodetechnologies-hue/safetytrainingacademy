@@ -166,6 +166,8 @@ The accident was reported at 10:30 am on the same day.`,
     {
         type: "image-mcq",
 
+        passage: `"All workers must wear hard hats, steel-capped boots and high-visibility vests while on a construction site. Personal protective equipment (PPE) must be checked daily. Report any damaged PPE or equipment immediately to the site supervisor. Workers must follow all safety signs and instructions at all times."`,
+
         image: poster, // or new image
 
         question: "Which instruction must workers follow according to the notice?",
@@ -230,41 +232,36 @@ function Literacy({ next }) {
 
 
 
-            const correctAnswers = {
-                // 👇 nee fill panna vendiyadhu based on your questions
-                "0-0": "Silvia",
-                "0-1": "Mike",
-                "0-2": "Tyres needed - Order no 2457",
-                "0-3": "Bridgestone",
-                "1-0": "Everyone",
-                "1-1": "9",
-                "1-2": "1",
-                "1-3": "Before and after providing care",
-                "2-0": "hand",
-                "2-1": "forklift",
-                "2-2": "ground",
-                "2-3": "ice pack",
-                "2-4": "First Aid",
-                "3": "Hard hats, steel-capped boots, high-visibility vests",
-                "4-0": "Hard hats, steel-capped boots, high-visibility vests",
-                "4-1": "The site supervisor",
-                "5": "Follow all safety signs and instructions",
-
-            }
+const correctAnswers = {
+    "0-0": "Silvia",
+    "0-1": "Mike",
+    "0-2": "Tyres needed - Order no 2457",
+    "0-3": "Bridgestone",
+    "1-0": "Everyone",
+    "1-1": "9",
+    "1-2": "1",
+    "1-3": "Before and after providing care",
+    "2-0": "hand",
+    "2-1": "forklift",
+    "2-2": "ground",
+    "2-3": "ice pack",
+    "2-4": "First Aid",
+    3: "Hard hats, steel-capped boots, high-visibility vests",   
+    "4-0": "The site supervisor",                                 
+    5: "Follow all safety signs and instructions",               
+}
 
             let score = 0
 
             Object.keys(correctAnswers).forEach(key => {
-
                 const value =
                     answers[key] ??
                     mcqAnswers[key] ??
-                    mcqAnswers[Number(key)] // for normal mcq
+                    mcqAnswers[Number(key)]   // number key la save aana mcq answers
 
                 if (value === correctAnswers[key]) {
                     score++
                 }
-
             })
 
 
@@ -403,7 +400,9 @@ function Literacy({ next }) {
                 <div className="literacy-mcq-boxs">
 
                     {/* PASSAGE */}
-
+                    <div className="literacy-passage">
+                        <p>{question.passage}</p>
+                    </div>
 
                     {/* CURRENT QUESTION */}
                     <p className="literacy-mcq-questions">
@@ -428,7 +427,9 @@ function Literacy({ next }) {
             }
             {question.type === "image-mcq" && (
                 <div className="literacy-mcq-box">
-
+                    <div className="literacy-passage">
+                        <p>{question.passage}</p>
+                    </div>
                     {/* QUESTION */}
                     <p className="literacy-mcq-question">
                         {question.question}

@@ -118,8 +118,8 @@ function LLNDAssessment({ onComplete, userDetails }) {
             "0-3": "Bridgestone",
             "1-0": "Everyone",
             "1-1": "9",
-            "1-2": "Once",
-            "1-3": "Before and after care",
+            "1-2": "1",
+            "1-3": "Before and after providing care",
             "2-0": "hand",
             "2-1": "forklift",
             "2-2": "ground",
@@ -127,7 +127,7 @@ function LLNDAssessment({ onComplete, userDetails }) {
             "2-4": "First Aid",
             "3-0": "Hard hats, steel-capped boots, high-visibility vests",
             "4-0": "The site supervisor",
-            "5-0": "Follow all safety signs and instructions",
+            "5-0": "Follow all safety signs and instructions", 
         }
 
         let litCorrect = 0

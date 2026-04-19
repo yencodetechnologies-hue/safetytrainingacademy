@@ -14,6 +14,7 @@ import Footer from "../components/landingPage/Footer";
 import "../styles/LandingPage.css"
 import { useLocation } from "react-router-dom";
 import Carousel from "../components/CarouselMain"
+import { API_URL } from "../data/service";
 
 function LandingPage() {
   const [courses, setCourses] = useState([]);
@@ -22,7 +23,7 @@ function LandingPage() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get("https://api.octosofttechnologies.in/api/courses"); // change your API
+        const res = await axios.get(`${API_URL}/api/courses`); // change your API
         setCourses(res.data);
         const uniqueCategories = [...new Set(res.data.map(c => c.category))];
         setCategories(uniqueCategories);

@@ -2,6 +2,7 @@ import { useLocation } from "react-router-dom"
 import "../../styles/CourseResult.css"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
+import { API_URL } from "../../data/service"
 
 
 
@@ -18,7 +19,7 @@ function CourseResult({ onRetry, onContinue, data }) {
 
             <div className="result-card">
 
-                <h2 className="result-title">?? Assessment Complete</h2>
+                <h2 className="result-title"> Assessment Complete</h2>
 
                 <div className="result-box">
 
@@ -88,7 +89,7 @@ function CourseResult({ onRetry, onContinue, data }) {
                                 answers: data.answers || []  
                             };
 
-                            const res = await fetch("https://api.octosofttechnologies.in/api/flow/llnd", {
+                            const res = await fetch(`${API_URL}/api/flow/llnd`, {
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json"

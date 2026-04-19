@@ -3,7 +3,7 @@ import { useFormik } from "formik"
 import axios from "axios"
 import "../../styles/CreateCourseModal.css";
 import DynamicField from "../DynamicField";
-
+import { API_URL } from "../../data/service";
 
 function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
 
@@ -100,15 +100,14 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
                 if (editCourse) {
 
                     await axios.put(
-                        `https://api.octosofttechnologies.in
-/api/courses/${editCourse._id}`,
+                        `${API_URL}/api/courses/${editCourse._id}`,
                         formData
                     )
 
                 } else {
 
                     await axios.post(
-                        "https://api.octosofttechnologies.in/api/courses",
+                        `${API_URL}/api/courses`,
                         formData
                     )
 

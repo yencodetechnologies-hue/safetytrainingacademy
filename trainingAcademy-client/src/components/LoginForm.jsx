@@ -6,6 +6,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+import { API_URL } from "../data/service";
 
 function LoginForm() {
   const { login } = useContext(AuthContext);
@@ -24,7 +25,7 @@ function LoginForm() {
     onSubmit: async (values) => {
       try {
         const res = await axios.post(
-          "https://api.octosofttechnologies.in/api/auth/login",
+          `${API_URL}/api/auth/login`,
           values
         );
         localStorage.setItem("token", res.data.token);

@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import "../styles/Student.css";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../data/service";
+
+
 const ITEMS_PER_PAGE = 10;
-const API_BASE = "https://api.octosofttechnologies.in/api";
+const API_BASE = `${API_URL}/api`;
 
 // ─── Badge Components ───────────────────────────────────────────────────────
 

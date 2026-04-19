@@ -4,6 +4,7 @@ import EnrollmentSection2 from "./EnrollmentSection2"
 import EnrollmentSection3 from "./EnrollmentSection3"
 import EnrollmentSection4 from "./EnrollmentSection4"
 import EnrollmentSection5 from "./EnrollmentSection5"
+import{ API_URL } from "../../data/service"
 
 const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, setSection }, ref) => {
 
@@ -202,7 +203,7 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
 
 
         try {
-            const res = await fetch("https://api.octosofttechnologies.in/api/enrollment-form/section", {
+            const res = await fetch(`${API_URL}/api/enrollment-form/section`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
@@ -228,7 +229,7 @@ const saveSection3File = async () => {
     }
 
     try {
-        const res = await fetch("https://api.octosofttechnologies.in/api/enrollment-form/section3-file", {
+        const res = await fetch(`${API_URL}/api/enrollment-form/section3-file`, {
             method: "POST",
             body: fd
         })
@@ -371,7 +372,7 @@ const saveSection3File = async () => {
             for (let [key, value] of fd.entries()) {
             }
 
-            const res = await fetch("https://api.octosofttechnologies.in/api/enrollment-form", {
+            const res = await fetch(`${API_URL}/api/enrollment-form`, {
                 method: "POST",
                 body: fd // ✅ Content-Type header வேண்டாம்
             })

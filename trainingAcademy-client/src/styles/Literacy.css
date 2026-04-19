@@ -134,6 +134,7 @@
 .literacy-image-box {
   width: 100%;
   margin-bottom: 20px;
+  display: flex;
 }
 
 .literacy-image-box img {

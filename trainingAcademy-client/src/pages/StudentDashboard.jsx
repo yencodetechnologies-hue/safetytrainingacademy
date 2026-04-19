@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import "../styles/StudentDashboard.css";
 import LLNDAssessment from "../components/llnd/LLNDAssessment";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../data/service";  
 
 export default function StudentDashboard() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -20,7 +21,7 @@ export default function StudentDashboard() {
     const fetchDashboard = async () => {
       try {
         const res = await fetch(
-          `https://api.octosofttechnologies.in/api/student/dashboard/${studentId}`
+          `${API_URL}/api/student/dashboard/${studentId}`
         );
         if (!res.ok) throw new Error("Failed to fetch data");
         const resData = await res.json();
@@ -46,7 +47,7 @@ export default function StudentDashboard() {
     const fetchDashboard = async () => {
       try {
         const res = await fetch(
-          `https://api.octosofttechnologies.in/api/student/dashboard/${studentId}`
+          `${API_URL}/api/student/dashboard/${studentId}`
         );
         if (!res.ok) throw new Error("Failed to fetch data");
         const resData = await res.json();

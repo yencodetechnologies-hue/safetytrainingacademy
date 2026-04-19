@@ -5,7 +5,8 @@ import axios from "axios";
 import ScheduleModal from "../ScheduleModal";
 import { useLocation } from "react-router-dom"
 import ManageCategories from "../course/ManageCategories";
-import ReorderCourseModal from "./ReorderCourseModal"; 
+import ReorderCourseModal from "./ReorderCourseModal";
+import { API_URL } from "../../data/service";
 
 function Courses() {
 
@@ -26,10 +27,10 @@ function Courses() {
     useEffect(() => {
         fetchCourses();
     }, []);
- 
+
     const fetchCourses = async () => {
         try {
-            const res = await axios.get("https://api.octosofttechnologies.in/api/courses");
+            const res = await axios.get(`${API_URL}/api/courses`);
             setCourses(res.data);
         } catch (error) {
             console.log(error);
@@ -39,24 +40,23 @@ function Courses() {
     };
 
     useEffect(() => {
-  if (categoryFromURL) {
-    const el = document.getElementById(categoryFromURL)
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" })
-    }
-  }
-}, [categoryFromURL])
+        if (categoryFromURL) {
+            const el = document.getElementById(categoryFromURL)
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth" })
+            }
+        }
+    }, [categoryFromURL])
 
     const pubfilteredCourses = courses.filter(c =>
-  c.title.toLowerCase().includes(search?.toLowerCase() || "")
-)
+        c.title.toLowerCase().includes(search?.toLowerCase() || "")
+    )
 
     const handleDelete = async (id) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this course?");
         if (!confirmDelete) return;
         try {
-            await axios.delete(`https://api.octosofttechnologies.in
-/api/courses/${id}`);
+            await axios.delete(`${API_URL}/api/courses/${id}`);
             fetchCourses();
         } catch (err) {
             console.log(err);
@@ -81,7 +81,7 @@ function Courses() {
                     <p>Create and manage courses with detailed information</p>
                 </div>
                 <div className="course-management-div">
-                   
+
                     <p onClick={() => setShowManageCategories(true)}>
                         <i className="fa-solid fa-tag"></i>Manage Categories
                     </p>
@@ -194,7 +194,7 @@ function Courses() {
                                                         setOpenSchedule(true);
                                                     }}
                                                 >
-                                                   <i className="fa-regular fa-calendar"></i>
+                                                    <i className="fa-regular fa-calendar"></i>
                                                 </button>
 
                                                 <button

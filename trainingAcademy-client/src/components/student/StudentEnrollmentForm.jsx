@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import "./StudentEnrollmentForm.css";
 import EnrollmentRegister from "../enrollmrntRegister/EnrollmentRegister";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../../data/service";
 
 export default function StudentEnrollmentForm() {
 
@@ -26,9 +27,9 @@ export default function StudentEnrollmentForm() {
         if (!studentId) throw new Error("Student ID not found. Please login again.");
 
         const [userRes, formRes, dashRes] = await Promise.all([
-          fetch(`https://api.octosofttechnologies.in/api/students/enrollment/${studentId}`),
-          fetch(`https://api.octosofttechnologies.in/api/enrollment-form?studentId=${studentId}`),
-          fetch(`https://api.octosofttechnologies.in/api/student/dashboard/${studentId}`)
+          fetch(`${API_URL}/api/students/enrollment/${studentId}`),
+          fetch(`${API_URL}/api/enrollment-form?studentId=${studentId}`),
+          fetch(`${API_URL}/api/student/dashboard/${studentId}`)
         ]);
 
         if (!userRes.ok) throw new Error("Failed to fetch user details");
@@ -81,7 +82,7 @@ export default function StudentEnrollmentForm() {
         return;
       }
 
-      const res = await fetch("https://api.octosofttechnologies.in/api/flow/complete", {
+      const res = await fetch(`${API_URL}/api/flow/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ flowId }),

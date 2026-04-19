@@ -4,6 +4,7 @@ import "../styles/RegisterForm.css";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
+import { API_URL } from "../data/service";
 
 function RegisterForm() {
 
@@ -29,7 +30,7 @@ function RegisterForm() {
             try {
 
                 const res = await axios.post(
-                    "https://api.octosofttechnologies.in/api/auth/register",
+                    `${API_URL}/api/auth/register`,
                     values
                 )
 

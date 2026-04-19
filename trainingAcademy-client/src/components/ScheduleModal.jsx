@@ -2,8 +2,9 @@ import "../styles/ScheduleModal.css"
 import { useFormik } from "formik"
 import axios from "axios"
 import { useState, useEffect } from "react"
+import { API_URL } from "../data/service"
 
-const API = "https://api.octosofttechnologies.in/api"
+const API = `${API_URL}/api`
 
 // ─── helpers ───────────────────────────────────────────────────────
 const toYMD = (d) => new Date(d).toISOString().split("T")[0]
