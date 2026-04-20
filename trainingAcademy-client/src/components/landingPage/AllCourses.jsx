@@ -5,11 +5,26 @@ import Footer from "./Footer";
 import CourseCard from "../course/CourseCard";
 import "../../styles/AllCourses.css";
 import { API_URL } from "../../data/service";
+import ViewAllCoursesMobile from "../mobile/components/ViewAllCoursesMobile";
+// ── Mobile detection hook ─────────────────────────────────────────────────────
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(
+    () => window.innerWidth <= breakpoint
+  );
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth <= breakpoint);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, [breakpoint]);
+  return isMobile;
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 function AllCourses() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   // URL-ல இருந்து category param எடு
   const params = new URLSearchParams(location.search);
@@ -23,6 +38,13 @@ function AllCourses() {
         setLoading(false);
       });
   }, []);
+
+  // ── Mobile view ───────────────────────────────────────────────────────────
+  if (isMobile) {
+    return <ViewAllCoursesMobile courses={courses} />;
+  }
+
+  // ── Desktop view (original — untouched) ──────────────────────────────────
 
   // Category filter
   const filtered = selectedCategory

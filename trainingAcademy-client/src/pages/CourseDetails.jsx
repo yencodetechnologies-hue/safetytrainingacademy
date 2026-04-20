@@ -10,16 +10,29 @@ import ViewDetailsLeft from "../components/ViewDetailsLeft"
 import ViewDetailsRight from "../components/ViewDetailsRight"
 import Footer from "../components/landingPage/Footer"
 import { API_URL } from "../data/service"
+import ViewCourseDetailMobile from "../components/mobile/components/ViewCourseDetailMobile"
+
+// ── Mobile detection hook ─────────────────────────────────────────────────────
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(
+    () => window.innerWidth <= breakpoint
+  );
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth <= breakpoint);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, [breakpoint]);
+  return isMobile;
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 function CourseDetails() {
 
     const { id } = useParams()
-
     const courseId = id.split("-").pop()
-
     const [course, setCourse] = useState(null)
-
     const [courses, setCourses] = useState([])
+    const isMobile = useIsMobile()
 
     useEffect(() => {
 
@@ -37,6 +50,12 @@ function CourseDetails() {
 
     if (!course) return <p>Loading...</p>
 
+    // ── Mobile view ───────────────────────────────────────────────────────────
+    if (isMobile) {
+        return <ViewCourseDetailMobile course={course} />
+    }
+
+    // ── Desktop view (original — untouched) ──────────────────────────────────
     return (
 
         <div className="course-details-public">

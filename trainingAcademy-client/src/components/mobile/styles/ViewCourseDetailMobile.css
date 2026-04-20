@@ -1,0 +1,654 @@
+/* CourseDetailMobile.css — all classes prefixed cdm- */
+
+.cdm-root {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: #f0f8ff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding-bottom: 70px;
+  min-height: 100vh;
+}
+
+.cdm-root *,
+.cdm-root *::before,
+.cdm-root *::after {
+  box-sizing: border-box;
+}
+
+/* ── Top Bar ── */
+.cdm-topbar {
+  background: #0d2240;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cdm-back-btn {
+  background: none;
+  border: none;
+  color: #29b6e8;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.cdm-topbar-title {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.cdm-topbar-phone {
+  background: #29b6e8;
+  color: #0d2240;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+/* ── Hero Image ── */
+.cdm-hero-img {
+  background: #0d2240;
+  height: 200px;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.cdm-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(13,34,64,0.96) 0%, rgba(13,34,64,0.5) 45%, rgba(13,34,64,0.1) 100%);
+}
+
+/* ── Hero content: code pill + title — BOTTOM LEFT (Option A style) ── */
+.cdm-hero-content {
+  position: absolute;
+  bottom: 15px;
+  left: 14px;
+  right: 100px;
+  z-index: 2;
+}
+
+.cdm-hero-code {
+  background: #29b6e8;
+  color: #0d2240;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.cdm-hero-title {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cdm-hero-btn {
+ 
+    padding: 7px;
+    border-radius: 20px;
+    background-color: #15a0de;
+
+}
+
+.cdm-hero-price {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  text-align: right;
+  z-index: 2;
+}
+
+.cdm-hero-price-num {
+  color: #29b6e8;
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 5px;
+}
+
+.cdm-hero-price-orig {
+  color: rgba(255,255,255,0.45);
+  font-size: 12px;
+  text-decoration: line-through;
+}
+
+/* ── Quick Facts ── */
+.cdm-quick-facts {
+  background: #fff;
+  border-bottom: 1px solid #bae0f7;
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.cdm-fact {
+  text-align: center;
+}
+
+.cdm-fact-icon {
+  font-size: 16px;
+  margin-bottom: 3px;
+}
+
+.cdm-fact-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0d2240;
+}
+
+.cdm-fact-label {
+  font-size: 10px;
+  color: #4a7096;
+}
+
+/* ── Section ── */
+.cdm-section {
+  background: #fff;
+  margin-bottom: 8px;
+  padding: 14px 16px;
+  overflow: hidden;
+}
+
+.cdm-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0d2240;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e8f4fd;
+}
+
+.cdm-section-title span {
+  color: #29b6e8;
+}
+
+.cdm-desc-text {
+  font-size: 13px;
+  color: #4a7096;
+  line-height: 1.6;
+}
+
+/* ── Checklist ── */
+.cdm-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cdm-checklist li {
+  font-size: 13px;
+  color: #4a7096;
+  padding: 6px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-bottom: 1px solid #f0f8ff;
+}
+
+.cdm-checklist li:last-child {
+  border-bottom: none;
+}
+
+.cdm-check {
+  color: #29b6e8;
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Points swipe (What you learn / Entry req) ── */
+.cdm-points-swipe {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 4px;
+  margin: 0 -16px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.cdm-points-swipe::-webkit-scrollbar {
+  display: none;
+}
+
+.cdm-points-page {
+  flex-shrink: 0;
+  width: calc(100vw - 64px);
+  max-width: 380px;
+  scroll-snap-align: start;
+}
+
+/* ── Price Section ── */
+.cdm-price-section {
+  background: #0d2240;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+}
+
+.cdm-price-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.cdm-price-big {
+  color: #29b6e8;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.cdm-price-save {
+  background: #29b6e8;
+  color: #0d2240;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.cdm-price-note {
+  color: rgba(255,255,255,0.6);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.cdm-book-now-big {
+  display: block;
+  background: #29b6e8;
+  color: #0d2240;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  width: 100%;
+  cursor: pointer;
+}
+
+.cdm-book-now-big:active {
+  opacity: 0.9;
+}
+
+/* ── Available Dates ── */
+.cdm-dates-list {
+  padding: 0;
+}
+
+.cdm-date-slot {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f8ff;
+  gap: 10px;
+}
+
+.cdm-date-slot:last-child {
+  border-bottom: none;
+}
+
+.cdm-date-cal {
+  background: #0d2240;
+  color: #fff;
+  border-radius: 8px;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cdm-date-cal.sunday {
+  background: #1a4a7a;
+}
+
+.cdm-date-cal-day {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.cdm-date-cal-mon {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: #29b6e8;
+}
+
+.cdm-date-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cdm-date-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0d2240;
+}
+
+.cdm-date-time {
+  font-size: 11px;
+  color: #4a7096;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cdm-date-spots {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cdm-date-spots.ok {
+  color: #0d7aad;
+  background: #dbeafe;
+}
+
+.cdm-date-spots.low {
+  color: #d97706;
+  background: #fef3c7;
+}
+
+.cdm-book-slot-btn {
+  background: #0d2240;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cdm-book-slot-btn:active {
+  background: #1a4a7a;
+}
+
+/* ── Sessions loading skeleton ── */
+.cdm-sessions-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cdm-skeleton-slot {
+  height: 52px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #e8f4fd 25%, #d1ebfa 50%, #e8f4fd 75%);
+  background-size: 200% 100%;
+  animation: cdm-shimmer 1.4s infinite;
+}
+
+@keyframes cdm-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.cdm-no-sessions {
+  text-align: center;
+  color: #4a7096;
+  font-size: 13px;
+  padding: 20px;
+  background: #f0f8ff;
+  border-radius: 10px;
+  border: 1px solid #bae0f7;
+}
+
+/* ── See more / See less button ── */
+.cdm-see-more-btn {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  background: #f0f8ff;
+  border: 1px solid #bae0f7;
+  border-radius: 10px;
+  color: #0d7aad;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+}
+
+.cdm-see-more-btn:active {
+  background: #dbeafe;
+}
+
+/* ── Session swipe — grouped pages of 7 ── */
+.cdm-session-swipe {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.cdm-session-swipe::-webkit-scrollbar {
+  display: none;
+}
+
+.cdm-session-page-card {
+  flex-shrink: 0;
+  width: 100%;
+  min-width: calc(100vw - 64px);
+  max-width: 416px;
+  background: #f0f8ff;
+  border: 1px solid #bae0f7;
+  border-radius: 12px;
+  overflow: hidden;
+  scroll-snap-align: start;
+}
+
+/* ── Page indicator (shared by sessions + points swipe) ── */
+.cdm-page-indicator {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #4a7096;
+  padding: 8px;
+  border-top: 1px solid #bae0f7;
+  background: #e8f4fd;
+}
+
+/* ── Trust Badges ── */
+.cdm-trust-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cdm-trust-badge {
+  background: #f0f8ff;
+  border: 1px solid #bae0f7;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.cdm-trust-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.cdm-trust-text {
+  font-size: 11px;
+  color: #0d2240;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* ── Reviews — horizontal swipe ── */
+.cdm-review-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.cdm-review-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.cdm-review-card {
+  background: #f0f8ff;
+  border: 1px solid #bae0f7;
+  border-radius: 10px;
+  padding: 12px;
+  min-width: 260px;
+  max-width: 280px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+.cdm-review-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.cdm-review-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0d2240;
+}
+
+.cdm-review-stars {
+  color: #f59e0b;
+  font-size: 12px;
+}
+
+.cdm-review-text {
+  font-size: 12px;
+  color: #4a7096;
+  line-height: 1.5;
+}
+
+/* ── Sticky Bottom Bar ── */
+.cdm-sticky {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: #0d2240;
+  padding: 10px 16px;
+  display: flex;
+  gap: 8px;
+  border-top: 2px solid #29b6e8;
+  z-index: 100;
+}
+
+.cdm-sticky-book {
+  flex: 1;
+  background: #29b6e8;
+  color: #0d2240;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+
+.cdm-sticky-call {
+  background: #fff;
+  color: #0d2240;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 18px;
+  font-weight: 700;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Section Slider ── */
+.slide-wrap { 
+    overflow: hidden !important;
+    text-wrap: wrap;
+ }
+.slide-track {
+  display: flex;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.slide-page { min-width: 100%; flex-shrink: 0; }
+.cdm-dot-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 10px;
+}
+.cdm-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #bae0f7;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.cdm-dot.active { background: #29b6e8; }
+
+.slide-track {
+  display: flex;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.slide-page {
+  min-width: 100%;
+  flex-shrink: 0;
+  width: 100%;
+}
+/* ── Desktop: hide ── */
+@media (min-width: 769px) {
+  .cdm-root {
+    display: none;
+  }
+}

@@ -70,7 +70,7 @@ function App() {
                 <Route path="/about" element={<About/>}/>
                 <Route path="/course" element={<CourseCard/>}/>
                 <Route path="/all-courses" element={<AllCourses/>}/>
-                                    <Route path="/enrollment-success" element={<EnrollmentSuccess />} />
+                <Route path="/enrollment-success" element={<EnrollmentSuccess />} />
 
 
 

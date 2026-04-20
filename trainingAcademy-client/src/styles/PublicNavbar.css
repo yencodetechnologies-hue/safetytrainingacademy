@@ -283,13 +283,15 @@
 
 @media (max-width: 768px) {
   .navbar-container {
-    padding: 12px 15px;
+    padding: 8px 15px;
   }
 
   .mobile-menu {
     font-size: 26px;
   }
-
+.navbar-logo > img {
+    height: 18px;
+  }
 
  
 }

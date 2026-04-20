@@ -14,6 +14,7 @@ const mobileMenuItems = [
   { label: "Unique Student Identifier (USI)", path: "/usi" },
   { label: "Code of Practice", path: "/code-of-practice" },
   { label: "Gallery", path: "/gallery" },
+  { label: "Sign In", path: "/login" },
 ];
 
 function PublicNavbar({ courses = [] }) {
