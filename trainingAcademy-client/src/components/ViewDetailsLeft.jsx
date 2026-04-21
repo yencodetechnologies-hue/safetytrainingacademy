@@ -4,59 +4,7 @@ function ViewDetailsLeft({ course }) {
     return (
 
         <div className="view-details-left">
-
-            {/* COURSE IMAGE */}
-
-            <div className="course-image">
-
-                <img
-                    src={course?.image}
-                    alt={course?.title}
-                />
-
-            </div>
-
-
-            {/* INFO CARDS */}
-
-            <div className="course-info-container">
-
-                <div className="info-card delivery">
-
-                    <span>🌐</span>
-                    <p>Delivery</p>
-                    <strong>{course?.deliveryMethod}</strong>
-
-                </div>
-
-
-                <div className="info-card price">
-
-                    <span>💲</span>
-                    <p>Price</p>
-                    <strong>${course?.sellingPrice}</strong>
-
-                </div>
-
-
-                <div className="info-card duration">
-
-                    <span></span>
-                    <p>Duration</p>
-                    <strong>{course?.duration}</strong>
-
-                </div>
-
-
-                <div className="info-card location">
-
-                    <span>📍</span>
-                    <p>Location</p>
-                    <strong>{course?.location}</strong>
-
-                </div>
-
-            </div>
+           
 
 
             {/* COMBO OFFER */}
@@ -131,6 +79,16 @@ function ViewDetailsLeft({ course }) {
                 <h3>Fees and Charges</h3>
 
                 {course?.feesCharges?.map((line, index) => (
+                    <p key={index}>✔ {line}</p>
+                ))}
+
+            </div>
+
+            <div className="course-section">
+
+                <h3>What you will Learn</h3>
+
+                {course?.trainingOverview?.map((line, index) => (
                     <p key={index}>✔ {line}</p>
                 ))}
 

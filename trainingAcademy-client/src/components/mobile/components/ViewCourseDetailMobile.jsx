@@ -226,9 +226,9 @@ export default function ViewCourseDetailMobile({ course }) {
       </div>
 
       {/* ── About — para only, no section title ── */}
-      <div className="cdm-section">
+      {/* <div className="cdm-section">
         <p className="cdm-desc-text">{aboutText}</p>
-      </div>
+      </div> */}
 
       {/* ── What You Will Learn ── */}
   

@@ -116,6 +116,76 @@ color: white;
 background:#7c3aed;
 }
 
+/* ===== ENROLMENT TYPE ===== */
+.form-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0d2240;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.form-required {
+  color: #ef4444;
+  margin-left: 3px;
+}
+
+.enrol-type-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.enrol-type-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #f8fafc;
+  transition: all 0.18s;
+  user-select: none;
+}
+
+.enrol-type-card:hover {
+  border-color: #29b6e8;
+  background: #f0f8ff;
+}
+
+.enrol-type-card--active {
+  background: #0d2240 !important;
+  border-color: #0d2240 !important;
+}
+
+.enrol-type-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.enrol-type-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0d2240;
+  line-height: 1.2;
+}
+.enrol-type-card--active .enrol-type-label {
+  color: #fff;
+}
+
+.enrol-type-sub {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 3px;
+}
+.enrol-type-card--active .enrol-type-sub {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* RESPONSIVE */
+
 
 /* Tablet */
 
@@ -135,4 +205,9 @@ grid-template-columns:repeat(2,1fr);
 grid-template-columns:1fr;
 }
 
+}
+@media (max-width: 480px) {
+  .enrol-type-grid {
+    grid-template-columns: 1fr;
+  }
 }

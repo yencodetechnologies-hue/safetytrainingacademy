@@ -1,6 +1,6 @@
 .clients-section{
-padding:80px 0;
-background:linear-gradient(to right,#dbeafe,#e0f2fe);
+padding:40px 0;
+background: #0d2240;
 }
 .clients-container{
     height: auto !important;
@@ -9,10 +9,11 @@ background:linear-gradient(to right,#dbeafe,#e0f2fe);
 }
 
 .clients-title{
-font-size:36px;
+font-size:20px;
 color:#0ea5e9;
 margin-bottom:40px;
 font-weight:700;
+text-align: center;
 }
 .review-container{
     display: block !important;
@@ -21,6 +22,8 @@ font-weight:700;
 display:grid;
 grid-template-columns:repeat(4,1fr);
 gap:30px;
+max-width: 75%;
+margin: auto;
 }
 
 .client-card{

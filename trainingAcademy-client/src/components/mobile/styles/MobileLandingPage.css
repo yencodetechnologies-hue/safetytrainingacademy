@@ -205,6 +205,9 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+.mlp-trust-strip>div{
+  margin: auto;
+}
 
 .mlp-trust-strip::-webkit-scrollbar {
   display: none;
@@ -358,11 +361,16 @@
   font-size: 11px;
   font-weight: 600;
   color: #0d7aad;
-  background: #dbeafe;
   padding: 3px 9px;
   border-radius: 20px;
   white-space: nowrap;
   margin-left: 8px;
+  border: none;
+}
+.mlp-date-actions > button{
+  background-color: #15a0de;
+  color: #fff;
+  padding: 5px 9px;
 }
 
 .mlp-date-spots.low {
@@ -696,13 +704,13 @@
   padding: 10px 16px;
   display: flex;
   gap: 8px;
-  border-top: 2px solid #29b6e8;
+  border-top: 2px solid #15a0de;
   z-index: 100;
 }
 
 .mlp-sticky-call {
   flex: 1;
-  background: #29b6e8;
+  background: #15a0de;
   color: #0d2240;
   border: none;
   border-radius: 10px;
@@ -833,7 +841,7 @@
 }
 
 .mlp-brand-logo {
-  height: 36px;
+  height: 56px;
   min-width: 90px;
   border-radius: 8px;
   display: flex;

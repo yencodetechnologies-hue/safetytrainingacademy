@@ -85,14 +85,14 @@ function CourseSelection({
     }
 
     useEffect(() => {
-    if (selectedCourse?._id && slots.length === 0) {
-        axios.get(
-            `https://api.octosofttechnologies.in/api/schedules/course/${selectedCourse._id}`
-        )
-        .then(res => setSlots(res.data))
-        .catch(err => console.log(err))
-    }
-}, [selectedCourse])
+        if (selectedCourse?._id && slots.length === 0) {
+            axios.get(
+                `https://api.octosofttechnologies.in/api/schedules/course/${selectedCourse._id}`
+            )
+                .then(res => setSlots(res.data))
+                .catch(err => console.log(err))
+        }
+    }, [selectedCourse])
     return (
 
         <>
@@ -101,33 +101,42 @@ function CourseSelection({
             {!hideEnrollmentType && (
                 <div className="form-group">
 
-                    <label>Enrollment type</label>
 
-                    <div className="radio-group">
 
-                        <label className="radio-group-opt">
-                            <input
-                                name="type"
-                                type="radio"
-                                value="individual"
-                                checked={enrollmentType === "individual"}
-                                onChange={(e) => setEnrollmentType(e.target.value)}
-                            />
-                            <span>Individual</span>
-                        </label>
+                    <label className="form-label">
+                        Enrolment Type <span className="form-required">*</span>
+                    </label>
 
-                        <label className="radio-group-opt">
-                            <input
-                                name="type"
-                                type="radio"
-                                value="company"
-                                checked={enrollmentType === "company"}
-                                onChange={(e) => setEnrollmentType(e.target.value)}
-                            />
-                            <span>Company</span>
-                        </label>
+                    <div className="enrol-type-grid">
+
+                        <div
+                            className={`enrol-type-card ${enrollmentType === "individual" ? "enrol-type-card--active" : ""}`}
+                            onClick={() => setEnrollmentType("individual")}
+                        >
+                            <span className="enrol-type-icon">👤</span>
+                            <div>
+                                <div className="enrol-type-label">Individual</div>
+                                <div className="enrol-type-sub">Personal enrolment</div>
+                            </div>
+                        </div>
+
+                        <div
+                            className={`enrol-type-card ${enrollmentType === "company" ? "enrol-type-card--active" : ""}`}
+                            onClick={() => setEnrollmentType("company")}
+                        >
+                            <span className="enrol-type-icon">🏢</span>
+                            <div>
+                                <div className="enrol-type-label">Company</div>
+                                <div className="enrol-type-sub">Group / corporate booking</div>
+                            </div>
+                        </div>
 
                     </div>
+
+                    {/* Hidden inputs for form compatibility */}
+                    <input type="hidden" name="type" value={enrollmentType} />
+
+
 
                 </div>)}
 

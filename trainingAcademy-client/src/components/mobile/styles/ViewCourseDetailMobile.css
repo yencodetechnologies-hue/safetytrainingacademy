@@ -105,8 +105,10 @@
 .cdm-hero-btn {
  
     padding: 7px;
-    border-radius: 20px;
+    border-radius: 10px;
     background-color: #15a0de;
+    border: none;
+    font-weight: 600;
 
 }
 

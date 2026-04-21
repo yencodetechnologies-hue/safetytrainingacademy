@@ -8,11 +8,13 @@ const {
  toggleSession,
  deleteSession,
  addSession,
- editSession
+ editSession,
+    getUpcomingSessions
 } = require("../controllers/scheduleController")
 
 
 router.post("/",createSchedule)
+router.get("/upcoming",getUpcomingSessions)
 router.post("/session",addSession)
 router.get("/course/:courseId",getCourseSchedules)
 router.patch("/session/:id",toggleSession)

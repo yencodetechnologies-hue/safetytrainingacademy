@@ -15,11 +15,10 @@ import ContactEnrollment from "../components/landingPage/ContactEnrollment";
 import Footer from "../components/landingPage/Footer";
 import Carousel from "../components/CarouselMain";
 import ViewAllCoursesMobile from "../components/mobile/components/ViewAllCoursesMobile";
-
-// Mobile component
+import CTABanner from "../components/CTABanner";
 import MobileLandingPage from "../components/mobile/components/MobileLandingPage";
-
 import "../styles/LandingPage.css";
+import SessionsBar from "../components/landingPage/SessionsBar";
 
 // ── Custom hook: returns true when viewport is ≤ 768 px ──────────────────────
 function useIsMobile(breakpoint = 768) {
@@ -80,7 +79,9 @@ function LandingPage() {
           <TrustBar />
         </div>
       </div>
-
+      <div className="sessions-bar" > 
+        <SessionsBar />
+        </div>
       <div>
         <Carousel courses={courses} />
       </div>
@@ -91,7 +92,8 @@ function LandingPage() {
 
       <AboutSection />
       <ClientsSection />
-      <ContactEnrollment />
+      <CTABanner />
+      {/* <ContactEnrollment /> */}
       <Footer />
     </div>
   );

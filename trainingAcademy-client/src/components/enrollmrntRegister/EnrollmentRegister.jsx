@@ -439,8 +439,6 @@ const saveSection3File = async () => {
                     prev={() => setSection(2)}
                     next={async () => {
                         console.log("Section 3 Next clicked")
-    console.log("qualificationFile:", formData.qualificationFile)
-    console.log("hasQualifications:", formData.hasQualifications)
                         await saveSectionToBackend(3)
                         await saveSection3File() // ✅
                         setSection(4)

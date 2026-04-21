@@ -14,6 +14,75 @@ const createSchedule = async (req,res) => {
  }
 }
 
+const getUpcomingSessions = async (req, res) => {
+    try {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+ 
+        const limit = parseInt(req.query.limit) || 10
+ 
+        // Fetch schedules from today onwards, populate course
+        const schedules = await Schedule.find({ date: { $gte: today } })
+            .populate("course", "title sellingPrice location duration slug _id")
+            .sort({ date: 1 })
+            .lean()
+ 
+        const upcoming = []
+ 
+        schedules.forEach(schedule => {
+            if (!schedule.course) return
+ 
+            const dateObj  = new Date(schedule.date)
+            const isSunday = dateObj.getDay() === 0
+ 
+            // Format date parts
+            const day = dateObj.getDate().toString()
+            const mon = dateObj.toLocaleString("en-AU", { month: "short" })
+ 
+            // Each schedule can have multiple sessions (General/Theory/Practical/Exam)
+            // Show one chip per schedule date (using first Active session)
+            const activeSession = schedule.sessions?.find(s => s.status === "Active")
+            if (!activeSession) return
+ 
+            // Spots type logic
+            const slots = activeSession.availableSlots
+            let spotsType = "ok"
+            if (slots === 0)      spotsType = "full"
+            else if (slots <= 3)  spotsType = "low"
+ 
+            upcoming.push({
+                scheduleId:    schedule._id,
+                sessionId:     activeSession._id,
+                date:          schedule.date,
+                day,
+                mon,
+                isSunday,
+                startTime:     activeSession.startTime  || "8:30am",
+                endTime:       activeSession.endTime    || "4:30pm",
+                location:      activeSession.location   || schedule.course.location || "Sefton",
+                availableSlots: slots,
+                spotsLabel:    slots === 0 ? "Full" : `${slots} spots`,
+                spotsType,
+                sessionType:   activeSession.sessionType,
+                course: {
+                    id:       schedule.course._id,
+                    title:    schedule.course.title,
+                    price:    schedule.course.sellingPrice,
+                    location: schedule.course.location || "Sefton",
+                    duration: schedule.course.duration,
+                    slug:     schedule.course.slug,
+                },
+            })
+        })
+ 
+        res.json(upcoming.slice(0, limit))
+ 
+    } catch (err) {
+        console.error("getUpcomingSessions error:", err)
+        res.status(500).json({ message: "Server error", error: err.message })
+    }
+}
+
 const editSession = async (req, res) => {
   try {
     const { startTime, endTime, maxCapacity } = req.body
@@ -188,7 +257,8 @@ module.exports = {
  addSession,
  toggleSession,
  deleteSession,
- editSession
+ editSession,
+  getUpcomingSessions
 }
 
 
