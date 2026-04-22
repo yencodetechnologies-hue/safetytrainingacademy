@@ -13,7 +13,7 @@ const paymentRouter = require("./routes/paymentRouter");
 const enrollmentLinksRouter = require("./routes/enrollmentLinks");
 const galleryRouter = require("./routes/gallery")
 dotenv.config();
-connectDB();
+connectDB(); 
 
 const app = express();
 const allowedOrigins = ["http://localhost:5173",
