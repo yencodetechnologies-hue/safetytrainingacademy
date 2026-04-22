@@ -172,7 +172,7 @@ export default function ViewAllCoursesMobile({ courses = [] }) {
                   <div className="vac-course-actions">
                     <button
                       className="vac-btn-book"
-                      onClick={() => navigate(`/course/${c.slug}-${c._id}`)}
+                      onClick={() => navigate(`/book-now?courseId=${c._id}`)}
                     >
                       Book Now
                     </button>
@@ -192,7 +192,7 @@ export default function ViewAllCoursesMobile({ courses = [] }) {
 
       {/* ── Sticky Bottom Bar ── */}
       <div className="vac-sticky">
-        <button href="tel:1300976097" className="vac-sticky-call">Enroll Now</button>
+        <button href="tel:1300976097" className="vac-sticky-call" onClick={()=>{navigate(`/book-now`)}}>Enroll Now</button>
         <a href="https://wa.me/611300976097" className="vac-sticky-wa"><span><i class="fa-brands fa-whatsapp"></i></span></a>
       </div>
 

@@ -44,6 +44,7 @@ import StudentSchedule from "./components/student/StudentSchedule"
 import ProtectedRoute from "./components/ProtectedRoute"
 import EnrollmentSuccess from "./components/student/StudentEnrollmentSuccess"
 import StudentProfile from "./components/Profile"
+import ScrollToTop from "./components/ScrollToTop"
 
 
 function App() {
@@ -53,6 +54,7 @@ function App() {
     return (
 
         <BrowserRouter>
+            <ScrollToTop />
 
             <Routes>
 

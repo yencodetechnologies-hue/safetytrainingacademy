@@ -16,7 +16,7 @@ const TRUST_PILLS = [
 
 const REVIEWS = [
   { name: "Valerii R. · White Card", quote: "Very good place. Trainer was excellent, passed first go." },
-  { name: "Jesus C. · Forklift",     quote: "They provide excellent information and great trainers. Highly recommend." },
+  { name: "Jesus C. · Forklift", quote: "They provide excellent information and great trainers. Highly recommend." },
 ];
 
 function formatDate(dateStr) {
@@ -31,30 +31,32 @@ function isLow(slots) { return slots <= 3; }
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function MobileLandingPage({ courses = [] }) {
-  const [slide, setSlide]           = useState(0);
+  const [slide, setSlide] = useState(0);
   const [sessionMap, setSessionMap] = useState({});
   const [loadingSessions, setLoadingSessions] = useState(true);
-  const [showAll, setShowAll]       = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const [showEnquire, setShowEnquire] = useState(false);
   const timerRef = useRef(null);
   const navigate = useNavigate();
+
+
 
   // ── Active courses only ───────────────────────────────────────────────────
   const activeCourses = courses.filter((c) => c.status === "Active" && c.image);
 
   // ── Hero slides ───────────────────────────────────────────────────────────
   const heroSlides = activeCourses.slice(0, 5).map((c) => ({
-    id:         c._id,           // ✅ NEW: needed to look up sessionMap
-    title:      c.title,
-    price:      c.sellingPrice ? `$${c.sellingPrice}` : "Enquire",
-    orig:       c.originalPrice && c.originalPrice > c.sellingPrice
-                  ? `$${c.originalPrice}` : "",
+    id: c._id,           // ✅ NEW: needed to look up sessionMap
+    title: c.title,
+    price: c.sellingPrice ? `$${c.sellingPrice}` : "Enquire",
+    orig: c.originalPrice && c.originalPrice > c.sellingPrice
+      ? `$${c.originalPrice}` : "",
     courseCode: c.courseCode || "",
-    image:      c.image,
-    slug:       c.slug,
-    duration:   c.duration || "",
+    image: c.image,
+    slug: c.slug,
+    duration: c.duration || "",
     sellingPrice: c.sellingPrice,
-    location:   c.location || "Sefton",
+    location: c.location || "Sefton",
   }));
 
   // ── Filter: only courses with sessions after fetch; all slides while loading ──
@@ -100,11 +102,13 @@ export default function MobileLandingPage({ courses = [] }) {
               .filter((sess) => sess.status === "Active")
               .forEach((sess) => {
                 rows.push({
-                  id:             sess._id,
-                  date:           sched.date,
-                  location:       sess.location || courseInfo.location || "Sefton",
-                  duration:       courseInfo.duration,
-                  sellingPrice:   courseInfo.sellingPrice,
+                  id: sess._id,
+                  scheduleId: sched._id,      // ← ADD
+                  courseId: id,
+                  date: sched.date,
+                  location: sess.location || courseInfo.location || "Sefton",
+                  duration: courseInfo.duration,
+                  sellingPrice: courseInfo.sellingPrice,
                   availableSlots: sess.availableSlots,
                 });
               });
@@ -128,21 +132,21 @@ export default function MobileLandingPage({ courses = [] }) {
   }, [courses]);
 
   // ── Sessions for current hero slide ──────────────────────────────────────
-  const currentSlide      = filteredHeroSlides[slide] ?? filteredHeroSlides[0];
-  const currentCourseId   = currentSlide?.id;
+  const currentSlide = filteredHeroSlides[slide] ?? filteredHeroSlides[0];
+  const currentCourseId = currentSlide?.id;
   const currentCourseName = currentSlide?.title || "";
-  const allSessions       = sessionMap[currentCourseId] || [];
-  const SHOW_LIMIT        = 3;
-  const visibleSessions   = showAll ? allSessions : allSessions.slice(0, SHOW_LIMIT);
-  const hasMore           = allSessions.length > SHOW_LIMIT;
+  const allSessions = sessionMap[currentCourseId] || [];
+  const SHOW_LIMIT = 3;
+  const visibleSessions = showAll ? allSessions : allSessions.slice(0, SHOW_LIMIT);
+  const hasMore = allSessions.length > SHOW_LIMIT;
 
   // ── Category cards ────────────────────────────────────────────────────────
   const categoryCards = [
     ...new Map(activeCourses.map((c) => [c.category, c])).values(),
   ].map((c) => ({
     category: c.category,
-    image:    c.image,
-    count:    activeCourses.filter((ac) => ac.category === c.category).length,
+    image: c.image,
+    count: activeCourses.filter((ac) => ac.category === c.category).length,
   }));
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -237,14 +241,14 @@ export default function MobileLandingPage({ courses = [] }) {
                     s.sellingPrice ? `$${s.sellingPrice}` : null,
                   ].filter(Boolean);
                   return (
-                    <div key={s.id} className="mlp-date-row">
+                    <div key={s.id} className="mlp-date-row" onClick={() => navigate(`/book-now?courseId=${s.courseId}&scheduleId=${s.scheduleId}&sessionId=${s.id}`)} >
                       <div className={`mlp-date-dot ${low ? "amber" : ""}`} />
                       <div className="mlp-date-info">
                         <div className="mlp-date-course">{currentCourseName}</div>
                         <div className="mlp-date-when">{whenParts.join(" · ")}</div>
                       </div>
                       <div className="mlp-date-actions">
-                        <button className="mlp-date-spots " onClick={() =>{navigate("/book-now")}}>
+                        <button className="mlp-date-spots " onClick={() => { navigate("/book-now") }}>
                           Book now
                         </button>
                         <div className={`mlp-date-spots ${low ? "low" : ""}`}>
@@ -392,14 +396,14 @@ export default function MobileLandingPage({ courses = [] }) {
             {[...Array(2)].map((_, dupIdx) => (
               <div key={dupIdx} className="mlp-brands-row">
                 {[
-                  { name: "Accenture",    bg: "#A100FF", color: "#fff",    text: "Accenture" },
-                  { name: "Deloitte",     bg: "#86BC25", color: "#fff",    text: "Deloitte." },
-                  { name: "EY",           bg: "#FFE600", color: "#2E2E38", text: "EY" },
-                  { name: "Google Cloud", bg: "#4285F4", color: "#fff",    text: "Google Cloud" },
-                  { name: "Klaviyo",      bg: "#222",    color: "#fff",    text: "Klaviyo" },
-                  { name: "Oracle",       bg: "#F80000", color: "#fff",    text: "ORACLE" },
-                  { name: "Atlassian",    bg: "#0052CC", color: "#fff",    text: "Atlassian" },
-                  { name: "AWS",          bg: "#FF9900", color: "#fff",    text: "AWS" },
+                  { name: "Accenture", bg: "#A100FF", color: "#fff", text: "Accenture" },
+                  { name: "Deloitte", bg: "#86BC25", color: "#fff", text: "Deloitte." },
+                  { name: "EY", bg: "#FFE600", color: "#2E2E38", text: "EY" },
+                  { name: "Google Cloud", bg: "#4285F4", color: "#fff", text: "Google Cloud" },
+                  { name: "Klaviyo", bg: "#222", color: "#fff", text: "Klaviyo" },
+                  { name: "Oracle", bg: "#F80000", color: "#fff", text: "ORACLE" },
+                  { name: "Atlassian", bg: "#0052CC", color: "#fff", text: "Atlassian" },
+                  { name: "AWS", bg: "#FF9900", color: "#fff", text: "AWS" },
                 ].map((brand, i) => (
                   <div key={i} className="mlp-brand-logo" style={{ background: brand.bg }}>
                     <span style={{ color: brand.color, fontWeight: 700, fontSize: 12, letterSpacing: "0.02em" }}>
@@ -431,11 +435,11 @@ export default function MobileLandingPage({ courses = [] }) {
             </div>
             <div className="mlp-modal-body">
               <div className="mlp-form-row">
-                <input className="mlp-input" type="text"  placeholder="Name *" />
-                <input className="mlp-input" type="tel"   placeholder="Phone *" />
+                <input className="mlp-input" type="text" placeholder="Name *" />
+                <input className="mlp-input" type="tel" placeholder="Phone *" />
               </div>
               <input className="mlp-input mlp-input-full" type="email" placeholder="Email *" />
-              <input className="mlp-input mlp-input-full" type="text"  placeholder="Subject" />
+              <input className="mlp-input mlp-input-full" type="text" placeholder="Subject" />
               <textarea className="mlp-textarea" placeholder="Message" rows={4} />
               <button
                 className="mlp-modal-send"
@@ -447,7 +451,7 @@ export default function MobileLandingPage({ courses = [] }) {
               <p className="mlp-modal-enrol-text">Ready to enrol? Use the buttons below:</p>
               <div className="mlp-modal-enrol-btns">
                 <a href="/book-now" className="mlp-modal-enrol-btn">ENROL NOW</a>
-                <a href="/voc"      className="mlp-modal-voc-btn">VOC</a>
+                <a href="/voc" className="mlp-modal-voc-btn">VOC</a>
               </div>
             </div>
           </div>
@@ -457,9 +461,8 @@ export default function MobileLandingPage({ courses = [] }) {
       <Footer />
       {/* ── Sticky Bottom Bar ── */}
       <div className="mlp-sticky">
-        <button className="mlp-sticky-call">Enroll Now</button>
-        <a href="https://wa.me/611300976097" className="mlp-sticky-wa">💬</a>
-      </div>
+        <button className="mlp-sticky-call" onClick={() => { navigate(`/book-now`) }}>Enroll Now</button>
+        <a href="https://wa.me/611300976097" className="vac-sticky-wa"><span><i class="fa-brands fa-whatsapp"></i></span></a>      </div>
 
     </div>
   );

@@ -296,8 +296,8 @@ function BookNow() {
 
             {step !== 3 && (
                 <>
-                    <h1 className="title">Student Enrollment</h1>
-                    <p className="subtitle">Complete all steps to enroll in your course</p>
+                    <h1 className="title">Book Your Course !</h1>
+                    <p className="subtitle">Complete all steps to book your course</p>
                 </>
             )}
 

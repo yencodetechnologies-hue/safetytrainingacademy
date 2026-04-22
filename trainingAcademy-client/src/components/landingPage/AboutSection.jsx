@@ -74,6 +74,7 @@
 
 // export default AboutSection
 import "../../styles/AboutSection.css"
+import { useNavigate } from "react-router-dom"
 const stats = [
     { num: "1,000+", label: "5-star Google reviews" },
     { num: "15+", label: "courses offered" },
@@ -103,6 +104,7 @@ const features = [
 ]
 
 function AboutSection() {
+    const navigte = useNavigate()
     return (
         <section className="wcs-section">
             <div className="wcs-split">
@@ -145,7 +147,7 @@ function AboutSection() {
                             </li>
                         ))}
                     </ul>
-                    <button className="wcs-cta-btn">Book Your Course Now</button>
+                    <button className="wcs-cta-btn" onClick={()=> {navigte(`/book-now`)}}>Book Your Course Now</button>
                 </div>
 
             </div>

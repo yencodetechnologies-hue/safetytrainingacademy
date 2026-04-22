@@ -18,11 +18,12 @@ function CourseSelection({
     const [visibleDates, setVisibleDates] = useState(3)
     const [visibleSessions, setVisibleSessions] = useState({})
 
-    // ✅ type query param எடுக்கிறோம்
     const params = new URLSearchParams(window.location.search)
-    const bookingType = params.get("type")
+    const bookingType  = params.get("type")
+    const paramCourseId   = params.get("courseId")
+    const paramScheduleId = params.get("scheduleId")
+    const paramSessionId  = params.get("sessionId")
 
-    // ✅ price display function
     const getCoursePrice = (course) => {
         if (course.experienceBasedBooking) {
             if (bookingType === "with-experience") return course.withExperiencePrice
@@ -36,22 +37,34 @@ function CourseSelection({
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const res = await axios.get(`https://api.octosofttechnologies.in/api/courses`)
+                const res = await axios.get(`http://localhost:8000/api/courses`)
                 const fetchedCourses = res.data
                 setCourses(fetchedCourses)
 
-                const params = new URLSearchParams(window.location.search)
-                const courseId = params.get("courseId")
-
-                if (courseId) {
-                    const selected = fetchedCourses.find(c => c._id === courseId)
+                if (paramCourseId) {
+                    const selected = fetchedCourses.find(c => c._id === paramCourseId)
                     if (selected) {
                         setSelectedCourse(selected)
 
                         const slotRes = await axios.get(
-                            `https://api.octosofttechnologies.in/api/schedules/course/${courseId}`
+                            `http://localhost:8000/api/schedules/course/${paramCourseId}`
                         )
-                        setSlots(slotRes.data)
+                        const fetchedSlots = slotRes.data
+                        setSlots(fetchedSlots)
+
+                        // ── Auto-select session — exact match only ──
+                        if (paramSessionId) {
+                            let matched = null
+                            fetchedSlots.forEach(slot => {
+                                slot.sessions?.forEach(session => {
+                                    if (String(session._id) === String(paramSessionId)) {
+                                        matched = { ...session, date: slot.date }
+                                    }
+                                })
+                            })
+                            if (matched) setSelectedSession(matched)
+                            // match ஆகல்னா — user manually select பண்ணட்டும்
+                        }
                     }
                 }
 
@@ -73,10 +86,11 @@ function CourseSelection({
         const courseId = e.target.value
         const selected = courses.find(c => c._id === courseId)
         setSelectedCourse(selected)
+        setSelectedSession(null) // reset session on course change
 
         try {
             const res = await axios.get(
-                `https://api.octosofttechnologies.in/api/schedules/course/${courseId}`
+                `http://localhost:8000/api/schedules/course/${courseId}`
             )
             setSlots(res.data)
         } catch (err) {
@@ -87,21 +101,19 @@ function CourseSelection({
     useEffect(() => {
         if (selectedCourse?._id && slots.length === 0) {
             axios.get(
-                `https://api.octosofttechnologies.in/api/schedules/course/${selectedCourse._id}`
+                `http://localhost:8000/api/schedules/course/${selectedCourse._id}`
             )
                 .then(res => setSlots(res.data))
                 .catch(err => console.log(err))
         }
     }, [selectedCourse])
-    return (
 
+    return (
         <>
 
             {/* Enrollment Type */}
             {!hideEnrollmentType && (
                 <div className="form-group">
-
-
 
                     <label className="form-label">
                         Enrolment Type <span className="form-required">*</span>
@@ -133,20 +145,16 @@ function CourseSelection({
 
                     </div>
 
-                    {/* Hidden inputs for form compatibility */}
                     <input type="hidden" name="type" value={enrollmentType} />
 
-
-
-                </div>)}
+                </div>
+            )}
 
             {/* Course Select */}
             <div className="form-group">
 
                 <label>
-                    {enrollmentType === "individual"
-                        ? "Select Course"
-                        : "Add Courses"}
+                    {enrollmentType === "individual" ? "Select Course" : "Add Courses"}
                 </label>
 
                 <select
@@ -154,16 +162,12 @@ function CourseSelection({
                     onChange={handleCourseChange}
                     value={selectedCourse?._id || ""}
                 >
-
                     <option value="">Select Course</option>
-
                     {courses.map(course => (
                         <option key={course._id} value={course._id}>
-                            {/* ✅ getCoursePrice use பண்றோம் */}
                             {course.courseCode} - {course.title} - ${getCoursePrice(course)}
                         </option>
                     ))}
-
                 </select>
 
             </div>
@@ -197,22 +201,20 @@ function CourseSelection({
 
                                             <div
                                                 key={index}
-                                                className={`slot-card ${selectedSession?._id === session._id ? "active" : ""}`} onClick={() => {
+                                                className={`slot-card ${selectedSession?._id === session._id ? "active" : ""}`}
+                                                onClick={() => {
                                                     setSelectedSession({
                                                         ...session,
                                                         date: slot.date
-                                                    });
+                                                    })
                                                 }}
                                             >
-
                                                 <div className="slot-time">
                                                     🕒 {session.startTime} - {session.endTime}
                                                 </div>
-
                                                 <p className="spots">
-                                                    {session.maxCapacity} slots
+                                                    {session.availableSlots ?? session.maxCapacity} slots
                                                 </p>
-
                                             </div>
 
                                         ))
@@ -233,8 +235,8 @@ function CourseSelection({
                                     }}
                                 >
                                     {getVisibleSessions(date) >= slots[0].sessions.length
-                                        ? "Show Less "
-                                        : "Show More "}
+                                        ? "Show Less"
+                                        : "Show More"}
                                 </button>
                             )}
 
@@ -256,15 +258,13 @@ function CourseSelection({
                     }}
                 >
                     {visibleDates >= Object.keys(groupedSlots).length
-                        ? "Show Less "
-                        : "Show More "}
+                        ? "Show Less"
+                        : "Show More"}
                 </button>
             )}
 
         </>
-
     )
-
 }
 
 export default CourseSelection

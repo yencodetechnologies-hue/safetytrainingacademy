@@ -265,7 +265,7 @@ function CourseCard({ course }) {
                             )}
                         </div>
                     </div>
-
+                        <h3 className="course-card-course-code">{course.courseCode}</h3>
                     {/* Title */}
                     <h3
                         className="course-title"

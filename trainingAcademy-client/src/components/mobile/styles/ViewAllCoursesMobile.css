@@ -34,12 +34,12 @@
 }
 
 .vac-topbar-phone {
-  background: #29b6e8;
-  color: #0d2240;
+  background: var(--btn-bg);
+  color: var(--btn-color);
   font-size: 11px;
   font-weight: 700;
   padding: 5px 12px;
-  border-radius: 20px;
+  border-radius: 6px;
   white-space: nowrap;
   text-decoration: none;
 }
@@ -300,8 +300,8 @@
 
 .vac-sticky-call {
   flex: 1;
-  background: #29b6e8;
-  color: #0d2240;
+  background: var(--btn-bg);
+  color: var(--btn-color);
   border: none;
   border-radius: 10px;
   padding: 11px;
@@ -315,7 +315,7 @@
 }
 
 .vac-sticky-wa {
-  background: #25d366;
+  background: var(--btn-bg);
   color: #fff;
   border: none;
   border-radius: 10px;

@@ -58,12 +58,12 @@
 }
 
 .mlp-topbar-phone {
-  background: #29b6e8;
-  color: #0d2240;
+  background: var(--btn-bg);
+  color: var(--btn-color);
   font-size: 11px;
   font-weight: 700;
   padding: 5px 12px;
-  border-radius: 20px;
+  border-radius: 6px;
   white-space: nowrap;
   text-decoration: none;
 }
@@ -362,7 +362,7 @@
   font-weight: 600;
   color: #0d7aad;
   padding: 3px 9px;
-  border-radius: 20px;
+  border-radius: 6px;
   white-space: nowrap;
   margin-left: 8px;
   border: none;
@@ -710,8 +710,8 @@
 
 .mlp-sticky-call {
   flex: 1;
-  background: #15a0de;
-  color: #0d2240;
+  background: var(--btn-bg);
+  color: var(--btn-color);
   border: none;
   border-radius: 10px;
   padding: 12px;

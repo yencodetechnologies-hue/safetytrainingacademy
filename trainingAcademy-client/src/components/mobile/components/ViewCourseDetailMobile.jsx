@@ -135,6 +135,7 @@ export default function ViewCourseDetailMobile({ course }) {
             .forEach((s) => {
               rows.push({
                 id:             s._id,
+                scheduleId:     sched._id, 
                 date:           sched.date,
                 startTime:      s.startTime,
                 endTime:        s.endTime,
@@ -202,7 +203,7 @@ export default function ViewCourseDetailMobile({ course }) {
         </div>
         <div className="cdm-hero-price ">
           
-          <button className="cdm-hero-btn">Book VOC</button>
+          <button className="cdm-hero-btn" onClick={() => navigate(`/book-now?courseId=${course._id}`)}>Book Voc</button>
         </div>
       </div>
 
@@ -245,10 +246,7 @@ export default function ViewCourseDetailMobile({ course }) {
         </div>
         <button
           className="cdm-book-now-big"
-          onClick={() => {
-            const el = document.getElementById("cdm-dates");
-            if (el) el.scrollIntoView({ behavior: "smooth" });
-          }}
+           onClick={() => navigate(`/book-now?courseId=${course._id}`)}
         >
           Book Now — Pick your date below
         </button>
@@ -269,12 +267,12 @@ export default function ViewCourseDetailMobile({ course }) {
           <>
             {/* Collapsed: first 3 as list */}
             {!showAll && (
-              <div className="cdm-dates-list">
+              <div className="cdm-dates-list" >
                 {sessions.slice(0, SHOW_DEFAULT).map((s) => {
                   const low    = isLow(s.availableSlots);
                   const sunday = isSunday(s.date);
                   return (
-                    <div key={s.id} className="cdm-date-slot">
+                    <div key={s.id} className="cdm-date-slot" onClick={() => navigate(`/book-now?courseId=${course._id}&scheduleId=${s.scheduleId}&sessionId=${s.id}`)}>
                       <div className={`cdm-date-cal ${sunday ? "sunday" : ""}`}>
                         <div className="cdm-date-cal-day">{formatDay(s.date)}</div>
                         <div className="cdm-date-cal-mon">{formatMon(s.date)}</div>
@@ -292,7 +290,8 @@ export default function ViewCourseDetailMobile({ course }) {
                       </div>
                       <button
                         className="cdm-book-slot-btn"
-                        onClick={() => navigate(`/enroll?course=${course._id}&session=${s.id}`)}
+                       onClick={() => navigate(`/book-now?courseId=${course._id}&scheduleId=${s.scheduleId}&sessionId=${s.id}`)}
+
                       >
                         Book
                       </button>
@@ -311,7 +310,7 @@ export default function ViewCourseDetailMobile({ course }) {
                       const low    = isLow(s.availableSlots);
                       const sunday = isSunday(s.date);
                       return (
-                        <div key={s.id} className="cdm-date-slot">
+                        <div key={s.id} className="cdm-date-slot"  onClick={() => navigate(`/book-now?courseId=${course._id}&scheduleId=${s.scheduleId}&sessionId=${s.id}`)} >
                           <div className={`cdm-date-cal ${sunday ? "sunday" : ""}`}>
                             <div className="cdm-date-cal-day">{formatDay(s.date)}</div>
                             <div className="cdm-date-cal-mon">{formatMon(s.date)}</div>
@@ -329,7 +328,8 @@ export default function ViewCourseDetailMobile({ course }) {
                           </div>
                           <button
                             className="cdm-book-slot-btn"
-                            onClick={() => navigate(`/enroll?course=${course._id}&session=${s.id}`)}
+                            onClick={() => navigate(`/book-now?courseId=${course._id}&scheduleId=${s.scheduleId}&sessionId=${s.id}`)}
+
                           >
                             Book
                           </button>
@@ -402,14 +402,11 @@ export default function ViewCourseDetailMobile({ course }) {
       <div className="cdm-sticky">
         <button
           className="cdm-sticky-book"
-          onClick={() => {
-            const el = document.getElementById("cdm-dates");
-            if (el) el.scrollIntoView({ behavior: "smooth" });
-          }}
+          onClick={() => navigate(`/book-now?courseId=${course._id}`)}
         >
           Book Now — {price}
         </button>
-        <a href="tel:1300976097" className="cdm-sticky-call">📞</a>
+           <a href="https://wa.me/611300976097" className="vac-sticky-wa"><span><i class="fa-brands fa-whatsapp"></i></span></a>
       </div>
 
     </div>

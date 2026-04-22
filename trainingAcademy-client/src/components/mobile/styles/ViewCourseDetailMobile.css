@@ -45,12 +45,12 @@
 }
 
 .cdm-topbar-phone {
-  background: #29b6e8;
-  color: #0d2240;
+  background: var(--btn-bg);
+  color: var(--btn-color);
   font-size: 11px;
   font-weight: 700;
   padding: 5px 10px;
-  border-radius: 20px;
+  border-radius: 6px;
   white-space: nowrap;
   text-decoration: none;
 }
@@ -104,10 +104,11 @@
 }
 .cdm-hero-btn {
  
-    padding: 7px;
-    border-radius: 10px;
-    background-color: #15a0de;
+    padding: 7px 12px;
+    border-radius: 7px;
+    background-color: var(--btn-bg);
     border: none;
+    color: var(--btn-color);
     font-weight: 600;
 
 }
@@ -282,8 +283,8 @@
 
 .cdm-book-now-big {
   display: block;
-  background: #29b6e8;
-  color: #0d2240;
+  background: var(--btn-bg);
+  color: var(--btn-color);
   border: none;
   border-radius: 10px;
   padding: 14px;
@@ -309,8 +310,14 @@
   padding: 10px 0;
   border-bottom: 1px solid #f0f8ff;
   gap: 10px;
+   cursor: pointer;
+    transition: background 0.15s;
 }
 
+
+.cdm-date-slot:hover {
+    background: #e0f2fe;
+}
 .cdm-date-slot:last-child {
   border-bottom: none;
 }
@@ -586,8 +593,8 @@
 
 .cdm-sticky-book {
   flex: 1;
-  background: #29b6e8;
-  color: #0d2240;
+  background: var(--btn-bg);
+  color: var(--btn-color);
   border: none;
   border-radius: 10px;
   padding: 12px;
