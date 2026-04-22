@@ -1,70 +1,55 @@
-.clients-section{
-padding:40px 0;
-background: #0d2240;
+.clients-section {
+    padding: 40px 0;
+    background: #0d2240;
+    overflow: hidden;
 }
-.clients-container{
+
+.clients-container {
     height: auto !important;
     background: transparent;
     display: block !important;
 }
 
-.clients-title{
-font-size:20px;
-color:#0ea5e9;
-margin-bottom:40px;
-font-weight:700;
-text-align: center;
-}
-.review-container{
-    display: block !important;
-}
-.clients-grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:30px;
-max-width: 75%;
-margin: auto;
+.clients-title {
+    font-size: 20px;
+    color: #0ea5e9;
+    margin-bottom: 40px;
+    font-weight: 700;
+    text-align: center;
 }
 
-.client-card{
-background:white;
-border-radius:20px;
-padding:40px;
-display:flex;
-align-items:center;
-justify-content:center;
-box-shadow:0 10px 20px rgba(0,0,0,0.1);
-transition:0.3s;
+/* ── Marquee wrap — overflow hidden cuts overflow ── */
+.mlp-brands-track-wrap {
+    overflow: hidden;
+    width: 100%;
 }
 
-.client-card:hover{
-transform:translateY(-6px);
-box-shadow:0 15px 30px rgba(0,0,0,0.15);
-cursor: pointer;
+.mlp-brands-track {
+    display: flex;
+    width: max-content;
+    animation: mlp-marquee 18s linear infinite;
 }
 
-.client-card img{
-max-width:120px;
-opacity:0.8;
-transition:0.3s;
-
+.mlp-brands-row {
+    display: flex;
+    gap: 10px;
+    padding-right: 10px;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
 }
 
-.client-card:hover img{
-opacity:1;
-}
-@media(max-width:1024px){
-
-.clients-grid{
-grid-template-columns:repeat(2,1fr);
-}
-
-}
-
-@media(max-width:600px){
-
-.clients-grid{
-grid-template-columns:1fr;
+.mlp-brand-logo {
+    height: 56px;
+    min-width: 110px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    flex-shrink: 0;
 }
 
+@keyframes mlp-marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }

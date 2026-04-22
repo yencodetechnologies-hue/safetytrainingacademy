@@ -117,6 +117,11 @@
 
 /* Category card */
 .hp-card {
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
   flex-shrink: 0;
   width: 220px;
   cursor: pointer;
@@ -142,7 +147,6 @@
 
 .hp-card-label {
   margin-top: 10px;
-  font-family: var(--font-head);
   font-size: 14px;
   font-weight: 700;
   color: var(--text);
