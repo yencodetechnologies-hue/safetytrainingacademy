@@ -299,7 +299,7 @@ function CourseCard({ course }) {
                                     key={i}
                                     className={`cc-card-opt-box ${opt.isVoc ? "cc-card-opt-box--voc" : "cc-card-opt-box--display"}`}
                                     onClick={opt.isVoc
-                                        ? () => navigate(`/book-now?courseId=${course._id}&type=voc`)
+                                        ? () => navigate(`/voc`) //`/book-now?courseId=${course._id}&type=voc`
                                         : undefined
                                     }
                                     title={opt.isVoc ? "Click to book VOC/RPL" : ""}

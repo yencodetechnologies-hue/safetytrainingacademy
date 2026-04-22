@@ -117,10 +117,10 @@
 .v1-cta-btn {
     display: block;
     width: 100%;
-    background: #67e8f9;
-    color: #0f172a;
+    background: var(--btn-bg);
+    color: var(--btn-color);
     border: none;
-    border-radius: 10px;
+    border-radius: var(--btn-radius);
     padding: 16px;
     font-size: 14px;
     font-weight: 700;

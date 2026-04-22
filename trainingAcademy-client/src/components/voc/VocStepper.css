@@ -29,8 +29,8 @@
 }
 
 .vs-active {
-    background: #22d3ee;
-    color: #fff;
+    background: var(--btn-bg);
+    color: var(--btn-color);
 }
 
 .vs-done {
@@ -52,7 +52,7 @@
 }
 
 .vs-label-active {
-    color: #22d3ee;
+    color: var(--btn-bg);
 }
 
 @media (max-width: 480px) {

@@ -197,7 +197,7 @@ height:150px;
 .wcs-fi-sub { font-size: 13px; color: #4a7096; margin-top: 2px; }
 
 .wcs-cta-btn {
-  background: #29b6e8; color: #0d2240; border: none;
+  background: var(--btn-bg); color: var(--btn-color); border: none;
   border-radius: 8px; padding: 12px 28px;
   font-size: 14px; font-weight: 700; cursor: pointer;
   font-family: 'Inter', sans-serif; transition: background 0.2s;

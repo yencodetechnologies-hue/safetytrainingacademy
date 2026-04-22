@@ -4,3 +4,8 @@
 display:none;
 }
 }
+:root{
+    --btn-bg:#02afef;
+    --btn-color:#fff;
+    --btn-radius:10px;
+}

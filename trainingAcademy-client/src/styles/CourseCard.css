@@ -76,7 +76,7 @@
   padding:11px 14px; border-radius:10px; font-size:12px; font-weight:700;
   cursor:pointer; transition:all 0.18s; border:none; font-family:'Inter',sans-serif;
 }
-.course-btn--primary { background:#0d2240; color:#fff; }
+.course-btn--primary { background:var(--btn-bg); color:var(--btn-color); }
 .course-btn--primary:hover { background:#29b6e8; color:#0d2240; }
 .course-btn--outline { background:transparent; color:#4a7096; border:1.5px solid #ddeef8; font-weight:600; }
 .course-btn--outline:hover { background:#f0f8ff; color:#0d2240; border-color:#29b6e8; }

@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 .cta-banner {
-  background: #29b6e8;
+  background: var(--btn-bg);
   padding: 48px 80px;
   display: flex;
   align-items: center;

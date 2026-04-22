@@ -24,7 +24,6 @@ function Voc() {
     return (
         <section className="voc-page">
             <TopNav />
-            <TrustBar />
             <PublicNavbar />
 
             <div className="voc-container">

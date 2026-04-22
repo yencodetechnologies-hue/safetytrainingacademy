@@ -75,8 +75,8 @@ display: flex;
     width: 275px;
     font-size: 15px;
     display: block;
-    background: #29b6e8;
-    color: #0d2240;
+    background: #02afef;
+    color: #fff;
     border: none;
     border-radius: 10px;
     padding: 11px;
@@ -102,7 +102,7 @@ display: flex;
 .cdp-save-badge { background: #dcfce7; color: #16a34a; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
 .cdp-price-note { font-size: 12px; color: #64748b; margin-bottom: 16px; line-height: 1.5; }
 .cdp-btn-book {
-  display: block; width: 100%; background: #29b6e8; color: #0d2240;
+  display: block; width: 100%; background: #02afef; color: #fff;
   border: none; border-radius: 10px; padding: 14px;
   font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 9px;
   font-family: 'Inter', sans-serif; transition: background 0.2s;
@@ -179,11 +179,11 @@ display: flex;
 .cdp-sb-price { font-size: 28px; font-weight: 700; color: #0d2240; }
 .cdp-sb-orig { font-size: 14px; color: #94a3b8; text-decoration: line-through; }
 .cdp-sb-note { font-size: 12px; color: #4a7096; margin-bottom: 14px; }
-.cdp-sb-btn-main { display: block; width: 100%; background: #29b6e8; color: #0d2240; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 700; text-align: center; cursor: pointer; margin-bottom: 8px; font-family: 'Inter', sans-serif; transition: background 0.2s; }
+.cdp-sb-btn-main { display: block; width: 100%; background: #02afef; color: #fff; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 700; text-align: center; cursor: pointer; margin-bottom: 8px; font-family: 'Inter', sans-serif; transition: background 0.2s; }
 .cdp-sb-btn-main:hover { background: #0ea5d4; }
 .cdp-sb-btn-voc { display: block; width: 100%; background: #f0f8ff; color: #0d2240; border: 1.5px solid #bae0f7; border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 600; text-align: center; cursor: pointer; margin-bottom: 8px; font-family: 'Inter', sans-serif; }
 .cdp-sb-btn-call { display: block; width: 100%; background: #0d2240; color: #fff; border: none; border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 600; text-align: center; cursor: pointer; font-family: 'Inter', sans-serif; }
-.cdp-sb-btn-cyan { display: block; width: 100%; background: #29b6e8; color: #0d2240; border: none; border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 700; text-align: center; cursor: pointer; margin-bottom: 8px; font-family: 'Inter', sans-serif; text-decoration: none; }
+.cdp-sb-btn-cyan { display: block; width: 100%; background: #02afef; color: #fff; border: none; border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 700; text-align: center; cursor: pointer; margin-bottom: 8px; font-family: 'Inter', sans-serif; text-decoration: none; }
 .cdp-sb-btn-ghost { display: block; width: 100%; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 600; text-align: center; cursor: pointer; font-family: 'Inter', sans-serif; text-decoration: none; }
 .cdp-sb-help-text { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.6; margin-bottom: 14px; }
 .cdp-sb-email { margin-top: 12px; font-size: 11px; color: rgba(255,255,255,0.4); text-align: center; }
@@ -210,7 +210,7 @@ display: flex;
 .cdp-sticky-facts { font-size: 12px; color: rgba(255,255,255,0.6); }
 .cdp-sticky-price { font-size: 20px; font-weight: 800; color: #29b6e8; }
 .cdp-sticky-btns { display: flex; gap: 10px; }
-.cdp-sticky-book { background: #29b6e8; color: #0d2240; border: none; border-radius: 8px; padding: 10px 22px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; }
+.cdp-sticky-book { background: #02afef; color: #fff; border: none; border-radius: 8px; padding: 10px 22px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; }
 .cdp-sticky-book:hover { background: #0ea5d4; }
 .cdp-sticky-call { background: #fff; color: #0d2240; border: none; border-radius: 8px; padding: 10px 16px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: flex; align-items: center; font-family: 'Inter', sans-serif; }
 

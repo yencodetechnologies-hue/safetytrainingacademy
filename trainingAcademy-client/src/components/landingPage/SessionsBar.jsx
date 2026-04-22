@@ -64,7 +64,7 @@ function SessionsBar() {
                         <div
                             key={s.sessionId || i}
                             className="sb-chip"
-                            onClick={() => navigate(`/course/${s.course.slug}-${s.course.id}`)}
+                            onClick={() =>  navigate(`/book-now?courseId=${s.course.id}&scheduleId=${s.scheduleId}&sessionId=${s.sessionId}&date=${s.date}&time=${s.startTime}`)}
                         >
                             <div className={`sb-date ${s.isSunday ? "sb-date--sunday" : ""}`}>
                                 <div className="sb-day">{s.day}</div>
@@ -79,7 +79,8 @@ function SessionsBar() {
                             </div>
 
                             <div className={`sb-spots sb-spots--${s.spotsType}`}>
-                                {s.spotsLabel}
+                                <button>Book</button>
+                                <p>{s.spotsLabel}</p>
                             </div>
                         </div>
                     )
