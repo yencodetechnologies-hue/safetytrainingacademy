@@ -1,0 +1,342 @@
+const axios = require('axios');
+const Payment = require('../models/Payment');
+
+const EWAY_BASE_URL =
+  process.env.EWAY_ENVIRONMENT === 'Production'
+    ? 'https://api.ewaypayments.com'
+    : 'https://api.sandbox.ewaypayments.com';
+
+function getEwayAuthHeader() {
+  const credentials = Buffer.from(
+    `${process.env.EWAY_API_KEY}:${process.env.EWAY_API_PASSWORD}`
+  ).toString('base64');
+  return `Basic ${credentials}`;
+}
+
+async function callEwayTransaction(requestData) {
+  const response = await axios.post(
+    `${EWAY_BASE_URL}/Transaction`,
+    requestData,
+    {
+      headers: {
+        Authorization: getEwayAuthHeader(),
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    }
+  );
+  return response.data;
+}
+
+function getFirstName(fullName) {
+  if (!fullName) return '';
+  const parts = fullName.trim().split(' ');
+  return parts[0];
+}
+
+function getLastName(fullName) {
+  if (!fullName) return '';
+  const parts = fullName.trim().split(' ');
+  return parts.length > 1 ? parts.slice(1).join(' ') : parts[0];
+}
+
+function randomInvoiceNumber() {
+  return String(Math.floor(Math.random() * 90000000) + 10000000);
+}
+
+// ============================================
+// 1. CREATE PAYMENT (Direct Card)
+exports.createPayment = async (req, res) => {
+  let payment;
+  try {
+    const {
+      amount, email, name, phone,
+      cardName, cardNumber, expiryMonth, expiryYear, cvv,
+      currency = 'AUD', userId, description,
+      courseName, // ADDED: for GTM tracking
+    } = req.body;
+
+    const numericAmount = parseFloat(amount); // CHANGE 2: store as number
+
+    payment = new Payment({
+      transactionId: `eway_${Date.now()}`,
+      userId: userId || phone,
+      amount: numericAmount,
+      currency,
+      paymentMethod: 'eway',
+      description: description || `Payment by ${name} - ${email}`,
+      status: 'pending',
+    });
+    await payment.save();
+
+    const invoiceNumber = randomInvoiceNumber();
+
+    const requestData = {
+      Customer: {
+        Reference: email,
+        Email: email,
+        FirstName: getFirstName(name),
+        LastName: getLastName(name),
+        Phone: phone,
+        CardDetails: {
+          Name: cardName,
+          Number: String(cardNumber).replace(/\s/g, ''),
+          ExpiryMonth: String(expiryMonth).padStart(2, '0'),
+          ExpiryYear: String(expiryYear).slice(-2),
+          CVN: cvv,
+        },
+      },
+      Payment: {
+        TotalAmount: Math.round(numericAmount * 100),
+        InvoiceNumber: invoiceNumber,
+        InvoiceDescription: `Payment by ${name}`,
+        InvoiceReference: `INV-${invoiceNumber}`,
+        CurrencyCode: currency,
+      },
+      TransactionType: 'Purchase',
+      Method: 'ProcessPayment',
+    };
+
+    console.log('eWAY Request:', JSON.stringify(requestData, null, 2));
+
+    const ewayResponse = await callEwayTransaction(requestData);
+
+    console.log('eWAY Response:', JSON.stringify(ewayResponse, null, 2));
+
+    if (ewayResponse.Errors) {
+      payment.status = 'failed';
+      await payment.save();
+      return res.status(400).json({
+        success: false,
+        message: ewayResponse.Errors,
+      });
+    }
+
+    const isApproved = ewayResponse.TransactionStatus === true;
+
+    payment.gatewayTransactionId = String(ewayResponse.TransactionID || '');
+    payment.status = isApproved ? 'completed' : 'failed';
+    payment.authorizationCode = ewayResponse.AuthorisationCode || '';
+    await payment.save();
+
+    // CHANGE 3: return order object for GTM tracking
+    return res.json({
+      success: isApproved,
+      transactionId: payment.transactionId,
+      gatewayTransactionId: String(ewayResponse.TransactionID || ''),
+      status: payment.status,
+      order: isApproved ? {
+        transactionId: payment.transactionId,
+        amount: numericAmount,
+        currency,
+        courseName: courseName || description || '',
+        email,
+        name,
+      } : null,
+      message: isApproved
+        ? 'Payment successful'
+        : `Payment declined: ${ewayResponse.ResponseCode} - ${ewayResponse.ResponseMessage}`,
+    });
+  } catch (error) {
+    const ewayError = error.response?.data;
+    console.error('eWAY Error:', ewayError || error.message);
+    if (payment) {
+      payment.status = 'failed';
+      await payment.save();
+    }
+    const msg = ewayError
+      ? (ewayError.Errors || JSON.stringify(ewayError))
+      : (error.message || 'Payment processing error');
+    return res.status(500).json({ success: false, message: msg });
+  }
+};
+
+// ============================================
+// 2. CREATE PAYMENT WITH TOKEN (Saved Card)
+// ============================================
+exports.createPaymentWithToken = async (req, res) => {
+  let payment;
+  try {
+    const { amount, currency = 'AUD', userId, description, paymentToken } = req.body;
+
+    payment = new Payment({
+      transactionId: `eway_${Date.now()}`,
+      userId,
+      amount,
+      currency,
+      paymentMethod: 'eway',
+      description,
+      status: 'pending',
+    });
+    await payment.save();
+
+    const requestData = {
+      Customer: { TokenCustomerID: paymentToken },
+      Payment: {
+        TotalAmount: Math.round(parseFloat(amount) * 100),
+        InvoiceDescription: description,
+        CurrencyCode: currency,
+      },
+      Method: 'TokenPayment',
+      TransactionType: 'Purchase',
+    };
+
+    const ewayResponse = await callEwayTransaction(requestData);
+
+    if (ewayResponse.Errors) {
+      payment.status = 'failed';
+      await payment.save();
+      return res.status(400).json({
+        success: false,
+        transactionId: payment.transactionId,
+        message: ewayResponse.Errors,
+      });
+    }
+
+    const isApproved = ewayResponse.TransactionStatus === true;
+
+    payment.gatewayTransactionId = String(ewayResponse.TransactionID || '');
+    payment.status = isApproved ? 'completed' : 'failed';
+    payment.authorizationCode = ewayResponse.AuthorisationCode || '';
+    await payment.save();
+
+    return res.json({
+      success: isApproved,
+      transactionId: payment.transactionId,
+      status: payment.status,
+      message: isApproved ? 'Payment successful' : 'Payment declined',
+    });
+  } catch (error) {
+    console.error('Token Payment Error:', error.response?.data || error.message);
+    if (payment) {
+      payment.status = 'failed';
+      await payment.save();
+    }
+    return res.status(500).json({
+      success: false,
+      message: error.response?.data?.Errors || error.message,
+    });
+  }
+};
+
+// ============================================
+// 3. CREATE PAYMENT TOKEN (Save Card)
+// ============================================
+exports.createPaymentToken = async (req, res) => {
+  try {
+    const { cardNumber, cardExpiryMonth, cardExpiryYear, cvv, cardHolderName } = req.body;
+
+    const requestData = {
+      Customer: {
+        CardDetails: {
+          Name: cardHolderName,
+          Number: String(cardNumber).replace(/\s/g, ''),
+          ExpiryMonth: String(cardExpiryMonth).padStart(2, '0'),
+          ExpiryYear: String(cardExpiryYear).slice(-2),
+          CVN: cvv,
+        },
+      },
+      Method: 'CreateTokenCustomer',
+      TransactionType: 'Purchase',
+    };
+
+    const ewayResponse = await callEwayTransaction(requestData);
+
+    if (ewayResponse.Errors) {
+      return res.status(400).json({ success: false, error: ewayResponse.Errors });
+    }
+
+    return res.json({
+      success: true,
+      paymentToken: ewayResponse.Customer?.TokenCustomerID,
+      cardType: ewayResponse.CardType || '',
+      maskedCardNumber: ewayResponse.Customer?.CardDetails?.Number || '',
+    });
+  } catch (error) {
+    console.error('Token Creation Error:', error.response?.data || error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.response?.data?.Errors || error.message,
+    });
+  }
+};
+
+// ============================================
+// 4. REFUND PAYMENT
+// ============================================
+exports.refundPayment = async (req, res) => {
+  try {
+    const { transactionId, refundAmount } = req.body;
+    const payment = await Payment.findOne({ transactionId });
+
+    if (!payment) return res.status(404).json({ error: 'Payment not found' });
+    if (payment.status !== 'completed') {
+      return res.status(400).json({ error: 'Cannot refund non-completed payment' });
+    }
+
+    const requestData = {
+      Refund: {
+        TotalAmount: Math.round((refundAmount || payment.amount) * 100),
+        TransactionID: payment.gatewayTransactionId,
+      },
+    };
+
+    const ewayResponse = await callEwayTransaction(requestData);
+
+    if (ewayResponse.Errors) {
+      return res.status(400).json({ success: false, error: ewayResponse.Errors });
+    }
+
+    const isApproved = ewayResponse.TransactionStatus === true;
+    if (isApproved) {
+      payment.status = 'refunded';
+      payment.updatedAt = new Date();
+      await payment.save();
+
+      return res.json({
+        success: true,
+        transactionId: payment.transactionId,
+        refundTransactionId: String(ewayResponse.TransactionID || ''),
+        refundAmount: refundAmount || payment.amount,
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: ewayResponse.ResponseMessage,
+      });
+    }
+  } catch (error) {
+    console.error('Refund Error:', error.response?.data || error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.response?.data?.Errors || error.message,
+    });
+  }
+};
+
+// ============================================
+// 5. GET PAYMENT DETAILS
+// ============================================
+exports.getPaymentDetails = async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+    const payment = await Payment.findOne({ transactionId });
+    if (!payment) return res.status(404).json({ error: 'Payment not found' });
+    res.json(payment);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// ============================================
+// 6. GET PAYMENT HISTORY
+// ============================================
+exports.getPaymentHistory = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const payments = await Payment.find({ userId }).sort({ createdAt: -1 });
+    res.json(payments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

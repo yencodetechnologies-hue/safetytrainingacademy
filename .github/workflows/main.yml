@@ -1,0 +1,24 @@
+name: Safety Backend Deploy
+
+on:
+  push:
+    branches:
+      - main   # change if using another branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Safety Server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: 72.61.236.154
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/safety/safetytrainingacademy/trainingAcademy-backend
+            git pull origin main
+            npm install
+            pm2 restart safetytraining
