@@ -68,12 +68,12 @@
 }
 .hp-see-all:hover { color: var(--brand-dark); }
 
-/* Carousel wrapper */
-.hp-carousel-wrap {
+/* Carousel container */
+.hp-carousel-container {
+  overflow: hidden;
+  width: 100%;
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  padding: 10px 0;
 }
 
 /* Arrows */
@@ -105,15 +105,21 @@
 .hp-track {
   display: flex;
   gap: 20px;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  padding: 8px 4px 16px;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  flex: 1;
-  justify-content: flex-start;
+  width: max-content;
 }
-.hp-track::-webkit-scrollbar { display: none; }
+
+.marquee-scroll {
+  animation: marquee 40s linear infinite;
+}
+
+.hp-carousel-container:hover .marquee-scroll {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.33%); } /* Since we duplicated 3 times */
+}
 
 /* Category card */
 .hp-card {
