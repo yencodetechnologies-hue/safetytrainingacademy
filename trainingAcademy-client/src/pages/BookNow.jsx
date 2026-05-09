@@ -1096,10 +1096,10 @@ function BookNow() {
                         <button
                             className="next-btn"
                             disabled={
-                                (step === 1 && !isCompany && !isCompanyEnroll && !selectedSession) ||
-                                (step === 1 && isCompanyEnroll && !selectedSession) ||
+                                (step === 1 && !isCompany && !isCompanyEnroll && !selectedSession?._id) ||
+                                (step === 1 && isCompanyEnroll && !selectedSession?._id) ||
                                 (step === 1 && isCompany && !isCompanyEnroll && selectedCourses.length === 0) ||
-                                (step === 1 && isCompany && !isCompanyEnroll && selectedCourses.some(sc => !sc.session)) ||
+                                (step === 1 && isCompany && !isCompanyEnroll && selectedCourses.some(sc => !sc.session?._id)) ||
                                 (step === 2 && isEmailTaken)
                             }
                             onClick={handleNext}

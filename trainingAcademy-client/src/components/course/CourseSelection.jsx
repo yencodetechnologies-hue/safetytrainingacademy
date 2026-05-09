@@ -180,6 +180,13 @@ function CalendarDatePicker({ groupedSlots, selectedSession, onSelectSession }) 
         document.addEventListener("mousedown", handler)
         return () => document.removeEventListener("mousedown", handler)
     }, [])
+    
+    // Sync local selectedDate with the session date passed from parent
+    useEffect(() => {
+        if (selectedSession?.date) {
+            setSelectedDate(selectedSession.date)
+        }
+    }, [selectedSession?.date])
 
     // ✅ Reset when groupedSlots changes (different course selected)
     useEffect(() => {
@@ -419,7 +426,10 @@ function CourseSelection({
                                     }
                                 })
                             })
-                            if (matched) setSelectedSession(matched)
+                            if (matched) {
+                                // Pre-select the date only; the user must pick a timing
+                                setSelectedSession({ date: matched.date })
+                            }
                         }
                     }
                 }

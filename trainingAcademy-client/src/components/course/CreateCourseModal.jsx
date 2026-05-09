@@ -322,7 +322,7 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
                                         </label>
                                         <label className={`pricing-type-option ${pricingType === "slbl" ? "active" : ""}`}>
                                             <input type="radio" value="slbl" checked={pricingType === "slbl"} onChange={() => setPricingType("slbl")} />
-                                            SL / BL
+                                            SL or BL
                                         </label>
                                     </div>
 

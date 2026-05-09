@@ -18,7 +18,7 @@
 
 /* ── Announcement Bar ── */
 .announcement-bar {
-  height: 36px;
+  height: 28px;
   align-items: center;
   width: 100%;
   background: #15a0de;
@@ -37,19 +37,14 @@
 }
 
 @keyframes scrollText {
-  0% {
-    transform: translateX(100%);
-  }
-
-  100% {
-    transform: translateX(-100%);
-  }
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
 }
 
 /* ── Top Bar ── */
 .mlp-topbar {
   background: #0d2240;
-  padding: 10px 16px;
+  padding: 6px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -82,7 +77,7 @@
 /* ── Hero Carousel ── */
 .mlp-carousel {
   position: relative;
-  height: 340px;
+  height: 180px;
   overflow: hidden;
   background: #0d2240;
 }
@@ -126,7 +121,7 @@
 .mlp-slide-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(13, 34, 64, 0.92) 0%, rgba(13, 34, 64, 0.2) 60%);
+  background: linear-gradient(to top, rgba(13,34,64,0.92) 0%, rgba(13,34,64,0.2) 60%);
 }
 
 .mlp-slide-content {
@@ -162,38 +157,15 @@
 
 .mlp-slide-price {
   color: #29b6e8;
-  font-size: 18px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .mlp-slide-orig {
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255,255,255,0.45);
   font-size: 12px;
   text-decoration: line-through;
   margin-left: 5px;
-}
-
-.mlp-slide-facts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  margin-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 10px;
-}
-
-.mlp-sf-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 500;
-}
-
-.mlp-sf-item span {
-  font-size: 12px;
-  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
 }
 
 .mlp-cbtn {
@@ -201,8 +173,8 @@
   top: 45%;
   transform: translateY(-50%);
   z-index: 3;
-  background: rgba(41, 182, 232, 0.2);
-  border: 1px solid rgba(41, 182, 232, 0.4);
+  background: rgba(41,182,232,0.2);
+  border: 1px solid rgba(41,182,232,0.4);
   color: #fff;
   width: 30px;
   height: 30px;
@@ -215,13 +187,8 @@
   padding: 0;
 }
 
-.mlp-prev {
-  left: 10px;
-}
-
-.mlp-next {
-  right: 10px;
-}
+.mlp-prev { left: 10px; }
+.mlp-next { right: 10px; }
 
 .mlp-dots {
   position: absolute;
@@ -237,7 +204,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255,255,255,0.35);
   cursor: pointer;
   transition: all 0.3s;
 }
@@ -270,16 +237,15 @@
 /* ── Trust Strip ── */
 .mlp-trust-strip {
   background: #0d2240;
-  padding: 9px 16px;
+  padding: 6px 16px;
   display: flex;
   gap: 7px;
   overflow-x: auto;
-  border-top: 1px solid rgba(41, 182, 232, 0.2);
+  border-top: 1px solid rgba(41,182,232,0.2);
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-
-.mlp-trust-strip>div {
+.mlp-trust-strip>div{
   margin: auto;
 }
 
@@ -288,8 +254,8 @@
 }
 
 .mlp-trust-pill {
-  background: rgba(41, 182, 232, 0.15);
-  border: 1px solid rgba(41, 182, 232, 0.3);
+  background: rgba(41,182,232,0.15);
+  border: 1px solid rgba(41,182,232,0.3);
   border-radius: 20px;
   padding: 4px 10px;
   color: #29b6e8;
@@ -303,7 +269,7 @@
 .mlp-cta-strip {
   display: flex;
   gap: 8px;
-  padding: 12px 16px;
+  padding: 8px 16px;
   background: #fff;
   border-bottom: 1px solid #dbeafe;
 }
@@ -347,7 +313,7 @@
 
 /* ── Section ── */
 .mlp-section {
-  padding: 16px;
+  padding: 12px 16px;
 }
 
 .mlp-section-label {
@@ -378,11 +344,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-.mlp-sessions-section {
+.mlp-sessions-section{
   min-height: 351px;
 }
-
 /* ── Dates Card ── */
 .mlp-dates-card {
   background: #f0f8ff;
@@ -400,7 +364,7 @@
 .mlp-date-row {
   display: flex;
   align-items: center;
-  padding: 11px 14px;
+  padding: 8px 14px;
   border-bottom: 1px solid #bae0f7;
 }
 
@@ -474,8 +438,7 @@
   margin-left: 8px;
   border: none;
 }
-
-.mlp-date-actions>button {
+.mlp-date-actions > button{
   background-color: #15a0de;
   color: #fff;
   padding: 5px 9px;
@@ -563,13 +526,8 @@
 }
 
 @keyframes mlp-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 /* ── Session swipe — grouped pages of 7 ── */
@@ -731,7 +689,6 @@
   font-weight: 700;
   color: #0d2240;
 }
-
 .mlp-date-actions {
   display: flex;
   flex-direction: column;
@@ -739,7 +696,6 @@
   text-align: center;
   border: none;
 }
-
 .mlp-stars {
   color: #f59e0b;
   font-size: 15px;
@@ -948,13 +904,8 @@
 
 
 @keyframes mlp-marquee {
-  0% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(-50%);
-  }
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 /* ── Enquire Now Button ── */
@@ -972,16 +923,13 @@
   cursor: pointer;
   letter-spacing: 0.03em;
 }
-
-.mlp-enquire-btn:active {
-  background: #1a4a7a;
-}
+.mlp-enquire-btn:active { background: #1a4a7a; }
 
 /* ── Modal Backdrop ── */
 .mlp-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(13, 34, 64, 0.6);
+  background: rgba(13,34,64,0.6);
   z-index: 200;
   display: flex;
   align-items: flex-end;
@@ -1000,13 +948,8 @@
 }
 
 @keyframes mlp-slide-up {
-  from {
-    transform: translateY(100%);
-  }
-
-  to {
-    transform: translateY(0);
-  }
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
 }
 
 .mlp-modal-header {
@@ -1064,18 +1007,9 @@
   color: #0d2240;
   outline: none;
 }
-
-.mlp-input:focus {
-  border-color: #29b6e8;
-}
-
-.mlp-input::placeholder {
-  color: #94a3b8;
-}
-
-.mlp-input-full {
-  width: 100%;
-}
+.mlp-input:focus { border-color: #29b6e8; }
+.mlp-input::placeholder { color: #94a3b8; }
+.mlp-input-full { width: 100%; }
 
 .mlp-textarea {
   width: 100%;
@@ -1089,14 +1023,8 @@
   resize: none;
   font-family: inherit;
 }
-
-.mlp-textarea:focus {
-  border-color: #29b6e8;
-}
-
-.mlp-textarea::placeholder {
-  color: #94a3b8;
-}
+.mlp-textarea:focus { border-color: #29b6e8; }
+.mlp-textarea::placeholder { color: #94a3b8; }
 
 .mlp-modal-send {
   background: #0d2240;
@@ -1109,10 +1037,7 @@
   cursor: pointer;
   width: 100%;
 }
-
-.mlp-modal-send:active {
-  background: #1a4a7a;
-}
+.mlp-modal-send:active { background: #1a4a7a; }
 
 .mlp-modal-divider {
   height: 1px;
