@@ -213,7 +213,7 @@ export default function ViewCourseDetailMobile({ course }) {
         <a href="tel:1300976097" className="cdm-topbar-phone">☎ Call</a>
       </div>
 
-      <PublicNavbar courses={[]} />
+      {/* Navbar removed to save vertical space for "Visible without scrolling" layout */}
 
       {/* ── Hero Image — real <img> so the browser can preload + apply
            fetchpriority="high" (CSS background-images can't). */}
@@ -246,18 +246,33 @@ export default function ViewCourseDetailMobile({ course }) {
       <div className="cdm-quick-facts">
         <div className="cdm-fact">
           <div className="cdm-fact-icon">📅</div>
-          <div className="cdm-fact-val">{course.duration || "—"}</div>
+          <div className="cdm-fact-val">{course.duration || "1 Day"}</div>
           <div className="cdm-fact-label">Duration</div>
         </div>
         <div className="cdm-fact">
+          <div className="cdm-fact-icon">⏰</div>
+          <div className="cdm-fact-val">8:30am – 4:30pm</div>
+          <div className="cdm-fact-label">Class hours</div>
+        </div>
+        <div className="cdm-fact">
           <div className="cdm-fact-icon">📍</div>
-          <div className="cdm-fact-val">{course.location || "Sefton"}</div>
+          <div className="cdm-fact-val">{course.location || "Safton"}</div>
           <div className="cdm-fact-label">Location</div>
         </div>
         <div className="cdm-fact">
           <div className="cdm-fact-icon">🎓</div>
           <div className="cdm-fact-val">RTO #45234</div>
           <div className="cdm-fact-label">Accredited</div>
+        </div>
+        <div className="cdm-fact">
+          <div className="cdm-fact-icon">📜</div>
+          <div className="cdm-fact-val">Same Day</div>
+          <div className="cdm-fact-label">Certificate</div>
+        </div>
+        <div className="cdm-fact">
+          <div className="cdm-fact-icon">🗺</div>
+          <div className="cdm-fact-val">All States</div>
+          <div className="cdm-fact-label">Recognition</div>
         </div>
       </div>
 
