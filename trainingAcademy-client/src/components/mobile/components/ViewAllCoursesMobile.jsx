@@ -44,8 +44,9 @@ export default function ViewAllCoursesMobile({ courses = [] }) {
 
   // initialise active filter from URL ?category=
   const urlCategory = searchParams.get("category") || "All";
+  const urlSearch = searchParams.get("search") || "";
   const [activeFilter, setActiveFilter] = useState(urlCategory);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(urlSearch);
   const [selectedCourse, setSelectedCourse] = useState(null);
 
   // ── Active courses only ───────────────────────────────────────────────────

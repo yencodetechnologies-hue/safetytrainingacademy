@@ -29,6 +29,7 @@ function AllCourses() {
   // URL-ல இருந்து category param எடு
   const params = new URLSearchParams(location.search);
   const selectedCategory = params.get("category");
+  const searchQuery = params.get("search") || "";
 
   useEffect(() => {
     fetch(`${API_URL}/api/courses`)
@@ -46,10 +47,14 @@ function AllCourses() {
 
   // ── Desktop view (original — untouched) ──────────────────────────────────
 
-  // Category filter
-  const filtered = selectedCategory
-    ? courses.filter(c => c.category === selectedCategory)
-    : courses;
+  // Category + Search filter
+  const filtered = courses.filter(c => {
+    const matchCat = !selectedCategory || c.category === selectedCategory;
+    const matchSearch = !searchQuery || 
+                        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        c.courseCode?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCat && matchSearch;
+  });
 
   return (
     <section>

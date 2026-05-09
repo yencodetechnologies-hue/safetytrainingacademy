@@ -132,7 +132,7 @@ function Hero() {
                   onChange={(e) => pubsetSearch(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && pubsearch.trim()) {
-                      navigate(`/courses?search=${pubsearch}`)
+                      navigate(`/all-courses?search=${pubsearch}`)
                     }
                   }}
                 />
@@ -140,7 +140,7 @@ function Hero() {
                   className="hero-search-btn"
                   onClick={() => {
                     if (pubsearch.trim()) {
-                      navigate(`/courses?search=${pubsearch}`)
+                      navigate(`/all-courses?search=${pubsearch}`)
                       pubsetSearch("")
                     }
                   }}
@@ -156,7 +156,7 @@ function Hero() {
                       key={course._id}
                       className="search-item"
                       onClick={() => {
-                        navigate(`/courses?search=${course.title}&category=${course.category}`)
+                        navigate(`/all-courses?search=${course.title}&category=${course.category}`)
                         setSuggestions([])
                         pubsetSearch("")
                       }}

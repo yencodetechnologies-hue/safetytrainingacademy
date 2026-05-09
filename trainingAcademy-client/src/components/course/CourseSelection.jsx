@@ -360,6 +360,7 @@ function CourseSelection({
     const [courseSlots, setCourseSlots] = useState({})
     const [collapsedCourses, setCollapsedCourses] = useState({})
     const [categoryList, setCategoryList] = useState([]) // ✅ Store categories for ordering
+    const processedUrlSession = useRef(false)
 
     const params = new URLSearchParams(window.location.search)
     const bookingType    = params.get("type")
@@ -447,6 +448,25 @@ function CourseSelection({
                 .catch(err => console.log(err))
         }
     }, [selectedCourse])
+
+    // ✅ Handle paramSessionId independent of paramCourseId (works with slugs)
+    useEffect(() => {
+        if (paramSessionId && slots.length > 0 && !processedUrlSession.current) {
+            let matched = null
+            slots.forEach(slot => {
+                slot.sessions?.forEach(session => {
+                    if (String(session._id) === String(paramSessionId)) {
+                        matched = { ...session, date: slot.date }
+                    }
+                })
+            })
+            if (matched) {
+                // Pre-select the date only; the user must pick a timing
+                setSelectedSession({ date: matched.date })
+                processedUrlSession.current = true
+            }
+        }
+    }, [slots, paramSessionId])
 
     const handleCourseChange = async (courseId, variant = null) => {
         if (!courseId) { setSelectedCourse(null); setSlots([]); return }
