@@ -318,21 +318,23 @@ function CourseDetails() {
                         decoding="async"
                     />
                 )}
-                <div className="cdp-hero-left">
-                    <div className="cdp-tag">{course?.courseCode || course?.category}</div>
-                    <h1 className="cdp-title">{course?.title}</h1>
-                    <div className="cdp-code">
-                        {course?.category} &nbsp;·&nbsp; Nationally Recognised Training
+                <div className="cdp-hero-inner">
+                    <div className="cdp-hero-left">
+                        <div className="cdp-tag">{course?.courseCode || course?.category}</div>
+                        <h1 className="cdp-title">{course?.title}</h1>
+                        <div className="cdp-code">
+                            {course?.category} &nbsp;·&nbsp; Nationally Recognised Training
+                        </div>
+                        <p className="cdp-desc">
+                            {Array.isArray(course?.description)
+                                ? course.description[0]
+                                : course?.description || ""}
+                        </p>
                     </div>
-                    <p className="cdp-desc">
-                        {Array.isArray(course?.description)
-                            ? course.description[0]
-                            : course?.description || ""}
-                    </p>
-                </div>
 
-                <div className="cdp-hero-right">
-                    <HeroPriceCard />
+                    <div className="cdp-hero-right">
+                        <HeroPriceCard />
+                    </div>
                 </div>
 
                 {/* ── QUICK FACTS BAR ── */}
