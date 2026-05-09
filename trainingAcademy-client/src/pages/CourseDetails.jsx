@@ -340,7 +340,7 @@ function CourseDetails() {
                     {[
                         { icon: "📅", val: course?.duration || "1 Day",     label: "Course duration" },
                         { icon: "⏰", val: "8:30am – 4:30pm",               label: "Class hours" },
-                        { icon: "📍", val: course?.location || "Sefton NSW", label: "Training location" },
+                        { icon: "📍", val: course?.location || "Safton NSW", label: "Training location" },
                         { icon: "🎓", val: "RTO #45234",                     label: "Accredited provider" },
                         { icon: "📜", val: "Same Day",                       label: "Certificate issued" },
                         { icon: "🗺", val: "All States",                     label: "Nationally recognised" },

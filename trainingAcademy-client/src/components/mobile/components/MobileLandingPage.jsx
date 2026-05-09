@@ -19,7 +19,7 @@ const TRUST_PILLS = [
   "⭐ 5.0 · 1,000+ reviews",
   "RTO #45234",
   "SafeWork NSW approved",
-  "📍 Sefton NSW",
+  "📍 Safton NSW",
 ];
 
 const REVIEWS = [
@@ -270,8 +270,56 @@ export default function MobileLandingPage({ courses = [] }) {
             <div className="mlp-slide-content">
               {s.courseCode && <span className="mlp-slide-badge">{s.courseCode}</span>}
               <div className="mlp-slide-title">{s.title}</div>
-              <span className="mlp-slide-price">{s.price}</span>
-              {s.orig && <span className="mlp-slide-orig">{s.orig}</span>}
+              <div className="mlp-slide-price-row">
+                <span className="mlp-slide-price">{s.price}</span>
+                {s.orig && <span className="mlp-slide-orig">{s.orig}</span>}
+              </div>
+              
+              {/* ── Quick Facts on Slide ── */}
+              <div className="mlp-slide-facts">
+                <div className="mlp-sf-item">
+                  <span>📅</span> 
+                  <div>
+                    <strong>{s.duration || "1 Day"}</strong>
+                    <p>Course duration</p>
+                  </div>
+                </div>
+                <div className="mlp-sf-item">
+                  <span>⏰</span> 
+                  <div>
+                    <strong>8:30am – 4:30pm</strong>
+                    <p>Class hours</p>
+                  </div>
+                </div>
+                <div className="mlp-sf-item">
+                  <span>📍</span> 
+                  <div>
+                    <strong>{s.location || "Safton"}</strong>
+                    <p>Training location</p>
+                  </div>
+                </div>
+                <div className="mlp-sf-item">
+                  <span>🎓</span> 
+                  <div>
+                    <strong>RTO #45234</strong>
+                    <p>Accredited provider</p>
+                  </div>
+                </div>
+                <div className="mlp-sf-item">
+                  <span>📜</span> 
+                  <div>
+                    <strong>Same Day</strong>
+                    <p>Certificate issued</p>
+                  </div>
+                </div>
+                <div className="mlp-sf-item">
+                  <span>🗺</span> 
+                  <div>
+                    <strong>All States</strong>
+                    <p>Nationally recognised</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         ))}

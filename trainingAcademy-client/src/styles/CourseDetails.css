@@ -54,9 +54,9 @@ grid-template-columns:1fr;
 /* ===== HERO ===== */
 .cdp-hero {
   background: #0d2240;
-  padding: 30px 80px 0;
+  padding: 20px 80px 0;
   display: grid; grid-template-columns: 3fr 1fr;
-  gap: 30px; align-items: start;
+  gap: 20px; align-items: start;
   position: relative; overflow: hidden;
 }
 .cdp-hero-bg {
@@ -109,12 +109,12 @@ display: flex;
 }
 
 /* PRICE CARD */
-.cdp-price-card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.25); }
+.cdp-price-card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.25); }
 .cdp-price-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
 .cdp-price-now { font-size: 42px; font-weight: 800; color: #0d2240; line-height: 1; }
 .cdp-price-old { font-size: 18px; color: #94a3b8; text-decoration: line-through; }
 .cdp-save-badge { background: #dcfce7; color: #16a34a; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
-.cdp-price-note { font-size: 12px; color: #64748b; margin-bottom: 16px; line-height: 1.5; }
+.cdp-price-note { font-size: 11px; color: #64748b; margin-bottom: 12px; line-height: 1.4; }
 .cdp-btn-book {
   display: block; width: 100%; background: #02afef; color: #fff;
   border: none; border-radius: 10px; padding: 14px;
@@ -129,15 +129,15 @@ display: flex;
   font-family: 'Inter', sans-serif; transition: background 0.2s;
 }
 .cdp-btn-voc:hover { background: #e0f2fe; }
-.cdp-trust-list { list-style: none; border-top: 1px solid #e8f4fd; padding-top: 14px; }
-.cdp-trust-list li { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #4a7096; padding: 4px 0; }
-.cdp-check { color: #29b6e8; font-weight: 700; font-size: 13px; }
+.cdp-trust-list { list-style: none; border-top: 1px solid #e8f4fd; padding-top: 10px; }
+.cdp-trust-list li { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #4a7096; padding: 3px 0; }
+.cdp-check { color: #29b6e8; font-weight: 700; font-size: 12px; }
 
 /* ===== QUICK FACTS BAR ===== */
 .cdp-qfbar { 
   background: #fff; 
   border-bottom: 2px solid #e8f4fd; 
-  padding: 16px 80px; 
+  padding: 12px 80px; 
   display: flex; 
   grid-column: 1 / -1; 
   margin: 0 -80px; 
