@@ -57,13 +57,10 @@ export default function HomePage({ courses = [] }) {
     ].filter((cat) => cat.name);
   }
 
-  const loading = dbCategories === null && courses.length === 0;
+  // Duplicate the list for seamless infinite scroll
+  const marqueeList = [...categoryList, ...categoryList, ...categoryList];
 
-  const scroll = (dir) => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: dir * 320, behavior: "smooth" });
-    }
-  };
+  const loading = dbCategories === null && courses.length === 0;
 
   return (
     <section className="hp-section">
@@ -74,16 +71,15 @@ export default function HomePage({ courses = [] }) {
         </div>
       </div>
 
-      <div className="hp-carousel-wrap">
-        {/* Scrollable Track */}
-        <div className="hp-track" ref={scrollRef}>
+      <div className="hp-carousel-container">
+        <div className="hp-track marquee-scroll">
           {loading
             ? Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="hp-card hp-card-skeleton" />
               ))
-            : categoryList.map((cat) => (
+            : marqueeList.map((cat, idx) => (
                 <div
-                  key={cat.name}
+                  key={`${cat.name}-${idx}`}
                   className="hp-card"
                   onClick={() =>
                     navigate(`/all-courses?category=${encodeURIComponent(cat.name)}`)
@@ -99,10 +95,6 @@ export default function HomePage({ courses = [] }) {
                         decoding="async"
                         width="320"
                         height="200"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.style.display = "none";
-                        }}
                       />
                     ) : (
                       <div className="hp-card-img-placeholder" />
@@ -112,11 +104,6 @@ export default function HomePage({ courses = [] }) {
                 </div>
               ))}
         </div>
-      </div>
-
-      {/* Scroll indicator bar */}
-      <div className="hp-scroll-bar">
-        <div className="hp-scroll-thumb" />
       </div>
     </section>
   );
