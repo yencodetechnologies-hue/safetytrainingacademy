@@ -4,6 +4,7 @@ import "../styles/MobileLandingPage.css";
 import PublicNavbar from "../../PublicNavbar";
 import PromoBar from "../../landingPage/PromoBar";
 import Footer from "../../landingPage/Footer";
+import BookingModal from "../../course/BookingModal";
 import { useNavigate } from "react-router-dom";
 import pbPaypal from "../../../assets/pb-paypal.jpg";
 import pbBlyncsy from "../../../assets/pb-blyncsy.webp";
@@ -19,7 +20,7 @@ const TRUST_PILLS = [
   "⭐ 5.0 · 1,000+ reviews",
   "RTO #45234",
   "SafeWork NSW approved",
-  "📍 Safton NSW",
+  "📍 Sefton NSW",
 ];
 
 const REVIEWS = [
@@ -47,6 +48,9 @@ export default function MobileLandingPage({ courses = [] }) {
   // Admin-managed categories (with the `image` field). When available we use
   // these for the carousel images instead of deriving from the first course.
   const [dbCategories, setDbCategories] = useState(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedBookingCourse, setSelectedBookingCourse] = useState(null);
+  const [selectedBookingSession, setSelectedBookingSession] = useState(null);
   const timerRef = useRef(null);
   const navigate = useNavigate();
 
@@ -181,6 +185,17 @@ export default function MobileLandingPage({ courses = [] }) {
       ? `/book-now/course/${s.courseSlug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`
       : `/book-now?courseId=${s.courseId}&scheduleId=${s.scheduleId}&sessionId=${s.id}`;
 
+  const handleBookNowClick = (s) => {
+    const courseObj = courses.find((c) => c._id === s.courseId);
+    if (courseObj) {
+      setSelectedBookingCourse(courseObj);
+      setSelectedBookingSession(s);
+      setShowBookingModal(true);
+    } else {
+      navigate(sessionBookNowHref(s));
+    }
+  };
+
   // ── Category cards ────────────────────────────────────────────────────────
   // Image priority: admin-managed Category.image → first course's image (legacy
   // fallback) → empty (gradient placeholder). Categories from the DB are
@@ -270,56 +285,8 @@ export default function MobileLandingPage({ courses = [] }) {
             <div className="mlp-slide-content">
               {s.courseCode && <span className="mlp-slide-badge">{s.courseCode}</span>}
               <div className="mlp-slide-title">{s.title}</div>
-              <div className="mlp-slide-price-row">
-                <span className="mlp-slide-price">{s.price}</span>
-                {s.orig && <span className="mlp-slide-orig">{s.orig}</span>}
-              </div>
-              
-              {/* ── Quick Facts on Slide ── */}
-              <div className="mlp-slide-facts">
-                <div className="mlp-sf-item">
-                  <span>📅</span> 
-                  <div>
-                    <strong>{s.duration || "1 Day"}</strong>
-                    <p>Course duration</p>
-                  </div>
-                </div>
-                <div className="mlp-sf-item">
-                  <span>⏰</span> 
-                  <div>
-                    <strong>8:30am – 4:30pm</strong>
-                    <p>Class hours</p>
-                  </div>
-                </div>
-                <div className="mlp-sf-item">
-                  <span>📍</span> 
-                  <div>
-                    <strong>{s.location || "Safton"}</strong>
-                    <p>Training location</p>
-                  </div>
-                </div>
-                <div className="mlp-sf-item">
-                  <span>🎓</span> 
-                  <div>
-                    <strong>RTO #45234</strong>
-                    <p>Accredited provider</p>
-                  </div>
-                </div>
-                <div className="mlp-sf-item">
-                  <span>📜</span> 
-                  <div>
-                    <strong>Same Day</strong>
-                    <p>Certificate issued</p>
-                  </div>
-                </div>
-                <div className="mlp-sf-item">
-                  <span>🗺</span> 
-                  <div>
-                    <strong>All States</strong>
-                    <p>Nationally recognised</p>
-                  </div>
-                </div>
-              </div>
+              <span className="mlp-slide-price">{s.price}</span>
+              {s.orig && <span className="mlp-slide-orig">{s.orig}</span>}
             </div>
           </div>
         ))}
@@ -397,17 +364,13 @@ export default function MobileLandingPage({ courses = [] }) {
                       <div className={`mlp-date-dot ${low ? "amber" : ""}`} />
                       <div
                         className="mlp-date-info mlp-date-info-link"
-                        // Tapping the session row jumps straight into the
-                        // Book Now flow with this exact session/date
-                        // pre-selected — no extra detour through the
-                        // course detail page.
-                        onClick={() => navigate(sessionBookNowHref(s))}
+                        onClick={() => handleBookNowClick(s)}
                       >
                         <div className="mlp-date-course">{currentCourseName}</div>
                         <div className="mlp-date-when">{whenParts.join(" · ")}</div>
                       </div>
                       <div className="mlp-date-actions">
-                        <button className="mlp-date-spots " onClick={() => navigate(sessionBookNowHref(s))}>
+                        <button className="mlp-date-spots " onClick={() => handleBookNowClick(s)}>
                           Book now
                         </button>
                         <div className={`mlp-date-spots ${low ? "low" : ""}`}>
@@ -445,25 +408,17 @@ export default function MobileLandingPage({ courses = [] }) {
                             <div className={`mlp-date-dot ${low ? "amber" : ""}`} />
                             <div
                               className="mlp-date-info mlp-date-info-link"
-                              // Same direct-to-Book-Now behaviour as the
-                              // collapsed view — keeps the gesture
-                              // consistent regardless of "Show all".
-                              onClick={() => navigate(sessionBookNowHref(s))}
+                              onClick={() => handleBookNowClick(s)}
                             >
                               <div className="mlp-date-course">{currentCourseName}</div>
                               <div className="mlp-date-when">{whenParts.join(" · ")}</div>
                             </div>
-                            {/* Mirror the collapsed view's actions block so
-                                "See all" still surfaces a tappable Book now
-                                button next to the spot count. */}
                             <div className="mlp-date-actions">
                               <button
                                 className="mlp-date-spots"
                                 onClick={(e) => {
-                                  // Stop the row's onClick from firing twice
-                                  // (parent already navigates on tap).
                                   e.stopPropagation();
-                                  navigate(sessionBookNowHref(s));
+                                  handleBookNowClick(s);
                                 }}
                               >
                                 Book now
@@ -617,10 +572,47 @@ export default function MobileLandingPage({ courses = [] }) {
       )}
 
       <Footer />
+
+      {showBookingModal && selectedBookingCourse && (
+        <BookingModal
+          course={selectedBookingCourse}
+          onClose={() => {
+            setShowBookingModal(false);
+            setSelectedBookingCourse(null);
+            setSelectedBookingSession(null);
+          }}
+          // Pass the session info so the modal can include it in the URL
+          extraQueryParams={
+            selectedBookingSession
+              ? `&scheduleId=${selectedBookingSession.scheduleId}&sessionId=${selectedBookingSession.id}`
+              : ""
+          }
+        />
+      )}
       {/* ── Sticky Bottom Bar ── */}
       <div className="mlp-sticky">
-        <button className="mlp-sticky-call" onClick={() => { navigate(`/book-now`) }}>Enroll Now</button>
-        <a href="https://wa.me/611300976097" className="vac-sticky-wa"><span><i class="fa-brands fa-whatsapp"></i></span></a>      </div>
+        <button 
+          className="mlp-sticky-call" 
+          onClick={() => {
+            if (currentSlide) {
+              handleBookNowClick({ 
+                courseId: currentSlide.id, 
+                courseSlug: currentSlide.slug,
+                // These are null because we're booking from the hero, not a specific session
+                scheduleId: "",
+                id: "" 
+              });
+            } else {
+              navigate("/book-now");
+            }
+          }}
+        >
+          Enroll Now
+        </button>
+        <a href="https://wa.me/611300976097" className="mlp-sticky-wa">
+          <span><i className="fa-brands fa-whatsapp"></i></span>
+        </a>
+      </div>
 
     </div>
   );

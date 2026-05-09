@@ -126,6 +126,7 @@ export default function ViewCourseDetailMobile({ course }) {
   const [showAll, setShowAll]         = useState(false);
   const [showModal, setShowModal]     = useState(false);
   const [selectedOptionId, setSelectedOptionId] = useState(null);
+  const [selectedSession, setSelectedSession]   = useState(null);
   const PAGE_SIZE                     = 7;
   const SHOW_DEFAULT                  = 3;
   const reviewRef = useRef(null);
@@ -213,7 +214,7 @@ export default function ViewCourseDetailMobile({ course }) {
         <a href="tel:1300976097" className="cdm-topbar-phone">☎ Call</a>
       </div>
 
-      {/* Navbar removed to save vertical space for "Visible without scrolling" layout */}
+      <PublicNavbar courses={[]} />
 
       {/* ── Hero Image — real <img> so the browser can preload + apply
            fetchpriority="high" (CSS background-images can't). */}
@@ -246,33 +247,18 @@ export default function ViewCourseDetailMobile({ course }) {
       <div className="cdm-quick-facts">
         <div className="cdm-fact">
           <div className="cdm-fact-icon">📅</div>
-          <div className="cdm-fact-val">{course.duration || "1 Day"}</div>
+          <div className="cdm-fact-val">{course.duration || "—"}</div>
           <div className="cdm-fact-label">Duration</div>
         </div>
         <div className="cdm-fact">
-          <div className="cdm-fact-icon">⏰</div>
-          <div className="cdm-fact-val">8:30am – 4:30pm</div>
-          <div className="cdm-fact-label">Class hours</div>
-        </div>
-        <div className="cdm-fact">
           <div className="cdm-fact-icon">📍</div>
-          <div className="cdm-fact-val">{course.location || "Safton"}</div>
+          <div className="cdm-fact-val">{course.location || "Sefton"}</div>
           <div className="cdm-fact-label">Location</div>
         </div>
         <div className="cdm-fact">
           <div className="cdm-fact-icon">🎓</div>
           <div className="cdm-fact-val">RTO #45234</div>
           <div className="cdm-fact-label">Accredited</div>
-        </div>
-        <div className="cdm-fact">
-          <div className="cdm-fact-icon">📜</div>
-          <div className="cdm-fact-val">Same Day</div>
-          <div className="cdm-fact-label">Certificate</div>
-        </div>
-        <div className="cdm-fact">
-          <div className="cdm-fact-icon">🗺</div>
-          <div className="cdm-fact-val">All States</div>
-          <div className="cdm-fact-label">Recognition</div>
         </div>
       </div>
 
@@ -331,7 +317,7 @@ export default function ViewCourseDetailMobile({ course }) {
         ) : (
           <button
             className="cdm-book-now-big"
-            onClick={() => navigate(variantHref(variants[0]))}
+            onClick={() => setShowModal(true)}
           >
             Book Now — Pick your date below
           </button>
@@ -357,8 +343,13 @@ export default function ViewCourseDetailMobile({ course }) {
                 {sessions.slice(0, SHOW_DEFAULT).map((s) => {
                   const low    = isLow(s.availableSlots);
                   const sunday = isSunday(s.date);
+                  const handleBook = (e) => {
+                    e.stopPropagation();
+                    setSelectedSession(s);
+                    setShowModal(true);
+                  };
                   return (
-                    <div key={s.id} className="cdm-date-slot" onClick={() => navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`)}>
+                    <div key={s.id} className="cdm-date-slot" onClick={handleBook}>
                       <div className={`cdm-date-cal ${sunday ? "sunday" : ""}`}>
                         <div className="cdm-date-cal-day">{formatDay(s.date)}</div>
                         <div className="cdm-date-cal-mon">{formatMon(s.date)}</div>
@@ -376,8 +367,7 @@ export default function ViewCourseDetailMobile({ course }) {
                       </div>
                       <button
                         className="cdm-book-slot-btn"
-                       onClick={() => navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`)}
-
+                        onClick={handleBook}
                       >
                         Book
                       </button>
@@ -396,7 +386,10 @@ export default function ViewCourseDetailMobile({ course }) {
                       const low    = isLow(s.availableSlots);
                       const sunday = isSunday(s.date);
                       return (
-                        <div key={s.id} className="cdm-date-slot"  onClick={() => navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`)} >
+                        <div key={s.id} className="cdm-date-slot"  onClick={() => {
+                          setSelectedSession(s);
+                          setShowModal(true);
+                        }} >
                           <div className={`cdm-date-cal ${sunday ? "sunday" : ""}`}>
                             <div className="cdm-date-cal-day">{formatDay(s.date)}</div>
                             <div className="cdm-date-cal-mon">{formatMon(s.date)}</div>
@@ -414,8 +407,11 @@ export default function ViewCourseDetailMobile({ course }) {
                           </div>
                           <button
                             className="cdm-book-slot-btn"
-                            onClick={() => navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`)}
-
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedSession(s);
+                              setShowModal(true);
+                            }}
                           >
                             Book
                           </button>
@@ -489,11 +485,7 @@ export default function ViewCourseDetailMobile({ course }) {
         <button
           className="cdm-sticky-book"
           onClick={() => {
-            if (isVariantCourse) {
-              setShowModal(true);
-            } else {
-              navigate(`/book-now/course/${course.slug}`);
-            }
+            setShowModal(true);
           }}
         >
           Book Now — {price}
@@ -507,8 +499,14 @@ export default function ViewCourseDetailMobile({ course }) {
           onClose={() => {
             setShowModal(false);
             setSelectedOptionId(null);
+            setSelectedSession(null);
           }}
           initialSelection={selectedOptionId}
+          extraQueryParams={
+            selectedSession
+              ? `&scheduleId=${selectedSession.scheduleId}&sessionId=${selectedSession.id}`
+              : ""
+          }
         />
       )}
 

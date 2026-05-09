@@ -56,7 +56,7 @@ export function getBookingOptions(course) {
             },
             {
                 id: "sl",
-                label: "SL / BL Only",
+                label: "SL or BL",
                 price: course.sellingPrice,
                 originalPrice: course.originalPrice,
                 dur: course.duration || "1 day",
@@ -97,7 +97,7 @@ export function getBookingOptions(course) {
     ]
 }
 
-export default function BookingModal({ course, onClose, initialSelection = null }) {
+export default function BookingModal({ course, onClose, initialSelection = null, extraQueryParams = "" }) {
     const navigate = useNavigate()
     const options  = getBookingOptions(course)
     const [selected, setSelected] = useState(initialSelection)
@@ -117,7 +117,14 @@ export default function BookingModal({ course, onClose, initialSelection = null 
         const base = course.slug
             ? `/book-now/course/${course.slug}`
             : `/book-now?courseId=${course._id}`
-        const join = (qs) => `${base}${base.includes("?") ? "&" : "?"}${qs}`
+
+        const join = (qs) => {
+            const hasQ = base.includes("?")
+            const sep = hasQ ? "&" : "?"
+            const params = [qs, extraQueryParams.replace(/^&/, "")].filter(Boolean).join("&")
+            return params ? `${base}${sep}${params}` : base
+        }
+
         const routes = {
             "with-experience":    join("type=with-experience"),
             "without-experience": join("type=without-experience"),
@@ -125,10 +132,10 @@ export default function BookingModal({ course, onClose, initialSelection = null 
             "sl":                 join("type=sl"),
             "bl":                 join("type=bl"),
             "voc":                join("type=voc"),
-            "standard":           base,
+            "standard":           join(""), 
         }
         onClose()
-        navigate(routes[selected] || base)
+        navigate(routes[selected] || join(""))
     }
 
     return (

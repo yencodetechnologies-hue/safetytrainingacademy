@@ -169,12 +169,7 @@ export default function ViewAllCoursesMobile({ courses = [] }) {
                       className="vac-btn-book"
                       onClick={(e) => {
                         e.stopPropagation();
-                        const type = getBookingType(c);
-                        if (type === "experience" || type === "slbl") {
-                          setSelectedCourse(c);
-                        } else {
-                          navigate(`/book-now/course/${c.slug}`);
-                        }
+                        setSelectedCourse(c);
                       }}
                     >
                       Book Now
