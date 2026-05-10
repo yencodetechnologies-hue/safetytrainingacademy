@@ -248,14 +248,7 @@ export default function MobileLandingPage({ courses = [] }) {
         image: c.image,
         count: activeCourses.filter((ac) => ac.category === c.category).length,
       }))
-      .sort((a, b) => {
-        const idxA = PREFERRED_ORDER.indexOf(a.category);
-        const idxB = PREFERRED_ORDER.indexOf(b.category);
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        if (idxA !== -1) return -1;
-        if (idxB !== -1) return 1;
-        return a.category.localeCompare(b.category);
-      });
+      .sort((a, b) => a.category.localeCompare(b.category));
   }
 
   // ─────────────────────────────────────────────────────────────────────────

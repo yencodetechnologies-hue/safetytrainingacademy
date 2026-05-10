@@ -47,7 +47,7 @@ grid-template-columns:1fr;
 
 .cdp {
   font-family: 'Inter', sans-serif;
-  background: #f0f8ff;
+  background: #fff;
   color: #0d2240;
   padding-bottom: 64px;
 }
@@ -69,8 +69,8 @@ grid-template-columns:1fr;
 /* ===== HERO ===== */
 .cdp-hero {
   background: #0d2240;
-  padding: 60px 80px 140px;
-  min-height: 500px;
+  padding: 15px 80px 100px;
+  min-height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -101,11 +101,11 @@ grid-template-columns:1fr;
 .cdp-hero-inner {
   display: grid;
   grid-template-columns: 1fr 350px;
-  gap: 40px;
-  align-items: center;
+  gap: 30px;
+  align-items: flex-end;
   position: relative;
   z-index: 1;
-  margin-top: 20px;
+  margin-top: 5px;
   margin-bottom: 0px;
 }
 
@@ -284,11 +284,11 @@ grid-template-columns:1fr;
   .cdp-qfbar {
     background: #fff;
     border-bottom: 2px solid #e8f4fd;
-    padding: 20px 80px;
+    padding: 15px 80px 32px;
     display: flex;
     margin: 0 -80px;
     position: absolute;
-    bottom: 20px;
+    bottom: 0;
     left: 80px;
     right: 80px;
     z-index: 2;
@@ -1159,23 +1159,24 @@ grid-template-columns:1fr;
   font-weight: 700 !important;
   color: #64748b !important;
 }
+
 .course-card-code {
-    color: #00AEEF;
-    font-size: 0.75rem;
-    font-weight: 700;
-    margin-bottom: 4px;
-    text-transform: uppercase;
+  color: #00AEEF;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  text-transform: uppercase;
 }
 
 .course-code-badge {
-    background: #00AEEF;
-    color: #0d2240;
-    padding: 6px 16px;
-    border-radius: 50px;
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  background: #00AEEF;
+  color: #0d2240;
+  padding: 6px 16px;
+  border-radius: 50px;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
