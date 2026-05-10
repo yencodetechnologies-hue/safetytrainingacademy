@@ -78,7 +78,7 @@ function SessionsBar() {
                             <div className="sb-info">
                                 <div className="sb-course">{s.course.title}</div>
                                 <div className="sb-detail">
-                                    {s.startTime} · {s.location} · {s.course.price ? `$${s.course.price}` : ""}
+                                    {s.startTime} {s.location && s.location.toLowerCase() !== "face to face" ? `· ${s.location}` : ""} {s.course.price ? `· $${s.course.price}` : ""}
                                 </div>
                             </div>
 

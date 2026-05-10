@@ -40,7 +40,7 @@ function CourseDetails() {
     const fetchSlug = legacyMatch ? slug.replace(`-${legacyMatch[1]}`, "") : slug
     const fallbackId = legacyMatch ? legacyMatch[1] : null
 
-    const [course, setCourse]   = useState(null)
+    const [course, setCourse] = useState(null)
     const [courses, setCourses] = useState([])
     const [sessions, setSessions] = useState([])
     const [loadingSessions, setLoadingSessions] = useState(true)
@@ -119,10 +119,10 @@ function CourseDetails() {
     }
 
     const originalPrice = course?.originalPrice || 0
-    const sellingPrice  = course?.sellingPrice  || 0
-    const savings       = originalPrice - sellingPrice
+    const sellingPrice = course?.sellingPrice || 0
+    const savings = originalPrice - sellingPrice
 
-    const isSlbl       = !!course?.slblPrice
+    const isSlbl = !!course?.slblPrice
     const isExperience = !!course?.experienceBasedBooking && !isSlbl
 
     const relatedCourses = courses
@@ -370,12 +370,12 @@ function CourseDetails() {
                 {/* ── QUICK FACTS BAR ── */}
                 <div className="cdp-qfbar">
                     {[
-                        { icon: "📅", val: course?.duration || "1 Day",     label: "Course duration" },
-                        { icon: "⏰", val: "8:30am – 4:30pm",               label: "Class hours" },
+                        { icon: "📅", val: course?.duration || "1 Day", label: "Course duration" },
+                        { icon: "⏰", val: "8:30am – 4:30pm", label: "Class hours" },
                         { icon: "📍", val: course?.location || "Sefton NSW", label: "Training location" },
-                        { icon: "🎓", val: "RTO #45234",                     label: "Accredited provider" },
-                        { icon: "📜", val: "Same Day",                       label: "Certificate issued" },
-                        { icon: "🗺", val: "All States",                     label: "Nationally recognised" },
+                        { icon: "🎓", val: "RTO #45234", label: "Accredited provider" },
+                        { icon: "📜", val: "Same Day", label: "Certificate issued" },
+                        { icon: "🗺", val: "All States", label: "Nationally recognised" },
                     ].map((item, i) => (
                         <div className="cdp-qf-item" key={i}>
                             <div className="cdp-qf-icon">{item.icon}</div>
@@ -421,7 +421,7 @@ function CourseDetails() {
                                             const weekday = d.toLocaleString("en-AU", { weekday: "long" })
                                             const isLow = s.availableSlots <= 3
                                             const cleanLoc = (s.location || "").replace(/Face to Face/gi, "").replace(/·\s*$/g, "").trim()
-                                            
+
                                             return (
                                                 <div className="cdp-session-row" key={i}>
                                                     <div className="cdp-s-date">
@@ -585,10 +585,10 @@ function CourseDetails() {
                         </div>
                         <div className="cdp-review-grid">
                             {[
-                                { name: "Valerii R.",  course: "White Card · April 2024",    text: "Very good place. Trainer was excellent and easy to understand. Passed first go. Highly recommend STA." },
-                                { name: "Jesus C.",    course: "White Card · March 2024",    text: "They provide excellent information and the trainers are very knowledgeable. Great experience overall." },
-                                { name: "Daniel M.",   course: "White Card · February 2024", text: "Quick, professional and friendly staff. Got my card same day. Would definitely come back for my forklift ticket." },
-                                { name: "Sarah K.",    course: "White Card · January 2024",  text: "Booked on Thursday, did the course on Saturday. Smooth process, great instructor, certificate ready by 4pm." },
+                                { name: "Valerii R.", course: "White Card · April 2024", text: "Very good place. Trainer was excellent and easy to understand. Passed first go. Highly recommend STA." },
+                                { name: "Jesus C.", course: "White Card · March 2024", text: "They provide excellent information and the trainers are very knowledgeable. Great experience overall." },
+                                { name: "Daniel M.", course: "White Card · February 2024", text: "Quick, professional and friendly staff. Got my card same day. Would definitely come back for my forklift ticket." },
+                                { name: "Sarah K.", course: "White Card · January 2024", text: "Booked on Thursday, did the course on Saturday. Smooth process, great instructor, certificate ready by 4pm." },
                             ].map((r, i) => (
                                 <div className="cdp-review-card" key={i}>
                                     <div className="cdp-rc-name">{r.name}</div>

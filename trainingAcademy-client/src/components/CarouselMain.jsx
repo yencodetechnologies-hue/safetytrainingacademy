@@ -5,18 +5,6 @@ import "../styles/Carousel.css";
 import { API_URL } from "../data/service";
 import { cdnImage } from "../utils/cdnImage";
 
-const PREFERRED_ORDER = [
-  "Combo Courses",
-  "Short Courses",
-  "Working in Confined Space Courses",
-  "Earthmoving Courses",
-  "Demolition Courses",
-  "First Aid Courses",
-  "Traffic Control Courses",
-  "Asbestos Removal Courses",
-  "High Risk Work",
-];
-
 export default function HomePage({ courses = [] }) {
   // Categories now come from /api/categories so we get the admin-managed
   // image. We fall back to deriving from `courses` if the fetch fails or
@@ -51,14 +39,7 @@ export default function HomePage({ courses = [] }) {
   } else if (dbCategories.length > 0) {
     categoryList = dbCategories
       .filter((c) => c.active !== false)
-      .sort((a, b) => {
-        const idxA = PREFERRED_ORDER.indexOf(a.name);
-        const idxB = PREFERRED_ORDER.indexOf(b.name);
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        if (idxA !== -1) return -1;
-        if (idxB !== -1) return 1;
-        return (a.order || 0) - (b.order || 0);
-      })
+      .sort((a, b) => (a.order || 0) - (b.order || 0)) // ✅ Respect Admin Order
       .map((c) => ({
         name: c.name,
         image: c.image || courseImgByCat[c.name] || "",
@@ -75,14 +56,7 @@ export default function HomePage({ courses = [] }) {
       ).values(),
     ]
       .filter((cat) => cat.name)
-      .sort((a, b) => {
-        const idxA = PREFERRED_ORDER.indexOf(a.name);
-        const idxB = PREFERRED_ORDER.indexOf(b.name);
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        if (idxA !== -1) return -1;
-        if (idxB !== -1) return 1;
-        return a.name.localeCompare(b.name);
-      });
+      .sort((a, b) => a.name.localeCompare(b.name)); // Default to alphabetical
   }
 
   // Duplicate the list for seamless infinite scroll
