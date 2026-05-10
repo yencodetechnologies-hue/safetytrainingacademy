@@ -231,9 +231,6 @@ export default function ViewCourseDetailMobile({ course }) {
         )}
         <div className="cdm-hero-overlay" />
         <div className="cdm-hero-content">
-          {course.courseCode && (
-            <div className="cdm-hero-code">{course.courseCode}</div>
-          )}
           <div className="cdm-hero-title">{course.title}</div>
           <div className="cdm-hero-price-num">{price}</div>
         </div>

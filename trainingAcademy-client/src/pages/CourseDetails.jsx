@@ -350,7 +350,7 @@ function CourseDetails() {
                 )}
                 <div className="cdp-hero-inner">
                     <div className="cdp-hero-left">
-                        <div className="cdp-tag">{course?.courseCode || course?.category}</div>
+                        <div className="cdp-tag">{course?.category}</div>
                         <h1 className="cdp-title">{course?.title}</h1>
                         <div className="cdp-code">
                             {course?.category} &nbsp;·&nbsp; Nationally Recognised Training
@@ -509,9 +509,6 @@ function CourseDetails() {
                     <div className="cdp-card">
                         <div className="cdp-card-title">
                             About this course
-                            {course?.courseCode && (
-                                <span className="cdp-card-code">{course.courseCode}</span>
-                            )}
                         </div>
                         <div className="cdp-card-body">
                             {Array.isArray(course?.trainingOverview) && course.trainingOverview.filter(Boolean).length > 0

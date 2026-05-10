@@ -50,7 +50,7 @@ function LoginForm() {
       {/* Tabs */}
       <div className="tabs">
         <Link className="tab active" to="/login">Sign In</Link>
-        <Link className="tab" to="/register">Register</Link>
+        {/* <Link className="tab" to="/register">Register</Link> */}
       </div>
 
       <form onSubmit={formik.handleSubmit}>

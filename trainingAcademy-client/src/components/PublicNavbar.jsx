@@ -122,7 +122,7 @@ function PublicNavbar({ courses = [] }) {
           <div className="nav-buttons">
             <button onClick={() => navigate("/combo-courses")}>Combo Courses</button>
             <button onClick={() => navigate("/book-now")}>Book now</button>
-            <button><Link className="login-link" to="/login">Login / Register</Link></button>
+            <button><Link className="login-link" to="/login">Login</Link></button>
           </div>
 
           {/* MOBILE BURGER */}
@@ -152,7 +152,7 @@ function PublicNavbar({ courses = [] }) {
             <div className="mobile-fullmenu-buttons">
               <button onClick={() => { navigate("/combo-courses"); closeMenu(); }}>Combo Courses</button>
               <button onClick={() => { navigate("/book-now"); closeMenu(); }}>Book now</button>
-              <button><Link className="login-link" to="/login">Login / Register</Link></button>
+              <button><Link className="login-link" to="/login">Login</Link></button>
             </div>
           </div>
         )}
