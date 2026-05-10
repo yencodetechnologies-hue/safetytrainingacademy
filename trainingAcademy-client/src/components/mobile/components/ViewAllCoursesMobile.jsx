@@ -9,6 +9,18 @@ import {
 } from "../../../utils/coursePrice";
 import BookingModal, { getBookingType } from "../../course/BookingModal";
 
+const PREFERRED_ORDER = [
+  "Combo Courses",
+  "Short Courses",
+  "Working in Confined Space Courses",
+  "Earthmoving Courses",
+  "Demolition Courses",
+  "First Aid Courses",
+  "Traffic Control Courses",
+  "Asbestos Removal Courses",
+  "High Risk Work",
+];
+
 // ── Color bar per category ────────────────────────────────────────────────────
 const CATEGORY_COLORS = {
   "Short Courses":      "#0d2240",
@@ -55,16 +67,33 @@ export default function ViewAllCoursesMobile({ courses = [] }) {
   // ── Unique categories for filter pills ───────────────────────────────────
   const categories = useMemo(() => {
     const cats = [...new Set(activeCourses.map((c) => c.category).filter(Boolean))];
-    return ["All", ...cats];
+    const sorted = cats.sort((a, b) => {
+      const idxA = PREFERRED_ORDER.indexOf(a);
+      const idxB = PREFERRED_ORDER.indexOf(b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.localeCompare(b);
+    });
+    return ["All", ...sorted];
   }, [activeCourses]);
 
   // ── Filtered courses ──────────────────────────────────────────────────────
   const filtered = useMemo(() => {
-    return activeCourses.filter((c) => {
+    const list = activeCourses.filter((c) => {
       const matchCat = activeFilter === "All" || c.category === activeFilter;
       const matchSearch = c.title?.toLowerCase().includes(search.toLowerCase()) ||
                           c.courseCode?.toLowerCase().includes(search.toLowerCase());
       return matchCat && matchSearch;
+    });
+
+    return list.sort((a, b) => {
+      const idxA = PREFERRED_ORDER.indexOf(a.category);
+      const idxB = PREFERRED_ORDER.indexOf(b.category);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return (a.category || "").localeCompare(b.category || "");
     });
   }, [activeCourses, activeFilter, search]);
 
