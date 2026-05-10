@@ -130,20 +130,20 @@ function CourseDetails() {
         .slice(0, 4)
 
     const openBooking = (type) => {
-        // Direct navigation for specific earthmoving courses requested by user
+        // Direct navigation for specific earthmoving courses ONLY if a type is already chosen
         const directSlugs = [
             'conduct-civil-construction-excavator-operations',
             'conduct-articulated-haul-truck-operations',
             'conduct-civil-construction-skid-steer-loader-operations'
         ];
 
-        if (directSlugs.includes(course.slug)) {
+        if (type && directSlugs.includes(course.slug)) {
             navigate(`/book-now/course/${course.slug}?type=${type}`);
             return;
         }
 
         if (isExperience || isSlbl) {
-            setSelectedOptionId(type)
+            setSelectedOptionId(type || null)
             setShowModal(true)
         } else {
             navigate(`/book-now/course/${course.slug}`)
@@ -662,7 +662,7 @@ function CourseDetails() {
                 <div className="cdp-sticky-btns">
                     <button
                         className="cdp-sticky-book"
-                        onClick={() => navigate(`/book-now/course/${course.slug}`)}
+                        onClick={() => openBooking()}
                     >
                         Book Now — Pick a Date
                     </button>
