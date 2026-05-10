@@ -180,14 +180,41 @@ const sendBookingConfirmation = async (req, res) => {
 </table></td></tr></table></body></html>`;
 
     try {
-        await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `New Booking #${orderId} - ${name} - ${courseName}`, html: academyHtml });
-        console.log("✅ Academy email sent");
-        await sendEmail({ to: email, subject: `Booking Confirmed - ${courseName} (Order #${orderId})`, html: studentHtml });
-        console.log("✅ Student email sent");
+        console.log("--- Email Sending Diagnostics ---");
+        console.log("Academy Recipient (BOOKINGS_EMAIL):", process.env.BOOKINGS_EMAIL);
+        console.log("Student Recipient:", email);
+        console.log("Order ID:", orderId);
+
+        // 1. Send Academy Notification
+        try {
+            await sendEmail({ 
+                to: process.env.BOOKINGS_EMAIL, 
+                subject: `New Booking #${orderId} - ${name} - ${courseName}`, 
+                html: academyHtml 
+            });
+            console.log(`✅ Academy notification sent to ${process.env.BOOKINGS_EMAIL}`);
+        } catch (academyErr) {
+            console.error(`❌ Academy notification failed for ${process.env.BOOKINGS_EMAIL}:`, academyErr.message);
+            // We continue so the student still gets their email even if internal notification fails
+        }
+
+        // 2. Send Student Confirmation
+        try {
+            await sendEmail({ 
+                to: email, 
+                subject: `Booking Confirmed - ${courseName} (Order #${orderId})`, 
+                html: studentHtml 
+            });
+            console.log(`✅ Student confirmation sent to ${email}`);
+        } catch (studentErr) {
+            console.error(`❌ Student confirmation failed for ${email}:`, studentErr.message);
+            throw studentErr; // Re-throw for final response if student email fails
+        }
+
         res.status(200).json({ success: true });
     } catch (err) {
-        console.error("❌ Email error:", err.message);
-        res.status(500).json({ success: false, message: "Email sending failed" });
+        console.error("❌ Booking email process error:", err.message);
+        res.status(500).json({ success: false, message: "Booking email process encountered an error" });
     }
 };
 
