@@ -247,8 +247,13 @@ export default function ViewCourseDetailMobile({ course }) {
       <div className="cdm-quick-facts">
         <div className="cdm-fact">
           <div className="cdm-fact-icon">📅</div>
-          <div className="cdm-fact-val">{course.duration || "—"}</div>
+          <div className="cdm-fact-val">{course.duration || "1 Day"}</div>
           <div className="cdm-fact-label">Duration</div>
+        </div>
+        <div className="cdm-fact">
+          <div className="cdm-fact-icon">⏰</div>
+          <div className="cdm-fact-val">8:30am – 4:30pm</div>
+          <div className="cdm-fact-label">Class hours</div>
         </div>
         <div className="cdm-fact">
           <div className="cdm-fact-icon">📍</div>
@@ -259,6 +264,16 @@ export default function ViewCourseDetailMobile({ course }) {
           <div className="cdm-fact-icon">🎓</div>
           <div className="cdm-fact-val">RTO #45234</div>
           <div className="cdm-fact-label">Accredited</div>
+        </div>
+        <div className="cdm-fact">
+          <div className="cdm-fact-icon">📜</div>
+          <div className="cdm-fact-val">Same Day</div>
+          <div className="cdm-fact-label">Certificate</div>
+        </div>
+        <div className="cdm-fact">
+          <div className="cdm-fact-icon">🗺</div>
+          <div className="cdm-fact-val">All States</div>
+          <div className="cdm-fact-label">Recognition</div>
         </div>
       </div>
 

@@ -142,18 +142,25 @@ grid-template-columns:1fr;
 .cdp-trust-list li { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #4a7096; padding: 4px 0; }
 .cdp-check { color: #29b6e8; font-weight: 700; font-size: 13px; }
 
-/* ===== QUICK FACTS BAR ===== */
-.cdp-qfbar { 
-  background: #fff; 
-  border-bottom: 2px solid #e8f4fd; 
-  padding: 20px 80px; 
-  display: flex; 
-  margin: 0 -80px; 
-  position: absolute;
-  bottom: 0;
-  left: 80px;
-  right: 80px;
-  z-index: 2; 
+/* ===== QUICK FACTS BAR (Desktop Only) ===== */
+@media (min-width: 901px) {
+  .cdp-qfbar { 
+    background: #fff; 
+    border-bottom: 2px solid #e8f4fd; 
+    padding: 20px 80px; 
+    display: flex; 
+    margin: 0 -80px; 
+    position: absolute;
+    bottom: 0;
+    left: 80px;
+    right: 80px;
+    z-index: 2; 
+  }
+}
+@media (max-width: 900px) {
+  .cdp-qfbar {
+    display: none;
+  }
 }
 .cdp-qf-item { flex: 1; display: flex; align-items: center; gap: 12px; padding: 0 20px; border-right: 1px solid #e8f4fd; }
 .cdp-qf-item:first-child { padding-left: 0; }

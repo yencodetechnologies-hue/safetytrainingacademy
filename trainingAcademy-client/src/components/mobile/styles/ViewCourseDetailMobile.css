@@ -145,29 +145,37 @@
 .cdm-quick-facts {
   background: #fff;
   border-bottom: 1px solid #bae0f7;
-  padding: 12px 16px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  padding: 10px 16px;
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.cdm-quick-facts::-webkit-scrollbar {
+  display: none;
 }
 
 .cdm-fact {
   text-align: center;
+  flex-shrink: 0;
+  min-width: 80px;
 }
 
 .cdm-fact-icon {
-  font-size: 16px;
-  margin-bottom: 3px;
+  font-size: 14px;
+  margin-bottom: 2px;
 }
 
 .cdm-fact-val {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: #0d2240;
+  white-space: nowrap;
 }
 
 .cdm-fact-label {
-  font-size: 10px;
+  font-size: 9px;
   color: #4a7096;
 }
 
