@@ -105,15 +105,17 @@
 .hp-track {
   display: flex;
   gap: 20px;
-  width: max-content;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .marquee-scroll {
-  animation: marquee 40s linear infinite;
+  /* Animation removed for static display */
 }
 
-.hp-carousel-container:hover .marquee-scroll {
-  animation-play-state: paused;
+.hp-carousel-container .marquee-scroll {
+  /* Removed pause state */
 }
 
 @keyframes marquee {
@@ -562,7 +564,19 @@
 /* ── Desktop: 7 visible items carousel ── */
 @media (min-width: 1024px) {
   .hp-card {
-    width: 160px; /* 7 fit ஆக சிறியதாக */
+    width: 130px; 
+  }
+  .hp-track {
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+  .hp-card-img-wrap {
+    width: 100px;
+    height: 90px;
+  }
+  .hp-card-label {
+    font-size: 12px;
   }
 
 }

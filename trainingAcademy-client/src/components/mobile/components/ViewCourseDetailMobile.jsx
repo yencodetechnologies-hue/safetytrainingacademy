@@ -332,7 +332,7 @@ export default function ViewCourseDetailMobile({ course }) {
         ) : (
           <button
             className="cdm-book-now-big"
-            onClick={() => setShowModal(true)}
+            onClick={() => navigate(`/book-now/course/${course.slug}`)}
           >
             Book Now — Pick your date below
           </button>
@@ -500,7 +500,11 @@ export default function ViewCourseDetailMobile({ course }) {
         <button
           className="cdm-sticky-book"
           onClick={() => {
-            setShowModal(true);
+            if (isVariantCourse) {
+              setShowModal(true);
+            } else {
+              navigate(`/book-now/course/${course.slug}`);
+            }
           }}
         >
           Book Now — {price}

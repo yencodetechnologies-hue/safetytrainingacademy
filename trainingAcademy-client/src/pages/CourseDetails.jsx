@@ -35,6 +35,8 @@ function CourseDetails() {
 
     const [course, setCourse]   = useState(null)
     const [courses, setCourses] = useState([])
+    const [sessions, setSessions] = useState([])
+    const [loadingSessions, setLoadingSessions] = useState(true)
     const [showModal, setShowModal] = useState(false)
     const [selectedOptionId, setSelectedOptionId] = useState(null)
     const isMobile = useIsMobile()
@@ -65,6 +67,34 @@ function CourseDetails() {
             .then(res => setCourses(res.data))
             .catch(err => console.error("Courses fetch error:", err))
     }, [fetchSlug, fallbackId])
+
+    useEffect(() => {
+        if (!course?._id) return
+        setLoadingSessions(true)
+        axios.get(`${API_URL}/api/schedules/course/${course._id}`)
+            .then(res => {
+                const rows = []
+                res.data.forEach(sched => {
+                    sched.sessions
+                        .filter(s => s.status === "Active")
+                        .forEach(s => {
+                            rows.push({
+                                id: s._id,
+                                scheduleId: sched._id,
+                                date: sched.date,
+                                startTime: s.startTime,
+                                endTime: s.endTime,
+                                location: s.location || course.location || "Sefton NSW",
+                                availableSlots: s.availableSlots
+                            })
+                        })
+                })
+                rows.sort((a, b) => new Date(a.date) - new Date(b.date))
+                setSessions(rows)
+            })
+            .catch(err => console.error("Session fetch error:", err))
+            .finally(() => setLoadingSessions(false))
+    }, [course?._id])
 
     if (isMobile) {
         return <ViewCourseDetailMobile course={course} />
@@ -113,30 +143,15 @@ function CourseDetails() {
                         )}
                         <span className="cdp-price-now">${sellingPrice}</span>
                     </div>
-                    <div className="cdp-pc-sub">Course Fee</div>
                     {savings > 0 && (
                         <div className="cdp-save-badge">SAVE ${savings}!</div>
                     )}
-                    <div className="cdp-pc-divider" />
-                    <div className="cdp-pc-slbl-label">SL + BL</div>
-                    <div className="cdp-pc-slbl-row">
-                        {course.slblStrikePrice && (
-                            <span className="cdp-price-old">${course.slblStrikePrice}</span>
-                        )}
-                        <span className="cdp-price-now">${course.slblPrice}</span>
-                    </div>
                     <p className="cdp-price-note">All inclusive — no hidden fees</p>
                     <button
                         className="cdp-btn-book"
                         onClick={() => navigate(`/book-now/course/${course.slug}`)}
                     >
                         BOOK NOW — ${sellingPrice}
-                    </button>
-                    <button
-                        className="cdp-btn-book cdp-btn-slbl"
-                        onClick={() => navigate(`/book-now/course/${course.slug}?type=slbl`)}
-                    >
-                        Book Now SL + BL — ${course.slblPrice}
                     </button>
                 </>
             )}
@@ -226,12 +241,6 @@ function CourseDetails() {
                         onClick={() => navigate(`/book-now/course/${course.slug}`)}
                     >
                         BOOK NOW — ${sellingPrice}
-                    </button>
-                    <button
-                        className="cdp-sb-btn-slbl"
-                        onClick={() => openBooking("slbl")}
-                    >
-                        Book Now SL + BL — ${course.slblPrice}
                     </button>
                 </>
             )}
@@ -410,6 +419,49 @@ function CourseDetails() {
                             </ul>
                         </div>
                     )}
+
+                    {/* AVAILABLE SESSIONS */}
+                    <div className="cdp-card">
+                        <div className="cdp-card-title">Available dates &amp; locations</div>
+                        {loadingSessions ? (
+                            <div className="cdp-sessions-loading">Loading sessions...</div>
+                        ) : sessions.length === 0 ? (
+                            <p className="cdp-no-sessions">No upcoming sessions available. Please contact us for private bookings.</p>
+                        ) : (
+                            <div className="cdp-sessions-list">
+                                {sessions.map((s, i) => {
+                                    const d = new Date(s.date)
+                                    const day = d.getDate()
+                                    const mon = d.toLocaleString("en-AU", { month: "short" }).toUpperCase()
+                                    const weekday = d.toLocaleString("en-AU", { weekday: "long" })
+                                    const isLow = s.availableSlots <= 3
+                                    return (
+                                        <div className="cdp-session-row" key={i}>
+                                            <div className="cdp-s-date">
+                                                <div className="cdp-s-day">{day}</div>
+                                                <div className="cdp-s-mon">{mon}</div>
+                                            </div>
+                                            <div className="cdp-s-info">
+                                                <div className="cdp-s-title">{weekday} — Full day</div>
+                                                <div className="cdp-s-meta">
+                                                    🕒 {s.startTime} – {s.endTime} &nbsp;·&nbsp; 📍 {s.location}
+                                                </div>
+                                            </div>
+                                            <div className={`cdp-s-spots ${isLow ? "cdp-s-spots--low" : ""}`}>
+                                                {s.availableSlots} {s.availableSlots === 1 ? "spot" : "spots"} left
+                                            </div>
+                                            <button
+                                                className="cdp-s-btn"
+                                                onClick={() => navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`)}
+                                            >
+                                                Book
+                                            </button>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )}
+                    </div>
 
                     {Array.isArray(course?.feesCharges) && course.feesCharges.filter(Boolean).length > 0 && (
                         <div className="cdp-card">

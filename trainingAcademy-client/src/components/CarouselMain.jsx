@@ -86,7 +86,7 @@ export default function HomePage({ courses = [] }) {
   }
 
   // Duplicate the list for seamless infinite scroll
-  const marqueeList = [...categoryList, ...categoryList, ...categoryList];
+  const marqueeList = categoryList;
 
   const loading = dbCategories === null && courses.length === 0;
 

@@ -25,14 +25,10 @@ const getUpcomingSessions = async (req, res) => {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
 
-        const tomorrow = new Date(today)
-        tomorrow.setDate(tomorrow.getDate() + 1)
-        tomorrow.setHours(23, 59, 59, 999)
-
         const limit = parseInt(req.query.limit) || 10
 
         const schedules = await Schedule.find({
-            date: { $gte: today, $lte: tomorrow }
+            date: { $gte: today }
         })
             .populate("course", "title pricingType sellingPrice slSinglePrice withExperiencePrice withoutExperiencePrice location duration slug _id")
             .sort({ date: 1 })
