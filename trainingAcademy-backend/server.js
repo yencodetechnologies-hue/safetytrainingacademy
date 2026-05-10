@@ -24,7 +24,9 @@ const allowedOrigins = ["http://localhost:5173",
   "https://api.octosofttechnologies.in",
   "https://safetytrainingacademy.vercel.app",
   "http://72.61.236.154:8000",
-  "https://www.safetytrainingacademy.edu.au/"
+ 
+  "https://www.safetytrainingacademy.edu.au",
+   "https://safetytrainingacademy.edu.au"
 ];
 
 app.use(cors({
