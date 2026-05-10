@@ -240,6 +240,9 @@ export default function ViewCourseDetailMobile({ course, fromPortal: propFromPor
         )}
         <div className="cdm-hero-overlay" />
         <div className="cdm-hero-content">
+          <div className="cdm-hero-code">
+            {course.courseCode ? `${course.courseCode} — ` : ""}{course.category}
+          </div>
           <div className="cdm-hero-title">{course.title}</div>
           <div className="cdm-hero-price-num">{price}</div>
         </div>

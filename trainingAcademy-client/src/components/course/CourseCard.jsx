@@ -78,6 +78,7 @@ function CourseCard({ course, fromPortal }) {
                         className="course-title"
                         onClick={() => navigate(`/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)}
                     >
+                        <div className="course-card-code">{course.courseCode}</div>
                         {course.title}
                     </h3>
 

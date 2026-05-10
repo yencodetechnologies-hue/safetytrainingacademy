@@ -352,10 +352,12 @@ function CourseDetails() {
                 )}
                 <div className="cdp-hero-inner">
                     <div className="cdp-hero-left">
-                        <div className="cdp-tag">{course?.category}</div>
+                        <div className="cdp-tag">
+                            {course?.courseCode ? `${course.courseCode} — ` : ""}{course?.category}
+                        </div>
                         <h1 className="cdp-title">{course?.title}</h1>
                         <div className="cdp-code">
-                            {course?.category} &nbsp;·&nbsp; Nationally Recognised Training
+                            {course?.courseCode} &nbsp;·&nbsp; Nationally Recognised Training
                         </div>
                         <p className="cdp-desc">
                             {Array.isArray(course?.description)

@@ -1158,3 +1158,23 @@ grid-template-columns:1fr;
   font-weight: 700 !important;
   color: #64748b !important;
 }
+.course-card-code {
+    color: #00AEEF;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.course-code-badge {
+    background: #00AEEF;
+    color: #0d2240;
+    padding: 6px 16px;
+    border-radius: 50px;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}

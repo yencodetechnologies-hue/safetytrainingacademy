@@ -328,7 +328,9 @@ export default function MobileLandingPage({ courses = [] }) {
             )}
             <div className="mlp-slide-overlay" />
             <div className="mlp-slide-content">
-              {s.courseCode && <span className="mlp-slide-badge">{s.courseCode}</span>}
+              <div className="mlp-slide-badge">
+                {s.courseCode ? `${s.courseCode} — ` : ""}{activeCourses.find(c => c._id === s.id)?.category || "Course"}
+              </div>
               <div className="mlp-slide-title">{s.title}</div>
               <span className="mlp-slide-price">{s.price}</span>
               {s.orig && <span className="mlp-slide-orig">{s.orig}</span>}

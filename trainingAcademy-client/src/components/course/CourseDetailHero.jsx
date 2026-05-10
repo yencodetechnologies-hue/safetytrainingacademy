@@ -28,7 +28,7 @@ function CourseDetailHero({ course }) {
                     <div className="course-hero-left">
 
                         <div className="course-tag">
-                            {course?.courseCode || "Construction — White Card"}
+                            {course?.courseCode ? `${course.courseCode} — ` : ""}{course?.category || "Construction — White Card"}
                         </div>
 
                         <h1 className="hero-title">
