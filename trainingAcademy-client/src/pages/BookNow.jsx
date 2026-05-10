@@ -65,7 +65,8 @@ function BookNow() {
     const [isProcessing, setIsProcessing] = useState(false)
 
     const loggedInUser = JSON.parse(localStorage.getItem("user") || "{}");
-    const isStudentPortalAutofill = fromPortal && loggedInUser?.role === "Student";
+    const isStudentPortalAutofill = fromPortal && 
+        (String(loggedInUser?.role || "").toLowerCase() === "student");
 
     const cardPaymentRef = useRef({ trigger: null, paymentMethod: "bank", paymentStatus: null })
     const [activePaymentMethod, setActivePaymentMethod] = useState("Bank Transfer")
@@ -351,6 +352,22 @@ function BookNow() {
             })
             .finally(() => setIsLoading(false));
     }, [enrollId]);
+
+    useEffect(() => {
+        if (isStudentPortalAutofill && loggedInUser?.email) {
+            const data = {
+                name: loggedInUser.name || "",
+                email: loggedInUser.email || "",
+                phone: loggedInUser.phone || loggedInUser.mobileNumber || "",
+            };
+            setUserDetails(data);
+            setPaymentData(prev => ({
+                ...prev,
+                ...data,
+                agreed: true,
+            }));
+        }
+    }, [isStudentPortalAutofill]);
 
     useEffect(() => {
         if (step === 1) {

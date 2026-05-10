@@ -233,7 +233,7 @@ function CourseDetails() {
                 </>
             )}
 
-            <button className="cdp-btn-voc" onClick={() => navigate(`/voc?courseId=${course._id}`)}>
+            <button className="cdp-btn-voc" onClick={() => navigate(`/voc?courseId=${course._id}${fromPortal ? "&fromPortal=true" : ""}`)}>
                 Already Trained? Book VOC
             </button>
             <ul className="cdp-trust-list">
@@ -315,7 +315,7 @@ function CourseDetails() {
                 </>
             )}
 
-            <button className="cdp-sb-btn-voc" onClick={() => navigate(`/voc?courseId=${course._id}`)}>
+            <button className="cdp-sb-btn-voc" onClick={() => navigate(`/voc?courseId=${course._id}${fromPortal ? "&fromPortal=true" : ""}`)}>
                 Already Trained? Book VOC
             </button>
             <a href="tel:1300976097" style={{ textDecoration: "none" }}>
@@ -672,7 +672,17 @@ function CourseDetails() {
             </div>
 
             <Footer courses={courses} />
-
+            {showModal && (
+                <BookingModal
+                    course={course}
+                    onClose={() => {
+                        setShowModal(false)
+                        setSelectedOptionId(null)
+                    }}
+                    initialSelection={selectedOptionId}
+                    extraQueryParams={fromPortal ? "fromPortal=true" : ""}
+                />
+            )}
         </div>
     )
 }
