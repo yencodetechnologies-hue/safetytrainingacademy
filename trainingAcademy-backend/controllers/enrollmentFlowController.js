@@ -4,6 +4,7 @@ const Course = require("../models/Course");
 const Schedule = require("../models/schedule");
 const mongoose = require("mongoose");
 const sendEmail = require("../config/sendEmail");
+const { sendLLNCompletionNotification, sendEnrollmentFormCompletionNotification } = require("./bookingEmailController");
 
 // ✅ Create new flow
 exports.createFlow = async (req, res) => {
@@ -237,6 +238,30 @@ exports.saveLLND = async (req, res) => {
 
     res.json(updated);
 
+    // ✅ Send Notifications (Non-blocking)
+    try {
+      const populated = await EnrollmentFlow.findById(flowId).populate("studentId");
+      if (populated && populated.studentId) {
+        // We call the controller function with a mock req/res or just manually
+        // But since we want it to be clean, we'll just call the logic
+        const student = populated.studentId;
+        const score = updated.llnd?.score || 0;
+        const isPassed = score >= 70; // Assuming 70 is pass mark as per system logic
+
+        // Call the email function (we pass a mock object that mimics req.body)
+        sendLLNCompletionNotification({
+          body: {
+            studentEmail: student.email,
+            studentName: student.name,
+            score: score,
+            isPassed: isPassed
+          }
+        }, null); // pass null for res since we already sent response
+      }
+    } catch (emailErr) {
+      console.error("Failed to trigger LLN emails:", emailErr.message);
+    }
+
   } catch (err) {
     console.error("saveLLND error:", err);
     res.status(500).json({ error: err.message });
@@ -258,6 +283,22 @@ exports.completeEnrollment = async (req, res) => {
     });
 
     res.json({ message: "Enrollment completed 🎉" });
+
+    // ✅ Send Notifications (Non-blocking)
+    try {
+      const populated = await EnrollmentFlow.findById(flowId).populate("studentId");
+      if (populated && populated.studentId) {
+        const student = populated.studentId;
+        sendEnrollmentFormCompletionNotification({
+          body: {
+            studentEmail: student.email,
+            studentName: student.name
+          }
+        }, null);
+      }
+    } catch (emailErr) {
+      console.error("Failed to trigger Enrollment emails:", emailErr.message);
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

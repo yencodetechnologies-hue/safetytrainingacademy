@@ -439,7 +439,7 @@ const sendVOCConfirmation = async (req, res) => {
     const shortId = String(submissionId).slice(0, 8);
     const priceStr = `$${Number(amountPaid).toFixed(2)}`;
 
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+    const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
 <tr><td align="center">
@@ -462,8 +462,30 @@ const sendVOCConfirmation = async (req, res) => {
 </td></tr>
 </table></td></tr></table></body></html>`;
 
+    const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
+<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;text-align:center;">
+    <h1 style="margin:0;font-size:20px;">NEW VOC SUBMISSION</h1>
+</td></tr>
+<tr><td style="padding:30px;">
+    <p>A new VOC submission has been received.</p>
+    <table width="100%" cellpadding="10" cellspacing="0" style="background-color:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
+        <tr><td style="color:#64748b;width:130px;">Name</td><td><strong>${firstName} ${lastName}</strong></td></tr>
+        <tr><td style="color:#64748b;">Email</td><td>${toEmail}</td></tr>
+        <tr><td style="color:#64748b;">Amount</td><td><strong>${priceStr}</strong></td></tr>
+        <tr><td style="color:#64748b;">Payment</td><td>${paymentMethod}</td></tr>
+        <tr><td style="color:#64748b;">Submission ID</td><td><code>${submissionId}</code></td></tr>
+    </table>
+    <p style="margin-top:20px;">Please log in to the admin portal to review this submission.</p>
+</td></tr>
+</table></body></html>`;
+
     try {
-        await sendEmail({ to: toEmail, subject: `VOC Submission Received - #${shortId}`, html });
+        await sendEmail({ to: toEmail, subject: `VOC Submission Received - #${shortId}`, html: studentHtml });
+        if (process.env.BOOKINGS_EMAIL) {
+            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `ACTION REQUIRED: New VOC Submission - ${firstName} ${lastName}`, html: academyHtml });
+        }
         res.status(200).json({ success: true });
     } catch (err) {
         console.error("❌ VOC email error:", err.message);
@@ -561,6 +583,120 @@ const sendCompanyBankTransfer = async (req, res) => {
 // 8. Company Billing — Card Payment
 // POST /api/booking-email/company-card-payment
 // ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// 9. LLN Completion Notification
+// ─────────────────────────────────────────────────────────────
+const sendLLNCompletionNotification = async (req, res) => {
+    const { studentEmail, studentName, score, isPassed } = req.body;
+
+    const status = isPassed ? "Passed" : "Under Review";
+    const statusColor = isPassed ? "#16a34a" : "#ca8a04";
+    const statusBg = isPassed ? "#f0fdf4" : "#fefce8";
+
+    const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
+<tr><td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:24px 30px;text-align:center;">
+    <h1 style="margin:0;font-size:22px;">Assessment Completed</h1>
+</td></tr>
+<tr><td style="padding:30px;">
+    <p>Dear <strong>${studentName}</strong>,</p>
+    <p>Thank you for completing your Pre-Enrollment (LLN) Assessment.</p>
+    <div style="margin:24px 0;padding:20px;background-color:${statusBg};border-radius:8px;border:1px solid ${statusColor};text-align:center;">
+        <p style="margin:0 0 8px;font-size:12px;color:#64748b;text-transform:uppercase;">Your Result</p>
+        <p style="margin:0;font-size:24px;font-weight:700;color:${statusColor};">${status}</p>
+        <p style="margin:8px 0 0;font-size:16px;color:#334155;">Score: ${Number(score).toFixed(1)}%</p>
+    </div>
+    ${isPassed 
+        ? "<p>Congratulations! You have passed the assessment. You can now proceed with your enrollment.</p>" 
+        : "<p>Your assessment is currently under review by our administration team. We will notify you once the review is complete.</p>"}
+</td></tr>
+<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
+    <p style="margin:0;font-size:13px;color:#64748b;">Best regards,<br/><strong>Safety Training Academy</strong></p>
+</td></tr>
+</table></body></html>`;
+
+    const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
+<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;text-align:center;">
+    <h1 style="margin:0;font-size:20px;">LLN ASSESSMENT COMPLETED</h1>
+</td></tr>
+<tr><td style="padding:30px;">
+    <p>A student has completed their LLN Assessment.</p>
+    <table width="100%" cellpadding="10" cellspacing="0" style="background-color:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
+        <tr><td style="color:#64748b;width:130px;">Student Name</td><td><strong>${studentName}</strong></td></tr>
+        <tr><td style="color:#64748b;">Email</td><td>${studentEmail}</td></tr>
+        <tr><td style="color:#64748b;">Score</td><td><strong>${Number(score).toFixed(1)}%</strong></td></tr>
+        <tr><td style="color:#64748b;">Status</td><td><span style="color:${statusColor};font-weight:700;">${status}</span></td></tr>
+    </table>
+    <p style="margin-top:20px;">Please log in to the admin portal to review the results.</p>
+</td></tr>
+</table></body></html>`;
+
+    try {
+        await sendEmail({ to: studentEmail, subject: "Pre-Enrollment Assessment Completed", html: studentHtml });
+        if (process.env.BOOKINGS_EMAIL) {
+            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `ACTION REQUIRED: LLN Assessment Completed - ${studentName}`, html: academyHtml });
+        }
+        if (res) res.status(200).json({ success: true });
+    } catch (err) {
+        console.error("❌ LLN email error:", err.message);
+        if (res) res.status(500).json({ success: false });
+    }
+};
+
+// ─────────────────────────────────────────────────────────────
+// 10. Enrollment Form Completion Notification
+// ─────────────────────────────────────────────────────────────
+const sendEnrollmentFormCompletionNotification = async (req, res) => {
+    const { studentEmail, studentName } = req.body;
+
+    const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
+<tr><td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:24px 30px;text-align:center;">
+    <h1 style="margin:0;font-size:22px;">Enrollment Form Submitted</h1>
+</td></tr>
+<tr><td style="padding:30px;">
+    <p>Dear <strong>${studentName}</strong>,</p>
+    <p>We have successfully received your enrollment form.</p>
+    <p>Our administration team will now review your application and documents. This process typically takes 1-2 business days.</p>
+    <p>We will notify you via email as soon as your enrollment is approved.</p>
+</td></tr>
+<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
+    <p style="margin:0;font-size:13px;color:#64748b;">Best regards,<br/><strong>Safety Training Academy</strong></p>
+</td></tr>
+</table></body></html>`;
+
+    const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
+<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;text-align:center;">
+    <h1 style="margin:0;font-size:20px;">ENROLLMENT FORM SUBMITTED</h1>
+</td></tr>
+<tr><td style="padding:30px;">
+    <p>A student has submitted their enrollment form and is awaiting review.</p>
+    <table width="100%" cellpadding="10" cellspacing="0" style="background-color:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
+        <tr><td style="color:#64748b;width:130px;">Student Name</td><td><strong>${studentName}</strong></td></tr>
+        <tr><td style="color:#64748b;">Email</td><td>${studentEmail}</td></tr>
+    </table>
+    <p style="margin-top:20px;">Please log in to the admin portal to review the form and documents.</p>
+</td></tr>
+</table></body></html>`;
+
+    try {
+        await sendEmail({ to: studentEmail, subject: "Enrollment Form Received", html: studentHtml });
+        if (process.env.BOOKINGS_EMAIL) {
+            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `ACTION REQUIRED: Enrollment Form Submitted - ${studentName}`, html: academyHtml });
+        }
+        if (res) res.status(200).json({ success: true });
+    } catch (err) {
+        console.error("❌ Enrollment form email error:", err.message);
+        if (res) res.status(500).json({ success: false });
+    }
+};
+
 const sendCompanyCardPayment = async (req, res) => {
     const { companyEmail, companyName, amount, transactionReference, linesSummary } = req.body;
     const amountStr = `$${Number(amount).toFixed(2)}`;
@@ -617,4 +753,6 @@ module.exports = {
     sendEmailOTP,
     sendCompanyBankTransfer,
     sendCompanyCardPayment,
+    sendLLNCompletionNotification,
+    sendEnrollmentFormCompletionNotification,
 };

@@ -36,7 +36,7 @@ const sendVocConfirmationEmail = async ({ toEmail, firstName, lastName, submissi
     const shortId = String(submissionId).slice(0, 8)
     const priceStr = `$${Number(amountPaid).toFixed(2)}`
 
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+    const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
 <tr><td align="center">
@@ -59,10 +59,31 @@ const sendVocConfirmationEmail = async ({ toEmail, firstName, lastName, submissi
 </td></tr>
 </table></td></tr></table></body></html>`
 
+    const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
+<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;text-align:center;">
+    <h1 style="margin:0;font-size:20px;">NEW VOC SUBMISSION</h1>
+</td></tr>
+<tr><td style="padding:30px;">
+    <p>A new VOC submission has been received.</p>
+    <table width="100%" cellpadding="10" cellspacing="0" style="background-color:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
+        <tr><td style="color:#64748b;width:130px;">Name</td><td><strong>${firstName} ${lastName}</strong></td></tr>
+        <tr><td style="color:#64748b;">Email</td><td>${toEmail}</td></tr>
+        <tr><td style="color:#64748b;">Amount</td><td><strong>${priceStr}</strong></td></tr>
+        <tr><td style="color:#64748b;">Payment</td><td>${paymentMethod}</td></tr>
+        <tr><td style="color:#64748b;">Submission ID</td><td><code>${submissionId}</code></td></tr>
+    </table>
+    <p style="margin-top:20px;">Please log in to the admin portal to review this submission.</p>
+</td></tr>
+</table></body></html>`
+
     try {
-        await sendEmail({ to: toEmail, subject: `VOC Submission Received - #${shortId}`, html })
+        await sendEmail({ to: toEmail, subject: `VOC Submission Received - #${shortId}`, html: studentHtml })
+        if (process.env.BOOKINGS_EMAIL) {
+            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `ACTION REQUIRED: New VOC Submission - ${firstName} ${lastName}`, html: academyHtml })
+        }
     } catch (err) {
-        // Log but never break the API response over an email failure.
         console.error("VOC confirmation email failed:", err.message)
     }
 }
