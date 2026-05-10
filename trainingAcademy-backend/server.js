@@ -1,4 +1,8 @@
-require("dns").setServers(["8.8.8.8"]);
+try {
+  require("dns").setServers(["8.8.8.8"]);
+} catch (err) {
+  console.warn("Could not set DNS servers:", err.message);
+}
 require("dotenv").config({ path: require("path").join(__dirname, ".env") });
 const express = require("express");
 const cors = require("cors");
@@ -93,13 +97,28 @@ app.use("/api/sliders", require("./routes/sliderRoutes"));
 app.use("/api/partners", require("./routes/partnerRoutes"));
 app.use("/api/voc", require("./routes/vocRoutes"));
 
+app.get("/api/health", async (req, res) => {
+  const mongoose = require("mongoose");
+  const dbStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
+  res.json({
+    status: "OK",
+    database: dbStatus,
+    origin: req.headers.origin || "No Origin Header",
+    allowedOrigins: allowedOrigins
+  });
+});
+
 // GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
   console.error("GLOBAL ERROR:", err.stack);
   
   // Ensure CORS headers are present on error responses
   const origin = req.headers.origin;
-  if (origin && (allowedOrigins.includes(origin) || allowedOrigins.includes(origin + "/"))) {
+  const isAllowed = origin && allowedOrigins.some(allowed => {
+    return origin === allowed || origin === allowed + "/";
+  });
+
+  if (isAllowed) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Access-Control-Allow-Credentials", "true");
   }
