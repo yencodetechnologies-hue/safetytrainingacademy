@@ -17,16 +17,23 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendEmail = async ({ to, subject, html }) => {
+  if (!to) {
+    console.error("❌ sendEmail error: No recipient defined (to is empty)");
+    return;
+  }
+
   try {
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: `"Safety Training Academy" <${process.env.SMTP_USER}>`,
       to,
       subject,
       html
     });
-    console.log("✅ Email sent to:", to);
+    console.log("✅ Email sent to:", to, "| MessageId:", info.messageId);
+    return info;
   } catch (err) {
-    console.error("❌ SMTP Error:", err.message);
+    console.error("❌ SMTP Error for", to, ":", err.message);
+    throw err; // Re-throw so caller knows it failed
   }
 };
 
