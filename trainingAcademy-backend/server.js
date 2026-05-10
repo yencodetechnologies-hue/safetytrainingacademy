@@ -18,27 +18,47 @@ const resultRoutes = require("./routes/resultRoutes");
 connectDB();
 
 const app = express();
-const allowedOrigins = ["http://localhost:5173",
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
   "https://safety-training-academy.netlify.app",
-  "https://api.octosofttechnologies.in/",
   "https://api.octosofttechnologies.in",
   "https://safetytrainingacademy.vercel.app",
-  "http://72.61.236.154:8000",
- 
   "https://www.safetytrainingacademy.edu.au",
-   "https://safetytrainingacademy.edu.au"
+  "https://safetytrainingacademy.edu.au",
+  "http://72.61.236.154:8000",
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
+// Combine with origins from .env
+if (process.env.CLIENT_ORIGIN) {
+  process.env.CLIENT_ORIGIN.split(",").forEach((origin) => {
+    const trimmed = origin.trim();
+    if (trimmed && !allowedOrigins.includes(trimmed)) {
+      allowedOrigins.push(trimmed);
     }
-  },
-  credentials: true
-}));
+  });
+}
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.error(`CORS blocked for origin: ${origin}`);
+        // Instead of throwing an error which causes a 500, we pass false
+        // This will result in no CORS headers, which is the correct way to block
+        callback(null, false);
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+  })
+);
 
 // ✅ Increased limits to handle file uploads up to 50MB
 app.use(express.json({ limit: "50mb" }));
