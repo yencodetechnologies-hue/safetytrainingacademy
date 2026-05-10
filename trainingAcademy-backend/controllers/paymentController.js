@@ -2,30 +2,45 @@ const axios = require('axios');
 const Payment = require('../models/Payment');
 
 const EWAY_BASE_URL =
-  process.env.EWAY_ENVIRONMENT === 'Production'
+  (process.env.EWAY_ENVIRONMENT || '').trim() === 'Production'
     ? 'https://api.ewaypayments.com'
     : 'https://api.sandbox.ewaypayments.com';
 
 function getEwayAuthHeader() {
-  const credentials = Buffer.from(
-    `${process.env.EWAY_API_KEY}:${process.env.EWAY_API_PASSWORD}`
-  ).toString('base64');
+  const apiKey = (process.env.EWAY_API_KEY || '').trim();
+  const apiPassword = (process.env.EWAY_API_PASSWORD || '').trim();
+  
+  if (!apiKey || !apiPassword) {
+    console.error('CRITICAL: eWAY API credentials missing in environment variables');
+  }
+
+  const credentials = Buffer.from(`${apiKey}:${apiPassword}`).toString('base64');
   return `Basic ${credentials}`;
 }
 
 async function callEwayTransaction(requestData) {
-  const response = await axios.post(
-    `${EWAY_BASE_URL}/Transaction`,
-    requestData,
-    {
-      headers: {
-        Authorization: getEwayAuthHeader(),
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
+  try {
+    const response = await axios.post(
+      `${EWAY_BASE_URL}/Transaction`,
+      requestData,
+      {
+        headers: {
+          Authorization: getEwayAuthHeader(),
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    // Re-throw with more context
+    if (error.response) {
+      const ewayErr = new Error(`eWAY API Error: ${error.response.status}`);
+      ewayErr.response = error.response;
+      throw ewayErr;
     }
-  );
-  return response.data;
+    throw error;
+  }
 }
 
 function getFirstName(fullName) {
@@ -138,16 +153,25 @@ exports.createPayment = async (req, res) => {
         : `Payment declined: ${ewayResponse.ResponseCode} - ${ewayResponse.ResponseMessage}`,
     });
   } catch (error) {
-    const ewayError = error.response?.data;
-    console.error('eWAY Error:', ewayError || error.message);
+    const ewayErrorResponse = error.response?.data;
+    const statusCode = error.response?.status || 500;
+    
+    console.error(`eWAY Payment Error [${statusCode}]:`, JSON.stringify(ewayErrorResponse || error.message, null, 2));
+
     if (payment) {
       payment.status = 'failed';
       await payment.save();
     }
-    const msg = ewayError
-      ? (ewayError.Errors || JSON.stringify(ewayError))
+
+    const errorMsg = ewayErrorResponse?.Errors 
+      ? `Payment gateway error: ${ewayErrorResponse.Errors}`
       : (error.message || 'Payment processing error');
-    return res.status(500).json({ success: false, message: msg });
+
+    return res.status(statusCode).json({ 
+      success: false, 
+      message: errorMsg,
+      details: ewayErrorResponse 
+    });
   }
 };
 

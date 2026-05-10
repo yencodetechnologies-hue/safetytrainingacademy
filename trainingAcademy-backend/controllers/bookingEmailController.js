@@ -187,10 +187,10 @@ const sendBookingConfirmation = async (req, res) => {
 
         // 1. Send Academy Notification
         try {
-            await sendEmail({ 
-                to: process.env.BOOKINGS_EMAIL, 
-                subject: `New Booking #${orderId} - ${name} - ${courseName}`, 
-                html: academyHtml 
+            await sendEmail({
+                to: process.env.BOOKINGS_EMAIL,
+                subject: `New Booking #${orderId} - ${name} - ${courseName}`,
+                html: academyHtml
             });
             console.log(`✅ Academy notification sent to ${process.env.BOOKINGS_EMAIL}`);
         } catch (academyErr) {
@@ -200,10 +200,10 @@ const sendBookingConfirmation = async (req, res) => {
 
         // 2. Send Student Confirmation
         try {
-            await sendEmail({ 
-                to: email, 
-                subject: `Booking Confirmed - ${courseName} (Order #${orderId})`, 
-                html: studentHtml 
+            await sendEmail({
+                to: email,
+                subject: `Booking Confirmed - ${courseName} (Order #${orderId})`,
+                html: studentHtml
             });
             console.log(`✅ Student confirmation sent to ${email}`);
         } catch (studentErr) {
@@ -607,9 +607,9 @@ const sendLLNCompletionNotification = async (req, res) => {
         <p style="margin:0;font-size:24px;font-weight:700;color:${statusColor};">${status}</p>
         <p style="margin:8px 0 0;font-size:16px;color:#334155;">Score: ${Number(score).toFixed(1)}%</p>
     </div>
-    ${isPassed 
-        ? "<p>Congratulations! You have passed the assessment. You can now proceed with your enrollment.</p>" 
-        : "<p>Your assessment is currently under review by our administration team. We will notify you once the review is complete.</p>"}
+    ${isPassed
+            ? "<p>Congratulations! You have passed the assessment. You can now proceed with your enrollment.</p>"
+            : "<p>Your assessment is currently under review by our administration team. We will notify you once the review is complete.</p>"}
 </td></tr>
 <tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
     <p style="margin:0;font-size:13px;color:#64748b;">Best regards,<br/><strong>Safety Training Academy</strong></p>

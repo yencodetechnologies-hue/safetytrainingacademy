@@ -19,10 +19,10 @@ const sanitizeCard = (cardRaw) => {
     if (!cardRaw) return { name: "", last4: "", expiryMonth: "", expiryYear: "" }
     const c = typeof cardRaw === "string" ? safeJson(cardRaw) : cardRaw
     return {
-        name:        String(c.name || "").trim(),
-        last4:       String(c.last4 || "").replace(/\D/g, "").slice(-4),
+        name: String(c.name || "").trim(),
+        last4: String(c.last4 || "").replace(/\D/g, "").slice(-4),
         expiryMonth: String(c.expiryMonth || "").trim().slice(0, 2),
-        expiryYear:  String(c.expiryYear  || "").trim().slice(0, 4),
+        expiryYear: String(c.expiryYear || "").trim().slice(0, 4),
     }
 }
 
@@ -120,17 +120,17 @@ exports.createSubmission = async (req, res) => {
         }
 
         const doc = {
-            firstName:     b.firstName,
-            lastName:      b.lastName,
-            email:         b.email,
-            phone:         b.phone,
-            studentId:     b.studentId || "",
+            firstName: b.firstName,
+            lastName: b.lastName,
+            email: b.email,
+            phone: b.phone,
+            studentId: b.studentId || "",
             streetAddress: b.streetAddress,
-            city:          b.city,
-            state:         b.state,
-            postcode:      b.postcode,
+            city: b.city,
+            state: b.state,
+            postcode: b.postcode,
             courses,
-            amount:        courses.length * VocSubmission.PRICE_PER_COURSE,
+            amount: courses.length * VocSubmission.PRICE_PER_COURSE,
             paymentMethod,
         }
 
@@ -155,11 +155,11 @@ exports.createSubmission = async (req, res) => {
 
         // Fire confirmation email (non-blocking failure)
         await sendVocConfirmationEmail({
-            toEmail:      submission.email,
-            firstName:    submission.firstName,
-            lastName:     submission.lastName,
+            toEmail: submission.email,
+            firstName: submission.firstName,
+            lastName: submission.lastName,
             submissionId: submission._id,
-            amountPaid:   submission.amount,
+            amountPaid: submission.amount,
             paymentMethod: paymentMethod === "card" ? "Credit / Debit Card" : "Bank Transfer",
         })
 
@@ -188,7 +188,7 @@ exports.listSubmissions = async (_req, res) => {
 exports.getStats = async (_req, res) => {
     try {
         const [pending, verified, rejected, total] = await Promise.all([
-            VocSubmission.countDocuments({ status: "Pending"  }),
+            VocSubmission.countDocuments({ status: "Pending" }),
             VocSubmission.countDocuments({ status: "Verified" }),
             VocSubmission.countDocuments({ status: "Rejected" }),
             VocSubmission.countDocuments({}),

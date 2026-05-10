@@ -1,31 +1,31 @@
-const CompanyPayment  = require("../models/CompanyPayment");
-const Company         = require("../models/Company");
-const cloudinary      = require("../config/cloudinary");
-const EnrollmentFlow  = require("../models/EnrollmentFlows");
-const sendEmail       = require("../config/sendEmail");
+const CompanyPayment = require("../models/CompanyPayment");
+const Company = require("../models/Company");
+const cloudinary = require("../config/cloudinary");
+const EnrollmentFlow = require("../models/EnrollmentFlows");
+const sendEmail = require("../config/sendEmail");
 
 const fmtId = (id) => {
-    const s = String(id).replace(/\D/g, "");
-    return s.length >= 8 ? s.slice(0, 8) : String(id).slice(0, 8).toUpperCase().padStart(8, "0");
+  const s = String(id).replace(/\D/g, "");
+  return s.length >= 8 ? s.slice(0, 8) : String(id).slice(0, 8).toUpperCase().padStart(8, "0");
 };
 
 const fmtDate = (d) => d
-    ? new Date(d).toLocaleDateString("en-AU", { weekday: "short", year: "numeric", month: "short", day: "numeric" })
-    : "TBC";
+  ? new Date(d).toLocaleDateString("en-AU", { weekday: "short", year: "numeric", month: "short", day: "numeric" })
+  : "TBC";
 
 const buildOrderEmails = (payment) => {
-    const orderId     = fmtId(payment._id.toString());
-    const priceStr    = `$${Number(payment.amount).toFixed(2)}`;
-    const orderDate   = new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const orderId = fmtId(payment._id.toString());
+  const priceStr = `$${Number(payment.amount).toFixed(2)}`;
+  const orderDate = new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
-    const coursesHtml = (payment.courses || []).map(c => `
+  const coursesHtml = (payment.courses || []).map(c => `
         <tr><td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;">
             <p style="margin:0 0 4px;font-size:14px;font-weight:600;color:#334155;">${c.courseName || "Course"}</p>
             <p style="margin:0 0 2px;font-size:13px;color:#64748b;">Date: ${fmtDate(c.sessionDate)} ${c.startTime ? "· " + c.startTime : ""}</p>
             <p style="margin:0;font-size:13px;color:#64748b;">Qty: ${c.quantity || 1} · $${Number(c.pricePerPerson || 0).toFixed(2)} / person</p>
         </td></tr>`).join("");
 
-    const companyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+  const companyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
 <tr><td align="center">
@@ -52,7 +52,7 @@ const buildOrderEmails = (payment) => {
 </td></tr>
 </table></td></tr></table></body></html>`;
 
-    const internalHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+  const internalHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
 <tr><td align="center">
@@ -77,7 +77,7 @@ const buildOrderEmails = (payment) => {
 </td></tr>
 </table></td></tr></table></body></html>`;
 
-    return { orderId, companyHtml, internalHtml };
+  return { orderId, companyHtml, internalHtml };
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -89,7 +89,7 @@ exports.getAllPayments = async (req, res) => {
     const { status, confirmed, companyId, page = 1, limit = 20 } = req.query;
 
     const query = {};
-    if (status)    query.status    = status;
+    if (status) query.status = status;
     if (confirmed) query.confirmed = confirmed === "true";
     if (companyId) query.companyId = companyId;
 
@@ -124,15 +124,15 @@ exports.getMyPayments = async (req, res) => {
       .lean();
 
     // Stats
-    const totalAmt  = payments.reduce((s, p) => s + (p.amount || 0), 0);
+    const totalAmt = payments.reduce((s, p) => s + (p.amount || 0), 0);
     const confirmed = payments.filter(p => p.confirmed).length;
-    const pending   = payments.filter(p => p.status === "pending").length;
+    const pending = payments.filter(p => p.status === "pending").length;
 
     res.json({
       success: true,
       data: payments,
       stats: {
-        total:     payments.length,
+        total: payments.length,
         confirmed,
         pending,
         totalAmount: totalAmt,
@@ -159,7 +159,7 @@ exports.createPayment = async (req, res) => {
       transactionReference,
       courseCount,
       notes,
-      courses, 
+      courses,
     } = req.body;
 
     if (!companyId || !amount) {
@@ -175,19 +175,19 @@ exports.createPayment = async (req, res) => {
 
     const payment = await CompanyPayment.create({
       companyId,
-      flowId:               flowId || null,
-      companyName:          company.companyName,
-      email:                company.email,
-      mobile:               company.mobileNumber || "",
-      amount:               Number(amount),
-      paymentMethod:        paymentMethod || "Bank Transfer",
-      courseCount:          Number(courseCount) || courses?.length || 1,  // ✅ AUTO
-      courses:              courses || [], 
+      flowId: flowId || null,
+      companyName: company.companyName,
+      email: company.email,
+      mobile: company.mobileNumber || "",
+      amount: Number(amount),
+      paymentMethod: paymentMethod || "Bank Transfer",
+      courseCount: Number(courseCount) || courses?.length || 1,  // ✅ AUTO
+      courses: courses || [],
       receiptUrl,
       transactionReference: transactionReference || "",
-      notes:                notes || "",
-      status:               "pending",
-      confirmed:            false,
+      notes: notes || "",
+      status: "pending",
+      confirmed: false,
     });
 
     res.status(201).json({ success: true, data: payment });
@@ -227,7 +227,7 @@ exports.uploadReceipt = async (req, res) => {
     // ── Delete old receipt from Cloudinary ───────────────────
     if (payment.receiptUrl) {
       try {
-        const parts    = payment.receiptUrl.split("/");
+        const parts = payment.receiptUrl.split("/");
         const filename = parts[parts.length - 1].split(".")[0];
         await cloudinary.uploader.destroy(`company-receipts/${filename}`);
       } catch (e) {
@@ -254,8 +254,8 @@ exports.confirmPayment = async (req, res) => {
     if (!payment) return res.status(404).json({ message: "Payment not found" });
 
     // ✅ CompanyPayment confirm
-    payment.confirmed   = true;
-    payment.status      = "success";
+    payment.confirmed = true;
+    payment.status = "success";
     payment.confirmedAt = new Date();
     payment.confirmedBy = req.user?.id || "admin";
     await payment.save();
@@ -263,7 +263,7 @@ exports.confirmPayment = async (req, res) => {
     // ✅ EnrollmentFlow-லயும் payment status update
     if (payment.companyId) {
       const EnrollmentFlow = require("../models/EnrollmentFlows");
-      
+
       // Company-ஓட pending flows எல்லாத்தையும் success பண்ணு
       await EnrollmentFlow.updateMany(
         {
@@ -352,17 +352,17 @@ exports.getPaymentDetails = async (req, res) => {
       const s = flow.studentId || {};
       const item = flow.items?.[0] || {};
       return {
-        name:    s.name  || "—",
-        email:   s.email || "—",
-        phone:   s.phone || "—",
-        course:  item.course?.courseName || "—",
-        payment: item.payment?.status    || "pending",
+        name: s.name || "—",
+        email: s.email || "—",
+        phone: s.phone || "—",
+        course: item.course?.courseName || "—",
+        payment: item.payment?.status || "pending",
       };
     });
 
     res.json({
       success: true,
-      courses:          payment.courses || [],
+      courses: payment.courses || [],
       enrolledStudents,
     });
   } catch (err) {
@@ -382,10 +382,10 @@ exports.deletePayment = async (req, res) => {
     // Delete receipt from Cloudinary
     if (payment.receiptUrl) {
       try {
-        const parts    = payment.receiptUrl.split("/");
+        const parts = payment.receiptUrl.split("/");
         const filename = parts[parts.length - 1].split(".")[0];
         await cloudinary.uploader.destroy(`company-receipts/${filename}`);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     res.json({ success: true, message: "Deleted" });

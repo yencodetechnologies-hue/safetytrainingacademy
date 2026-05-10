@@ -612,7 +612,7 @@ function Payment({
 
             {/* Card Payment */}
             {!isCompanyEnroll && !isEnrollmentLink && paymentMethod === "Card Payment" && (
-                <div className="card-payment">
+                <form className="card-payment" onSubmit={(e) => e.preventDefault()}>
                     <div className="secure-box">
                         <div className="secure-left">
                             🔒 <strong>Secure Payment</strong>
@@ -690,6 +690,7 @@ function Payment({
                             onChange={(e) => setCvv(e.target.value)}
                             onBlur={() => handleBlur("cvv")}
                             className={errors.cvv ? "input-error" : ""}
+                            autoComplete="cc-csc"
                         />
                         {errors.cvv && <span className="error-text">⚠ {errors.cvv}</span>}
                     </div>
@@ -713,15 +714,15 @@ function Payment({
                                     <span>⚠️</span>
                                     <strong>Payment failed</strong>
                                 </div>
-                                <button className="payment-error-close" onClick={() => setPaymentStatus(null)}>✕</button>
+                                <button className="payment-error-close" type="button" onClick={() => setPaymentStatus(null)}>✕</button>
                             </div>
                             <p className="payment-error-message">
                                 {paymentError || "Your card was declined. Please contact your bank or try a different payment method."}
                             </p>
-                            <button className="try-again-btn" onClick={() => setPaymentStatus(null)}>Try again</button>
+                            <button className="try-again-btn" type="button" onClick={() => setPaymentStatus(null)}>Try again</button>
                         </div>
                     )}
-                </div>
+                </form>
             )}
 
             {paymentStatus === "loading" && (
