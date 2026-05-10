@@ -25,13 +25,28 @@
 /* SCROLL */
 .sb-scroll {
   display: flex;
-  gap: 10px;
-  overflow-x: auto;
+  overflow: hidden;
   flex: 1;
-  padding-bottom: 2px;
-  scrollbar-width: none;
+  padding: 5px 0;
+  position: relative;
 }
-.sb-scroll::-webkit-scrollbar { display: none; }
+
+.sb-marquee {
+  display: flex;
+  gap: 15px;
+  animation: sb-marquee-scroll 40s linear infinite;
+  white-space: nowrap;
+  width: max-content;
+}
+
+.sb-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes sb-marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
 
 /* CHIP */
 .sb-chip {

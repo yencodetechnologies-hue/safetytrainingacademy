@@ -46,50 +46,50 @@ function SessionsBar() {
             <div className="sb-label">Don't miss out</div>
 
             <div className="sb-scroll">
-
-                {/* Loading skeletons */}
-                {loading && Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="sb-chip sb-chip--skeleton">
-                        <div className="sb-skeleton-date" />
-                        <div className="sb-skeleton-info">
-                            <div className="sb-skeleton-line sb-skeleton-line--title" />
-                            <div className="sb-skeleton-line sb-skeleton-line--sub" />
-                        </div>
-                        <div className="sb-skeleton-pill" />
-                    </div>
-                ))}
-
-                {/* Actual sessions */}
-                {!loading && sessions.map((s, i) => {
-                    return (
-                        <div
-                            key={s.sessionId || i}
-                            className="sb-chip"
-                            onClick={() =>  navigate(s.course.slug
-                                ? `/book-now/course/${s.course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.sessionId}&date=${s.date}&time=${s.startTime}`
-                                : `/book-now?courseId=${s.course.id}&scheduleId=${s.scheduleId}&sessionId=${s.sessionId}&date=${s.date}&time=${s.startTime}`
-                            )}
-                        >
-                            <div className={`sb-date ${s.isSunday ? "sb-date--sunday" : ""}`}>
-                                <div className="sb-day">{s.day}</div>
-                                <div className="sb-mon">{s.mon}</div>
+                <div className="sb-marquee">
+                    {/* Loading skeletons */}
+                    {loading && Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="sb-chip sb-chip--skeleton">
+                            <div className="sb-skeleton-date" />
+                            <div className="sb-skeleton-info">
+                                <div className="sb-skeleton-line sb-skeleton-line--title" />
+                                <div className="sb-skeleton-line sb-skeleton-line--sub" />
                             </div>
+                            <div className="sb-skeleton-pill" />
+                        </div>
+                    ))}
 
-                            <div className="sb-info">
-                                <div className="sb-course">{s.course.title}</div>
-                                <div className="sb-detail">
-                                    {s.startTime} {s.location && s.location.toLowerCase() !== "face to face" ? `· ${s.location}` : ""} {s.course.price ? `· $${s.course.price}` : ""}
+                    {/* Actual sessions duplicated for infinite scroll */}
+                    {!loading && [...sessions, ...sessions, ...sessions].map((s, i) => {
+                        return (
+                            <div
+                                key={`${s.sessionId || i}-${i}`}
+                                className="sb-chip"
+                                onClick={() =>  navigate(s.course.slug
+                                    ? `/book-now/course/${s.course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.sessionId}&date=${s.date}&time=${s.startTime}`
+                                    : `/book-now?courseId=${s.course.id}&scheduleId=${s.scheduleId}&sessionId=${s.sessionId}&date=${s.date}&time=${s.startTime}`
+                                )}
+                            >
+                                <div className={`sb-date ${s.isSunday ? "sb-date--sunday" : ""}`}>
+                                    <div className="sb-day">{s.day}</div>
+                                    <div className="sb-mon">{s.mon}</div>
+                                </div>
+
+                                <div className="sb-info">
+                                    <div className="sb-course">{s.course.title}</div>
+                                    <div className="sb-detail">
+                                        {s.startTime} {s.location && s.location.toLowerCase() !== "face to face" ? `· ${s.location}` : ""} {s.course.price ? `· $${s.course.price}` : ""}
+                                    </div>
+                                </div>
+
+                                <div className={`sb-spots sb-spots--${s.spotsType}`}>
+                                    <button>Book</button>
+                                    <p>{s.spotsLabel}</p>
                                 </div>
                             </div>
-
-                            <div className={`sb-spots sb-spots--${s.spotsType}`}>
-                                <button>Book</button>
-                                <p>{s.spotsLabel}</p>
-                            </div>
-                        </div>
-                    )
-                })}
-
+                        )
+                    })}
+                </div>
             </div>
         </div>
     )

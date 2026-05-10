@@ -52,8 +52,36 @@ function SectionBar({ section }) {
   );
 }
 
-function AssessmentModal({ record, onClose }) {
+function AssessmentModal({ record, onClose, onRefresh }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [newDate, setNewDate] = useState(record.completedDate || record.date);
+  const [saving, setSaving] = useState(false);
+
   if (!record) return null;
+
+  const handleSaveDate = async () => {
+    try {
+      setSaving(true);
+      const res = await fetch(`${API_URL}/api/flow/llnd-date`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ flowId: record.id, newDate })
+      });
+      if (res.ok) {
+        setIsEditing(false);
+        if (onRefresh) onRefresh();
+        alert("Date updated successfully!");
+      } else {
+        alert("Failed to update date.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error updating date.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const totalCorrect = record.sections.reduce((a, s) => a + s.correct, 0);
   const totalQ = record.sections.reduce((a, s) => a + s.total, 0);
   const wrong = totalQ - totalCorrect;
@@ -77,8 +105,45 @@ function AssessmentModal({ record, onClose }) {
             <span className="lln-info-value">{record.email}</span>
             <span className="lln-info-label">Phone:</span>
             <span className="lln-info-value">{record.phone || "+61400000000"}</span>
+            
             <span className="lln-info-label">Completed Date:</span>
-            <span className="lln-info-value">{record.completedDate || `${record.date}, 2:05:36 AM`}</span>
+            <div className="lln-info-value" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              {isEditing ? (
+                <>
+                  <input 
+                    type="datetime-local" 
+                    value={newDate} 
+                    onChange={(e) => setNewDate(e.target.value)}
+                    className="lln-date-input"
+                  />
+                  <button 
+                    className="lln-btn lln-btn-sm" 
+                    onClick={handleSaveDate}
+                    disabled={saving}
+                  >
+                    {saving ? "..." : "Save"}
+                  </button>
+                  <button 
+                    className="lln-btn lln-btn-outline lln-btn-sm" 
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span>{record.completedDate || `${record.date}, 2:05:36 AM`}</span>
+                  <button 
+                    className="lln-edit-link" 
+                    onClick={() => setIsEditing(true)}
+                    style={{ background: "none", border: "none", color: "#7c3aed", cursor: "pointer", fontSize: "12px", textDecoration: "underline" }}
+                  >
+                    Change Date
+                  </button>
+                </>
+              )}
+            </div>
+
             <span className="lln-info-label">Status:</span>
             <span className="lln-info-value"><StatusBadge status={record.status} /></span>
           </div>
@@ -349,7 +414,19 @@ export default function LlndResults() {
 
       {/* Modal */}
       {selectedRecord && (
-        <AssessmentModal record={selectedRecord} onClose={() => setSelectedRecord(null)} />
+        <AssessmentModal 
+          record={selectedRecord} 
+          onClose={() => setSelectedRecord(null)} 
+          onRefresh={() => {
+            // Re-fetch data to reflect date change
+            fetch(`${API_URL}/api/flow/llnd-results`)
+              .then(res => res.json())
+              .then(res => {
+                setData(res);
+                setFilteredData(res);
+              });
+          }}
+        />
       )}
     </div>
   );

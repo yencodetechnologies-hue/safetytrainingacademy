@@ -15,20 +15,12 @@ exports.getStudentDashboard = async (req, res) => {
       return res.status(400).json({ message: "Invalid ObjectId format" });
     }
 
-    let flow = await EnrollmentFlow.findOne({
-      studentId,
-      "llnd.status": "completed"
-    })
+    // Fetch ALL flows for this student to aggregate all courses
+    const flows = await EnrollmentFlow.find({ studentId })
       .sort({ createdAt: -1 })
       .populate("studentId");
 
-    if (!flow) {
-      flow = await EnrollmentFlow.findOne({ studentId })
-        .sort({ createdAt: -1 })
-        .populate("studentId");
-    }
-
-    if (!flow) {
+    if (!flows || flows.length === 0) {
       return res.status(200).json({
         studentName: null,
         assessmentScore: 0,
@@ -41,60 +33,66 @@ exports.getStudentDashboard = async (req, res) => {
       });
     }
 
-    const isAgentEnrollment = flow.enrollmentType === "agent" || flow.enrollmentType === "Agent" || flow.source === "Enrollment Link";
-    const paymentVerified = isAgentEnrollment || flow.items?.some(
-      item => item.payment?.status === "success"
-    ) || false;
+    // Use the latest flow for general dashboard stats (Score, LLND, etc.)
+    const latestFlow = flows[0];
+    
+    // Check if any flow has a successful payment or is an agent enrollment
+    const paymentVerified = flows.some(f => {
+      const isAgent = f.enrollmentType?.toLowerCase() === "agent" || f.source === "Enrollment Link";
+      const hasSuccess = f.items?.some(item => 
+        item.payment?.status === "success" || item.payment?.status === "completed"
+      );
+      return isAgent || hasSuccess;
+    });
 
-    const llndScore = flow.llnd?.score || 0;
-    const llndStatus = flow.llnd?.status;
+    const llndScore = latestFlow.llnd?.score || 0;
+    const llndStatus = latestFlow.llnd?.status;
     const assessmentPassed = llndStatus === "completed";
 
-    const firstItem = flow.items?.[0];
+    const firstItem = latestFlow.items?.[0];
     const paymentMethod = firstItem?.payment?.method || "";
 
-    let enrollmentType = flow.enrollmentType;
-
+    let enrollmentType = latestFlow.enrollmentType;
     if (!enrollmentType) {
-      enrollmentType = flow.companyId ? "Company" : "Individual";
+      enrollmentType = latestFlow.companyId ? "Company" : "Individual";
     }
-
-    if (!enrollmentType && flow.studentId?.enrollmentType) {
-      const studentEnrollmentType = flow.studentId.enrollmentType;
-      enrollmentType = studentEnrollmentType.charAt(0).toUpperCase() +
-        studentEnrollmentType.slice(1).toLowerCase();
+    if (!enrollmentType && latestFlow.studentId?.enrollmentType) {
+      const studentType = latestFlow.studentId.enrollmentType;
+      enrollmentType = studentType.charAt(0).toUpperCase() + studentType.slice(1).toLowerCase();
     }
-
     enrollmentType = enrollmentType || "Individual";
 
-    // ✅ Course image + student selected session only
-    const enrolledCourses = await Promise.all(
-      (flow.items || []).map(async (item) => {
-        const course = await Course.findById(item.course?.courseId)
-          .select("image").lean();
-
-        return {
+    // ✅ Aggregate ALL courses from ALL flows
+    const allCourses = [];
+    for (const f of flows) {
+      for (const item of (f.items || [])) {
+        const course = await Course.findById(item.course?.courseId).select("image").lean();
+        
+        allCourses.push({
           courseId: item.course?.courseId,
           courseName: item.course?.courseName,
           price: item.course?.price,
           paymentStatus: item.payment?.status || "Pending",
           image: course?.image || null,
-          sessionDate: flow.sessionDate || null,
-          startTime: flow.startTime || null,
-          endTime: flow.endTime || null,
-        };
-      })
-    );
+          sessionDate: f.sessionDate || null,
+          startTime: f.startTime || null,
+          endTime: f.endTime || null,
+          status: f.status || "active",
+          llndStatus: f.llnd?.status || "pending",
+          formStatus: f.enrollmentFormId ? "approved" : "pending"
+        });
+      }
+    }
 
     const response = {
-      studentName: flow.studentId?.name,
+      studentName: latestFlow.studentId?.name,
       assessmentScore: llndScore,
       paymentVerified,
       assessmentPassed,
-      enrollmentFormApproved: flow.currentStep >= 4,
+      enrollmentFormApproved: latestFlow.currentStep >= 4,
       paymentMethod,
       enrollmentType,
-      enrolledCourses
+      enrolledCourses: allCourses
     };
 
     res.json(response);
@@ -118,13 +116,29 @@ exports.getStudentProfile = async (req, res) => {
       return res.status(404).json({ message: "Student not found" });
     }
 
-    const totalCourses = student.courses?.length || 0;
-    const completedCourses = student.courses?.filter(c => c.status === "completed").length || 0;
+    const flows = await EnrollmentFlow.find({ studentId: id }).lean();
+    
+    // Live aggregate unique courses from flows
+    const courseMap = new Map();
+    flows.forEach(f => {
+      (f.items || []).forEach(item => {
+        if (!item.course?.courseId) return;
+        const cid = String(item.course.courseId);
+        if (!courseMap.has(cid)) {
+          courseMap.set(cid, {
+            status: f.status === "completed" ? "completed" : "active"
+          });
+        }
+      });
+    });
+
+    const totalCourses = courseMap.size;
+    const completedCourses = Array.from(courseMap.values()).filter(c => c.status === "completed").length;
     const activeCourses = totalCourses - completedCourses;
 
-    const flows = await EnrollmentFlow.find({ studentId: id }).lean();
     const certCount = flows.filter(f =>
-      f.items?.[0]?.payment?.status === "success" && f.enrollmentFormId
+      f.items?.some(item => (item.payment?.status === "success" || item.payment?.status === "completed")) && 
+      f.enrollmentFormId
     ).length;
 
     res.json({

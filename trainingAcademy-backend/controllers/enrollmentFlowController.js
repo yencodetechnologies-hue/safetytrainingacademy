@@ -268,6 +268,29 @@ exports.saveLLND = async (req, res) => {
   }
 };
 
+exports.updateLLNDDate = async (req, res) => {
+  try {
+    const { flowId, newDate } = req.body;
+    if (!flowId || !newDate) {
+      return res.status(400).json({ error: "Flow ID and new date are required" });
+    }
+
+    const updated = await EnrollmentFlow.findByIdAndUpdate(
+      flowId,
+      { $set: { "llnd.completedAt": new Date(newDate) } },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: "Flow not found" });
+    }
+
+    res.json({ message: "Date updated successfully", updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 
 // ✅ Final Enrollment
 exports.completeEnrollment = async (req, res) => {
@@ -385,7 +408,13 @@ exports.getLLNDResults = async (req, res) => {
       return {
         id: flow._id,
 
-        date: flow.createdAt.toISOString().split("T")[0], // ✅ date only
+        date: flow.llnd?.completedAt 
+          ? new Date(flow.llnd.completedAt).toISOString().split("T")[0] 
+          : flow.createdAt.toISOString().split("T")[0],
+
+        completedDate: flow.llnd?.completedAt 
+          ? new Date(flow.llnd.completedAt).toLocaleString("en-AU", { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) 
+          : null,
 
         student: student?.name,
         email: student?.email,
@@ -421,6 +450,8 @@ exports.getLLNDResults = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// ... existing code ...
 
 exports.getAllPayments = async (req, res) => {
   try {
@@ -471,7 +502,7 @@ exports.getAllPayments = async (req, res) => {
 
         if (payment.status === "pending") stats.pending++;
 
-        if (payment.status === "success") {
+        if (payment.status === "success" || payment.status === "completed") {
           stats.success++;
 
           const amount = payment.amount || item.course.price || 0;

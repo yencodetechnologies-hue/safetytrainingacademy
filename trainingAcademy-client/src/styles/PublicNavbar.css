@@ -335,3 +335,41 @@
     padding: 0 22px;
   }
 }
+
+/* COMBO DROPDOWN */
+.combo-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 400px;
+  background: #0d1b2a;
+  color: white;
+  border-radius: 10px;
+  padding: 10px 0;
+  z-index: 1000;
+  margin-top: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.combo-item {
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  color: white;
+  transition: background 0.2s, color 0.2s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.combo-item:last-child {
+  border-bottom: none;
+}
+
+.combo-item:hover {
+  background: #02afef;
+  color: white;
+}
+
+.combo-btn-nav {
+  white-space: nowrap;
+}

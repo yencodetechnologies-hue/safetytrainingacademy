@@ -7,6 +7,7 @@ const menu = {
   Student: [
     { name: "Dashboard", path: "/student" },
     { name: "My Courses", path: "/student/my-courses" },
+    { name: "Buy New Course", path: "/student/my-courses", state: { tab: "browse" } },
     { name: "Enrollment Form", path: "/student/enrollment-form" },
     { name: "Schedule", path: "/student/schedule" },
     { name: "Results", path: "/student/results" },
@@ -68,7 +69,7 @@ function Sidebar({ user }) {
   const active = getActiveFromPath()
 
   const handleNavigate = (item) => {
-    navigate(item.path)
+    navigate(item.path, { state: item.state })
     setIsOpen(false)
   }
 

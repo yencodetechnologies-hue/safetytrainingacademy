@@ -23,6 +23,7 @@ function PublicNavbar({ courses = [] }) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [showResources, setShowResources] = useState(false);
+  const [showComboDropdown, setShowComboDropdown] = useState(false);
 
   const groupedCourses = courses.reduce((acc, course) => {
     if (!acc[course.category]) acc[course.category] = [];
@@ -120,7 +121,11 @@ function PublicNavbar({ courses = [] }) {
 
           {/* DESKTOP BUTTONS */}
           <div className="nav-buttons">
-            <button onClick={() => navigate("/combo-courses")}>Combo Courses</button>
+            <div className="combo-nav-wrapper">
+              <button onClick={() => navigate("/combo-courses")} className="combo-btn-nav">
+                Combo Courses
+              </button>
+            </div>
             <button onClick={() => navigate("/book-now")}>Book now</button>
             <button><Link className="login-link" to="/login">Login</Link></button>
           </div>

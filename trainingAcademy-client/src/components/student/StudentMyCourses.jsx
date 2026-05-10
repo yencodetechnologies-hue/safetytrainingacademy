@@ -14,6 +14,7 @@ export default function StudentMyCourses() {
   const [tab, setTab] = useState(location.state?.tab || "enrolled");
 
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedDates, setSelectedDates] = useState({});
   const [showAssessment, setShowAssessment] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
@@ -76,9 +77,13 @@ export default function StudentMyCourses() {
     fetchData();
   };
 
-  const filtered = browseCourses.filter((c) =>
-    c.title?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = browseCourses.filter((c) => {
+    const matchesSearch = c.title?.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || c.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const categories = ["All", ...new Set(browseCourses.map(c => c.category).filter(Boolean))];
 
   if (showAssessment) {
     return (
@@ -285,6 +290,18 @@ export default function StudentMyCourses() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
+          </div>
+
+          <div className="mc-categories">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                className={`mc-category-btn ${selectedCategory === cat ? "active" : ""}`}
+                onClick={() => setSelectedCategory(cat)}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
           <div className="mc-grid">
             {filtered.map((course) => (

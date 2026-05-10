@@ -216,7 +216,7 @@ exports.getAllStudents = async (req, res) => {
         llndStatus: flow.llnd?.status === "completed" ? "Completed" : "Not Completed",
         enrollmentForm: flow.enrollmentFormId ? "Completed" : "Not Completed",
         paymentStatus: item.payment?.method === "Card Payment"
-          ? item.payment?.status === "success" ? "Paid" : "Unpaid"
+          ? (item.payment?.status === "success" || item.payment?.status === "completed") ? "Paid" : "Unpaid"
           : item.payment?.method === "Bank Transfer"
             ? item.payment?.status === "success" ? "Verified" : "Not Verified"
             : "—",
@@ -308,7 +308,7 @@ exports.getStudentsByCompany = async (req, res) => {
       let paymentStatus;
       if (source === "Booking Link") {
         paymentStatus = "paid";
-      } else if (payment.status === "success") {
+      } else if (payment.status === "success" || payment.status === "completed") {
         paymentStatus = "paid";
       } else if (payment.status === "failed") {
         paymentStatus = "failed";
@@ -481,7 +481,7 @@ exports.getStudentsByLink = async (req, res) => {
 
       // All students in getStudentsByLink came via a Booking Link — always paid
       let paymentStatus;
-      if (payment.status === "success" || flow.source === "Booking Link") {
+      if (payment.status === "success" || payment.status === "completed" || flow.source === "Booking Link") {
         paymentStatus = "paid";
       } else if (payment.status === "failed") {
         paymentStatus = "failed";

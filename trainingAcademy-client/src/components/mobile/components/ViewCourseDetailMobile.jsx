@@ -119,7 +119,7 @@ function SectionSlider({ sections }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function ViewCourseDetailMobile({ course, fromPortal: propFromPortal }) {
+export default function ViewCourseDetailMobile({ course, courses = [], fromPortal: propFromPortal }) {
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -223,7 +223,7 @@ export default function ViewCourseDetailMobile({ course, fromPortal: propFromPor
         <a href="tel:1300976097" className="cdm-topbar-phone">☎ Call</a>
       </div>
 
-      <PublicNavbar courses={[]} />
+      <PublicNavbar courses={courses} />
 
       {/* ── Hero Image — real <img> so the browser can preload + apply
            fetchpriority="high" (CSS background-images can't). */}
@@ -361,7 +361,7 @@ export default function ViewCourseDetailMobile({ course, fromPortal: propFromPor
           </div>
         ) : sessions.length === 0 ? (
           <div className="cdm-no-sessions">
-            No upcoming sessions. Call us to book a private session.
+            no dates available for booking
           </div>
         ) : (
           <>

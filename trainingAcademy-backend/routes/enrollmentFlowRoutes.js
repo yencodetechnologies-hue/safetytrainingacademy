@@ -14,6 +14,7 @@ router.get("/weekly", controller.getWeeklyBookings);
 router.get("/llnd-results", controller.getLLNDResults);
 router.get("/payments", controller.getAllPayments);
 router.put("/payment/:enrollmentId/:itemId", controller.updatePaymentStatus);
+router.put("/llnd-date", controller.updateLLNDDate);
 
 
 module.exports = router;

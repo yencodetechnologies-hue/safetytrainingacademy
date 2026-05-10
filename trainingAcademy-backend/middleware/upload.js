@@ -14,7 +14,8 @@ const paymentStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "payment-slips",
-    allowed_formats: ["jpg", "png", "jpeg", "webp", "pdf"]
+    allowed_formats: ["jpg", "png", "jpeg", "webp", "pdf"],
+    transformation: [{ width: 1000, crop: "limit", quality: "auto" }]
   }
 })
 // middleware/upload.js-ல் add பண்ணுங்க

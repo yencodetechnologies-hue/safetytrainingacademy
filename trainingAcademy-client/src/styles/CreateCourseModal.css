@@ -500,11 +500,16 @@ opacity:0.6;
     font-size: 14px;
     transition: all 0.2s;
     background: #fafafa;
+    min-width: fit-content;
+    flex: 1;
 }
 
 .pricing-type-option input[type="radio"] {
     accent-color: #7b2ff7;
     margin: 0;
+    width: auto !important;
+    min-width: 16px;
+    flex-shrink: 0;
 }
 
 .pricing-type-option.active {

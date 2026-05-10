@@ -18,18 +18,7 @@ import {
 } from "../../../utils/coursePrice";
 import ClientsSection from "../../landingPage/ClientsSection";
 
-const PREFERRED_ORDER = [
-  "Combo Courses",
-  "Short Courses",
-  "Working in Confined Space Courses",
-  "Earthmoving Courses",
-  "Demolition Courses",
-  "First Aid Courses",
-  "Traffic Control Courses",
-  "Asbestos Removal Courses",
-  "High Risk Work",
-];
-
+// Order is now managed via Admin Dashboard (dbCategories.order)
 const TRUST_PILLS = [
   "⭐ 5.0 · 1,000+ reviews",
   "RTO #45234",
@@ -85,12 +74,10 @@ export default function MobileLandingPage({ courses = [] }) {
   const activeCourses = courses
     .filter((c) => c.status === "Active" && c.image)
     .sort((a, b) => {
-      const idxA = PREFERRED_ORDER.indexOf(a.category);
-      const idxB = PREFERRED_ORDER.indexOf(b.category);
-      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-      if (idxA !== -1) return -1;
-      if (idxB !== -1) return 1;
-      return (a.category || "").localeCompare(b.category || "");
+      if (!dbCategories) return 0;
+      const catA = dbCategories.find(db => db.name === a.category);
+      const catB = dbCategories.find(db => db.name === b.category);
+      return (catA?.order || 0) - (catB?.order || 0);
     });
 
   // ── Hero slides ───────────────────────────────────────────────────────────
@@ -244,14 +231,7 @@ export default function MobileLandingPage({ courses = [] }) {
   if (dbCategories && dbCategories.length > 0) {
     categoryCards = dbCategories
       .filter((c) => c.active !== false)
-      .sort((a, b) => {
-        const idxA = PREFERRED_ORDER.indexOf(a.name);
-        const idxB = PREFERRED_ORDER.indexOf(b.name);
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        if (idxA !== -1) return -1;
-        if (idxB !== -1) return 1;
-        return (a.order || 0) - (b.order || 0);
-      })
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
       .map((c) => ({
         category: c.name,
         image: c.image || courseImgByCat[c.name] || "",
@@ -393,7 +373,7 @@ export default function MobileLandingPage({ courses = [] }) {
             ))}
           </div>
         ) : allSessions.length === 0 ? (
-          <div className="mlp-no-sessions">No upcoming sessions for this course. Call us to book!</div>
+          <div className="mlp-no-sessions">no dates available for booking</div>
         ) : (
           <>
             {/* ── Collapsed view: first 3 as list ── */}

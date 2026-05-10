@@ -109,13 +109,13 @@ function CourseDetails() {
     }, [course?._id])
 
     if (isMobile) {
-        return <ViewCourseDetailMobile course={course} fromPortal={fromPortal} />
+        return <ViewCourseDetailMobile course={course} courses={courses} fromPortal={fromPortal} />
     }
 
     if (!course) {
         return (
             <div className="cdp-loading">
-                <PublicNavbar />
+                <PublicNavbar courses={courses} />
                 <div className="cdp-loading-inner">Loading course...</div>
             </div>
         )
@@ -414,7 +414,7 @@ function CourseDetails() {
                         {loadingSessions ? (
                             <div className="cdp-sessions-loading">Loading sessions...</div>
                         ) : sessions.length === 0 ? (
-                            <p className="cdp-no-sessions">No upcoming sessions available. Please contact us for private bookings.</p>
+                            <p className="cdp-no-sessions">no dates available for booking</p>
                         ) : (
                             <>
                                 {!showAllSessions ? (

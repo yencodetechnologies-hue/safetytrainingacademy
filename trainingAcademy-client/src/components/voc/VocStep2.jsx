@@ -3,7 +3,7 @@ import axios from "axios"
 import "./VocStep2.css"
 import { API_URL } from "../../data/service"
 
-const PRICE = 150
+
 
 // Last-resort fallback so the form is still usable even if /api/courses fails.
 const FALLBACK_COURSES = [
@@ -18,15 +18,21 @@ const FALLBACK_COURSES = [
     "Operate elevated work platform",
 ]
 
-// Generate dates from today for next 60 days (weekdays only)
+// Generate dates from today for next 90 days (weekdays only)
+// Ensuring we respect Sydney time (AEST/AEDT) so "today" rolls over correctly.
 function generateDates() {
     const dates = []
-    const now = new Date()
+    
+    // Get current time in Sydney
+    const sydneyTime = new Date(new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" }))
+    sydneyTime.setHours(0, 0, 0, 0) // Start from beginning of Sydney today
+
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    
     for (let i = 0; i < 90; i++) {
-        const d = new Date(now)
-        d.setDate(now.getDate() + i)
+        const d = new Date(sydneyTime)
+        d.setDate(sydneyTime.getDate() + i)
         const day = d.getDay()
         if (day !== 0) { // exclude Sunday
             dates.push(`${days[day]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`)
@@ -87,10 +93,7 @@ function VocStep2({ courses, setCourses, onNext, onBack, preselectedCourseId }) 
         setCourses([{ name: seedName, date: "" }])
     }, [preselectedCourseId, dbCourses, courses.length, setCourses])
 
-    // Group titles by category. Each key is a category name; values are unique
-    // entry strings. For experience-based courses we expand to two entries
-    // (With / Without Experience). For SL+BL courses we expand to two entries
-    // (Single License / Both Licenses). Standard courses contribute one entry.
+    // Group titles by category and store their vocPrice
     const groupedTitles = useMemo(() => {
         if (dbCourses.length === 0) return null
         const groups = {}
@@ -102,28 +105,31 @@ function VocStep2({ courses, setCourses, onNext, onBack, preselectedCourseId }) 
             if (!groups[cat]) groups[cat] = new Set()
 
             const pt = c.pricingType || (c.experienceBasedBooking ? "experience" : "standard")
+            const vPrice = c.vocPrice || 150
+
             if (pt === "experience") {
-                groups[cat].add(`${c.title} (With Experience)`)
-                groups[cat].add(`${c.title} (Without Experience)`)
+                groups[cat].add(JSON.stringify({ name: `${c.title} (With Experience)`, price: vPrice }))
+                groups[cat].add(JSON.stringify({ name: `${c.title} (Without Experience)`, price: vPrice }))
             } else if (pt === "slbl") {
-                groups[cat].add(`${c.title} (Single License)`)
-                groups[cat].add(`${c.title} (Both Licenses)`)
+                groups[cat].add(JSON.stringify({ name: `${c.title} (Single License)`, price: vPrice }))
+                groups[cat].add(JSON.stringify({ name: `${c.title} (Both Licenses)`, price: vPrice }))
             } else {
-                groups[cat].add(c.title)
+                groups[cat].add(JSON.stringify({ name: c.title, price: vPrice }))
             }
         }
         const out = {}
         Object.keys(groups).sort().forEach(cat => {
-            out[cat] = [...groups[cat]].sort()
+            out[cat] = [...groups[cat]].map(s => JSON.parse(s)).sort((a, b) => a.name.localeCompare(b.name))
         })
         return out
     }, [dbCourses])
 
-    const total = courses.length * PRICE
+    const total = courses.reduce((sum, c) => sum + (c.price || 150), 0)
 
     const addCourse = () => {
         if (!selected) return
-        setCourses(prev => [...prev, { name: selected, date: "" }])
+        const item = JSON.parse(selected)
+        setCourses(prev => [...prev, { name: item.name, price: item.price, date: "" }])
         setSelected("")
     }
 
@@ -150,6 +156,9 @@ function VocStep2({ courses, setCourses, onNext, onBack, preselectedCourseId }) 
         onNext()
     }
 
+    // Determine display price (if only one item selected, show its price, else show default)
+    const displayPrice = selected ? JSON.parse(selected).price : 150
+
     return (
         <div className="v2-wrap">
 
@@ -157,7 +166,7 @@ function VocStep2({ courses, setCourses, onNext, onBack, preselectedCourseId }) 
             <div className="v2-header">
                 <h2 className="v2-header-title">Course Selection</h2>
                 <p className="v2-header-sub">
-                    Select the courses you wish to renew — <span className="v2-price-highlight">${PRICE} per course</span>
+                    Select the courses you wish to renew — <span className="v2-price-highlight">${displayPrice} per course</span>
                 </p>
             </div>
 
@@ -180,7 +189,7 @@ function VocStep2({ courses, setCourses, onNext, onBack, preselectedCourseId }) 
                         {groupedTitles
                             ? Object.entries(groupedTitles).map(([cat, titles]) => (
                                 <optgroup key={cat} label={cat}>
-                                    {titles.map(t => <option key={t} value={t}>{t}</option>)}
+                                    {titles.map(t => <option key={t.name} value={JSON.stringify(t)}>{t.name}</option>)}
                                 </optgroup>
                             ))
                             : FALLBACK_COURSES.map(c => (
@@ -211,7 +220,7 @@ function VocStep2({ courses, setCourses, onNext, onBack, preselectedCourseId }) 
                                         <span className="v2-course-check">✔</span>
                                         <div>
                                             <p className="v2-course-name">{c.name}</p>
-                                            <p className="v2-course-price">${PRICE}.00</p>
+                                            <p className="v2-course-price">${c.price || 150}.00</p>
                                         </div>
                                     </div>
                                     <button className="v2-delete-btn" onClick={() => removeCourse(i)}>🗑</button>

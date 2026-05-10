@@ -69,11 +69,11 @@ grid-template-columns:1fr;
 /* ===== HERO ===== */
 .cdp-hero {
   background: #0d2240;
-  padding: 60px 80px 120px;
-  min-height: calc(100vh - 80px);
+  padding: 15px 80px 100px;
+  min-height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
@@ -100,12 +100,13 @@ grid-template-columns:1fr;
 
 .cdp-hero-inner {
   display: grid;
-  grid-template-columns: 3fr 1fr;
-  gap: 60px;
+  grid-template-columns: 1fr 350px;
+  gap: 30px;
   align-items: flex-end;
   position: relative;
   z-index: 1;
-  margin-bottom: 20px;
+  margin-top: 5px;
+  margin-bottom: 0px;
 }
 
 .cdp-hero-left {
@@ -131,7 +132,7 @@ grid-template-columns:1fr;
 }
 
 .cdp-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
   color: #fff;
   line-height: 1.2;
@@ -287,7 +288,7 @@ grid-template-columns:1fr;
     display: flex;
     margin: 0 -80px;
     position: absolute;
-    bottom: 0;
+    bottom: 20px;
     left: 80px;
     right: 80px;
     z-index: 2;

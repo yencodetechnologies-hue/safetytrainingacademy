@@ -385,6 +385,37 @@
   font-style: italic;
 }
 
+.mc-categories {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.mc-categories::-webkit-scrollbar { display: none; }
+
+.mc-category-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--gray-200);
+  background: #fff;
+  color: var(--gray-600);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.mc-category-btn:hover { border-color: var(--purple); color: var(--purple); }
+.mc-category-btn.active {
+  background: var(--purple);
+  color: #fff;
+  border-color: var(--purple);
+  box-shadow: 0 2px 8px rgba(124,58,237,0.25);
+}
+
 /* Responsive tweaks */
 @media (max-width: 480px) {
   .mc-banner--optional { flex-direction: column; }

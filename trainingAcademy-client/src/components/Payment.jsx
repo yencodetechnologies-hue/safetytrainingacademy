@@ -211,7 +211,20 @@ function Payment({
                 return
             }
             if (setIsValid) setIsValid(Object.keys(errs).length === 0)
-            if (triggerValidation) setErrors(errs)
+            
+            if (triggerValidation) {
+                setErrors(errs)
+                
+                // ✅ Auto-scroll to first error if exists
+                if (Object.keys(errs).length > 0) {
+                    setTimeout(() => {
+                        const firstError = document.querySelector(".error-text, .input-error")
+                        if (firstError) {
+                            firstError.scrollIntoView({ behavior: "smooth", block: "center" })
+                        }
+                    }, 100)
+                }
+            }
         })
     }, [name, phone, email, agreed, contactPerson, transactionId, paymentSlip, cardName, cardNumber, expiryMonth, expiryYear, cvv, paymentMethod, triggerValidation, emailExists, fileSizeError])
 

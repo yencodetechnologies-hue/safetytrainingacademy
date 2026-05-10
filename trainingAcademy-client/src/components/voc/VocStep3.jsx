@@ -7,8 +7,7 @@ const YEARS = Array.from({ length: 12 }, (_, i) => String(new Date().getFullYear
 
 function VocStep3({ details = {}, courses, onBack, onComplete }) {
 
-    const PRICE = 150
-    const total = courses.length * PRICE
+    const total = courses.reduce((sum, c) => sum + (c.price || 150), 0)
 
     const [method, setMethod] = useState("card") // "card" | "bank"
 
@@ -296,8 +295,8 @@ function VocStep3({ details = {}, courses, onBack, onComplete }) {
                             {method === "card" ? "CREDIT CARD" : "BANK TRANSFER"}
                         </span>
                     </p>
-                    <p className="v3-total-amount">${total}.00</p>
-                    <p className="v3-total-sub">{courses.length} COURSE{courses.length !== 1 ? "S" : ""} × $150</p>
+                    <p className="v3-total-amount">${total.toFixed(2)}</p>
+                    <p className="v3-total-sub">{courses.length} COURSE{courses.length !== 1 ? "S" : ""} SELECTED</p>
                 </div>
                 <div className="v3-footer-btns">
                     <button className="v3-back-btn" onClick={onBack} disabled={submitting}>‹ &nbsp; BACK</button>
