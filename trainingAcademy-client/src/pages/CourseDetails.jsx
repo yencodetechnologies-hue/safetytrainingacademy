@@ -134,13 +134,12 @@ function CourseDetails() {
 
     const openBooking = (type) => {
         // Direct navigation for specific earthmoving courses ONLY if a type is already chosen
-        const directSlugs = [
-            'conduct-civil-construction-excavator-operations',
-            'conduct-articulated-haul-truck-operations',
-            'conduct-civil-construction-skid-steer-loader-operations'
-        ];
+        const bypassKeywords = ['excavator', 'haul truck', 'skid steer'];
+        const isBypass = bypassKeywords.some(kw => 
+            course.title?.toLowerCase().includes(kw)
+        );
 
-        if (type && directSlugs.includes(course.slug)) {
+        if (type && isBypass) {
             navigate(`/book-now/course/${course.slug}?type=${type}${fromPortal ? "&fromPortal=true" : ""}`);
             return;
         }

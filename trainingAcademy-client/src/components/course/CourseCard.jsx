@@ -11,6 +11,11 @@ function CourseCard({ course, fromPortal }) {
     const [showModal, setShowModal] = useState(false)
     const [selectedOptionId, setSelectedOptionId] = useState(null)
 
+    const BYPASS_KEYWORDS = ["excavator", "haul truck", "skid steer"];
+    const shouldBypassModal = BYPASS_KEYWORDS.some(kw => 
+        course.title?.toLowerCase().includes(kw)
+    );
+
     const options = getBookingOptions(course)
     const sellingPrice = course?.sellingPrice || null
     const originalPrice = course?.originalPrice || null
@@ -101,8 +106,12 @@ function CourseCard({ course, fromPortal }) {
                                     key={i}
                                     className={`cc-card-opt-box ${opt.isVoc ? "cc-card-opt-box--voc" : "cc-card-opt-box--display"}`}
                                     onClick={() => {
-                                        setSelectedOptionId(opt.id)
-                                        setShowModal(true)
+                                        if (shouldBypassModal) {
+                                            navigate(`/book-now/course/${course.slug}?type=${opt.id}${fromPortal ? "&fromPortal=true" : ""}`)
+                                        } else {
+                                            setSelectedOptionId(opt.id)
+                                            setShowModal(true)
+                                        }
                                     }}
                                     title={`Click to book ${opt.label}`}
                                 >
@@ -120,7 +129,13 @@ function CourseCard({ course, fromPortal }) {
                     {/* Book Now */}
                     <button
                         className="course-btn course-btn--primary"
-                        onClick={() => setShowModal(true)}
+                        onClick={() => {
+                            if (shouldBypassModal) {
+                                navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)
+                            } else {
+                                setShowModal(true)
+                            }
+                        }}
                     >
                         Book Now
                         <i className="fa-regular fa-circle-right" />

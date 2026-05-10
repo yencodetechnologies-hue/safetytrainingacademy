@@ -207,6 +207,12 @@ export default function ViewCourseDetailMobile({ course, fromPortal: propFromPor
   // ── Session display ───────────────────────────────────────────────────────
   const sessionPages = chunkArray(sessions, PAGE_SIZE);
 
+  // ── Bypass Modal Logic for specific courses ──────────────────────────────
+  const BYPASS_KEYWORDS = ["excavator", "haul truck", "skid steer"];
+  const shouldBypassModal = BYPASS_KEYWORDS.some(kw => 
+    course.title?.toLowerCase().includes(kw)
+  );
+
   return (
     <div className="cdm-root">
 
@@ -305,14 +311,18 @@ export default function ViewCourseDetailMobile({ course, fromPortal: propFromPor
         {isVariantCourse ? (
           <>
             <div className="cdm-price-label">Choose your option</div>
-            <div className="cdm-variant-row">
+            <div className="cdm-variant-row" id="cdm-variants">
               {variants.map((v) => (
                 <button
                   key={v.key}
                   className="cdm-variant-btn"
                   onClick={() => {
-                    setSelectedOptionId(v.key);
-                    setShowModal(true);
+                    if (shouldBypassModal) {
+                      navigate(`/book-now/course/${course.slug}?type=${v.key}${fromPortal ? "&fromPortal=true" : ""}`);
+                    } else {
+                      setSelectedOptionId(v.key);
+                      setShowModal(true);
+                    }
                   }}
                 >
                   {/* Single-line label: "$400 Book With Experience".
@@ -361,8 +371,12 @@ export default function ViewCourseDetailMobile({ course, fromPortal: propFromPor
                   const handleBook = (e) => {
                     e.stopPropagation();
                     if (isVariantCourse) {
-                      setSelectedSession(s);
-                      setShowModal(true);
+                      if (shouldBypassModal) {
+                        document.getElementById("cdm-variants")?.scrollIntoView({ behavior: "smooth" });
+                      } else {
+                        setSelectedSession(s);
+                        setShowModal(true);
+                      }
                     } else {
                       navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${fromPortal ? "&fromPortal=true" : ""}`);
                     }
@@ -407,8 +421,12 @@ export default function ViewCourseDetailMobile({ course, fromPortal: propFromPor
                       return (
                         <div key={s.id} className="cdm-date-slot"  onClick={() => {
                           if (isVariantCourse) {
-                            setSelectedSession(s);
-                            setShowModal(true);
+                            if (shouldBypassModal) {
+                              document.getElementById("cdm-variants")?.scrollIntoView({ behavior: "smooth" });
+                            } else {
+                              setSelectedSession(s);
+                              setShowModal(true);
+                            }
                           } else {
                             navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${fromPortal ? "&fromPortal=true" : ""}`);
                           }
@@ -433,8 +451,12 @@ export default function ViewCourseDetailMobile({ course, fromPortal: propFromPor
                             onClick={(e) => {
                               e.stopPropagation();
                               if (isVariantCourse) {
-                                setSelectedSession(s);
-                                setShowModal(true);
+                                if (shouldBypassModal) {
+                                  document.getElementById("cdm-variants")?.scrollIntoView({ behavior: "smooth" });
+                                } else {
+                                  setSelectedSession(s);
+                                  setShowModal(true);
+                                }
                               } else {
                                 navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${fromPortal ? "&fromPortal=true" : ""}`);
                               }
@@ -513,7 +535,11 @@ export default function ViewCourseDetailMobile({ course, fromPortal: propFromPor
           className="cdm-sticky-book"
           onClick={() => {
             if (isVariantCourse) {
-              setShowModal(true);
+              if (shouldBypassModal) {
+                document.getElementById("cdm-variants")?.scrollIntoView({ behavior: "smooth" });
+              } else {
+                setShowModal(true);
+              }
             } else {
               navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`);
             }
