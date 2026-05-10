@@ -3,7 +3,7 @@ name: Safety Backend Deploy
 on:
   push:
     branches:
-      - main   # change if using another branch
+      - main
 
 jobs:
   deploy:
@@ -12,13 +12,40 @@ jobs:
     steps:
       - name: Deploy to Safety Server
         uses: appleboy/ssh-action@v0.1.10
+
         with:
           host: 72.61.236.154
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
+
           script: |
             cd ~/safety/safetytrainingacademy/trainingAcademy-backend
-            git pull origin main
+
+            echo "📥 Updating project..."
+            git fetch origin
+            git reset --hard origin/main
+
+            echo "⚙️ Loading NVM..."
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+            nvm use 20
+
+            echo "📦 Installing packages..."
             npm install
-            pm2 restart safetytraining
+
+            echo "🚀 Restarting PM2..."
+
+            pm2 describe safetytraining > /dev/null
+
+            if [ $? -eq 0 ]; then
+              pm2 restart safetytraining
+            else
+              pm2 start server.js --name safetytraining
+            fi
+
+            echo "💾 Saving PM2..."
+            pm2 save
+
+            echo "✅ Deployment Finished"
