@@ -22,8 +22,8 @@ const createSchedule = async (req,res) => {
 
 const getUpcomingSessions = async (req, res) => {
     try {
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
+        const nowSydney = new Date(new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
+        const today = new Date(nowSydney.getFullYear(), nowSydney.getMonth(), nowSydney.getDate());
 
         const limit = parseInt(req.query.limit) || 10
 
@@ -153,9 +153,9 @@ const toggleSession = async(req,res)=>{
 
 const getCourseSchedules = async (req, res) => {
   try {
-    const now = new Date()
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const nowSydney = new Date(new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
+    const now = nowSydney;
+    const today = new Date(nowSydney.getFullYear(), nowSydney.getMonth(), nowSydney.getDate());
 
     const schedules = await Schedule.find({
       course: req.params.courseId,

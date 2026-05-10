@@ -46,6 +46,7 @@ function formatDate(dateStr) {
   const d = new Date(dateStr);
   return d.toLocaleDateString("en-AU", {
     weekday: "short", day: "numeric", month: "short",
+    timeZone: "Australia/Sydney"
   });
 }
 
