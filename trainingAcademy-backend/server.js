@@ -27,6 +27,7 @@ const allowedOrigins = [
   "https://www.safetytrainingacademy.edu.au",
   "https://safetytrainingacademy.edu.au",
   "http://72.61.236.154:8000",
+
 ];
 
 // Combine with origins from .env
