@@ -139,13 +139,16 @@ function CourseDetails() {
             course.title?.toLowerCase().includes(kw)
         );
 
-        if (type && isBypass) {
-            navigate(`/book-now/course/${course.slug}?type=${type}${fromPortal ? "&fromPortal=true" : ""}`);
+        // For bypass courses, if no type is passed (e.g. from mobile bottom bar), default to with-experience
+        const activeType = type || (isBypass ? "with-experience" : null);
+
+        if (activeType && isBypass) {
+            navigate(`/book-now/course/${course.slug}?type=${activeType}${fromPortal ? "&fromPortal=true" : ""}`);
             return;
         }
 
         if (isExperience || isSlbl) {
-            setSelectedOptionId(type || null)
+            setSelectedOptionId(activeType || null)
             setShowModal(true)
         } else {
             navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)

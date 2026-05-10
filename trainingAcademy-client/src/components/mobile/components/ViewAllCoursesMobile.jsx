@@ -199,7 +199,16 @@ export default function ViewAllCoursesMobile({ courses = [] }) {
                       className="vac-btn-book"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setSelectedCourse(c);
+                        // Bypass for Earthmoving
+                        const bypassKeywords = ['excavator', 'haul truck', 'skid steer'];
+                        const isBypass = bypassKeywords.some(kw => 
+                          c.title?.toLowerCase().includes(kw)
+                        );
+                        if (isBypass) {
+                          navigate(`/book-now/course/${c.slug}?type=with-experience`);
+                        } else {
+                          setSelectedCourse(c);
+                        }
                       }}
                     >
                       Book Now

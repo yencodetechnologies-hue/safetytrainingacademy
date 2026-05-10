@@ -132,7 +132,7 @@ function CourseCard({ course, fromPortal }) {
                         className="course-btn course-btn--primary"
                         onClick={() => {
                             if (shouldBypassModal) {
-                                navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)
+                                navigate(`/book-now/course/${course.slug}?type=with-experience${fromPortal ? "&fromPortal=true" : ""}`)
                             } else {
                                 setShowModal(true)
                             }

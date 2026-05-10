@@ -199,10 +199,19 @@ export default function MobileLandingPage({ courses = [] }) {
   const handleBookNowClick = (s) => {
     const courseObj = courses.find((c) => c._id === s.courseId);
     if (courseObj) {
-      // If it's a standard course (only 1 variant), go direct
+      // Check for Earthmoving bypass
+      const bypassKeywords = ['excavator', 'haul truck', 'skid steer'];
+      const isBypass = bypassKeywords.some(kw => 
+        courseObj.title?.toLowerCase().includes(kw)
+      );
+
       const variants = getCourseVariants(courseObj);
-      if (variants.length <= 1) {
-        navigate(sessionBookNowHref(s));
+      if (variants.length <= 1 || isBypass) {
+        let href = sessionBookNowHref(s);
+        if (isBypass) {
+          href += (href.includes('?') ? '&' : '?') + 'type=with-experience';
+        }
+        navigate(href);
       } else {
         setSelectedBookingCourse(courseObj);
         setSelectedBookingSession(s);

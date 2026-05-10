@@ -539,7 +539,7 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
           onClick={() => {
             if (isVariantCourse) {
               if (shouldBypassModal) {
-                document.getElementById("cdm-variants")?.scrollIntoView({ behavior: "smooth" });
+                navigate(`/book-now/course/${course.slug}?type=with-experience${fromPortal ? "&fromPortal=true" : ""}`);
               } else {
                 setShowModal(true);
               }
