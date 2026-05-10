@@ -69,8 +69,8 @@ grid-template-columns:1fr;
 /* ===== HERO ===== */
 .cdp-hero {
   background: #0d2240;
-  padding: 15px 80px 100px;
-  min-height: calc(100vh - 120px);
+  padding: 60px 80px 140px;
+  min-height: 500px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -101,11 +101,11 @@ grid-template-columns:1fr;
 .cdp-hero-inner {
   display: grid;
   grid-template-columns: 1fr 350px;
-  gap: 30px;
-  align-items: flex-end;
+  gap: 40px;
+  align-items: center;
   position: relative;
   z-index: 1;
-  margin-top: 5px;
+  margin-top: 20px;
   margin-bottom: 0px;
 }
 
