@@ -466,14 +466,19 @@ function BookNow() {
                     // Create enrollment flow
                     await createFlow();
 
-                    // Mark this enrollment link as used only after successful enrollment
+                    // Mark this enrollment link as used and record student after successful enrollment
                     if (enrollmentLinkId) {
-                        const useRes = await fetch(`${API_URL}/api/enrollment-links/${enrollmentLinkId}/use`, {
-                            method: "PATCH"
+                        const enrollLinkRes = await fetch(`${API_URL}/api/enrollment-links/${enrollmentLinkId}/enroll`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                name: paymentData.name,
+                                email: paymentData.email,
+                            }),
                         });
-                        const useData = await useRes.json();
-                        if (!useRes.ok) {
-                            throw new Error(useData.message || "Enrollment link could not be used.");
+                        const enrollLinkData = await enrollLinkRes.json();
+                        if (!enrollLinkRes.ok) {
+                            throw new Error(enrollLinkData.message || "Enrollment link could not be used.");
                         }
                     }
 
