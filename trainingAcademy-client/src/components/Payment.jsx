@@ -61,6 +61,7 @@ function Payment({
     isExistingCompany = false,
     initialPaymentData = {},
     isEnrollmentLink = false,  // ✅ NEW: for enrollment links
+    shouldAutofill = false,    // ✅ NEW: for student portal autofill
 }) {
 
     const [paymentMethod, setPaymentMethod] = useState("Bank Transfer")
@@ -127,16 +128,17 @@ function Payment({
     }, [name, email, phone])
 
     useEffect(() => {
-        if (isExistingCompany && initialPaymentData && initialPaymentData.email) {
+        if ((isExistingCompany || shouldAutofill) && initialPaymentData && initialPaymentData.email) {
             setName(initialPaymentData.name || "")
             setEmail(initialPaymentData.email || "")
-            setPhone(initialPaymentData.mobileNumber || initialPaymentData.phone || "")
+            // Students use 'phone', Companies use 'mobileNumber'
+            setPhone(initialPaymentData.phone || initialPaymentData.mobileNumber || "")
             setAgreed(true)
         }
-    }, [isExistingCompany, initialPaymentData])
+    }, [isExistingCompany, shouldAutofill, initialPaymentData])
 
     useEffect(() => {
-        if (isExistingCompany) {
+        if (isExistingCompany || shouldAutofill) {
             setEmailExists(false)
             setErrors(prev => {
                 const copy = { ...prev }
@@ -144,13 +146,13 @@ function Payment({
                 return copy
             })
         }
-    }, [isExistingCompany])
+    }, [isExistingCompany, shouldAutofill])
 
     useEffect(() => {
-        if (isExistingCompany) return
+        if (isExistingCompany || shouldAutofill) return
         const timer = setTimeout(() => { if (email) checkEmailExists(email) }, 900)
         return () => clearTimeout(timer)
-    }, [email, isExistingCompany])
+    }, [email, isExistingCompany, shouldAutofill])
 
     useEffect(() => {
         const fullData = {

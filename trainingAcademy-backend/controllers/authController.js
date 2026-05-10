@@ -63,6 +63,7 @@ exports.login = async (req, res) => {
           id: student._id,   // 🔥 IMPORTANT
           name: student.name,
           email: student.email,
+          phone: student.phone, // ✅ added
           role: "Student"
         }
       });
@@ -97,6 +98,8 @@ exports.login = async (req, res) => {
         id: user._id,
         name: user.name || user.companyName || user.email,
         email: user.email,
+        phone: user.phone || user.mobileNumber || "", // ✅ added
+        mobileNumber: user.mobileNumber || user.phone || "", // ✅ added
         role: user.role
       }
     });
@@ -127,6 +130,7 @@ exports.autoLogin = async (req, res) => {
           id: student._id,
           name: student.name,
           email: student.email,
+          phone: student.phone, // ✅ added
           role: "Student"
         }
       });
@@ -155,6 +159,8 @@ exports.autoLogin = async (req, res) => {
         id: user._id,
         name: user.name || user.companyName || user.email,
         email: user.email,
+        phone: user.phone || user.mobileNumber || "", // ✅ added
+        mobileNumber: user.mobileNumber || user.phone || "", // ✅ added
         role: user.role
       }
     });

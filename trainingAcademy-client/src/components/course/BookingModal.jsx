@@ -131,7 +131,7 @@ export default function BookingModal({ course, onClose, initialSelection = null,
             "slbl":               join("type=slbl"),
             "sl":                 join("type=sl"),
             "bl":                 join("type=bl"),
-            "voc":                `/voc?courseId=${course._id}${extraQueryParams}`,
+            "voc":                `/voc?courseId=${course._id}${extraQueryParams.startsWith('&') || extraQueryParams.startsWith('?') ? extraQueryParams : (extraQueryParams ? '&' + extraQueryParams : '')}`,
             "standard":           join(""), 
         }
         onClose()

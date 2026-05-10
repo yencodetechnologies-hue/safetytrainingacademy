@@ -27,6 +27,7 @@ function BookNow() {
     const [searchParams] = useSearchParams();
     const bookingType = searchParams.get("type");
     const enrollType = searchParams.get("enroll")
+    const fromPortal = searchParams.get("fromPortal") === "true";
 
     const isEnrollmentLink = location.pathname.startsWith('/enroll/');
     const isCoursePath     = location.pathname.startsWith('/book-now/course/');
@@ -62,6 +63,9 @@ function BookNow() {
     const [userDetails, setUserDetails] = useState({ name: "", email: "", phone: "" });
     const [companyUser, setCompanyUser] = useState(() => JSON.parse(localStorage.getItem("user") || "{}"));
     const [isProcessing, setIsProcessing] = useState(false)
+
+    const loggedInUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const isStudentPortalAutofill = fromPortal && loggedInUser?.role === "Student";
 
     const cardPaymentRef = useRef({ trigger: null, paymentMethod: "bank", paymentStatus: null })
     const [activePaymentMethod, setActivePaymentMethod] = useState("Bank Transfer")
@@ -1062,8 +1066,9 @@ function BookNow() {
                             setActivePaymentMethod(ref.paymentMethod)
                         }}
                         isExistingCompany={isDashboardCompany}
-                        initialPaymentData={companyUser}
+                        initialPaymentData={loggedInUser}
                         isEnrollmentLink={isEnrollmentLink}
+                        shouldAutofill={isStudentPortalAutofill}
                     />
                 )}
 

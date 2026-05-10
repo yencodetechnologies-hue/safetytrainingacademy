@@ -288,7 +288,7 @@ export default function StudentMyCourses() {
           </div>
           <div className="mc-grid">
             {filtered.map((course) => (
-              <CourseCard key={course._id} course={course} />
+              <CourseCard key={course._id} course={course} fromPortal={true} />
             ))}
           </div>
         </div>

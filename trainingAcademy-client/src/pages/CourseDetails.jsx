@@ -6,7 +6,7 @@ import PublicNavbar from "../components/PublicNavbar"
 import Footer from "../components/landingPage/Footer"
 import ViewCourseDetailMobile from "../components/mobile/components/ViewCourseDetailMobile"
 import { API_URL } from "../data/service"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { cdnImage } from "../utils/cdnImage"
 import BookingModal from "../components/course/BookingModal"
 
@@ -31,6 +31,9 @@ function useIsMobile(breakpoint = 768) {
 
 function CourseDetails() {
     const navigate = useNavigate()
+    const location = useLocation()
+    const searchParams = new URLSearchParams(location.search)
+    const fromPortal = searchParams.get("fromPortal") === "true"
     // Route is /course/:slug. We support a legacy fallback where the param
     // still ends with -<ObjectId> (LegacyCourseRedirect rewrites the URL,
     // but the redirect runs in an effect so the first render still has the
@@ -106,7 +109,7 @@ function CourseDetails() {
     }, [course?._id])
 
     if (isMobile) {
-        return <ViewCourseDetailMobile course={course} />
+        return <ViewCourseDetailMobile course={course} fromPortal={fromPortal} />
     }
 
     if (!course) {
@@ -138,7 +141,7 @@ function CourseDetails() {
         ];
 
         if (type && directSlugs.includes(course.slug)) {
-            navigate(`/book-now/course/${course.slug}?type=${type}`);
+            navigate(`/book-now/course/${course.slug}?type=${type}${fromPortal ? "&fromPortal=true" : ""}`);
             return;
         }
 
@@ -146,7 +149,7 @@ function CourseDetails() {
             setSelectedOptionId(type || null)
             setShowModal(true)
         } else {
-            navigate(`/book-now/course/${course.slug}`)
+            navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)
         }
     }
 
@@ -170,7 +173,7 @@ function CourseDetails() {
                     <p className="cdp-price-note">All inclusive — no hidden fees</p>
                     <button
                         className="cdp-btn-book"
-                        onClick={() => navigate(`/book-now/course/${course.slug}`)}
+                        onClick={() => navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)}
                     >
                         BOOK NOW — ${sellingPrice}
                     </button>
@@ -223,7 +226,7 @@ function CourseDetails() {
                     </p>
                     <button
                         className="cdp-btn-book"
-                        onClick={() => navigate(`/book-now/course/${course.slug}`)}
+                        onClick={() => navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)}
                     >
                         Book Now — Pick a Date
                     </button>
@@ -259,7 +262,7 @@ function CourseDetails() {
                     <div className="cdp-sb-note">All inclusive · SafeWork NSW card fee included</div>
                     <button
                         className="cdp-sb-btn-main"
-                        onClick={() => navigate(`/book-now/course/${course.slug}`)}
+                        onClick={() => navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)}
                     >
                         BOOK NOW — ${sellingPrice}
                     </button>
@@ -305,7 +308,7 @@ function CourseDetails() {
                     <div className="cdp-sb-note">All inclusive · SafeWork NSW card fee included</div>
                     <button
                         className="cdp-sb-btn-main"
-                        onClick={() => navigate(`/book-now/course/${course.slug}`)}
+                        onClick={() => navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)}
                     >
                         Book Now — Pick a Date
                     </button>
@@ -396,6 +399,7 @@ function CourseDetails() {
                         setSelectedOptionId(null)
                     }}
                     initialSelection={selectedOptionId}
+                    extraQueryParams={fromPortal ? "fromPortal=true" : ""}
                 />
             )}
 
@@ -442,7 +446,7 @@ function CourseDetails() {
                                                     </div>
                                                     <button
                                                         className="cdp-s-btn"
-                                                        onClick={() => navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`)}
+                                                        onClick={() => navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${fromPortal ? "&fromPortal=true" : ""}`)}
                                                     >
                                                         Book
                                                     </button>
@@ -480,7 +484,7 @@ function CourseDetails() {
                                                             </div>
                                                             <button
                                                                 className="cdp-s-btn"
-                                                                onClick={() => navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`)}
+                                                                onClick={() => navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${fromPortal ? "&fromPortal=true" : ""}`)}
                                                             >
                                                                 Book
                                                             </button>

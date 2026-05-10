@@ -6,7 +6,7 @@ import { cdnImage } from "../../utils/cdnImage"
 import BookingModal, { getBookingOptions } from "./BookingModal"
 
 // ── Course Card ───────────────────────────────────────────────────────────────
-function CourseCard({ course }) {
+function CourseCard({ course, fromPortal }) {
     const navigate    = useNavigate()
     const [showModal, setShowModal] = useState(false)
     const [selectedOptionId, setSelectedOptionId] = useState(null)
@@ -31,7 +31,7 @@ function CourseCard({ course }) {
                 {/* THUMB */}
                 <div
                     className="course-thumb"
-                    onClick={() => navigate(`/course/${course.slug}`)}
+                    onClick={() => navigate(`/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)}
                 >
                     {course.image ? (
                         <img
@@ -71,7 +71,7 @@ function CourseCard({ course }) {
                     {/* Title */}
                     <h3
                         className="course-title"
-                        onClick={() => navigate(`/course/${course.slug}`)}
+                        onClick={() => navigate(`/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)}
                     >
                         {course.title}
                     </h3>
@@ -129,7 +129,7 @@ function CourseCard({ course }) {
                     {/* View Details */}
                     <button
                         className="course-btn course-btn--outline"
-                        onClick={() => navigate(`/course/${course.slug}`)}
+                        onClick={() => navigate(`/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)}
                     >
                         View Details
                         <i className="fa-solid fa-circle-info" />
@@ -147,6 +147,7 @@ function CourseCard({ course }) {
                         setSelectedOptionId(null)
                     }}
                     initialSelection={selectedOptionId}
+                    extraQueryParams={fromPortal ? "fromPortal=true" : ""}
                 />
             )}
         </>

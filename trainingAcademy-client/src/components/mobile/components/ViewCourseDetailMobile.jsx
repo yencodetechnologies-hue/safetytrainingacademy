@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import PublicNavbar from "../../PublicNavbar";
 import "../styles/ViewCourseDetailMobile.css";
@@ -119,8 +119,11 @@ function SectionSlider({ sections }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function ViewCourseDetailMobile({ course }) {
+export default function ViewCourseDetailMobile({ course, fromPortal: propFromPortal }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const fromPortal = propFromPortal || searchParams.get("fromPortal") === "true";
   const [sessions, setSessions]       = useState([]);
   const [loadingSessions, setLoading] = useState(true);
   const [showAll, setShowAll]         = useState(false);
@@ -184,8 +187,8 @@ export default function ViewCourseDetailMobile({ course }) {
   // used everywhere else (`?type=with-experience` etc.).
   const variantHref = (v) =>
     v?.key
-      ? `/book-now/course/${course.slug}?type=${v.key}`
-      : `/book-now/course/${course.slug}`;
+      ? `/book-now/course/${course.slug}?type=${v.key}${fromPortal ? "&fromPortal=true" : ""}`
+      : `/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`;
 
   // ── Content arrays — use API data if available, else mock fallback ──────────
   const outcomePoints    = (course.outcomePoints    || []).filter(Boolean);
@@ -236,7 +239,7 @@ export default function ViewCourseDetailMobile({ course }) {
         </div>
         <div className="cdm-hero-price ">
           
-          <button className="cdm-hero-btn" onClick={() => navigate(`/voc?courseId=${course._id}`)}>Book Voc</button>
+          <button className="cdm-hero-btn" onClick={() => navigate(`/voc?courseId=${course._id}${fromPortal ? "&fromPortal=true" : ""}`)}>Book Voc</button>
         </div>
       </div>
 
@@ -329,7 +332,7 @@ export default function ViewCourseDetailMobile({ course }) {
         ) : (
           <button
             className="cdm-book-now-big"
-            onClick={() => navigate(`/book-now/course/${course.slug}`)}
+            onClick={() => navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)}
           >
             Book Now — Pick your date below
           </button>
@@ -361,7 +364,7 @@ export default function ViewCourseDetailMobile({ course }) {
                       setSelectedSession(s);
                       setShowModal(true);
                     } else {
-                      navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`);
+                      navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${fromPortal ? "&fromPortal=true" : ""}`);
                     }
                   };
                   return (
@@ -407,7 +410,7 @@ export default function ViewCourseDetailMobile({ course }) {
                             setSelectedSession(s);
                             setShowModal(true);
                           } else {
-                            navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`);
+                            navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${fromPortal ? "&fromPortal=true" : ""}`);
                           }
                         }} >
                           <div className={`cdm-date-cal ${sunday ? "sunday" : ""}`}>
@@ -433,7 +436,7 @@ export default function ViewCourseDetailMobile({ course }) {
                                 setSelectedSession(s);
                                 setShowModal(true);
                               } else {
-                                navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`);
+                                navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${fromPortal ? "&fromPortal=true" : ""}`);
                               }
                             }}
                           >
@@ -512,7 +515,7 @@ export default function ViewCourseDetailMobile({ course }) {
             if (isVariantCourse) {
               setShowModal(true);
             } else {
-              navigate(`/book-now/course/${course.slug}`);
+              navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`);
             }
           }}
         >
@@ -531,9 +534,9 @@ export default function ViewCourseDetailMobile({ course }) {
           }}
           initialSelection={selectedOptionId}
           extraQueryParams={
-            selectedSession
+            (selectedSession
               ? `&scheduleId=${selectedSession.scheduleId}&sessionId=${selectedSession.id}`
-              : ""
+              : "") + (fromPortal ? "&fromPortal=true" : "")
           }
         />
       )}
