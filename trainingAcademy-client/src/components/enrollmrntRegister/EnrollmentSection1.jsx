@@ -15,7 +15,7 @@ function EnrollmentSection1({ userDetails, data, setData, next }) {
             givenName: parts[0] || "",
             surname: parts.slice(1).join(" ") || "",
             email: userDetails.email || "",
-            mobilePhone: userDetails.phone || ""
+            mobilePhone: userDetails.phone || userDetails.mobileNumber || userDetails.mobile || ""
         }))
     }, [userDetails])
 

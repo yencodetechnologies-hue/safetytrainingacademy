@@ -132,7 +132,7 @@ function Payment({
             setName(initialPaymentData.name || "")
             setEmail(initialPaymentData.email || "")
             // Students use 'phone', Companies use 'mobileNumber'
-            setPhone(initialPaymentData.phone || initialPaymentData.mobileNumber || "")
+            setPhone(initialPaymentData.phone || initialPaymentData.mobileNumber || initialPaymentData.mobile || "")
             setAgreed(true)
         }
     }, [isExistingCompany, shouldAutofill, initialPaymentData])

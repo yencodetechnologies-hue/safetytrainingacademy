@@ -13,6 +13,8 @@ import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom"
 import Loading from "../components/Loading"
 import { API_URL } from "../data/service";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 function BookNow() {
     const location = useLocation()
@@ -64,7 +66,8 @@ function BookNow() {
     const [companyUser, setCompanyUser] = useState(() => JSON.parse(localStorage.getItem("user") || "{}"));
     const [isProcessing, setIsProcessing] = useState(false)
 
-    const loggedInUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const { user: authUser } = useContext(AuthContext);
+    const loggedInUser = authUser || JSON.parse(localStorage.getItem("user") || "{}");
     const isStudentPortalAutofill = fromPortal && 
         (String(loggedInUser?.role || "").toLowerCase() === "student");
 
@@ -358,16 +361,32 @@ function BookNow() {
             const data = {
                 name: loggedInUser.name || "",
                 email: loggedInUser.email || "",
-                phone: loggedInUser.phone || loggedInUser.mobileNumber || "",
+                phone: loggedInUser.phone || loggedInUser.mobileNumber || loggedInUser.mobile || "",
             };
-            setUserDetails(data);
+            setUserDetails(prev => ({ ...prev, ...data }));
             setPaymentData(prev => ({
                 ...prev,
                 ...data,
                 agreed: true,
             }));
+
+            // 🔥 Robustness: If phone is missing from localStorage/Context, try fetching from profile API
+            if (!data.phone) {
+                const sid = loggedInUser.id || loggedInUser._id;
+                if (sid) {
+                    fetch(`${API_URL}/api/student/profile/${sid}`)
+                        .then(res => res.json())
+                        .then(profile => {
+                            if (profile.phone) {
+                                setUserDetails(prev => ({ ...prev, phone: profile.phone }));
+                                setPaymentData(prev => ({ ...prev, phone: profile.phone }));
+                            }
+                        })
+                        .catch(err => console.error("Portal autofill profile fetch failed:", err));
+                }
+            }
         }
-    }, [isStudentPortalAutofill]);
+    }, [isStudentPortalAutofill, loggedInUser]);
 
     useEffect(() => {
         if (step === 1) {

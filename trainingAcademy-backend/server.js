@@ -46,12 +46,15 @@ app.use(
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
+      // Check if origin matches exactly or with a trailing slash
+      const isAllowed = allowedOrigins.some(allowed => {
+        return origin === allowed || origin === allowed + "/";
+      });
+
+      if (isAllowed) {
         callback(null, true);
       } else {
         console.error(`CORS blocked for origin: ${origin}`);
-        // Instead of throwing an error which causes a 500, we pass false
-        // This will result in no CORS headers, which is the correct way to block
         callback(null, false);
       }
     },
@@ -89,6 +92,23 @@ app.use("/api/categories", require("./routes/categoryRoutes")); // ✅ ADD
 app.use("/api/sliders", require("./routes/sliderRoutes"));
 app.use("/api/partners", require("./routes/partnerRoutes"));
 app.use("/api/voc", require("./routes/vocRoutes"));
+
+// GLOBAL ERROR HANDLER
+app.use((err, req, res, next) => {
+  console.error("GLOBAL ERROR:", err.stack);
+  
+  // Ensure CORS headers are present on error responses
+  const origin = req.headers.origin;
+  if (origin && (allowedOrigins.includes(origin) || allowedOrigins.includes(origin + "/"))) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+  }
+
+  res.status(500).json({
+    message: err.message || "Internal Server Error",
+    error: process.env.NODE_ENV === "development" ? err : {},
+  });
+});
 
 const PORT = process.env.PORT || 8000;
 
