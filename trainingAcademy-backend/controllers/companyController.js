@@ -5,8 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../config/sendEmail");
 
-const PORTAL_URL = (process.env.CLIENT_ORIGIN || "https://safetytrainingacademy.vercel.app").split(",")[1]?.trim()
-    || "https://safetytrainingacademy.vercel.app";
+const PORTAL_URL = process.env.CLIENT_ORIGIN?.split(",")[0]?.trim() || "https://safetytrainingacademy.edu.au";
 
 const buildCompanyWelcomeHtml = ({ companyName, email, password }) => `
 <!DOCTYPE html><html><head><meta charset="utf-8"></head>
