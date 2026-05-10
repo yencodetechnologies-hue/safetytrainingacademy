@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000"; // ✅ API URL constant
+const API_URL = "https://api.octosofttechnologies.in"; // ✅ Production API URL
 
 async function loadForm() {
     const params = new URLSearchParams(window.location.search)
@@ -90,6 +90,7 @@ function fillForm(data) {
         p3SchoolPostcode: edu.schoolPostcode || "",    // ✅ NEW
         p3SchoolCountry: edu.schoolCountry || "",      // ✅ NEW
         p4ReasonOther: data.trainingReasonOther || "", // ✅ NEW
+        p4SpecialOther: needs.other || "",             // ✅ NEW
         p4CountryBirthOther: lang.countryOfBirth !== "Australia" ? lang.countryOfBirth : "",
         p4LangHomeOther: lang.otherLanguage || "",     // ✅ NEW
         p13StudentName: data.studentName || "",        // ✅ fixed
@@ -105,6 +106,16 @@ function fillForm(data) {
     })
 
     // ── CHECKBOXES ────────────────────────────────────────
+
+    // Education level map
+    const priorEduMap = {
+        "12": "12",
+        "11": "11",
+        "10": "10",
+        "09": "09",
+        "08": "08",
+        "never": "02"
+    }
 
     // Training reason map
     const reasonMap = {
@@ -156,7 +167,7 @@ function fillForm(data) {
         emgConsent: emg.consent ? "Yes" : "No",
         usiPermission: usi.permission ? "true" : "",
         usiApplyConsent: usi.staConsent ? "true" : "",
-        priorEdu: edu.highestLevel,                   // ✅ fixed
+        priorEdu: priorEduMap[edu.highestLevel] || "", // ✅ fixed map
         empStatus: empMap[data.employment?.status] || "",  // ✅ fixed
         qualHave: qual.hasQualification ? "Yes" : "No",   // ✅ NEW
         reasonTrain: reasonMap[data.trainingReason] || "", // ✅ fixed

@@ -3,6 +3,7 @@ import "./StudentMyCourses.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import LLNDAssessment from "../llnd/LLNDAssessment";
 import Payment from "../../components/Payment";
+import CourseCard from "../course/CourseCard";
 import { API_URL } from "../../data/service";
 import { cdnImage } from "../../utils/cdnImage";
 
@@ -287,64 +288,7 @@ export default function StudentMyCourses() {
           </div>
           <div className="mc-grid">
             {filtered.map((course) => (
-              <div key={course._id} className="mc-browse-card">
-                <div className="mc-browse-card__img-wrap">
-                  <img
-                    src={cdnImage(course.image, { w: 480 })}
-                    alt={course.title}
-                    className="mc-browse-card__img"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <span className="mc-category-badge">{course.title}</span>
-                </div>
-                <div className="mc-browse-card__body">
-                  <h3 className="mc-browse-card__title">{course.title}</h3>
-                  <p className="mc-browse-card__batch">Next batch starts: {course.nextBatch || "Contact us"}</p>
-                  <div className="mc-browse-card__meta">
-                    {course.duration && <span>⏱ {course.duration}</span>}
-                    <span>👥 {course.studentsEnrolled || 0}</span>
-                  </div>
-                  {course.tags && (
-                    <div className="mc-tags">
-                      {course.tags.map((t) => (
-                        <span key={t} className="mc-tag">{t}</span>
-                      ))}
-                    </div>
-                  )}
-                  {course.dates && course.dates.length > 0 && (
-                    <div className="mc-date-select">
-                      <label>📅 Select a Date</label>
-                      <select
-                        value={selectedDates[course._id] || ""}
-                        onChange={(e) =>
-                          setSelectedDates({ ...selectedDates, [course._id]: e.target.value })
-                        }
-                      >
-                        <option value="">Choose a date</option>
-                        {course.dates.map((d) => (
-                          <option key={d} value={d}>{d}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                  <div className="mc-browse-card__footer">
-                    <div>
-                      <p className="mc-price-label">Price</p>
-                      <p className="mc-price">{course.price}</p>
-                    </div>
-                    <button
-                      className="mc-btn mc-btn--purple mc-btn--sm"
-                      onClick={() => {
-                        setSelectedCourse(course);
-                        setShowPayment(true);
-                      }}
-                    >
-                      ↑ Enroll &amp; Pay
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <CourseCard key={course._id} course={course} />
             ))}
           </div>
         </div>
