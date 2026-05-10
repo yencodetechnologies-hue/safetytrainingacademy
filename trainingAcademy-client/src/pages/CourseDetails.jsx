@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import axios from "axios"
 import "../styles/CourseDetails.css"
 import PublicNavbar from "../components/PublicNavbar"
@@ -9,6 +9,13 @@ import { API_URL } from "../data/service"
 import { useNavigate } from "react-router-dom"
 import { cdnImage } from "../utils/cdnImage"
 import BookingModal from "../components/course/BookingModal"
+
+function chunkArray(arr, size) {
+    if (!arr) return []
+    const res = []
+    for (let i = 0; i < arr.length; i += size) res.push(arr.slice(i, i + size))
+    return res
+}
 
 function useIsMobile(breakpoint = 768) {
     const [isMobile, setIsMobile] = useState(
@@ -37,8 +44,10 @@ function CourseDetails() {
     const [courses, setCourses] = useState([])
     const [sessions, setSessions] = useState([])
     const [loadingSessions, setLoadingSessions] = useState(true)
+    const [showAllSessions, setShowAllSessions] = useState(false)
     const [showModal, setShowModal] = useState(false)
     const [selectedOptionId, setSelectedOptionId] = useState(null)
+    const swipeRef = useRef(null)
     const isMobile = useIsMobile()
 
     useEffect(() => {
@@ -384,6 +393,108 @@ function CourseDetails() {
                 <div className="cdp-content">
 
                     <div className="cdp-card">
+                        <div className="cdp-card-title">Available dates &amp; locations</div>
+                        {loadingSessions ? (
+                            <div className="cdp-sessions-loading">Loading sessions...</div>
+                        ) : sessions.length === 0 ? (
+                            <p className="cdp-no-sessions">No upcoming sessions available. Please contact us for private bookings.</p>
+                        ) : (
+                            <>
+                                {!showAllSessions ? (
+                                    <div className="cdp-sessions-list">
+                                        {sessions.slice(0, 4).map((s, i) => {
+                                            const d = new Date(s.date)
+                                            const day = d.getDate()
+                                            const mon = d.toLocaleString("en-AU", { month: "short" }).toUpperCase()
+                                            const weekday = d.toLocaleString("en-AU", { weekday: "long" })
+                                            const isLow = s.availableSlots <= 3
+                                            const cleanLoc = (s.location || "").replace(/Face to Face/gi, "").replace(/·\s*$/g, "").trim()
+                                            
+                                            return (
+                                                <div className="cdp-session-row" key={i}>
+                                                    <div className="cdp-s-date">
+                                                        <div className="cdp-s-day">{day}</div>
+                                                        <div className="cdp-s-mon">{mon}</div>
+                                                    </div>
+                                                    <div className="cdp-s-info">
+                                                        <div className="cdp-s-title">{weekday}</div>
+                                                        <div className="cdp-s-meta">
+                                                            {s.startTime} – {s.endTime}
+                                                        </div>
+                                                    </div>
+                                                    <div className="cdp-s-meta-desktop">
+                                                        {cleanLoc}
+                                                    </div>
+                                                    <div className={`cdp-s-spots ${isLow ? "cdp-s-spots--low" : ""}`}>
+                                                        {s.availableSlots} left
+                                                    </div>
+                                                    <button
+                                                        className="cdp-s-btn"
+                                                        onClick={() => navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`)}
+                                                    >
+                                                        Book
+                                                    </button>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="cdp-sessions-expanded">
+                                        {chunkArray(sessions, 7).map((page, pIdx) => (
+                                            <div key={pIdx} className="cdp-expanded-page">
+                                                {page.map((s, i) => {
+                                                    const d = new Date(s.date)
+                                                    const day = d.getDate()
+                                                    const mon = d.toLocaleString("en-AU", { month: "short" }).toUpperCase()
+                                                    const weekday = d.toLocaleString("en-AU", { weekday: "long" })
+                                                    const isLow = s.availableSlots <= 3
+                                                    const cleanLoc = (s.location || "").replace(/Face to Face/gi, "").replace(/·\s*$/g, "").trim()
+                                                    const cleanTime = (s.startTime || "").replace(/Face to Face/gi, "").trim()
+
+                                                    return (
+                                                        <div className="cdp-session-row expanded" key={i}>
+                                                            <div className="cdp-s-date">
+                                                                <div className="cdp-s-day">{day}</div>
+                                                                <div className="cdp-s-mon">{mon}</div>
+                                                            </div>
+                                                            <div className="cdp-s-info">
+                                                                <div className="cdp-s-title">{weekday} — Full day</div>
+                                                                <div className="cdp-s-meta">
+                                                                    {cleanTime} – {s.endTime} &nbsp;·&nbsp; {cleanLoc}
+                                                                </div>
+                                                            </div>
+                                                            <div className={`cdp-s-spots ${isLow ? "cdp-s-spots--low" : ""}`}>
+                                                                {s.availableSlots} left
+                                                            </div>
+                                                            <button
+                                                                className="cdp-s-btn"
+                                                                onClick={() => navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`)}
+                                                            >
+                                                                Book
+                                                            </button>
+                                                        </div>
+                                                    )
+                                                })}
+                                                <div className="cdp-page-indicator">
+                                                    {pIdx + 1} / {Math.ceil(sessions.length / 7)}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                {sessions.length > 4 && (
+                                    <button
+                                        className="cdp-see-all-btn"
+                                        onClick={() => setShowAllSessions(!showAllSessions)}
+                                    >
+                                        {showAllSessions ? "See less" : `See all sessions`}
+                                    </button>
+                                )}
+                            </>
+                        )}
+                    </div>
+
+                    <div className="cdp-card">
                         <div className="cdp-card-title">
                             About this course
                             {course?.courseCode && (
@@ -420,49 +531,6 @@ function CourseDetails() {
                         </div>
                     )}
 
-                    {/* AVAILABLE SESSIONS */}
-                    <div className="cdp-card">
-                        <div className="cdp-card-title">Available dates &amp; locations</div>
-                        {loadingSessions ? (
-                            <div className="cdp-sessions-loading">Loading sessions...</div>
-                        ) : sessions.length === 0 ? (
-                            <p className="cdp-no-sessions">No upcoming sessions available. Please contact us for private bookings.</p>
-                        ) : (
-                            <div className="cdp-sessions-list">
-                                {sessions.map((s, i) => {
-                                    const d = new Date(s.date)
-                                    const day = d.getDate()
-                                    const mon = d.toLocaleString("en-AU", { month: "short" }).toUpperCase()
-                                    const weekday = d.toLocaleString("en-AU", { weekday: "long" })
-                                    const isLow = s.availableSlots <= 3
-                                    return (
-                                        <div className="cdp-session-row" key={i}>
-                                            <div className="cdp-s-date">
-                                                <div className="cdp-s-day">{day}</div>
-                                                <div className="cdp-s-mon">{mon}</div>
-                                            </div>
-                                            <div className="cdp-s-info">
-                                                <div className="cdp-s-title">{weekday} — Full day</div>
-                                                <div className="cdp-s-meta">
-                                                    🕒 {s.startTime} – {s.endTime} &nbsp;·&nbsp; 📍 {s.location}
-                                                </div>
-                                            </div>
-                                            <div className={`cdp-s-spots ${isLow ? "cdp-s-spots--low" : ""}`}>
-                                                {s.availableSlots} {s.availableSlots === 1 ? "spot" : "spots"} left
-                                            </div>
-                                            <button
-                                                className="cdp-s-btn"
-                                                onClick={() => navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`)}
-                                            >
-                                                Book
-                                            </button>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        )}
-                    </div>
-
                     {Array.isArray(course?.feesCharges) && course.feesCharges.filter(Boolean).length > 0 && (
                         <div className="cdp-card">
                             <div className="cdp-card-title">Fees &amp; Charges</div>
@@ -475,22 +543,19 @@ function CourseDetails() {
                     )}
 
                     <div className="cdp-card">
-                        <div className="cdp-card-title">Why choose Safety Training Academy</div>
+                        <div className="cdp-card-title">Why choose STA</div>
                         <div className="cdp-trust-grid">
                             {[
-                                { icon: "⭐", title: "1,000+ Five-Star Reviews",    sub: "Highest rated RTO in Western Sydney" },
-                                { icon: "🏛", title: "SafeWork NSW Approved",        sub: "RTO #45234 — nationally recognised" },
-                                { icon: "📜", title: "Certificate Same Day",         sub: "Walk out ready to work on site" },
-                                { icon: "📅", title: "Sunday Sessions Available",    sub: "Flexible for shift workers and weekdays" },
-                                { icon: "💰", title: "All-Inclusive Pricing",        sub: "SafeWork card fee included — no surprises" },
-                                { icon: "📍", title: "Easy Location — Free Parking", sub: "Sefton NSW, close to M4 & M7" },
+                                { icon: "⭐", title: "1,000+ Five-Star Google Reviews" },
+                                { icon: "🏛", title: "SafeWork NSW Approved Provider" },
+                                { icon: "📜", title: "Certificate Issued Same Day" },
+                                { icon: "📅", title: "Sunday Sessions Available" },
+                                { icon: "💰", title: "All-Inclusive Pricing — No Hidden Fees" },
+                                { icon: "📍", title: "Easy Location with Free Parking" },
                             ].map((b, i) => (
                                 <div className="cdp-trust-badge" key={i}>
                                     <span className="cdp-tb-icon">{b.icon}</span>
-                                    <div>
-                                        <div className="cdp-tb-title">{b.title}</div>
-                                        <div className="cdp-tb-sub">{b.sub}</div>
-                                    </div>
+                                    <span className="cdp-tb-title">{b.title}</span>
                                 </div>
                             ))}
                         </div>
