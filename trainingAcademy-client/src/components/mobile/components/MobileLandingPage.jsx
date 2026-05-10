@@ -14,6 +14,7 @@ import { cdnImage } from "../../../utils/cdnImage";
 import {
   getCoursePriceDisplay,
   getCourseOriginalDisplay,
+  getCourseVariants,
 } from "../../../utils/coursePrice";
 import ClientsSection from "../../landingPage/ClientsSection";
 
@@ -210,9 +211,15 @@ export default function MobileLandingPage({ courses = [] }) {
   const handleBookNowClick = (s) => {
     const courseObj = courses.find((c) => c._id === s.courseId);
     if (courseObj) {
-      setSelectedBookingCourse(courseObj);
-      setSelectedBookingSession(s);
-      setShowBookingModal(true);
+      // If it's a standard course (only 1 variant), go direct
+      const variants = getCourseVariants(courseObj);
+      if (variants.length <= 1) {
+        navigate(sessionBookNowHref(s));
+      } else {
+        setSelectedBookingCourse(courseObj);
+        setSelectedBookingSession(s);
+        setShowBookingModal(true);
+      }
     } else {
       navigate(sessionBookNowHref(s));
     }
@@ -631,19 +638,7 @@ export default function MobileLandingPage({ courses = [] }) {
       <div className="mlp-sticky">
         <button 
           className="mlp-sticky-call" 
-          onClick={() => {
-            if (currentSlide) {
-              handleBookNowClick({ 
-                courseId: currentSlide.id, 
-                courseSlug: currentSlide.slug,
-                // These are null because we're booking from the hero, not a specific session
-                scheduleId: "",
-                id: "" 
-              });
-            } else {
-              navigate("/book-now");
-            }
-          }}
+          onClick={() => navigate("/book-now")}
         >
           Enroll Now
         </button>

@@ -360,8 +360,12 @@ export default function ViewCourseDetailMobile({ course }) {
                   const sunday = isSunday(s.date);
                   const handleBook = (e) => {
                     e.stopPropagation();
-                    setSelectedSession(s);
-                    setShowModal(true);
+                    if (isVariantCourse) {
+                      setSelectedSession(s);
+                      setShowModal(true);
+                    } else {
+                      navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`);
+                    }
                   };
                   return (
                     <div key={s.id} className="cdm-date-slot" onClick={handleBook}>
@@ -402,8 +406,12 @@ export default function ViewCourseDetailMobile({ course }) {
                       const sunday = isSunday(s.date);
                       return (
                         <div key={s.id} className="cdm-date-slot"  onClick={() => {
-                          setSelectedSession(s);
-                          setShowModal(true);
+                          if (isVariantCourse) {
+                            setSelectedSession(s);
+                            setShowModal(true);
+                          } else {
+                            navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`);
+                          }
                         }} >
                           <div className={`cdm-date-cal ${sunday ? "sunday" : ""}`}>
                             <div className="cdm-date-cal-day">{formatDay(s.date)}</div>
@@ -424,8 +432,12 @@ export default function ViewCourseDetailMobile({ course }) {
                             className="cdm-book-slot-btn"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setSelectedSession(s);
-                              setShowModal(true);
+                              if (isVariantCourse) {
+                                setSelectedSession(s);
+                                setShowModal(true);
+                              } else {
+                                navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}`);
+                              }
                             }}
                           >
                             Book
