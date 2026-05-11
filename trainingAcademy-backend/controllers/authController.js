@@ -46,6 +46,11 @@ exports.login = async (req, res) => {
     // 🔥 FIRST check StudentMain
     let student = await StudentMain.findOne({ email });
 
+    if (!student) {
+      const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      student = await StudentMain.findOne({ email: { $regex: new RegExp("^" + escapedEmail + "$", "i") } });
+    }
+
     if (student) {
       const isMatch = await bcrypt.compare(password, student.password);
 
@@ -131,6 +136,11 @@ exports.autoLogin = async (req, res) => {
 
     // 🔥 1. Check StudentMain first
     let student = await StudentMain.findOne({ email });
+
+    if (!student) {
+      const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      student = await StudentMain.findOne({ email: { $regex: new RegExp("^" + escapedEmail + "$", "i") } });
+    }
 
     if (student) {
       const token = jwt.sign(
