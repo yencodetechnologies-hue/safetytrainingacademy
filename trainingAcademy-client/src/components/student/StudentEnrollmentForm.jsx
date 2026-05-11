@@ -110,11 +110,8 @@ export default function StudentEnrollmentForm() {
   if (error) return <div>Error: {error}</div>;
   if (!userDetails) return <div>No user details found.</div>;
 
-  const canAccess =
-    enrollmentType === "company" ||
-    enrollmentType === "Company" ||
-    paymentMethod === "Card Payment" ||
-    (paymentMethod === "Bank Transfer" && paymentVerified);
+  const canAccess = true; // Bypassed verification as per user request
+
 
   if (!canAccess) {
     return (
