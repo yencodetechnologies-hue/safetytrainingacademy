@@ -304,15 +304,44 @@ function BookNow() {
                     email: storedUser.email || "",
                     phone: storedUser.mobileNumber || "",
                 });
+
+                // 🔥 Always fetch latest company settings to ensure Pay Later toggle is up-to-date
+                fetch(`${API_URL}/api/companies/${enrollId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            const updatedUser = { ...storedUser, payLater: data.data.payLater };
+                            setCompanyUser(updatedUser);
+                            setPaymentData(prev => ({
+                                ...prev,
+                                payLater: data.data.payLater
+                            }));
+                        }
+                    })
+                    .catch(err => console.error("Failed to sync company settings:", err))
+                    .finally(() => setIsLoading(false));
             } else {
                 // Public / shared employee enrolment link — visitor enrols
                 // as an individual student, attached to this company.
-                setIsCompanyEnroll(true);
-                setEnrollmentType("individual");
-                setIsDashboardCompany(false);
-                setTokenData(prev => ({ ...(prev || {}), companyId: enrollId }));
+                setIsLoading(true);
+                fetch(`${API_URL}/api/companies/${enrollId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            setTokenData({ 
+                                companyId: enrollId, 
+                                payLater: data.data.payLater 
+                            });
+                            setIsCompanyEnroll(true);
+                            setEnrollmentType("individual");
+                            setIsDashboardCompany(false);
+                        } else {
+                            navigate("/");
+                        }
+                    })
+                    .catch(() => navigate("/"))
+                    .finally(() => setIsLoading(false));
             }
-            setIsLoading(false);
             return;
         }
 
@@ -467,7 +496,10 @@ function BookNow() {
     };
 
     const getNextLabel = () => {
-        if (step === 2 && !isCompanyEnroll && !isEnrollmentLink) return `🔒 Pay $${coursePrice} & Continue`
+        if (step === 2 && !isCompanyEnroll && !isEnrollmentLink) {
+            if (paymentData.paymentMethod === "Pay Later") return "Confirm & Continue"
+            return `🔒 Pay $${coursePrice} & Continue`
+        }
         if (step === 2 && isEnrollmentLink) return "Create Account & Continue"
         if (step === 4 && enrollSection === 5) return "Submit"
         return "Next"
@@ -1102,9 +1134,11 @@ function BookNow() {
                             setActivePaymentMethod(ref.paymentMethod)
                         }}
                         isExistingCompany={isDashboardCompany}
-                        initialPaymentData={loggedInUser}
+                        initialPaymentData={isDashboardCompany ? companyUser : loggedInUser}
                         isEnrollmentLink={isEnrollmentLink}
                         shouldAutofill={isStudentPortalAutofill}
+                        tokenData={tokenData}
+                        enrollmentLinkData={enrollmentLinkData}
                     />
                 )}
 

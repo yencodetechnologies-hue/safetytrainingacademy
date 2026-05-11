@@ -39,7 +39,8 @@ message:"Register success",
 
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email: rawEmail, password } = req.body;
+    const email = rawEmail ? rawEmail.toLowerCase().trim() : "";
 
     // 🔥 FIRST check StudentMain
     let student = await StudentMain.findOne({ email });
@@ -100,7 +101,8 @@ exports.login = async (req, res) => {
         email: user.email,
         phone: user.phone || user.mobileNumber || "", // ✅ added
         mobileNumber: user.mobileNumber || user.phone || "", // ✅ added
-        role: user.role
+        role: user.role,
+        payLater: user.payLater || false // ✅ added
       }
     });
 
@@ -112,7 +114,8 @@ exports.login = async (req, res) => {
 
 exports.autoLogin = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email: rawEmail } = req.body;
+    const email = rawEmail ? rawEmail.toLowerCase().trim() : "";
 
     // 🔥 1. Check StudentMain first
     let student = await StudentMain.findOne({ email });
@@ -161,7 +164,8 @@ exports.autoLogin = async (req, res) => {
         email: user.email,
         phone: user.phone || user.mobileNumber || "", // ✅ added
         mobileNumber: user.mobileNumber || user.phone || "", // ✅ added
-        role: user.role
+        role: user.role,
+        payLater: user.payLater || false // ✅ added
       }
     });
 
