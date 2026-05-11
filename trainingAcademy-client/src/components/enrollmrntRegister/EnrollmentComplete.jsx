@@ -10,7 +10,7 @@ function EnrollmentComplete() {
     const enrollmentData = state || {}
     const navigate = useNavigate()
     const { setUser } = useContext(AuthContext)
-    const [countdown, setCountdown] = useState(5)
+    const [countdown, setCountdown] = useState(10)
     const [copiedToken, setCopiedToken] = useState("")
 
     const isCompany = enrollmentData.enrollmentType === "company"
@@ -286,7 +286,7 @@ function EnrollmentComplete() {
                                         stroke="#7b2ff7"
                                         strokeWidth="4"
                                         strokeDasharray={`${2 * Math.PI * 20}`}
-                                        strokeDashoffset={`${2 * Math.PI * 20 * (1 - countdown / 5)}`}
+                                        strokeDashoffset={`${2 * Math.PI * 20 * (1 - countdown / 10)}`}
                                         strokeLinecap="round"
                                         transform="rotate(-90 24 24)"
                                         style={{ transition: "stroke-dashoffset 1s linear" }}

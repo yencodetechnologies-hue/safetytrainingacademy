@@ -509,13 +509,11 @@ exports.getAllPayments = async (req, res) => {
           slipUrl: payment.slipUrl || null, // ✅ image URL
         });
 
-        if (payment.status === "pending") stats.pending++;
-
+        if (payment.status === "pending" || payment.status === "unpaid") stats.pending++;
+        
         if (payment.status === "success" || payment.status === "completed") {
           stats.success++;
-
           const amount = payment.amount || item.course.price || 0;
-
           stats.totalAmount += amount;
         }
 

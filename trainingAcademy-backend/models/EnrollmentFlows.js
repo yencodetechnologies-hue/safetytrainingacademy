@@ -25,7 +25,7 @@ enrollmentType: {
 
   source: {
     type: String,
-    enum: ["Company Link", "Booking Link", "Enrollment Link", "individual"],
+    enum: ["Company Link", "Booking Link", "Enrollment Link", "individual", "Manual Admin Add"],
     default: "individual"
   },
 
@@ -43,7 +43,7 @@ enrollmentType: {
       payment: {
         status: {
           type: String,
-          enum: ["pending", "success", "failed"],
+          enum: ["pending", "success", "failed", "unpaid"],
           default: "pending"
         },
         paymentId: String,

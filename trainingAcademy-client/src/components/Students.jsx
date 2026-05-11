@@ -297,17 +297,65 @@ function AddStudentModal({ onClose, onSave }) {
     email: "",
     phone: "",
     password: "",
+    courseId: "",
+    sessionId: "",
+    transactionId: "",
+    paymentMethod: "Bank Transfer",
   });
+  const [courses, setCourses] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/courses`);
+        if (res.ok) {
+          const data = await res.json();
+          setCourses(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch courses:", err);
+      }
+    };
+    fetchCourses();
+  }, []);
+
+  const handleChange = async (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "courseId") {
+      setForm(prev => ({ ...prev, sessionId: "" }));
+      if (value) {
+        setLoadingSessions(true);
+        try {
+          const res = await fetch(`${API_URL}/api/schedules/course/${value}`);
+          if (res.ok) {
+            const data = await res.json();
+            // Flatten sessions from slots
+            const allSessions = data.flatMap(slot => 
+              slot.sessions.map(s => ({ ...s, date: slot.date }))
+            );
+            setSessions(allSessions);
+          }
+        } catch (err) {
+          console.error("Failed to fetch sessions:", err);
+        } finally {
+          setLoadingSessions(false);
+        }
+      } else {
+        setSessions([]);
+      }
+    }
   };
 
+
   const handleSubmit = async () => {
-    if (!form.name || !form.email || !form.password) {
-      setError("Name, email, and password are required.");
+    if (!form.name || !form.email || !form.password || !form.courseId || !form.sessionId) {
+      setError("Name, email, password, course, and session are required.");
       return;
     }
     setSaving(true);
@@ -370,6 +418,111 @@ function AddStudentModal({ onClose, onSave }) {
           <div className="modal-input-wrap">
             <span className="modal-input-icon">🔒</span>
             <input className="modal-input" name="password" type="password" value={form.password} onChange={handleChange} placeholder="Set a password" />
+          </div>
+
+          <label className="modal-label">Select Course *</label>
+          <div className="modal-input-wrap">
+            <span className="modal-input-icon">📖</span>
+            <select
+              className="modal-input"
+              name="courseId"
+              value={form.courseId}
+              onChange={handleChange}
+            >
+              <option value="">Select a course</option>
+              {courses.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.courseCode} - {c.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {form.courseId && (
+            <>
+              <label className="modal-label" style={{ display: 'block', marginTop: '15px' }}>Select Date & Time *</label>
+              <div className="modal-sessions-grid" style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', 
+                gap: '10px', 
+                marginTop: '8px',
+                maxHeight: '220px',
+                overflowY: 'auto',
+                padding: '8px',
+                background: '#f9fafb',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0'
+              }}>
+                {loadingSessions ? (
+                  <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '20px', color: '#64748b', fontSize: '13px' }}>
+                    ⏳ Loading available dates...
+                  </div>
+                ) : sessions.length > 0 ? (
+                  sessions.map((s) => {
+                    const isActive = form.sessionId === s._id;
+                    const dateObj = new Date(s.date);
+                    const formattedDate = !isNaN(dateObj.getTime()) 
+                      ? dateObj.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })
+                      : "Date TBD";
+                    
+                    return (
+                      <div
+                        key={s._id}
+                        onClick={() => setForm(prev => ({ ...prev, sessionId: s._id }))}
+                        style={{
+                          padding: '12px 8px',
+                          border: `2px solid ${isActive ? '#7c3aed' : '#cbd5e1'}`,
+                          borderRadius: '10px',
+                          cursor: 'pointer',
+                          background: isActive ? '#f3f0ff' : '#fff',
+                          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                          textAlign: 'center',
+                          boxShadow: isActive ? '0 4px 6px -1px rgba(124, 58, 237, 0.1)' : 'none'
+                        }}
+                      >
+                        <div style={{ fontSize: '11px', fontWeight: '700', color: isActive ? '#7c3aed' : '#64748b', textTransform: 'uppercase' }}>
+                          {formattedDate}
+                        </div>
+                        <div style={{ fontSize: '13px', fontWeight: '800', marginTop: '4px', color: isActive ? '#5b21b6' : '#1e293b' }}>
+                          {s.startTime || "TBD"}
+                        </div>
+                        <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '2px' }}>
+                          {s.endTime ? `- ${s.endTime}` : ""}
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '20px', color: '#ef4444', fontSize: '13px', fontWeight: '500' }}>
+                    ❌ No upcoming sessions available for this course.
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          <label className="modal-label">Payment Method *</label>
+          <div className="modal-radio-group" style={{ display: "flex", gap: "20px", marginTop: "10px", padding: "10px" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="Bank Transfer"
+                checked={form.paymentMethod === "Bank Transfer"}
+                onChange={handleChange}
+              />
+              Bank Transfer
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="Pay Later"
+                checked={form.paymentMethod === "Pay Later"}
+                onChange={handleChange}
+              />
+              Pay Later
+            </label>
           </div>
         </div>
 

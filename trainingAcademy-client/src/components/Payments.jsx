@@ -21,9 +21,11 @@ const Payment = () => {
   };
 
   const formatStatus = (status) => {
-    if (status === "success") return "Verified";
+    if (status === "success" || status === "completed") return "Verified";
     if (status === "pending") return "Pending";
     if (status === "failed") return "Rejected";
+    if (status === "unpaid") return "Unpaid";
+    return status || "Pending";
   };
 
   useEffect(() => {
@@ -319,16 +321,26 @@ const Payment = () => {
                 </div>
               </div>
 
-              <div className="receipt-preview">
-                <div className="receipt-header"></div>
-                <img className="receipt-header-img" src={selectedPayment.slipUrl} alt="Receipt" />
-                <div className="pdf-placeholder">
+              <div className="receipt-preview" style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', borderRadius: '8px', border: '1px dashed #ccc', marginBottom: '20px' }}>
+                {selectedPayment.slipUrl ? (
+                  <img className="receipt-header-img" src={selectedPayment.slipUrl} alt="Receipt" style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }} />
+                ) : (
+                  <div style={{ textAlign: 'center', color: '#666' }}>
+                    <p style={{ fontSize: '24px', marginBottom: '8px' }}>📄</p>
+                    <p>No payment receipt uploaded yet.</p>
+                    {selectedPayment.method === "Pay Later" && <p style={{ fontSize: '12px' }}>(Payment Method: Pay Later)</p>}
+                  </div>
+                )}
+              </div>
+
+              {selectedPayment.slipUrl && (
+                <div className="pdf-placeholder" style={{ marginBottom: '20px' }}>
                   <p>PDF Document</p>
                   <button className="open-pdf" onClick={() => window.open(selectedPayment.slipUrl, "_blank")}>
                     Open PDF in New Tab
                   </button>
                 </div>
-              </div>
+              )}
 
               <div className="rejection-section">
                 <label>Rejection Reason (if rejecting)</label>

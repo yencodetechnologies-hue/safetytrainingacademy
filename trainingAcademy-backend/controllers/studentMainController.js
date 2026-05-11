@@ -7,6 +7,7 @@ const Company = require("../models/Company");
 const CourseLink = require("../models/CourseLink");
 const Course = require("../models/Course");
 const EnrollmentLink = require("../models/EnrollmentLink");
+const Schedule = require("../models/schedule");
 
 exports.createStudent = async (req, res) => {
   try {
@@ -75,6 +76,51 @@ exports.createStudent = async (req, res) => {
     }
 
     await student.save();
+
+    // ✅ Fetch session details if sessionId is provided
+    const course = await Course.findById(data.courseId).lean();
+    let sessionData = {};
+    if (data.sessionId) {
+      const schedule = await Schedule.findOne({ "sessions._id": data.sessionId });
+      if (schedule) {
+        const session = schedule.sessions.id(data.sessionId);
+        if (session) {
+          sessionData = {
+            sessionDate: schedule.date,
+            startTime: session.startTime,
+            endTime: session.endTime
+          };
+        }
+      }
+    }
+
+    // ✅ Create EnrollmentFlow so the student shows up in the Admin table
+    const newFlow = new EnrollmentFlow({
+      studentId: student._id,
+      enrollmentType: data.enrollmentType || "individual",
+      companyId: data.companyId || null,
+      source: "Manual Admin Add",
+      ...sessionData,
+      items: [{
+        course: {
+          courseId: course?._id,
+          courseName: course?.title,
+          courseCategory: course?.courseCategory,
+          price: course?.sellingPrice || 0
+        },
+        payment: {
+          method: data.paymentMethod || "Bank Transfer",
+          status: data.paymentMethod === "Pay Later" ? "unpaid" : "pending",
+          transactionId: data.transactionId || `MANUAL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          amount: course?.sellingPrice || 0
+        }
+      }],
+      status: "active",
+      currentStep: 4
+    });
+
+    await newFlow.save();
+
     res.json(student);
 
   } catch (err) {
@@ -219,7 +265,9 @@ exports.getAllStudents = async (req, res) => {
           ? (item.payment?.status === "success" || item.payment?.status === "completed") ? "Paid" : "Unpaid"
           : item.payment?.method === "Bank Transfer"
             ? item.payment?.status === "success" ? "Verified" : "Not Verified"
-            : "—",
+            : item.payment?.method === "Pay Later"
+              ? "Unpaid"
+              : "—",
         status: flow.status === "active" ? "Active" : "Inactive",
         lastLogin: student.lastLogin || "Never",
       };

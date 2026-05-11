@@ -362,6 +362,7 @@ function CourseSelection({
     const [courseSlots, setCourseSlots] = useState({})
     const [collapsedCourses, setCollapsedCourses] = useState({})
     const [categoryList, setCategoryList] = useState([]) // ✅ Store categories for ordering
+    const [loadingSlots, setLoadingSlots] = useState(false)
     const processedUrlSession = useRef(false)
 
     const params = new URLSearchParams(window.location.search)
@@ -416,23 +417,28 @@ function CourseSelection({
                     const selected = fetchedCourses.find(c => c._id === paramCourseId)
                     if (selected) {
                         setSelectedCourse(selected)
-                        const slotRes = await axios.get(`${API_URL}/api/schedules/course/${paramCourseId}`)
-                        const fetchedSlots = slotRes.data
-                        setSlots(fetchedSlots)
+                        setLoadingSlots(true)
+                        try {
+                            const slotRes = await axios.get(`${API_URL}/api/schedules/course/${paramCourseId}`)
+                            const fetchedSlots = slotRes.data
+                            setSlots(fetchedSlots)
 
-                        if (paramSessionId) {
-                            let matched = null
-                            fetchedSlots.forEach(slot => {
-                                slot.sessions?.forEach(session => {
-                                    if (String(session._id) === String(paramSessionId)) {
-                                        matched = { ...session, date: slot.date }
-                                    }
+                            if (paramSessionId) {
+                                let matched = null
+                                fetchedSlots.forEach(slot => {
+                                    slot.sessions?.forEach(session => {
+                                        if (String(session._id) === String(paramSessionId)) {
+                                            matched = { ...session, date: slot.date }
+                                        }
+                                    })
                                 })
-                            })
-                            if (matched) {
-                                // Pre-select the date only; the user must pick a timing
-                                setSelectedSession({ date: matched.date })
+                                if (matched) {
+                                    // Pre-select the date only; the user must pick a timing
+                                    setSelectedSession({ date: matched.date })
+                                }
                             }
+                        } finally {
+                            setLoadingSlots(false)
                         }
                     }
                 }
@@ -478,11 +484,14 @@ function CourseSelection({
         // alongside the course object so price math downstream stays consistent.
         setSelectedCourse({ ...selected, __variant: variant })
         setSelectedSession(null)
+        setLoadingSlots(true)
         try {
             const res = await axios.get(`${API_URL}/api/schedules/course/${courseId}`)
             setSlots(res.data)
         } catch (err) {
             console.log(err)
+        } finally {
+            setLoadingSlots(false)
         }
     }
 
@@ -668,17 +677,30 @@ function CourseSelection({
                         />
                     </div>
 
-                    {selectedCourse && Object.keys(groupedSlots).length > 0 && (
-                        <>
-                            <p className="slot-title" style={{ marginBottom: 8 }}>
-                                Select date for <strong>{selectedCourse.title}</strong>
+                    {selectedCourse && (
+                        <div className="date-selection-container" style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                            <p className="slot-title" style={{ marginBottom: '15px', fontSize: '16px', fontWeight: '600', color: '#1a1a2e' }}>
+                                {loadingSlots ? "Loading available dates..." : `Select date for ${selectedCourse.title}`}
                             </p>
-                            <CalendarDatePicker
-                                groupedSlots={groupedSlots}
-                                selectedSession={selectedSession}
-                                onSelectSession={setSelectedSession}
-                            />
-                        </>
+                            
+                            {loadingSlots ? (
+                                <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                                    <div className="loading-spinner-small" style={{ marginBottom: '10px' }}></div>
+                                    <p>Checking for upcoming sessions...</p>
+                                </div>
+                            ) : Object.keys(groupedSlots).length > 0 ? (
+                                <CalendarDatePicker
+                                    groupedSlots={groupedSlots}
+                                    selectedSession={selectedSession}
+                                    onSelectSession={setSelectedSession}
+                                />
+                            ) : (
+                                <div style={{ textAlign: 'center', padding: '30px', background: '#fff5f5', borderRadius: '12px', border: '1px solid #feb2b2' }}>
+                                    <p style={{ color: '#c53030', fontWeight: '600' }}>No upcoming sessions available for this course.</p>
+                                    <p style={{ fontSize: '13px', color: '#666', marginTop: '5px' }}>Please contact us for more information or try another course.</p>
+                                </div>
+                            )}
+                        </div>
                     )}
                 </>
             )}
