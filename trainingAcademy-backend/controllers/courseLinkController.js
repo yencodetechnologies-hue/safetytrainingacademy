@@ -1,6 +1,7 @@
 // controllers/courseLinkController.js
 
 const CourseLink = require("../models/CourseLink")
+const Company = require("../models/Company")
 const crypto = require("crypto")
 
 // ─────────────────────────────────────────────────────────────
@@ -77,6 +78,8 @@ exports.validateLink = async (req, res) => {
         }
 
         // ✅ Valid — return course + session info
+        const company = await Company.findById(link.companyId).select("payLater")
+
         res.json({
             valid: true,
             data: {
@@ -92,6 +95,7 @@ exports.validateLink = async (req, res) => {
                 usedCount:   link.usedCount,
                 companyId:   link.companyId,
                 token:       link.token,
+                payLater:    company?.payLater || false,
             }
         })
     } catch (err) {

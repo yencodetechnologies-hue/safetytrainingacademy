@@ -5,6 +5,7 @@ const Schedule = require("../models/schedule");
 const mongoose = require("mongoose");
 const sendEmail = require("../config/sendEmail");
 const { sendLLNCompletionNotification, sendEnrollmentFormCompletionNotification } = require("./bookingEmailController");
+const Company = require("../models/Company");
 
 // ✅ Create new flow
 exports.createFlow = async (req, res) => {
@@ -53,8 +54,16 @@ exports.createFlow = async (req, res) => {
     if (source === "Booking Link" && sourceToken) {
       const link = await CourseLink.findOne({ token: sourceToken }).lean();
       if (link) {
-        resolvedPaymentStatus = "success";   // pre-paid by company
-        resolvedMethod = "Link Ref";
+        const company = await Company.findById(link.companyId).select("payLater").lean()
+
+        if (company?.payLater) {
+          resolvedPaymentStatus = "pending";
+          resolvedMethod = "Pay Later";
+        } else {
+          resolvedPaymentStatus = "success";   // pre-paid by company
+          resolvedMethod = "Link Ref";
+        }
+
         if (!resolvedCompanyId && link.companyId) {
           resolvedCompanyId = link.companyId;
         }

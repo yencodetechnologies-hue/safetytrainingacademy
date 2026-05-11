@@ -62,6 +62,8 @@ function Payment({
     initialPaymentData = {},
     isEnrollmentLink = false,  // ✅ NEW: for enrollment links
     shouldAutofill = false,    // ✅ NEW: for student portal autofill
+    tokenData = null,          // ✅ NEW
+    enrollmentLinkData = null, // ✅ NEW
 }) {
 
     const [paymentMethod, setPaymentMethod] = useState("Bank Transfer")
@@ -199,6 +201,9 @@ function Payment({
                     expiryYear: vals.expiryYear,
                     cvv: vals.cvv,
                 })
+            } else if (paymentMethod === "Pay Later") {
+                // Pay Later has no specific validation requirements
+                methodErrors = {}
             }
         }
         return { ...personalErrors, ...methodErrors }
@@ -482,7 +487,7 @@ function Payment({
                             <span>Duration:</span>
                             <span>{selectedCourse?.duration || "0"}</span>
                         </div>
-                        {!isEnrollmentLink && (
+                        {(!isEnrollmentLink || enrollmentLinkData?.payLater || tokenData?.payLater || initialPaymentData?.payLater) && (
                             <div className="summary-row total">
                                 <span>Total:</span>
                                 <span>${coursePrice || selectedCourse?.sellingPrice || "0"}</span>
@@ -492,8 +497,8 @@ function Payment({
                 )}
             </div>
 
-            {/* Enrollment Link Info */}
-            {isEnrollmentLink && (
+            {/* Enrollment Link Info (Only show "No Payment Required" if Pay Later is NOT enabled for the link) */}
+            {isEnrollmentLink && !enrollmentLinkData?.payLater && (
                 <div className="summary-card" style={{ backgroundColor: "#f3e8ff", borderLeft: "4px solid #7c3aed" }}>
                     <div style={{ fontSize: 14, color: "#5b21b6", fontWeight: 600 }}>
                         ✓ No Payment Required
@@ -504,8 +509,8 @@ function Payment({
                 </div>
             )}
 
-            {/* Payment Method */}
-            {!isCompanyEnroll && !isEnrollmentLink && (
+            {/* Payment Method - Show if not an enrollment/company link OR if Pay Later is enabled */}
+            {(!isCompanyEnroll && !isEnrollmentLink || tokenData?.payLater || enrollmentLinkData?.payLater || initialPaymentData?.payLater) && (
                 <div className="payment-method">
                     <label>Select Payment Method *</label>
                     <div
@@ -515,9 +520,10 @@ function Payment({
                         <input type="radio" checked={paymentMethod === "Bank Transfer"} readOnly />
                         <div>
                             <strong>Bank Transfer</strong>
-                            <p>Transfer to our bank account - pay later</p>
+                            <p>Transfer to our bank account and upload receipt</p>
                         </div>
                     </div>
+
                     <div
                         className={`method-card ${paymentMethod === "Card Payment" ? "active" : ""}`}
                         onClick={() => setPaymentMethod("Card Payment")}
@@ -528,11 +534,25 @@ function Payment({
                             <p>Pay securely with your card online</p>
                         </div>
                     </div>
+                    
+                    {/* Standalone Pay Later option - only if enabled */}
+                    {(tokenData?.payLater || enrollmentLinkData?.payLater || initialPaymentData?.payLater) && (
+                        <div
+                            className={`method-card ${paymentMethod === "Pay Later" ? "active" : ""}`}
+                            onClick={() => setPaymentMethod("Pay Later")}
+                        >
+                            <input type="radio" checked={paymentMethod === "Pay Later"} readOnly />
+                            <div>
+                                <strong>Pay Later</strong>
+                                <p>Proceed now and pay later via invoice</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
-            {/* Bank Transfer */}
-            {!isCompanyEnroll && !isEnrollmentLink && paymentMethod === "Bank Transfer" && (
+            {/* Bank Transfer Details (Normal bank transfer requiring slip) */}
+            {(!isCompanyEnroll && !isEnrollmentLink || tokenData?.payLater || enrollmentLinkData?.payLater || initialPaymentData?.payLater) && paymentMethod === "Bank Transfer" && (
                 <div className="bank-details">
                     <h4>Bank Details</h4>
                     <div className="bank-row"><span>Bank:</span><span>Commonwealth Bank</span></div>
@@ -620,6 +640,20 @@ function Payment({
                     </div>
 
                     <p className="bank-note">Please use your name and course code as the payment reference.</p>
+                </div>
+            )}
+
+            {/* Pay Later Option Note (No fields required) */}
+            {(!isCompanyEnroll && !isEnrollmentLink || tokenData?.payLater || enrollmentLinkData?.payLater || initialPaymentData?.payLater) && paymentMethod === "Pay Later" && (
+                <div className="bank-details" style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                    <div style={{ padding: 10 }}>
+                        <p style={{ margin: 0, fontSize: 14, color: "#166534", fontWeight: 600 }}>
+                            ✓ Pay Later Method Selected
+                        </p>
+                        <p style={{ margin: "8px 0 0", fontSize: 13, color: "#15803d" }}>
+                            You can proceed with the enrollment now. Your company will be invoiced for this booking. No immediate payment or receipt is required.
+                        </p>
+                    </div>
                 </div>
             )}
 

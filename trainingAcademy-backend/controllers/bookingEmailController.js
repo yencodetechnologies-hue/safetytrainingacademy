@@ -60,41 +60,7 @@ const sendBookingConfirmation = async (req, res) => {
     <p style="margin:0 0 16px;font-size:15px;color:#555;">Dear <strong style="color:#333;">${name}</strong>,</p>
     <p style="margin:0 0 24px;font-size:15px;color:#555;">Thank you for booking with <strong>Safety Training Academy</strong>. Your booking has been successfully received!</p>
 
-    ${loginCredentialsHtml}
-
-    <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#334155;">Please find your course details below:</p>
-    <table width="100%" cellpadding="12" cellspacing="0" border="0" style="background-color:#f8fafc;border-radius:6px;margin-bottom:24px;border:1px solid #e2e8f0;">
-        <tr><td style="font-size:13px;color:#64748b;width:120px;">Course Name</td><td style="font-size:14px;font-weight:600;color:#334155;">${courseName}</td></tr>
-        <tr><td style="font-size:13px;color:#64748b;">Course Code</td><td style="font-size:14px;font-weight:600;color:#334155;">${courseCode}</td></tr>
-        <tr><td style="font-size:13px;color:#64748b;">Date</td><td style="font-size:14px;font-weight:600;color:#334155;">${courseDate}</td></tr>
-        <tr><td style="font-size:13px;color:#64748b;">Time</td><td style="font-size:14px;font-weight:600;color:#334155;">${startTime} - ${endTime}</td></tr>
-        <tr><td style="font-size:13px;color:#64748b;">Location</td><td style="font-size:14px;font-weight:600;color:#334155;">3/14-16 Marjorie Street, Sefton NSW 2162</td></tr>
-    </table>
-    <div style="margin-bottom:24px;padding:16px;background-color:#fef3c7;border-radius:6px;border-left:4px solid #f59e0b;">
-        <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#92400e;">Important: Course Preparation Checklist</p>
-        <p style="margin:0 0 8px;font-size:13px;color:#334155;">Course Address: <strong>3/14-16 Marjorie Street, Sefton NSW 2162</strong></p>
-        <ul style="margin:0 0 12px;padding-left:20px;font-size:13px;color:#334155;">
-            <li style="margin-bottom:6px;">ID reflecting your name and address.</li>
-            <li style="margin-bottom:6px;">PPE — high visibility vest and steel cap boots. <em>(Not required for First Aid courses.)</em></li>
-            <li style="margin-bottom:6px;"><strong>USI:</strong> <a href="https://www.usi.gov.au/your-usi/create-usi" style="color:#3b82f6;">Create USI</a> | <a href="https://www.usi.gov.au/faqs/find-your-usi" style="color:#3b82f6;">Find your USI</a></li>
-        </ul>
-        <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#334155;">High-Risk licence (Forklift / Boom lift over 11m):</p>
-        <ul style="margin:0 0 12px;padding-left:20px;font-size:13px;color:#334155;">
-            <li>100 Points ID: <a href="https://www.safework.nsw.gov.au/licences-and-registrations/licences/proof-of-identity" style="color:#3b82f6;">Proof of Identification</a></li>
-            <li>AEN: <a href="https://www.service.nsw.gov.au/transaction/apply-for-a-high-risk-work-licence-assessment-enrolment-number" style="color:#3b82f6;">Apply for AEN</a></li>
-        </ul>
-        <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#334155;">White Card / Asbestos:</p>
-        <ul style="margin:0 0 12px;padding-left:20px;font-size:13px;color:#334155;">
-            <li>100 Points ID: <a href="https://www.safework.nsw.gov.au/licences-and-registrations/licences/evidence-of-identity" style="color:#3b82f6;">Evidence of Identity</a></li>
-        </ul>
-        <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#334155;">We provide:</p>
-        <ul style="margin:0 0 8px;padding-left:20px;font-size:13px;color:#334155;">
-            <li>Beverages (coffee, tea, hot chocolate, water).</li>
-            <li>Lunchroom, toilets, and fridge in kitchen room.</li>
-            <li>Easy council parking.</li>
-        </ul>
-    </div>
-    ${bankDetailsHtml}
+    <!-- 1. Product Box (Matches Company Style) -->
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;background-color:#ffffff;border-radius:8px;border:1px solid #e2e8f0;">
     <tr><td style="padding:20px;border-bottom:1px solid #e2e8f0;">
         <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Product</p>
@@ -107,6 +73,28 @@ const sendBookingConfirmation = async (req, res) => {
             <tr><td style="padding:8px 12px;color:#64748b;">Price</td><td style="padding:8px 12px;text-align:right;font-weight:600;color:#334155;">${priceStr}</td></tr>
         </table>
     </td></tr></table>
+
+    <!-- 2. Student Login (Distinct Section) -->
+    ${loginCredentialsHtml}
+
+    <!-- 3. Important Checklist -->
+    <div style="margin-bottom:24px;padding:16px;background-color:#fef3c7;border-radius:6px;border-left:4px solid #f59e0b;">
+        <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#92400e;">⚠️ Important: Course Preparation Checklist</p>
+        <p style="margin:0 0 8px;font-size:13px;color:#334155;">Course Address: <strong>3/14-16 Marjorie Street, Sefton NSW 2162</strong></p>
+        <ul style="margin:0 0 12px;padding-left:20px;font-size:13px;color:#334155;">
+            <li style="margin-bottom:6px;">ID reflecting your name and address.</li>
+            <li style="margin-bottom:6px;">PPE — high visibility vest and steel cap boots.</li>
+            <li style="margin-bottom:6px;"><strong>USI:</strong> <a href="https://www.usi.gov.au/your-usi/create-usi" style="color:#3b82f6;">Create USI</a></li>
+        </ul>
+        <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#334155;">We provide:</p>
+        <ul style="margin:0 0 8px;padding-left:20px;font-size:13px;color:#334155;">
+            <li>Beverages, Lunchroom, Toilets, and easy council parking.</li>
+        </ul>
+    </div>
+
+    ${bankDetailsHtml}
+
+    <!-- 4. Order Details -->
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;background-color:#ffffff;border-radius:8px;border:1px solid #e2e8f0;">
     <tr><td style="padding:20px;">
         <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Order Details (Order #${orderId})</p>
@@ -117,16 +105,19 @@ const sendBookingConfirmation = async (req, res) => {
             <tr style="border-top:2px solid #e2e8f0;"><td style="padding:12px 0 0;font-size:15px;font-weight:700;color:#334155;">Total</td><td style="padding:12px 0 0;text-align:right;font-size:15px;font-weight:700;color:#334155;">${priceStr}</td></tr>
         </table>
     </td></tr></table>
+
+    <!-- 5. Billing Address -->
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;background-color:#ffffff;border-radius:8px;border:1px solid #e2e8f0;">
     <tr><td style="padding:20px;">
         <p style="margin:0 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Billing Address</p>
         <p style="margin:0;font-size:14px;color:#334155;line-height:1.6;">${billingAddressHtml}</p>
     </td></tr></table>
+
+    <!-- 6. Footer / Contact -->
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
     <tr><td style="padding:20px;">
         <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Contact Details</p>
-        <p style="margin:0 0 4px;font-size:14px;color:#334155;">Office: <a href="mailto:info@safetytrainingacademy.edu.au" style="color:#3b82f6;">info@safetytrainingacademy.edu.au</a></p>
-        <p style="margin:0 0 4px;font-size:14px;color:#334155;">Booking: <a href="mailto:bookings@safetytrainingacademy.edu.au" style="color:#3b82f6;">bookings@safetytrainingacademy.edu.au</a></p>
+        <p style="margin:0 0 4px;font-size:14px;color:#334155;">Email: <a href="mailto:info@safetytrainingacademy.edu.au" style="color:#3b82f6;">info@safetytrainingacademy.edu.au</a></p>
         <p style="margin:0;font-size:14px;color:#334155;">Business: 1300 976 097 | M: 0483 878 887</p>
     </td></tr></table>
 </td></tr>

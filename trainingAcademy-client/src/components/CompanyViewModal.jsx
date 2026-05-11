@@ -217,6 +217,16 @@ export default function CompanyViewModal({ company, onClose }) {
     const linkCount = data?.courseLinksCount ?? links.length ?? data?.linkCount ?? 0;
     const enrolCount = data?.enrolmentsCount ?? students.length ?? data?.enrollmentCount ?? 0;
 
+    const [linkCopied, setLinkCopied] = useState(false);
+    const enrolmentUrl = `${window.location.origin}/book-now/company/${data?._id}`;
+
+    const handleCopyEnrolmentLink = () => {
+        navigator.clipboard.writeText(enrolmentUrl).then(() => {
+            setLinkCopied(true);
+            setTimeout(() => setLinkCopied(false), 2000);
+        });
+    };
+
     return (
         <div className="cvm-backdrop" onClick={handleBackdrop}>
             <div className="cvm-modal">
@@ -301,6 +311,28 @@ export default function CompanyViewModal({ company, onClose }) {
                                         <div className="cvm-stat-num">{enrolCount}</div>
                                         <div className="cvm-stat-label">Company enrolments</div>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* ── General Enrolment Link ── */}
+                            <div className="cvm-section" style={{ border: "1px solid #7c3aed33", background: "#f5f3ff44" }}>
+                                <div className="cvm-section-header" style={{ background: "#f5f3ff88" }}>
+                                    <h3 className="cvm-section-title" style={{ color: "#7c3aed" }}>General Enrolment Link</h3>
+                                    <p className="cvm-section-sub">
+                                        Share this link with employees. They can select any course and enroll themselves under your company account.
+                                    </p>
+                                </div>
+                                <div style={{ padding: "14px 16px" }}>
+                                    <div className="cvm-link-url-box" style={{ background: "white", border: "1px solid #e0e7ff", marginBottom: 12 }}>
+                                        {enrolmentUrl}
+                                    </div>
+                                    <button 
+                                        className="cvm-link-btn-copy" 
+                                        onClick={handleCopyEnrolmentLink}
+                                        style={{ width: "fit-content" }}
+                                    >
+                                        <LinkIcon /> {linkCopied ? "Copied URL!" : "Copy Enrolment Link"}
+                                    </button>
                                 </div>
                             </div>
 
