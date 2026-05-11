@@ -49,7 +49,7 @@ const companyPaymentSchema = new mongoose.Schema(
         amount: { type: Number, required: true },
         paymentMethod: {
             type: String,
-            enum: ["Bank Transfer", "Card", "pay later"],
+            enum: ["Bank Transfer", "Card", "Card Payment", "Pay Later", "pay later"],
             default: "Bank Transfer",
         },
 

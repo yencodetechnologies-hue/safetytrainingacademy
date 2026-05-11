@@ -44,13 +44,8 @@ export default function StudentDashboard() {
   const paymentMethod = data?.paymentMethod || "";
   const enrollmentType = data?.enrollmentType || "";
 
-  const canTakeAssessment =
-    enrollmentType === "company"
-      || enrollmentType === "agent"
-      || enrollmentType === "Agent"
-      || paymentMethod === "Card Payment"
-      || (paymentMethod === "Bank Transfer" && paymentVerified)
-      || paymentVerified;
+  const canTakeAssessment = true; // Bypassed verification as per user request
+
 
   const handleAssessmentComplete = () => {
     setShowAssessment(false);
