@@ -307,21 +307,14 @@ exports.updateLLNDDate = async (req, res) => {
 exports.completeEnrollment = async (req, res) => {
   try {
     const { flowId } = req.body;
-    console.log(`[completeEnrollment] Finalizing flowId: ${flowId}`);
 
-    const updated = await EnrollmentFlow.findByIdAndUpdate(flowId, {
+    await EnrollmentFlow.findByIdAndUpdate(flowId, {
       enrollment: {
         status: "enrolled",
         enrolledAt: new Date()
       },
       currentStep: 4
-    }, { returnDocument: "after" });
-
-    if (!updated) {
-        console.warn(`[completeEnrollment] Flow not found: ${flowId}`);
-    } else {
-        console.log(`[completeEnrollment] Flow finalized successfully. Step: ${updated.currentStep}`);
-    }
+    });
 
     res.json({ message: "Enrollment completed 🎉" });
 
