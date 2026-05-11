@@ -67,6 +67,9 @@ function Payment({
 }) {
 
     const [paymentMethod, setPaymentMethod] = useState("Bank Transfer")
+    const isAgent = String(enrollmentType || "").toLowerCase() === "agent" || enrollmentType === "Agent"
+    const hidePricing = isEnrollmentLink || isAgent
+    
     const [name, setName] = useState("")
     const [phone, setPhone] = useState("")
     const [email, setEmail] = useState("")
@@ -472,10 +475,12 @@ function Payment({
                                 <span>${sc.course.sellingPrice * sc.quantity}</span>
                             </div>
                         ))}
-                        <div className="summary-row total">
-                            <span>Total:</span>
-                            <span>${coursePrice}</span>
-                        </div>
+                        {!hidePricing && (
+                            <div className="summary-row total">
+                                <span>Total:</span>
+                                <span>${coursePrice}</span>
+                            </div>
+                        )}
                     </>
                 ) : (
                     <>
@@ -487,7 +492,7 @@ function Payment({
                             <span>Duration:</span>
                             <span>{selectedCourse?.duration || "0"}</span>
                         </div>
-                        {(!isEnrollmentLink || enrollmentLinkData?.payLater || tokenData?.payLater || initialPaymentData?.payLater) && (
+                        {!hidePricing && (
                             <div className="summary-row total">
                                 <span>Total:</span>
                                 <span>${coursePrice || selectedCourse?.sellingPrice || "0"}</span>
@@ -498,7 +503,7 @@ function Payment({
             </div>
 
             {/* Enrollment Link Info (Only show "No Payment Required" if Pay Later is NOT enabled for the link) */}
-            {isEnrollmentLink && !enrollmentLinkData?.payLater && (
+            {hidePricing && (
                 <div className="summary-card" style={{ backgroundColor: "#f3e8ff", borderLeft: "4px solid #7c3aed" }}>
                     <div style={{ fontSize: 14, color: "#5b21b6", fontWeight: 600 }}>
                         ✓ No Payment Required
@@ -510,7 +515,7 @@ function Payment({
             )}
 
             {/* Payment Method - Show if not an enrollment/company link OR if Pay Later is enabled */}
-            {(!isCompanyEnroll && !isEnrollmentLink || tokenData?.payLater || enrollmentLinkData?.payLater || initialPaymentData?.payLater) && (
+            {(!isCompanyEnroll && !isEnrollmentLink || tokenData?.payLater || enrollmentLinkData?.payLater || initialPaymentData?.payLater) && !hidePricing && (
                 <div className="payment-method">
                     <label>Select Payment Method *</label>
                     <div
@@ -552,7 +557,7 @@ function Payment({
             )}
 
             {/* Bank Transfer Details (Normal bank transfer requiring slip) */}
-            {(!isCompanyEnroll && !isEnrollmentLink || tokenData?.payLater || enrollmentLinkData?.payLater || initialPaymentData?.payLater) && paymentMethod === "Bank Transfer" && (
+            {(!isCompanyEnroll && !isEnrollmentLink || tokenData?.payLater || enrollmentLinkData?.payLater || initialPaymentData?.payLater) && paymentMethod === "Bank Transfer" && !hidePricing && (
                 <div className="bank-details">
                     <h4>Bank Details</h4>
                     <div className="bank-row"><span>Bank:</span><span>Commonwealth Bank</span></div>
@@ -658,7 +663,7 @@ function Payment({
             )}
 
             {/* Card Payment */}
-            {!isCompanyEnroll && !isEnrollmentLink && paymentMethod === "Card Payment" && (
+            {!isCompanyEnroll && !hidePricing && paymentMethod === "Card Payment" && (
                 <form className="card-payment" onSubmit={(e) => e.preventDefault()}>
                     <div className="secure-box">
                         <div className="secure-left">

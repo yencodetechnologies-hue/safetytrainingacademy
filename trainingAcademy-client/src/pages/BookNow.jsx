@@ -1174,9 +1174,11 @@ function BookNow() {
                         courseDate: selectedSession?.date,
                         courseTime: `${selectedSession?.startTime} - ${selectedSession?.endTime}`,
                         coursePrice,
-                        paymentMethod: paymentData.paymentMethod,
+                        paymentMethod: paymentData.paymentMethod || (isEnrollmentLink ? "No Payment Required" : ""),
                         email: paymentData.email,
                         name: paymentData.name,
+                        isAgent: enrollmentType === "agent",
+                        isEnrollmentLink: isEnrollmentLink
                     }} />
                 )}
 
