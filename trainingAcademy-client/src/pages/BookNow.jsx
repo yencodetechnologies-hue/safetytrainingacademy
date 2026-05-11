@@ -295,19 +295,21 @@ function BookNow() {
                 setIsDashboardCompany(true);
 
                 // Initial pre-fill from stored user
-                setCompanyUser(effectiveUser);
-                setPaymentData(prev => ({
-                    ...prev,
-                    name: effectiveUser.name || "",
-                    email: effectiveUser.email || "",
-                    phone: (effectiveUser.phone || effectiveUser.mobileNumber || effectiveUser.mobile || ""),
-                    agreed: true,
-                }));
-                setUserDetails({
-                    name: effectiveUser.name || "",
-                    email: effectiveUser.email || "",
-                    phone: (effectiveUser.phone || effectiveUser.mobileNumber || effectiveUser.mobile || ""),
-                });
+                if (!isAdmin) {
+                    setCompanyUser(effectiveUser);
+                    setPaymentData(prev => ({
+                        ...prev,
+                        name: effectiveUser.name || "",
+                        email: effectiveUser.email || "",
+                        phone: (effectiveUser.phone || effectiveUser.mobileNumber || effectiveUser.mobile || ""),
+                        agreed: true,
+                    }));
+                    setUserDetails({
+                        name: effectiveUser.name || "",
+                        email: effectiveUser.email || "",
+                        phone: (effectiveUser.phone || effectiveUser.mobileNumber || effectiveUser.mobile || ""),
+                    });
+                }
 
                 // 🔥 Always fetch latest company settings to ensure Pay Later toggle is up-to-date.
                 // If an admin is logged in, we override the pre-filled data with the company's 
@@ -317,26 +319,15 @@ function BookNow() {
                     .then(data => {
                         if (data.success) {
                             const companyData = data.data;
-                            const displayUser = isAdmin 
-                                ? { ...companyData, id: companyData._id } 
-                                : { ...effectiveUser, payLater: companyData.payLater };
                             
-                            setCompanyUser(displayUser);
-
                             if (isAdmin) {
+                                setCompanyUser({ ...companyData, id: companyData._id });
                                 setPaymentData(prev => ({
                                     ...prev,
-                                    name: companyData.companyName || "",
-                                    email: companyData.email || "",
-                                    phone: (companyData.mobileNumber || ""),
                                     payLater: companyData.payLater
                                 }));
-                                setUserDetails({
-                                    name: companyData.companyName || "",
-                                    email: companyData.email || "",
-                                    phone: (companyData.mobileNumber || ""),
-                                });
                             } else {
+                                setCompanyUser({ ...effectiveUser, payLater: companyData.payLater });
                                 setPaymentData(prev => ({
                                     ...prev,
                                     payLater: companyData.payLater
@@ -1159,8 +1150,8 @@ function BookNow() {
                             cardPaymentRef.current = ref
                             setActivePaymentMethod(ref.paymentMethod)
                         }}
-                        isExistingCompany={isDashboardCompany}
-                        initialPaymentData={isDashboardCompany ? companyUser : loggedInUser}
+                        isExistingCompany={false}
+                        initialPaymentData={isStudentPortalAutofill ? loggedInUser : {}}
                         isEnrollmentLink={isEnrollmentLink}
                         shouldAutofill={isStudentPortalAutofill}
                         tokenData={tokenData}
