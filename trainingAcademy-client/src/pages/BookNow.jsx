@@ -161,6 +161,7 @@ function BookNow() {
                 if (data.success) {
                     const link = data.data
                     setEnrollmentLinkData(link)
+                    setIsCompanyEnroll(true)
                     
                     // Set enrollment type based on agent flag
                     if (link.agent) {

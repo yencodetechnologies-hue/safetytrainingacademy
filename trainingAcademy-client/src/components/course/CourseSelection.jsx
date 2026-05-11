@@ -51,7 +51,7 @@ function CourseDropdown({ groupedCourses, value, onChange, placeholder = "Select
     const variantLabel = value?.variant
         ? ` (${(getCourseVariants(selected).find(v => v.variant === value.variant) || {}).label || ""})`
         : ""
-    const isAgent = enrollmentType === "agent"
+    const isAgent = String(enrollmentType || "").toLowerCase() === "agent" || enrollmentType === "Agent"
     const label = selected
         ? `${selected.courseCode} - ${selected.title}${variantLabel}${isAgent ? "" : ` - $${getCoursePrice(selected)}`}`
         : placeholder
@@ -110,7 +110,7 @@ function AddCourseButton({ groupedCourses, onAdd, enrollmentType }) {
         return () => document.removeEventListener("mousedown", handler)
     }, [])
 
-    const isAgent = enrollmentType === "agent"
+    const isAgent = String(enrollmentType || "").toLowerCase() === "agent" || enrollmentType === "Agent"
     const handleSelect = (courseId, variant) => {
         onAdd(courseId, variant)
         setOpen(false)
