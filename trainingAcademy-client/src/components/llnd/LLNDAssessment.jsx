@@ -9,7 +9,8 @@ import LLNDAssessmentComplete from "../llnd/LLNDAssessmentComplete"
 
 const topics = ["Numeracy", "Literacy", "Language", "Digital"]
 
-function LLNDAssessment({ onComplete, userDetails }) {
+function LLNDAssessment(props) {
+    const { onComplete, userDetails } = props
     const [attempt, setAttempt] = useState(1)
     const [topicIndex, setTopicIndex] = useState(0)
     const navigate = useNavigate()
@@ -284,6 +285,7 @@ function LLNDAssessment({ onComplete, userDetails }) {
                 resultData?.status === "Passed" ? (
                     <CourseResult
                         data={resultData}
+                        flowId={props.flowId}
                         onRetry={() => {
                             setTopicIndex(0)
                             setIsCompleted(false)

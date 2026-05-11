@@ -111,6 +111,11 @@ function CourseResult({ onRetry, onContinue, data }) {
                         try {
                             const flowId = localStorage.getItem("flowId")
 
+                            if (!flowId || flowId === "null" || flowId === "undefined") {
+                                alert("Session expired or missing. Please refresh the dashboard and try again.")
+                                return
+                            }
+
                             const payload = {
                                 flowId,
                                 ...data,

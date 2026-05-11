@@ -72,6 +72,7 @@ export default function StudentDashboard() {
     return (
       <LLNDAssessment
         onComplete={handleAssessmentComplete}
+        flowId={data.latestFlowId}
         userDetails={{
           name: user?.name || "",
           email: user?.email || "",
