@@ -66,7 +66,11 @@ function Payment({
     enrollmentLinkData = null, // ✅ NEW
 }) {
 
-    const [paymentMethod, setPaymentMethod] = useState("Bank Transfer")
+    const [paymentMethod, setPaymentMethod] = useState(() => {
+        // We initialize with a safe default, but useEffect below will adjust it
+        // once enrollmentLinkData or tokenData arrives.
+        return "Bank Transfer"
+    })
     const [name, setName] = useState("")
     const [phone, setPhone] = useState("")
     const [email, setEmail] = useState("")
@@ -137,7 +141,12 @@ function Payment({
             setPhone(initialPaymentData.phone || initialPaymentData.mobileNumber || initialPaymentData.mobile || "")
             setAgreed(true)
         }
-    }, [isExistingCompany, shouldAutofill, initialPaymentData])
+        
+        // ✅ Set default payment method if Pay Later is enabled
+        if (enrollmentLinkData?.payLater || tokenData?.payLater || initialPaymentData?.payLater) {
+            setPaymentMethod("Pay Later")
+        }
+    }, [isExistingCompany, shouldAutofill, initialPaymentData, enrollmentLinkData, tokenData])
 
     useEffect(() => {
         if (isExistingCompany || shouldAutofill) {
@@ -499,19 +508,21 @@ function Payment({
             </div>
 
             {/* Enrollment Link Info (Only show "No Payment Required" if Pay Later is NOT enabled for the link) */}
-            {isEnrollmentLink && !enrollmentLinkData?.payLater && (
+            {isEnrollmentLink && (
                 <div className="summary-card" style={{ backgroundColor: "#f3e8ff", borderLeft: "4px solid #7c3aed" }}>
                     <div style={{ fontSize: 14, color: "#5b21b6", fontWeight: 600 }}>
-                        ✓ No Payment Required
+                        {enrollmentLinkData?.payLater ? "✓ Pay Later Enabled" : "✓ No Payment Required"}
                     </div>
                     <div style={{ fontSize: 12, color: "#6b21b6", marginTop: 4 }}>
-                        Complete enrollment and assessment to activate your account
+                        {enrollmentLinkData?.payLater 
+                            ? "Your enrollment will be processed now, and an invoice will be issued to your company."
+                            : "Complete enrollment and assessment to activate your account."}
                     </div>
                 </div>
             )}
 
-            {/* Payment Method - Show if not an enrollment/company link OR if it's an agent link OR if Pay Later is enabled */}
-            {(!isCompanyEnroll && !isEnrollmentLink || (isEnrollmentLink && enrollmentLinkData?.agent) || tokenData?.payLater || initialPaymentData?.payLater) && (
+            {/* Payment Method - Show if not an enrollment/company link OR if it's an agent link OR if Pay Later is enabled and NOT an enrollment link */}
+            {(!isCompanyEnroll && !isEnrollmentLink || (isEnrollmentLink && enrollmentLinkData?.agent) || (tokenData?.payLater && !isEnrollmentLink) || (initialPaymentData?.payLater && !isEnrollmentLink)) && (
                 <div className="payment-method">
                     <label>Select Payment Method *</label>
                     <div
@@ -645,7 +656,7 @@ function Payment({
             )}
 
             {/* Pay Later Option Note (No fields required) */}
-            {(!isCompanyEnroll && !isEnrollmentLink || tokenData?.payLater || enrollmentLinkData?.payLater || initialPaymentData?.payLater) && paymentMethod === "Pay Later" && (
+            {(isEnrollmentLink || tokenData?.payLater || enrollmentLinkData?.payLater || initialPaymentData?.payLater) && paymentMethod === "Pay Later" && (
                 <div className="bank-details" style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0" }}>
                     <div style={{ padding: 10 }}>
                         <p style={{ margin: 0, fontSize: 14, color: "#166534", fontWeight: 600 }}>
