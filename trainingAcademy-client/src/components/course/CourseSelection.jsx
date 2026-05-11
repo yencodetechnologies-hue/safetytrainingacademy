@@ -34,7 +34,7 @@ const getCourseVariants = (course) => {
 
 const variantKey = (courseId, variant) => variant ? `${courseId}|${variant}` : String(courseId)
 
-function CourseDropdown({ groupedCourses, value, onChange, placeholder = "Select Course", getCoursePrice }) {
+function CourseDropdown({ groupedCourses, value, onChange, placeholder = "Select Course", getCoursePrice, enrollmentType }) {
     const [open, setOpen] = useState(false)
     const ref = useRef(null)
 
@@ -51,8 +51,9 @@ function CourseDropdown({ groupedCourses, value, onChange, placeholder = "Select
     const variantLabel = value?.variant
         ? ` (${(getCourseVariants(selected).find(v => v.variant === value.variant) || {}).label || ""})`
         : ""
+    const isAgent = enrollmentType === "agent"
     const label = selected
-        ? `${selected.courseCode} - ${selected.title}${variantLabel} - $${getCoursePrice(selected)}`
+        ? `${selected.courseCode} - ${selected.title}${variantLabel}${isAgent ? "" : ` - $${getCoursePrice(selected)}`}`
         : placeholder
 
     return (
@@ -75,8 +76,8 @@ function CourseDropdown({ groupedCourses, value, onChange, placeholder = "Select
                                     const k = variantKey(course._id, v.variant)
                                     const isSel = value?.courseId === course._id && (value?.variant || null) === (v.variant || null)
                                     const optionLabel = v.label
-                                        ? `${course.courseCode} - ${course.title} (${v.label}) - $${v.price}`
-                                        : `${course.courseCode} - ${course.title} - $${v.price}`
+                                        ? `${course.courseCode} - ${course.title} (${v.label})${isAgent ? "" : ` - $${v.price}`}`
+                                        : `${course.courseCode} - ${course.title}${isAgent ? "" : ` - $${v.price}`}`
                                     return (
                                         <div
                                             key={k}
@@ -97,7 +98,7 @@ function CourseDropdown({ groupedCourses, value, onChange, placeholder = "Select
 }
 
 // ✅ Add Course Button — click to open inline dropdown, select to close
-function AddCourseButton({ groupedCourses, onAdd }) {
+function AddCourseButton({ groupedCourses, onAdd, enrollmentType }) {
     const [open, setOpen] = useState(false)
     const ref = useRef(null)
 
@@ -109,6 +110,7 @@ function AddCourseButton({ groupedCourses, onAdd }) {
         return () => document.removeEventListener("mousedown", handler)
     }, [])
 
+    const isAgent = enrollmentType === "agent"
     const handleSelect = (courseId, variant) => {
         onAdd(courseId, variant)
         setOpen(false)
@@ -134,8 +136,8 @@ function AddCourseButton({ groupedCourses, onAdd }) {
                                 return variants.map(v => {
                                     const k = variantKey(course._id, v.variant)
                                     const optionLabel = v.label
-                                        ? `${course.courseCode} - ${course.title} (${v.label}) - $${v.price}`
-                                        : `${course.courseCode} - ${course.title} - $${v.price}`
+                                        ? `${course.courseCode} - ${course.title} (${v.label})${isAgent ? "" : ` - $${v.price}`}`
+                                        : `${course.courseCode} - ${course.title}${isAgent ? "" : ` - $${v.price}`}`
                                     return (
                                         <div
                                             key={k}
@@ -662,6 +664,7 @@ function CourseSelection({
                             onChange={handleCourseChange}
                             placeholder="Select Course"
                             getCoursePrice={getCoursePrice}
+                            enrollmentType={enrollmentType}
                         />
                     </div>
 
@@ -715,6 +718,7 @@ function CourseSelection({
                         groupedCourses={groupedCourses}
                         onAdd={handleCompanyCourseAdd}
                         getCoursePrice={getCoursePrice}
+                        enrollmentType={enrollmentType}
                     />
 
                     {selectedCourses?.map(sc => (

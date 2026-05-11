@@ -530,8 +530,8 @@ function BookNow() {
                             body: JSON.stringify({
                                 toEmail: paymentData.email,
                                 studentName: paymentData.name,
-                                courseName: selectedCourse?.name || "Course",
-                                courseCode: selectedCourse?.code || "",
+                                courseName: selectedCourse?.title || "Course",
+                                courseCode: selectedCourse?.courseCode || "",
                                 courseDate: selectedSession?.date || "To be confirmed",
                                 startTime: selectedSession?.startTime || "",
                                 endTime: selectedSession?.endTime || ""

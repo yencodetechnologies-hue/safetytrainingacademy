@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Core Pages -->
+  <url>
+    <loc>https://safetytrainingacademy.edu.au/</loc>
+    <lastmod>2024-05-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://safetytrainingacademy.edu.au/all-courses</loc>
+    <lastmod>2024-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://safetytrainingacademy.edu.au/combo-courses</loc>
+    <lastmod>2024-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://safetytrainingacademy.edu.au/voc</loc>
+    <lastmod>2024-05-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://safetytrainingacademy.edu.au/about</loc>
+    <lastmod>2024-05-11</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://safetytrainingacademy.edu.au/contact</loc>
+    <lastmod>2024-05-11</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://safetytrainingacademy.edu.au/login</loc>
+    <lastmod>2024-05-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Note: Dynamic course pages (/course/:slug) should be added here 
+       as they are added to the database. -->
+</urlset>
