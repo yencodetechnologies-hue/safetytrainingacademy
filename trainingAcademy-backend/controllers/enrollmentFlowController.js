@@ -75,6 +75,14 @@ exports.createFlow = async (req, res) => {
       resolvedMethod = "Pay Later";
     }
 
+    if (source === "Company Link" && companyId) {
+      const company = await Company.findById(companyId).select("payLater").lean();
+      if (company?.payLater && resolvedMethod === "Pay Later") {
+        resolvedPaymentStatus = "pending";
+      }
+      // Bank Transfer / Card remain "pending" until admin confirms
+    }
+
     // If price is still 0, look up the course's price as fallback
     if (!resolvedPrice && courseId) {
       const course = await Course.findById(courseId)

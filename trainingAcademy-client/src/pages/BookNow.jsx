@@ -53,6 +53,7 @@ function BookNow() {
     const [isEmailTaken, setIsEmailTaken] = useState(false)
     const [selectedCourses, setSelectedCourses] = useState([])
     const [isCompanyEnroll, setIsCompanyEnroll] = useState(false);
+    const [isPublicCompanyLink, setIsPublicCompanyLink] = useState(false);
     const [isDashboardCompany, setIsDashboardCompany] = useState(false);
     const [enrollmentType, setEnrollmentType] = useState(enrollType === "company" ? "company" : "individual");
     const [step, setStep] = useState(1);
@@ -75,7 +76,7 @@ function BookNow() {
     const [activePaymentMethod, setActivePaymentMethod] = useState("Bank Transfer")
 
     const isCompany = enrollmentType === "company"
-    const hideEnrollmentType = isCompanyEnroll || isDashboardCompany
+    const hideEnrollmentType = isCompanyEnroll || isDashboardCompany || isPublicCompanyLink
     const email = location.state?.email || "your email"
 
     // ✅ Individual course price
@@ -342,11 +343,12 @@ function BookNow() {
                     .then(res => res.json())
                     .then(data => {
                         if (data.success) {
-                            setTokenData({ 
-                                companyId: enrollId, 
-                                payLater: data.data.payLater 
+                            setTokenData({
+                                companyId: enrollId,
+                                payLater: data.data.payLater
                             });
-                            setIsCompanyEnroll(true);
+                            setIsCompanyEnroll(false);
+                            setIsPublicCompanyLink(true);
                             setEnrollmentType("individual");
                             setIsDashboardCompany(false);
                         } else {
@@ -469,9 +471,13 @@ function BookNow() {
                 formData.append("paymentMethod", "Pay Later");
             } else if (tokenData?.companyId) {
                 formData.append("companyId", tokenData.companyId);
-                formData.append("source", "Booking Link");
                 const linkToken = searchParams.get("token");
-                if (linkToken) formData.append("sourceToken", linkToken);
+                if (linkToken) {
+                    formData.append("source", "Booking Link");
+                    formData.append("sourceToken", linkToken);
+                } else {
+                    formData.append("source", "Company Link");
+                }
             } else if (enrollId) {
                 formData.append("companyId", enrollId);
                 formData.append("source", "Company Link");
