@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/CompanyViewModal.css"
 import { API_URL } from "../data/service";
@@ -56,6 +57,7 @@ function LinkCard({ link, students }) {
     const [copied, setCopied] = useState(false);
 
     const url = `${window.location.origin}/book-now?token=${link.token}`;
+    const navigate = useNavigate();
     const isFull = link.usedCount >= link.maxUses;
     const linkStudents = students.filter(s => s.sourceToken === link.token);
 
@@ -112,6 +114,13 @@ function LinkCard({ link, students }) {
                     onClick={() => setOpen(v => !v)}
                 >
                     {open ? "Hide Students" : `View Students${linkStudents.length > 0 ? ` (${linkStudents.length})` : ""}`}
+                </button>
+                <button
+                    className="cvm-link-btn-students"
+                    style={{ background: "#f5f3ff", color: "#7c3aed", border: "1px solid #7c3aed33" }}
+                    onClick={() => window.open(url, "_blank")}
+                >
+                    Open Link ↗
                 </button>
             </div>
 
@@ -177,6 +186,7 @@ function LinkCard({ link, students }) {
 
 /* ── Main Modal ── */
 export default function CompanyViewModal({ company, onClose }) {
+    const navigate = useNavigate();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -326,13 +336,22 @@ export default function CompanyViewModal({ company, onClose }) {
                                     <div className="cvm-link-url-box" style={{ background: "white", border: "1px solid #e0e7ff", marginBottom: 12 }}>
                                         {enrolmentUrl}
                                     </div>
-                                    <button 
-                                        className="cvm-link-btn-copy" 
-                                        onClick={handleCopyEnrolmentLink}
-                                        style={{ width: "fit-content" }}
-                                    >
-                                        <LinkIcon /> {linkCopied ? "Copied URL!" : "Copy Enrolment Link"}
-                                    </button>
+                                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                                        <button 
+                                            className="cvm-link-btn-copy" 
+                                            onClick={handleCopyEnrolmentLink}
+                                            style={{ width: "fit-content" }}
+                                        >
+                                            <LinkIcon /> {linkCopied ? "Copied URL!" : "Copy Enrolment Link"}
+                                        </button>
+                                        <button 
+                                            className="cvm-link-btn-copy" 
+                                            onClick={() => navigate(`/book-now/company/${data?._id}`)}
+                                            style={{ width: "fit-content", background: "#7c3aed", color: "white" }}
+                                        >
+                                            Book Course / Add Link
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
