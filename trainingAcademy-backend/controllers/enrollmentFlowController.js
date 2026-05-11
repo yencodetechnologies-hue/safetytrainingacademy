@@ -308,6 +308,7 @@ exports.updateLLNDDate = async (req, res) => {
 // ✅ Final Enrollment
 exports.completeEnrollment = async (req, res) => {
   try {
+    const { flowId } = req.body;
     console.log("[EnrollmentFlow] Completing enrollment for flowId:", flowId);
     const flow = await EnrollmentFlow.findByIdAndUpdate(flowId, {
       enrollmentStatus: "enrolled",
