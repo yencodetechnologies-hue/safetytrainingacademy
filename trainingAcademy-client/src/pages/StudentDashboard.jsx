@@ -26,6 +26,9 @@ export default function StudentDashboard() {
         if (!res.ok) throw new Error("Failed to fetch data");
         const resData = await res.json();
         setData(resData);
+        if (resData.latestFlowId) {
+          localStorage.setItem("flowId", resData.latestFlowId);
+        }
       } catch (err) {
         console.error(err);
         setError("Something went wrong da 😅");
