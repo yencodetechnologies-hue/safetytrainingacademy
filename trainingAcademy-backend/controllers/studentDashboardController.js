@@ -79,8 +79,20 @@ exports.getStudentDashboard = async (req, res) => {
           endTime: f.endTime || null,
           status: f.status || "active",
           llndStatus: f.llnd?.status || "pending",
-          formStatus: f.enrollmentFormId ? "approved" : "pending"
+          formStatus: f.enrollmentFormId ? "submitted" : "pending" // Changed from "approved" to "submitted"
         });
+      }
+    }
+
+    // ✅ Check if enrollment form is actually APPROVED (not just submitted)
+    let enrollmentFormApproved = false;
+    if (latestFlow.enrollmentFormId) {
+      try {
+        const EnrollmentForm = require("../models/EnrollmentForm");
+        const form = await EnrollmentForm.findById(latestFlow.enrollmentFormId).lean();
+        enrollmentFormApproved = (form?.status === "Approved");
+      } catch (e) {
+        console.error("Error checking form status:", e);
       }
     }
 
@@ -90,7 +102,7 @@ exports.getStudentDashboard = async (req, res) => {
       assessmentScore: llndScore,
       paymentVerified,
       assessmentPassed,
-      enrollmentFormApproved: latestFlow.currentStep >= 4,
+      enrollmentFormApproved,
       paymentMethod,
       enrollmentType,
       enrolledCourses: allCourses

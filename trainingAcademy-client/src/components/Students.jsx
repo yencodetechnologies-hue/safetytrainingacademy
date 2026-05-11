@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import * as React from "react";
+import { useState, useEffect, useRef } from "react";
 import "../styles/Student.css";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../data/service";
@@ -290,6 +291,25 @@ function DeleteModal({ student, onClose, onConfirm }) {
 
 // ─── Add Student Modal ────────────────────────────────────────────────────────
 
+const getCourseVariants = (course) => {
+  if (!course) return [];
+  const pt = course.pricingType || (course.experienceBasedBooking ? "experience" : "standard");
+
+  if (pt === "experience") {
+    return [
+      { variant: "with-experience", label: "With Experience", price: Number(course.withExperiencePrice || 0) },
+      { variant: "without-experience", label: "Without Experience", price: Number(course.withoutExperiencePrice || 0) },
+    ];
+  }
+  if (pt === "slbl") {
+    return [
+      { variant: "sl", label: "Single License", price: Number(course.slSinglePrice || 0) },
+      { variant: "slbl", label: "Both Licenses (SL + BL)", price: Number(course.slblPrice || 0) },
+    ];
+  }
+  return [{ variant: null, label: null, price: Number(course.sellingPrice || 0) }];
+};
+
 function AddStudentModal({ onClose, onSave }) {
   const [form, setForm] = useState({
     name: "",
@@ -306,6 +326,9 @@ function AddStudentModal({ onClose, onSave }) {
   const [courses, setCourses] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
+  const [courseOpen, setCourseOpen] = useState(false); // ✅ Added for custom dropdown
+  const dropdownRef = React.useRef(null); // ✅ Used React.useRef for reliability
+  const [selectedDate, setSelectedDate] = useState(null); // ✅ Added for session chips
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
@@ -323,6 +346,46 @@ function AddStudentModal({ onClose, onSave }) {
     };
     fetchCourses();
   }, []);
+
+  // ✅ Handle click outside for dropdown
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setCourseOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleCourseSelect = (courseId) => {
+    setForm(prev => ({ ...prev, courseId }));
+    setCourseOpen(false);
+    setSelectedDate(null); // Reset date on course change
+    // Manually trigger the fetch logic that was in handleChange
+    fetchSessions(courseId);
+  };
+
+  const fetchSessions = async (courseId) => {
+    setForm(prev => ({ ...prev, sessionId: "" }));
+    if (courseId) {
+      setLoadingSessions(true);
+      try {
+        const res = await fetch(`${API_URL}/api/schedules/course/${courseId}`);
+        if (res.ok) {
+          const data = await res.json();
+          const allSessions = data.flatMap(slot => 
+            slot.sessions.map(s => ({ ...s, date: slot.date }))
+          );
+          setSessions(allSessions);
+        }
+      } catch (err) {
+        console.error("Failed to fetch sessions:", err);
+      } finally {
+        setLoadingSessions(false);
+      }
+    } else {
+      setSessions([]);
+    }
+  };
 
   const handleChange = async (e) => {
     const { name, value } = e.target;
@@ -432,84 +495,269 @@ function AddStudentModal({ onClose, onSave }) {
           </div>
 
           <label className="modal-label">Select Course *</label>
-          <div className="modal-input-wrap">
+          <div className="modal-input-wrap" ref={dropdownRef}>
             <span className="modal-input-icon">📖</span>
-            <select
-              className="modal-input"
-              name="courseId"
-              value={form.courseId}
-              onChange={handleChange}
-            >
-              <option value="">Select a course</option>
-              {courses.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.courseCode} - {c.title}
-                </option>
-              ))}
-            </select>
+            <style>
+              {`
+                .custom-dropdown {
+                  position: relative;
+                  width: 100%;
+                }
+                .custom-dropdown-trigger {
+                  padding: 10px 12px;
+                  border: 1px solid #cbd5e1;
+                  border-radius: 8px;
+                  background: #fff;
+                  cursor: pointer;
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  font-size: 14px;
+                  min-height: 42px;
+                }
+                .custom-dropdown-menu {
+                  position: absolute;
+                  top: calc(100% + 6px); /* Better spacing below trigger */
+                  left: 0;
+                  right: 0;
+                  background: #fff;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 12px;
+                  max-height: 350px;
+                  overflow-y: auto;
+                  z-index: 9999; /* Ensure it stays on top */
+                  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+                  padding: 0;
+                }
+                .custom-dropdown-group {
+                  background: #e0f2fe; /* Light blue from Screenshot 2 */
+                  color: #0ea5e9; /* Sky blue text */
+                  font-weight: 700;
+                  padding: 10px 15px;
+                  font-size: 11px;
+                  text-transform: uppercase;
+                  border-top: 1px solid #bae6fd;
+                  border-bottom: 1px solid #bae6fd;
+                  letter-spacing: 0.05em;
+                  position: sticky;
+                  top: 0;
+                  z-index: 10;
+                  display: block;
+                  width: 100%;
+                  box-sizing: border-box;
+                }
+                .custom-dropdown-option {
+                  padding: 12px 15px;
+                  cursor: pointer;
+                  font-size: 13px;
+                  transition: all 0.2s;
+                  color: #334155;
+                  border-bottom: 1px solid #f1f5f9;
+                  background: #fff;
+                }
+                .custom-dropdown-option:hover {
+                  background: #f8fafc;
+                  color: #0ea5e9;
+                  padding-left: 20px;
+                }
+                .custom-dropdown-placeholder { color: #94a3b8; }
+              `}
+            </style>
+            
+            <div className="custom-dropdown">
+              <div className="custom-dropdown-trigger" onClick={() => setCourseOpen(!courseOpen)}>
+                <span className={form.courseId ? "" : "custom-dropdown-placeholder"}>
+                  {form.courseId 
+                    ? (courses.find(c => c._id === form.courseId)?.title + " - $" + (courses.find(c => c._id === form.courseId)?.sellingPrice || 0))
+                    : "Select a course"}
+                </span>
+                <span style={{ fontSize: '10px', color: '#64748b' }}>{courseOpen ? "▲" : "▼"}</span>
+              </div>
+              
+              {courseOpen && (
+                <div className="custom-dropdown-menu">
+                  {Object.entries(
+                    courses.reduce((acc, course) => {
+                      // ✅ Try to get category name from different possible fields
+                      const cat = (course.category && typeof course.category === 'object' ? course.category.name : course.category) || "Other Courses";
+                      if (!acc[cat]) acc[cat] = [];
+                      acc[cat].push(course);
+                      return acc;
+                    }, {})
+                  ).map(([category, catCourses]) => (
+                    <div key={category}>
+                      <div className="custom-dropdown-group">{category}</div>
+                      {catCourses.flatMap((c) => {
+                        const variants = getCourseVariants(c);
+                        return variants.map((v) => (
+                          <div 
+                            key={`${c._id}-${v.variant}`} 
+                            className="custom-dropdown-option"
+                            onClick={() => handleCourseSelect(c._id)}
+                          >
+                            {c.courseCode} - {c.title} {v.label ? `(${v.label})` : ""} - ${v.price}
+                          </div>
+                        ));
+                      })}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {form.courseId && (
-            <>
-              <label className="modal-label" style={{ display: 'block', marginTop: '15px' }}>Select Date & Time *</label>
-              <div className="modal-sessions-grid" style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', 
-                gap: '10px', 
-                marginTop: '8px',
-                maxHeight: '220px',
-                overflowY: 'auto',
-                padding: '8px',
-                background: '#f9fafb',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0'
-              }}>
+            <div className="session-selection-container" style={{ marginTop: '20px' }}>
+              <style>
+                {`
+                  .session-heading {
+                    font-size: 15px;
+                    font-weight: 700;
+                    color: #1e293b;
+                    margin-bottom: 12px;
+                  }
+                  .date-chips-wrap {
+                    display: flex;
+                    gap: 10px;
+                    overflow-x: auto;
+                    padding-bottom: 10px;
+                    margin-bottom: 15px;
+                  }
+                  .date-chip {
+                    min-width: 80px;
+                    padding: 10px;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    text-align: center;
+                    transition: all 0.2s;
+                    background: #fff;
+                  }
+                  .date-chip--active {
+                    background: #f5f3ff;
+                    border-color: #7c3aed;
+                    color: #7c3aed;
+                  }
+                  .date-chip__day { font-size: 11px; font-weight: 600; text-transform: uppercase; }
+                  .date-chip__date { font-size: 14px; font-weight: 700; margin: 2px 0; }
+                  .date-chip__session { font-size: 10px; color: #64748b; }
+                  .date-chip--active .date-chip__session { color: #7c3aed; }
+                  
+                  .session-cards-wrap {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 10px;
+                  }
+                  .session-card {
+                    padding: 15px;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    background: #fff;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                  }
+                  .session-card:hover { border-color: #7c3aed; background: #fdfcff; }
+                  .session-card--active {
+                    background: #f5f3ff;
+                    border-color: #7c3aed;
+                  }
+                  .session-card__time {
+                    font-weight: 600;
+                    color: #334155;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                  }
+                  .session-card__slots {
+                    font-size: 12px;
+                    color: #7c3aed;
+                    font-weight: 500;
+                    padding-left: 24px;
+                  }
+                  .clear-btn {
+                    color: #64748b;
+                    font-size: 12px;
+                    cursor: pointer;
+                    margin-bottom: 10px;
+                    display: inline-block;
+                  }
+                `}
+              </style>
+
+              <h3 className="session-heading">
+                Select date for {courses.find(c => c._id === form.courseId)?.title}
+              </h3>
+
+              {selectedDate && (
+                <div className="clear-btn" onClick={() => { setSelectedDate(null); setForm(prev => ({ ...prev, sessionId: "" })); }}>
+                  ✕ Clear
+                </div>
+              )}
+
+              <div className="date-chips-wrap">
                 {loadingSessions ? (
-                  <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '20px', color: '#64748b', fontSize: '13px' }}>
-                    ⏳ Loading available dates...
-                  </div>
+                  <p style={{ fontSize: '13px', color: '#64748b' }}>⏳ Loading sessions...</p>
                 ) : sessions.length > 0 ? (
-                  sessions.map((s) => {
-                    const isActive = form.sessionId === s._id;
-                    const dateObj = new Date(s.date);
-                    const formattedDate = !isNaN(dateObj.getTime()) 
-                      ? dateObj.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })
-                      : "Date TBD";
-                    
+                  Object.entries(
+                    sessions.reduce((acc, s) => {
+                      if (!acc[s.date]) acc[s.date] = [];
+                      acc[s.date].push(s);
+                      return acc;
+                    }, {})
+                  ).map(([date, dateSessions]) => {
+                    const d = new Date(date);
+                    const isActive = selectedDate === date;
                     return (
-                      <div
-                        key={s._id}
-                        onClick={() => setForm(prev => ({ ...prev, sessionId: s._id }))}
-                        style={{
-                          padding: '12px 8px',
-                          border: `2px solid ${isActive ? '#7c3aed' : '#cbd5e1'}`,
-                          borderRadius: '10px',
-                          cursor: 'pointer',
-                          background: isActive ? '#f3f0ff' : '#fff',
-                          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                          textAlign: 'center',
-                          boxShadow: isActive ? '0 4px 6px -1px rgba(124, 58, 237, 0.1)' : 'none'
-                        }}
+                      <div 
+                        key={date} 
+                        className={`date-chip ${isActive ? "date-chip--active" : ""}`}
+                        onClick={() => setSelectedDate(date)}
                       >
-                        <div style={{ fontSize: '11px', fontWeight: '700', color: isActive ? '#7c3aed' : '#64748b', textTransform: 'uppercase' }}>
-                          {formattedDate}
-                        </div>
-                        <div style={{ fontSize: '13px', fontWeight: '800', marginTop: '4px', color: isActive ? '#5b21b6' : '#1e293b' }}>
-                          {s.startTime || "TBD"}
-                        </div>
-                        <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '2px' }}>
-                          {s.endTime ? `- ${s.endTime}` : ""}
-                        </div>
+                        <div className="date-chip__day">{d.toLocaleDateString("en-AU", { weekday: "short" })}</div>
+                        <div className="date-chip__date">{d.getDate()} {d.toLocaleDateString("en-AU", { month: "short" })}</div>
+                        <div className="date-chip__session">{dateSessions.length} session{dateSessions.length > 1 ? "s" : ""}</div>
                       </div>
                     );
                   })
                 ) : (
-                  <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '20px', color: '#ef4444', fontSize: '13px', fontWeight: '500' }}>
-                    ❌ No upcoming sessions available for this course.
-                  </div>
+                   <p style={{ fontSize: '13px', color: '#ef4444' }}>❌ No upcoming sessions available.</p>
                 )}
               </div>
-            </>
+
+              {selectedDate && (
+                <>
+                  <h3 className="session-heading" style={{ fontSize: '13px', color: '#64748b' }}>
+                    Sessions on {new Date(selectedDate).toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                  </h3>
+                  <div className="session-cards-wrap">
+                    {sessions
+                      .filter(s => s.date === selectedDate)
+                      .map(s => {
+                        const isActive = form.sessionId === s._id;
+                        return (
+                          <div 
+                            key={s._id} 
+                            className={`session-card ${isActive ? "session-card--active" : ""}`}
+                            onClick={() => setForm(prev => ({ ...prev, sessionId: s._id }))}
+                          >
+                            <div className="session-card__time">
+                              <span>🕒</span>
+                              {s.startTime} - {s.endTime}
+                            </div>
+                            <div className="session-card__slots">
+                              {s.maxStudents - (s.enrolledCount || 0)} slots available
+                            </div>
+                          </div>
+                        );
+                      })
+                    }
+                  </div>
+                </>
+              )}
+            </div>
           )}
 
           <label className="modal-label">Payment Method *</label>

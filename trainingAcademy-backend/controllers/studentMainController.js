@@ -131,7 +131,7 @@ exports.createStudent = async (req, res) => {
         }
       }],
       status: "active",
-      currentStep: 4
+      currentStep: 2 // ✅ Start at LLND Assessment (Step 2) for manual admin adds
     });
 
       await newFlow.save();
