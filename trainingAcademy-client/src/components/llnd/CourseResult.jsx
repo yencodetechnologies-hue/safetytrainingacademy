@@ -14,12 +14,13 @@ const declarationSchema = Yup.object().shape({
         .required("This field is required."),
 })
 
-function CourseResult({ onRetry, onContinue, data }) {
+function CourseResult({ onRetry, onContinue, data, flowId: flowIdProp }) {
 
     const navigate = useNavigate()
     const [agree1, setAgree1] = useState(false)
     const [agree2, setAgree2] = useState(false)
     const [errors, setErrors] = useState({})
+    const [isSaving, setIsSaving] = useState(false)
 
     const validate = async () => {
         try {
@@ -76,7 +77,7 @@ function CourseResult({ onRetry, onContinue, data }) {
                         />
                         I completed this quiz honestly and did not cheat in any way.
                     </label>
-                    {errors.agree1 && <p className="error-text">{errors.agree1}</p>}
+                    {errors.agree1 && <p className="error-message">{errors.agree1}</p>}
 
                     <label>
                         <input
@@ -90,7 +91,7 @@ function CourseResult({ onRetry, onContinue, data }) {
                         />
                         I understand that my score will be recorded under my name.
                     </label>
-                    {errors.agree2 && <p className="error-text">{errors.agree2}</p>}
+                    {errors.agree2 && <p className="error-message">{errors.agree2}</p>}
 
                     <p className="confirm-text">
                         Please confirm your name below and click <b>Continue</b> to proceed.
@@ -104,15 +105,18 @@ function CourseResult({ onRetry, onContinue, data }) {
 
                 <button
                     className="continue-btn"
+                    disabled={isSaving}
                     onClick={async () => {
                         const isValid = await validate()
                         if (!isValid) return
 
+                        setIsSaving(true)
                         try {
-                            const flowId = localStorage.getItem("flowId")
+                            const flowId = flowIdProp || localStorage.getItem("flowId")
 
                             if (!flowId || flowId === "null" || flowId === "undefined") {
                                 alert("Session expired or missing. Please refresh the dashboard and try again.")
+                                setIsSaving(false)
                                 return
                             }
 
@@ -122,20 +126,27 @@ function CourseResult({ onRetry, onContinue, data }) {
                                 answers: data.answers || []
                             }
 
-                            await fetch(`${API_URL}/api/flow/llnd`, {
+                            const res = await fetch(`${API_URL}/api/flow/llnd`, {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify(payload)
                             })
 
+                            if (!res.ok) {
+                                const errData = await res.json().catch(() => ({}))
+                                throw new Error(errData.error || "Failed to save assessment")
+                            }
+
                             onContinue()
                         } catch (err) {
                             console.error(err)
-                            alert("Failed to save assessment")
+                            alert(err.message || "Failed to save assessment")
+                        } finally {
+                            setIsSaving(false)
                         }
                     }}
                 >
-                    Continue to Enrollment Form
+                    {isSaving ? "Saving..." : "Continue to Enrollment Form"}
                 </button>
             </div>
         </div>

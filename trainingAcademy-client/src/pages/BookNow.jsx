@@ -1148,7 +1148,7 @@ function BookNow() {
                             setActivePaymentMethod(ref.paymentMethod)
                         }}
                         isExistingCompany={false}
-                        initialPaymentData={isStudentPortalAutofill ? loggedInUser : {}}
+                        initialPaymentData={isStudentPortalAutofill ? loggedInUser : (isDashboardCompany ? companyUser : {})}
                         isEnrollmentLink={isEnrollmentLink}
                         shouldAutofill={isStudentPortalAutofill}
                         tokenData={tokenData}

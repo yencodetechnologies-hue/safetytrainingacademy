@@ -74,7 +74,7 @@ function LLNDAssessment(props) {
             score: numPercent.toFixed(0),
             correct: numCorrect,  // ✅ add
             total: numTotal,
-            status: numPercent >= 67 ? "Passed" : "Failed"
+            status: numPercent >= 66 ? "Passed" : "Failed"
         })
 
         // ---------------- LANGUAGE ----------------
@@ -107,7 +107,7 @@ function LLNDAssessment(props) {
             score: langPercent.toFixed(0),
             correct: langCorrect,  // ✅ add
             total: langTotal,
-            status: langPercent >= 67 ? "Passed" : "Failed"
+            status: langPercent >= 66 ? "Passed" : "Failed"
         })
 
         // ---------------- LITERACY ----------------
@@ -149,7 +149,7 @@ function LLNDAssessment(props) {
             score: litPercent.toFixed(0),
             correct: litCorrect,  // ✅ add
             total: litTotal,
-            status: litPercent >= 67 ? "Passed" : "Failed"
+            status: litPercent >= 66 ? "Passed" : "Failed"
         })
 
         // ---------------- DIGITAL ----------------
@@ -199,7 +199,7 @@ function LLNDAssessment(props) {
             score: digiPercent.toFixed(0),
             correct: digiCorrect,  // ✅ add
             total: digiTotal,
-            status: digiPercent >= 67 ? "Passed" : "Failed"
+            status: digiPercent >= 66 ? "Passed" : "Failed"
         })
 
         // ---------------- ATTEMPT >= 4 FORCE PASS ----------------
@@ -208,7 +208,7 @@ function LLNDAssessment(props) {
                 if (sec.status === "Failed") {
                     return {
                         ...sec,
-                        score: 67,
+                        score: 66,
                         status: "Passed"
                     }
                 }
@@ -239,7 +239,7 @@ function LLNDAssessment(props) {
 
         // ---------------- FINAL ----------------
         const percentage = ((correct / total) * 100).toFixed(2)
-        const allPassed = sectionResults.every(sec => Number(sec.score) >= 67)
+        const allPassed = sectionResults.every(sec => Number(sec.score) >= 66)
         const result = {
             total,
             correct,
@@ -296,6 +296,8 @@ function LLNDAssessment(props) {
                     <LLNDAssessmentComplete
                         attempt={attempt}
                         data={resultData}
+                        flowId={props.flowId}
+                        onContinue={onComplete}
                         onRetry={() => {
                             setTopicIndex(0)
                             setIsCompleted(false)

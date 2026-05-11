@@ -1,7 +1,10 @@
 import "../../styles/LLNDComplete.css"
 import { FaCheckCircle } from "react-icons/fa"
+import { useState } from "react"
+import { API_URL } from "../../data/service"
 
-function LLNDAssessmentComplete({ data, onRetry,attempt }) {
+function LLNDAssessmentComplete({ data, onRetry, attempt, onContinue, flowId: flowIdProp }) {
+    const [isSaving, setIsSaving] = useState(false)
 
    const safeData = data || {
     total: 0,
@@ -68,8 +71,47 @@ const isPassed = isOverallPass && isAllSectionsPass;
 
       {isPassed && (
         <div className="continue-wrapper">
-          <button className="continue-btn">
-            Continue to Enrollment Form →
+          <button
+            className="continue-btn"
+            disabled={isSaving}
+            onClick={async () => {
+              setIsSaving(true)
+              try {
+                const flowId = flowIdProp || localStorage.getItem("flowId")
+
+                if (!flowId || flowId === "null" || flowId === "undefined") {
+                  alert("Session expired or missing. Please refresh the dashboard and try again.")
+                  setIsSaving(false)
+                  return
+                }
+
+                const payload = {
+                  flowId,
+                  ...data,
+                  answers: data.answers || []
+                }
+
+                const res = await fetch(`${API_URL}/api/flow/llnd`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload)
+                })
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}))
+                    throw new Error(errData.error || "Failed to save assessment")
+                }
+
+                onContinue()
+              } catch (err) {
+                console.error(err)
+                alert(err.message || "Failed to save assessment")
+              } finally {
+                setIsSaving(false)
+              }
+            }}
+          >
+            {isSaving ? "Saving..." : "Continue to Enrollment Form →"}
           </button>
         </div>
       )}

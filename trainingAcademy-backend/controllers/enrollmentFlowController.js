@@ -198,22 +198,24 @@ exports.updatePayment = async (req, res) => {
 // ✅ Save LLND
 exports.saveLLND = async (req, res) => {
   try {
-    const { flowId, ...rest } = req.body; // ✅ முதல்ல இது
+    const { flowId, ...rest } = req.body; 
 
-    // ✅ இப்போ log பண்ணு
-  
+    console.log(`[saveLLND] Attempting to save LLND for flowId: ${flowId}`);
 
     if (!flowId) {
+      console.warn("[saveLLND] Flow ID missing in request body");
       return res.status(400).json({ error: "Flow ID missing" });
     }
 
     if (!mongoose.Types.ObjectId.isValid(flowId)) {
+      console.warn(`[saveLLND] Invalid flowId format: ${flowId}`);
       return res.status(400).json({ error: "Invalid flowId" });
     }
 
     const existing = await EnrollmentFlow.findById(flowId);
 
     if (!existing) {
+      console.warn(`[saveLLND] No flow found with id: ${flowId}`);
       return res.status(404).json({ error: "Flow not found for id: " + flowId });
     }
 
@@ -305,14 +307,21 @@ exports.updateLLNDDate = async (req, res) => {
 exports.completeEnrollment = async (req, res) => {
   try {
     const { flowId } = req.body;
+    console.log(`[completeEnrollment] Finalizing flowId: ${flowId}`);
 
-    await EnrollmentFlow.findByIdAndUpdate(flowId, {
+    const updated = await EnrollmentFlow.findByIdAndUpdate(flowId, {
       enrollment: {
         status: "enrolled",
         enrolledAt: new Date()
       },
       currentStep: 4
-    });
+    }, { returnDocument: "after" });
+
+    if (!updated) {
+        console.warn(`[completeEnrollment] Flow not found: ${flowId}`);
+    } else {
+        console.log(`[completeEnrollment] Flow finalized successfully. Step: ${updated.currentStep}`);
+    }
 
     res.json({ message: "Enrollment completed 🎉" });
 

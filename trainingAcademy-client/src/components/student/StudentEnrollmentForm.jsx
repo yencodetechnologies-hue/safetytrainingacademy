@@ -53,6 +53,9 @@ export default function StudentEnrollmentForm() {
 
         if (dashRes.ok) {
           const dashData = await dashRes.json();
+          if (dashData.latestFlowId) {
+            localStorage.setItem("flowId", dashData.latestFlowId);
+          }
           setPaymentVerified(dashData.paymentVerified === true);
           setAssessmentPassed(dashData.assessmentPassed === true);
           setEnrollmentType(dashData.enrollmentType || "");
