@@ -90,22 +90,23 @@ exports.createStudent = async (req, res) => {
 
     await student.save();
 
-    // ✅ Fetch session details if sessionId is provided
-    const course = await Course.findById(data.courseId).lean();
-    let sessionData = {};
-    if (data.sessionId) {
-      const schedule = await Schedule.findOne({ "sessions._id": data.sessionId });
-      if (schedule) {
-        const session = schedule.sessions.id(data.sessionId);
-        if (session) {
-          sessionData = {
-            sessionDate: schedule.date,
-            startTime: session.startTime,
-            endTime: session.endTime
-          };
+    if (!data.skipFlow) {
+      // ✅ Fetch session details if sessionId is provided
+      const course = await Course.findById(data.courseId).lean();
+      let sessionData = {};
+      if (data.sessionId) {
+        const schedule = await Schedule.findOne({ "sessions._id": data.sessionId });
+        if (schedule) {
+          const session = schedule.sessions.id(data.sessionId);
+          if (session) {
+            sessionData = {
+              sessionDate: schedule.date,
+              startTime: session.startTime,
+              endTime: session.endTime
+            };
+          }
         }
       }
-    }
 
     // ✅ Create EnrollmentFlow so the student shows up in the Admin table
     const newFlow = new EnrollmentFlow({
@@ -130,10 +131,11 @@ exports.createStudent = async (req, res) => {
         }
       }],
       status: "active",
-      currentStep: 1
+      currentStep: 4
     });
 
-    await newFlow.save();
+      await newFlow.save();
+    }
 
     res.json(student);
 
