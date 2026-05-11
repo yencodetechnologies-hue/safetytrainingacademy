@@ -11,6 +11,19 @@ const Schedule = require("../models/schedule");
 
 exports.createStudent = async (req, res) => {
   try {
+    const {
+      name,
+      nickname,
+      email,
+      phone,
+      password,
+      courseId,
+      sessionId,
+      paymentMethod,
+      transactionId,
+      enrollmentType,
+      companyId
+    } = req.body;
     const data = req.body;
     const paymentSlipUrl = req.file ? req.file.path : null;
 
@@ -112,6 +125,7 @@ exports.createStudent = async (req, res) => {
           method: data.paymentMethod || "Bank Transfer",
           status: data.paymentMethod === "Pay Later" ? "unpaid" : "pending",
           transactionId: data.transactionId || `MANUAL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          slipUrl: paymentSlipUrl || "",
           amount: course?.sellingPrice || 0
         }
       }],

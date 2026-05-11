@@ -27,6 +27,9 @@ const Payment = () => {
     return status || "Pending";
   };
 
+  const [uploading, setUploading] = useState(false);
+  const [receiptFile, setReceiptFile] = useState(null);
+
   useEffect(() => {
     fetchPayments();
   }, []);
@@ -70,6 +73,34 @@ const Payment = () => {
       fetchPayments();
     } catch (err) {
       console.error("Reject Error:", err);
+    }
+  };
+
+  const handleUploadReceipt = async () => {
+    if (!receiptFile || !selectedPayment) return;
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append("paymentSlip", receiptFile);
+      formData.append("flowId", selectedPayment.enrollmentId);
+      formData.append("courseId", selectedPayment.code);
+      formData.append("payment", JSON.stringify({
+        status: selectedPayment.status,
+        method: selectedPayment.method,
+        amount: selectedPayment.amount,
+        transactionId: selectedPayment.transId
+      }));
+
+      await axios.post(`${API_URL}/api/flow/payment`, formData);
+      alert("Receipt uploaded successfully");
+      fetchPayments();
+      setReceiptFile(null);
+      setShowModal(false);
+    } catch (err) {
+      console.error("Upload Error:", err);
+      alert("Upload failed");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -327,7 +358,38 @@ const Payment = () => {
                   <div style={{ textAlign: 'center', color: '#666' }}>
                     <p style={{ fontSize: '24px', marginBottom: '8px' }}>📄</p>
                     <p>No payment receipt uploaded yet.</p>
-                    {selectedPayment.method === "Pay Later" && <p style={{ fontSize: '12px' }}>(Payment Method: Pay Later)</p>}
+                    
+                    <div style={{ marginTop: '15px', padding: '12px', border: '1px dashed #4f46e5', borderRadius: '8px', background: '#f5f3ff' }}>
+                      <p style={{ fontSize: '12px', color: '#4f46e5', fontWeight: '600', marginBottom: '8px' }}>Upload Receipt Now:</p>
+                      <input 
+                        type="file" 
+                        accept="image/*,application/pdf"
+                        onChange={(e) => setReceiptFile(e.target.files[0])} 
+                        style={{ fontSize: '11px', display: 'block', margin: '0 auto' }}
+                      />
+                      {receiptFile && (
+                        <button 
+                          onClick={handleUploadReceipt}
+                          disabled={uploading}
+                          style={{ 
+                            marginTop: '12px', 
+                            padding: '6px 12px', 
+                            fontSize: '12px', 
+                            background: '#4f46e5', 
+                            color: '#fff', 
+                            border: 'none', 
+                            borderRadius: '6px', 
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          {uploading ? "Uploading..." : "🚀 Upload & Save Receipt"}
+                        </button>
+                      )}
+                    </div>
+
+                    {selectedPayment.method === "Pay Later" && <p style={{ fontSize: '12px', marginTop: '10px' }}>(Payment Method: Pay Later)</p>}
                   </div>
                 )}
               </div>

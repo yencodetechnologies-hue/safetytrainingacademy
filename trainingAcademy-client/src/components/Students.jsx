@@ -302,6 +302,7 @@ function AddStudentModal({ onClose, onSave }) {
     transactionId: "",
     paymentMethod: "Bank Transfer",
   });
+  const [paymentSlip, setPaymentSlip] = useState(null);
   const [courses, setCourses] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
@@ -352,6 +353,9 @@ function AddStudentModal({ onClose, onSave }) {
     }
   };
 
+  const handleFileChange = (e) => {
+    setPaymentSlip(e.target.files[0]);
+  };
 
   const handleSubmit = async () => {
     if (!form.name || !form.email || !form.password || !form.courseId || !form.sessionId) {
@@ -361,10 +365,17 @@ function AddStudentModal({ onClose, onSave }) {
     setSaving(true);
     setError(null);
     try {
+      const formData = new FormData();
+      Object.entries(form).forEach(([key, val]) => {
+        formData.append(key, val);
+      });
+      if (paymentSlip) {
+        formData.append("paymentSlip", paymentSlip);
+      }
+
       const res = await fetch(`${API_URL}/api/students`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: formData,
       });
       if (!res.ok) throw new Error("Failed to add student");
       const newStudent = await res.json();
@@ -523,6 +534,28 @@ function AddStudentModal({ onClose, onSave }) {
               />
               Pay Later
             </label>
+          </div>
+
+          <div style={{ marginTop: '15px' }}>
+            <label className="modal-label">Payment Receipt (Optional)</label>
+            <div style={{ 
+              marginTop: '8px', 
+              border: '2px dashed #cbd5e1', 
+              borderRadius: '8px', 
+              padding: '10px',
+              textAlign: 'center',
+              background: '#f8fafc'
+            }}>
+              <input 
+                type="file" 
+                accept="image/*,application/pdf"
+                onChange={handleFileChange}
+                style={{ fontSize: '12px' }}
+              />
+              <p style={{ fontSize: '10px', color: '#64748b', marginTop: '5px' }}>
+                Upload proof of bank transfer or receipt
+              </p>
+            </div>
           </div>
         </div>
 
