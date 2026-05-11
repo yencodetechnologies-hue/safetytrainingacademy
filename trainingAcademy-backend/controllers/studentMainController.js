@@ -27,38 +27,22 @@ exports.createStudent = async (req, res) => {
       student = new StudentMain({
         name: data.name,
         email: data.email,
-        phone: data.phone,
+        phone: data.phone || "",
         companyId: data.companyId || null,
         enrollmentType: data.enrollmentType || "individual",
         password: hashedPassword,
-        courses: [
-          {
-            courseId: data.courseId,
-            sessionId: data.sessionId,
-            paymentMethod: data.paymentMethod,
-            transactionId: data.transactionId,
-            slipUrl: paymentSlipUrl,
-            step: 2
-          }
-        ]
+        courses: []
       });
     } else {
-      // If a student record already exists (matched by email) and this new
-      // enrolment is happening via a company link, attach the company tag —
-      // otherwise the student stays "Individual" forever even though they're
-      // booking through a company. This also keeps enrollmentType in sync.
-      if (data.companyId && !student.companyId) {
-        student.companyId = data.companyId;
-      }
+      if (data.companyId && !student.companyId) student.companyId = data.companyId;
       if (data.enrollmentType && data.enrollmentType !== student.enrollmentType) {
-        // Only escalate to "company"/"agent"; never silently downgrade a
-        // company student back to "individual".
         const incoming = String(data.enrollmentType).toLowerCase();
-        if (incoming === "company" || incoming === "agent") {
-          student.enrollmentType = incoming;
-        }
+        if (incoming === "company" || incoming === "agent") student.enrollmentType = incoming;
       }
+    }
 
+    // Add course entry if courseId is provided
+    if (data.courseId) {
       const alreadyExists = student.courses.find(
         c => c.courseId.toString() === data.courseId
       );
@@ -75,12 +59,86 @@ exports.createStudent = async (req, res) => {
     }
 
     await student.save();
-    res.json(student);
+
+    // CREATE OR UPDATE ENROLLMENT FLOW
+    let flow;
+    if (data.courseId) {
+      flow = await EnrollmentFlow.findOne({ studentId: student._id, "items.course": data.courseId });
+    }
+
+    if (!flow) {
+      let paymentStatus = "pending";
+      let paymentMethod = data.paymentMethod || "Pay Later";
+
+      if (paymentMethod === "Credit Card") {
+        paymentStatus = "success";
+        paymentMethod = "Card Payment";
+      } else if (paymentMethod === "Bank Transfer") {
+        paymentStatus = "pending";
+        // If admin adds it, they might want to mark it verified immediately if they have the slip
+        // but typically it starts as pending.
+      }
+
+      const flowData = {
+        studentId: student._id,
+        companyId: student.companyId,
+        enrollmentType: student.enrollmentType || "individual",
+        status: "active",
+        items: data.courseId ? [{
+          course: data.courseId,
+          session: data.sessionId,
+          status: "not_started"
+        }] : [],
+        payment: {
+          method: paymentMethod,
+          status: paymentStatus,
+          transactionId: data.transactionId || "",
+          slipUrl: paymentSlipUrl || ""
+        }
+      };
+      flow = await EnrollmentFlow.create(flowData);
+    }
+
+    // Format for Admin UI
+    const populatedFlow = await EnrollmentFlow.findById(flow._id)
+      .populate("studentId")
+      .populate("items.course");
+
+    const formatted = {
+      _id: student._id,
+      id: student._id,
+      flowId: flow._id,
+      name: student.name,
+      nickname: student.nickname || "",
+      email: student.email,
+      phone: student.phone,
+      registerDate: flow.createdAt.toLocaleDateString("en-AU", { day: "2-digit", month: "2-digit", year: "numeric" }),
+      registerTime: flow.createdAt.toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", hour12: true }),
+      type: student.enrollmentType.charAt(0).toUpperCase() + student.enrollmentType.slice(1),
+      courseTitle: populatedFlow.items?.[0]?.course?.title || "—",
+      courseCategory: populatedFlow.items?.[0]?.course?.category || "",
+      courseBookingDate: populatedFlow.items?.[0]?.session ? "Scheduled" : "—",
+      llndStatus: "Not Completed",
+      enrollmentForm: "Not Completed",
+      paymentMethod: flow.payment?.method || "—",
+      paymentStatus: flow.payment?.method === "Card Payment"
+        ? (flow.payment?.status === "success" || flow.payment?.status === "completed") ? "Paid" : "Unpaid"
+        : flow.payment?.method === "Bank Transfer"
+          ? flow.payment?.status === "success" ? "Verified" : "Not Verified"
+          : "—",
+      status: "Active",
+      lastLogin: "Never",
+      slipUrl: flow.payment?.slipUrl || ""
+    };
+
+    res.json(formatted);
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
+
 
 exports.updateStudentCourse = async (req, res) => {
   try {

@@ -297,9 +297,54 @@ function AddStudentModal({ onClose, onSave }) {
     email: "",
     phone: "",
     password: "",
+    courseId: "",
+    sessionId: "",
+    paymentMethod: "Pay Later",
   });
+  const [courses, setCourses] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [paymentSlip, setPaymentSlip] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/courses`);
+        if (res.ok) {
+          const data = await res.json();
+          setCourses(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch courses", err);
+      }
+    };
+    fetchCourses();
+  }, []);
+
+  useEffect(() => {
+    if (form.courseId) {
+      const fetchSessions = async () => {
+        try {
+          const res = await fetch(`${API_URL}/api/schedules/course/${form.courseId}`);
+          if (res.ok) {
+            const data = await res.json();
+            // Flatten sessions from slots
+            const allSessions = data.flatMap((slot) =>
+              slot.sessions.map((s) => ({ ...s, date: slot.date }))
+            );
+            setSessions(allSessions);
+          }
+        } catch (err) {
+          console.error("Failed to fetch sessions", err);
+        }
+      };
+      fetchSessions();
+    } else {
+      setSessions([]);
+      setForm((prev) => ({ ...prev, sessionId: "" }));
+    }
+  }, [form.courseId]);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -313,12 +358,24 @@ function AddStudentModal({ onClose, onSave }) {
     setSaving(true);
     setError(null);
     try {
+      const formData = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      if (paymentSlip) {
+        formData.append("paymentSlip", paymentSlip);
+      }
+
       const res = await fetch(`${API_URL}/api/students`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: formData, // FormData handles Content-Type automatically
       });
-      if (!res.ok) throw new Error("Failed to add student");
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || "Failed to add student");
+      }
+
       const newStudent = await res.json();
       onSave(newStudent);
     } catch (err) {
@@ -330,50 +387,122 @@ function AddStudentModal({ onClose, onSave }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-box" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "600px" }}>
         <div className="modal-header">
           <div>
             <h2 className="modal-title">Add New Student</h2>
-            <p className="modal-subtitle">Create a new student account</p>
+            <p className="modal-subtitle">Create a new student account and enrollment</p>
           </div>
           <button className="modal-close-btn" onClick={onClose}>✕</button>
         </div>
 
         {error && <div className="modal-error">{error}</div>}
 
-        <div className="modal-form">
-          <label className="modal-label">Full Name *</label>
-          <div className="modal-input-wrap">
-            <span className="modal-input-icon">👤</span>
-            <input className="modal-input" name="name" value={form.name} onChange={handleChange} placeholder="Full Name" />
+        <div className="modal-form" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 20px" }}>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label className="modal-label">Full Name *</label>
+            <div className="modal-input-wrap">
+              <span className="modal-input-icon">👤</span>
+              <input className="modal-input" name="name" value={form.name} onChange={handleChange} placeholder="Full Name" />
+            </div>
           </div>
 
-          <label className="modal-label">Preferred Name (Optional)</label>
-          <div className="modal-input-wrap">
-            <span className="modal-input-icon">👤</span>
-            <input className="modal-input" name="nickname" value={form.nickname} onChange={handleChange} placeholder="Johnny" />
+          <div>
+            <label className="modal-label">Preferred Name</label>
+            <div className="modal-input-wrap">
+              <span className="modal-input-icon">👤</span>
+              <input className="modal-input" name="nickname" value={form.nickname} onChange={handleChange} placeholder="Johnny" />
+            </div>
           </div>
 
-          <label className="modal-label">Email *</label>
-          <div className="modal-input-wrap">
-            <span className="modal-input-icon">✉</span>
-            <input className="modal-input" name="email" value={form.email} onChange={handleChange} placeholder="email@example.com" />
+          <div>
+            <label className="modal-label">Phone Number</label>
+            <div className="modal-input-wrap">
+              <span className="modal-input-icon">📞</span>
+              <input className="modal-input" name="phone" value={form.phone} onChange={handleChange} placeholder="+61..." />
+            </div>
           </div>
 
-          <label className="modal-label">Phone Number</label>
-          <div className="modal-input-wrap">
-            <span className="modal-input-icon">📞</span>
-            <input className="modal-input" name="phone" value={form.phone} onChange={handleChange} placeholder="+61..." />
+          <div>
+            <label className="modal-label">Email *</label>
+            <div className="modal-input-wrap">
+              <span className="modal-input-icon">✉</span>
+              <input className="modal-input" name="email" value={form.email} onChange={handleChange} placeholder="email@example.com" />
+            </div>
           </div>
 
-          <label className="modal-label">Password *</label>
-          <div className="modal-input-wrap">
-            <span className="modal-input-icon">🔒</span>
-            <input className="modal-input" name="password" type="password" value={form.password} onChange={handleChange} placeholder="Set a password" />
+          <div>
+            <label className="modal-label">Password *</label>
+            <div className="modal-input-wrap">
+              <span className="modal-input-icon">🔒</span>
+              <input className="modal-input" name="password" type="password" value={form.password} onChange={handleChange} placeholder="Set a password" />
+            </div>
           </div>
+
+          <div style={{ gridColumn: "1 / -1", height: "1px", background: "#eee", margin: "10px 0" }}></div>
+
+          <div>
+            <label className="modal-label">Select Course</label>
+            <select name="courseId" value={form.courseId} onChange={handleChange} className="modal-select">
+              <option value="">No Course (Manual Entry)</option>
+              {courses.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.courseCode} - {c.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="modal-label">Select Session</label>
+            <select
+              name="sessionId"
+              value={form.sessionId}
+              onChange={handleChange}
+              className="modal-select"
+              disabled={!form.courseId}
+            >
+              <option value="">Select Date & Time</option>
+              {sessions.map((s) => (
+                <option key={s._id} value={s._id}>
+                  {new Date(s.date).toLocaleDateString("en-AU")} | {s.startTime}-{s.endTime}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label className="modal-label">Payment Method</label>
+            <div className="payment-options" style={{ display: "flex", gap: "20px", marginTop: "8px" }}>
+              {["Pay Later", "Credit Card", "Bank Transfer"].map((m) => (
+                <label key={m} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "14px", cursor: "pointer" }}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value={m}
+                    checked={form.paymentMethod === m}
+                    onChange={handleChange}
+                  />
+                  {m}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {form.paymentMethod === "Bank Transfer" && (
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label className="modal-label">Upload Payment Slip (Required for Bank Transfer)</label>
+              <input
+                type="file"
+                onChange={(e) => setPaymentSlip(e.target.files[0])}
+                accept="image/*,application/pdf"
+                style={{ marginTop: "8px", fontSize: "14px" }}
+              />
+            </div>
+          )}
         </div>
 
-        <div className="modal-actions">
+        <div className="modal-actions" style={{ marginTop: "30px" }}>
           <button className="modal-cancel-btn" onClick={onClose} disabled={saving}>Cancel</button>
           <button className="modal-save-btn" onClick={handleSubmit} disabled={saving}>
             {saving ? "Adding..." : "Add Student"}
@@ -383,6 +512,7 @@ function AddStudentModal({ onClose, onSave }) {
     </div>
   );
 }
+
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 

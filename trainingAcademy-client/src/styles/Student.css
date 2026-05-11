@@ -729,6 +729,27 @@ body {
   color: #111;
   width: 100%;
 }
+.modal-select {
+  width: 100%;
+  padding: 10px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fafafa;
+  font-size: 14px;
+  outline: none;
+  margin-top: 4px;
+  cursor: pointer;
+  color: #111;
+}
+.modal-select:focus {
+  border-color: #7c3aed;
+  background: #fff;
+}
+.modal-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 
 /* ── Modal Buttons ── */
 .modal-actions {
