@@ -520,6 +520,8 @@ function BookNow() {
     }
 
     const handleNext = async () => {
+        if (isProcessing) return;
+
         if (step === 2) {
             // ✅ ============================================================
             // ✅ ENROLLMENT LINK FLOW
@@ -540,6 +542,7 @@ function BookNow() {
                     formData.append("sessionDate", selectedSession?.date);
                     formData.append("startTime", selectedSession?.startTime);
                     formData.append("endTime", selectedSession?.endTime);
+                    formData.append("skipFlow", "true");
 
                     const res = await fetch(`${API_URL}/api/enroll/enrollment`, {
                         method: "POST",
@@ -867,6 +870,7 @@ function BookNow() {
                         formData.append("startTime", selectedSession?.startTime);
                         formData.append("endTime", selectedSession?.endTime);
                         formData.append("enrollmentType", isCompanyEnroll ? "company" : enrollmentType);
+                        formData.append("skipFlow", "true");
                         if (tokenData?.companyId) formData.append("companyId", tokenData.companyId);
                         else if (enrollId) formData.append("companyId", enrollId);
 
@@ -938,6 +942,7 @@ function BookNow() {
                     formData.append("startTime", selectedSession?.startTime);
                     formData.append("endTime", selectedSession?.endTime);
                     formData.append("enrollmentType", isCompanyEnroll ? "company" : enrollmentType);
+                    formData.append("skipFlow", "true");
                     if (tokenData?.companyId) formData.append("companyId", tokenData.companyId);
                     else if (enrollId) formData.append("companyId", enrollId);
 
@@ -1190,6 +1195,7 @@ function BookNow() {
                         <button
                             className="next-btn"
                             disabled={
+                                isProcessing ||
                                 (step === 1 && !isCompany && !isCompanyEnroll && !selectedSession?._id) ||
                                 (step === 1 && isCompanyEnroll && !selectedSession?._id) ||
                                 (step === 1 && isCompany && !isCompanyEnroll && selectedCourses.length === 0) ||
