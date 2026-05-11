@@ -197,9 +197,9 @@ function LLNDAssessment(props) {
         sectionResults.push({
             name: "Digital Literacy",
             score: digiPercent.toFixed(0),
-            correct: digiCorrect,  // ✅ add
+            correct: digiCorrect,
             total: digiTotal,
-            status: digiPercent >= 66 ? "Passed" : "Failed"
+            status: digiPercent >= 67 ? "Passed" : "Failed"
         })
 
         // ---------------- ATTEMPT >= 4 FORCE PASS ----------------
@@ -208,7 +208,7 @@ function LLNDAssessment(props) {
                 if (sec.status === "Failed") {
                     return {
                         ...sec,
-                        score: 66,
+                        score: 67,
                         status: "Passed"
                     }
                 }

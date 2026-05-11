@@ -246,7 +246,7 @@ export default function CompanyViewModal({ company, onClose }) {
                             <BuildingIcon size={22} color="white" />
                         </div>
                         <div>
-                            <h2 className="cvm-company-name">{data?.companyName || "Company"}</h2>
+                            <h2 className="cvm-company-name">{data?.companyName || data?.name || "Company"}</h2>
                             <p className="cvm-company-tagline">Course links, enrolled students & enrolment status</p>
                         </div>
                     </div>

@@ -111,7 +111,7 @@ function LinksModal({ company, onClose }) {
             <div className="modal-box" style={{ maxWidth: 820 }}>
                 <div className="modal-header">
                     <div>
-                        <h2 className="modal-title">Course Links — {company.companyName}</h2>
+                        <h2 className="modal-title">Course Links — {company.companyName || company.name}</h2>
                         <p className="modal-subtitle">{links.length} link{links.length !== 1 ? "s" : ""} generated</p>
                     </div>
                     <button className="modal-close-btn" onClick={onClose}><CloseIcon /></button>
@@ -577,7 +577,7 @@ export default function Companies() {
                                     <td>
                                         <div className="company-cell">
                                             <div className="company-icon"><BuildingIcon /></div>
-                                            <span className="company-name">{company.companyName}</span>
+                                            <span className="company-name">{company.companyName || company.name}</span>
                                         </div>
                                     </td>
                                     <td>{company.contactPerson ? company.contactPerson : <span className="dash">—</span>}</td>

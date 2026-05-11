@@ -41,7 +41,7 @@ const buildCompanyWelcomeHtml = ({ companyName, email, password }) => `
 // ─── GET ALL COMPANIES ───────────────────────────────────────────
 exports.getAllCompanies = async (req, res) => {
   try {
-    const { search, status, page = 1, limit = 10 } = req.query;
+    const { search, status, page = 1, limit = 1000 } = req.query;
 
     const query = {};
 
