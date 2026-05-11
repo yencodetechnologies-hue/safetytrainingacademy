@@ -15,7 +15,7 @@ const { verifyAdmin, verifyToken } = require("../middleware/authMiddleware");
 router.post("/login", companyLogin);
 router.get("/", verifyAdmin, getAllCompanies);
 router.get("/:id/details", verifyAdmin, getCompanyDetails);
-router.get("/:id", verifyToken, getCompanyById)
+router.get("/:id", getCompanyById)
 router.post("/", verifyAdmin, createCompany);
 router.put("/:id", verifyAdmin, updateCompany);
 router.patch("/:id/toggle-status", verifyAdmin, toggleCompanyStatus);

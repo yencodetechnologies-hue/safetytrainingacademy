@@ -81,13 +81,22 @@ function EnrolmentLinkCard({ enrollLink }) {
         your company (no card payment on this link).
       </p>
       <div className="cd-enroll-url-box">{enrollLink}</div>
-      <button className="cd-copy-btn" onClick={handleCopy}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
-          <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
-        </svg>
-        {copied ? "Copied!" : "Copy link"}
-      </button>
+      <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
+        <button className="cd-copy-btn" onClick={handleCopy}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
+          </svg>
+          {copied ? "Copied!" : "Copy link"}
+        </button>
+        <button 
+          className="cd-copy-btn" 
+          style={{ background: "var(--primary-color, #7b2ff7)", color: "white", border: "none" }}
+          onClick={() => window.open(enrollLink, "_self")}
+        >
+          Book Now
+        </button>
+      </div>
     </div>
   );
 }

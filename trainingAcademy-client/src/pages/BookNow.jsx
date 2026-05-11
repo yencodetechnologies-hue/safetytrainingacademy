@@ -280,43 +280,68 @@ function BookNow() {
         const isCompanyPath = location.pathname.startsWith("/book-now/company/");
 
         if (isCompanyPath) {
-            const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-            const storedRole = String(storedUser?.role || "").toLowerCase();
-            const storedId   = String(storedUser?._id || storedUser?.id || "");
-            const isLoggedInAsThisCompany = storedRole === "company" && storedId === String(enrollId);
+            // Priority: Use user from AuthContext, fallback to localStorage
+            const effectiveUser = loggedInUser || JSON.parse(localStorage.getItem("user") || "{}");
+            const storedRole = String(effectiveUser?.role || "").toLowerCase();
+            const storedId   = String(effectiveUser?._id || effectiveUser?.id || "");
+            const isAdmin = storedRole === "admin";
+            const isLoggedInAsThisCompany = (storedRole === "company" && storedId === String(enrollId)) || isAdmin;
 
             if (isLoggedInAsThisCompany) {
-                // Dashboard flow — the company itself is logged in and
+                // Dashboard flow — the company (or an admin) is logged in and
                 // managing its own bookings.
                 setIsCompanyEnroll(false);
                 setEnrollmentType("company");
                 setIsDashboardCompany(true);
 
-                setCompanyUser(storedUser);
+                // Initial pre-fill from stored user
+                setCompanyUser(effectiveUser);
                 setPaymentData(prev => ({
                     ...prev,
-                    name: storedUser.name || "",
-                    email: storedUser.email || "",
-                    phone: storedUser.mobileNumber || "",
+                    name: effectiveUser.name || "",
+                    email: effectiveUser.email || "",
+                    phone: (effectiveUser.phone || effectiveUser.mobileNumber || effectiveUser.mobile || ""),
                     agreed: true,
                 }));
                 setUserDetails({
-                    name: storedUser.name || "",
-                    email: storedUser.email || "",
-                    phone: storedUser.mobileNumber || "",
+                    name: effectiveUser.name || "",
+                    email: effectiveUser.email || "",
+                    phone: (effectiveUser.phone || effectiveUser.mobileNumber || effectiveUser.mobile || ""),
                 });
 
-                // 🔥 Always fetch latest company settings to ensure Pay Later toggle is up-to-date
+                // 🔥 Always fetch latest company settings to ensure Pay Later toggle is up-to-date.
+                // If an admin is logged in, we override the pre-filled data with the company's 
+                // own info for a true dashboard experience.
                 fetch(`${API_URL}/api/companies/${enrollId}`)
                     .then(res => res.json())
                     .then(data => {
                         if (data.success) {
-                            const updatedUser = { ...storedUser, payLater: data.data.payLater };
-                            setCompanyUser(updatedUser);
-                            setPaymentData(prev => ({
-                                ...prev,
-                                payLater: data.data.payLater
-                            }));
+                            const companyData = data.data;
+                            const displayUser = isAdmin 
+                                ? { ...companyData, id: companyData._id } 
+                                : { ...effectiveUser, payLater: companyData.payLater };
+                            
+                            setCompanyUser(displayUser);
+
+                            if (isAdmin) {
+                                setPaymentData(prev => ({
+                                    ...prev,
+                                    name: companyData.companyName || "",
+                                    email: companyData.email || "",
+                                    phone: (companyData.mobileNumber || ""),
+                                    payLater: companyData.payLater
+                                }));
+                                setUserDetails({
+                                    name: companyData.companyName || "",
+                                    email: companyData.email || "",
+                                    phone: (companyData.mobileNumber || ""),
+                                });
+                            } else {
+                                setPaymentData(prev => ({
+                                    ...prev,
+                                    payLater: companyData.payLater
+                                }));
+                            }
                         }
                     })
                     .catch(err => console.error("Failed to sync company settings:", err))
