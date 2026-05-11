@@ -45,7 +45,7 @@ export default function EnrollmentSuccess({ enrollmentData, onBackToHome }) {
     { label: "Course", value: courseDisplay },
     { label: "Date", value: formatDate(enrollmentData.courseDate) },
     { label: "Time", value: enrollmentData.courseTime || "Time not available" },
-    ...(enrollmentData.isAgent || enrollmentData.isEnrollmentLink ? [] : [{ label: "Payment Method", value: paymentMethodDisplay }]),
+    { label: "Payment Method", value: paymentMethodDisplay },
   ];
 
   const { setUser } = useContext(AuthContext); // 🔥 ADD THIS
@@ -149,14 +149,12 @@ export default function EnrollmentSuccess({ enrollmentData, onBackToHome }) {
           ))}
 
           {/* Total Row */}
-          {!enrollmentData.isAgent && !enrollmentData.isEnrollmentLink && (
-            <div className="summary-total-row">
-              <span className="summary-total-label">Total</span>
-              <span className="summary-total-value">
-                ${enrollmentData.coursePrice || "0"}
-              </span>
-            </div>
-          )}
+          <div className="summary-total-row">
+            <span className="summary-total-label">Total</span>
+            <span className="summary-total-value">
+              ${enrollmentData.coursePrice || "0"}
+            </span>
+          </div>
         </div>
 
         {/* Payment Notice - Bank Transfer */}
