@@ -22,9 +22,8 @@ const Payment = () => {
 
   const formatStatus = (status) => {
     if (status === "success" || status === "completed") return "Verified";
-    if (status === "pending") return "Pending";
+    if (status === "pending" || status === "unpaid") return "Pending";
     if (status === "failed") return "Rejected";
-    if (status === "unpaid") return "Unpaid";
     return status || "Pending";
   };
 
@@ -356,7 +355,7 @@ const Payment = () => {
             <div className="modal-footer">
               <button className="btn-secondary" onClick={() => setShowModal(false)}>Close</button>
               <button className="btn-reject" onClick={() => { handleReject(); setShowModal(false); }}>Reject</button>
-              <button className="btn-verify" onClick={() => { handleVerify(); setShowModal(false); }}>Verify Payment</button>
+              <button className="btn-verify" onClick={() => { handleVerify(); setShowModal(false); }}>Confirm Payment</button>
             </div>
           </div>
         </div>

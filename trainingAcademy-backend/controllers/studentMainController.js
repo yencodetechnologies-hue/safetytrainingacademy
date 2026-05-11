@@ -116,7 +116,7 @@ exports.createStudent = async (req, res) => {
         }
       }],
       status: "active",
-      currentStep: 4
+      currentStep: 1
     });
 
     await newFlow.save();
@@ -237,9 +237,12 @@ exports.getAllStudents = async (req, res) => {
       return {
         id: student._id,
         flowId: flow._id,
-        registerDate: student.createdAt
-          ? new Date(student.createdAt).toLocaleDateString("en-GB")
+        registerDate: flow.createdAt
+          ? new Date(flow.createdAt).toLocaleDateString("en-GB")
           : "—",
+        registerTime: flow.createdAt
+          ? new Date(flow.createdAt).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit', hour12: true })
+          : "",
         name: student.name || "",
         email: student.email || "",
         phone: student.phone || "",
