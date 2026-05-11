@@ -95,30 +95,30 @@ exports.createStudent = async (req, res) => {
         }
       }
 
-      // ✅ Create EnrollmentFlow so the student shows up in the Admin table
-      const newFlow = new EnrollmentFlow({
-        studentId: student._id,
-        enrollmentType: data.enrollmentType || "individual",
-        companyId: data.companyId || null,
-        source: "Manual Admin Add",
-        ...sessionData,
-        items: [{
-          course: {
-            courseId: course?._id,
-            courseName: course?.title,
-            courseCategory: course?.courseCategory,
-            price: course?.sellingPrice || 0
-          },
-          payment: {
-            method: data.paymentMethod || "Bank Transfer",
-            status: data.paymentMethod === "Pay Later" ? "unpaid" : "pending",
-            transactionId: data.transactionId || `MANUAL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-            amount: course?.sellingPrice || 0
-          }
-        }],
-        status: "active",
-        currentStep: 4
-      });
+    // ✅ Create EnrollmentFlow so the student shows up in the Admin table
+    const newFlow = new EnrollmentFlow({
+      studentId: student._id,
+      enrollmentType: data.enrollmentType || "individual",
+      companyId: data.companyId || null,
+      source: "Manual Admin Add",
+      ...sessionData,
+      items: [{
+        course: {
+          courseId: course?._id,
+          courseName: course?.title,
+          courseCategory: course?.courseCategory,
+          price: course?.sellingPrice || 0
+        },
+        payment: {
+          method: data.paymentMethod || "Bank Transfer",
+          status: data.paymentMethod === "Pay Later" ? "unpaid" : "pending",
+          transactionId: data.transactionId || `MANUAL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          amount: course?.sellingPrice || 0
+        }
+      }],
+      status: "active",
+      currentStep: 4
+    });
 
       await newFlow.save();
     }
@@ -239,9 +239,12 @@ exports.getAllStudents = async (req, res) => {
       return {
         id: student._id,
         flowId: flow._id,
-        registerDate: student.createdAt
-          ? new Date(student.createdAt).toLocaleDateString("en-GB")
+        registerDate: flow.createdAt
+          ? new Date(flow.createdAt).toLocaleDateString("en-GB")
           : "—",
+        registerTime: flow.createdAt
+          ? new Date(flow.createdAt).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit', hour12: true })
+          : "",
         name: student.name || "",
         email: student.email || "",
         phone: student.phone || "",
