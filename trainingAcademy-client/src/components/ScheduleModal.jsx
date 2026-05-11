@@ -38,7 +38,7 @@ const generateDates = (start, end, selectedDays) => {
 function EditSessionModal({ session, scheduleDate, onClose, onSaved }) {
   const [startTime, setStartTime] = useState(session.startTime || "")
   const [endTime, setEndTime] = useState(session.endTime || "")
-  const [maxCapacity, setMaxCapacity] = useState(session.maxCapacity || "")
+  const [availableSlots, setAvailableSlots] = useState(session.availableSlots || 0)
   const [saving, setSaving] = useState(false)
 
   const handleSave = async () => {
@@ -47,7 +47,7 @@ function EditSessionModal({ session, scheduleDate, onClose, onSaved }) {
       await axios.patch(`${API_URL}/api/schedules/session/${session._id}/edit`, {
         startTime,
         endTime,
-        maxCapacity: Number(maxCapacity),
+        availableSlots: Number(availableSlots),
       })
       onSaved()
       onClose()
@@ -86,11 +86,11 @@ function EditSessionModal({ session, scheduleDate, onClose, onSaved }) {
         </div>
 
         <div className="csm-field">
-          <label>Max Capacity (spots)</label>
+          <label>Active Slots</label>
           <input
             type="number"
-            value={maxCapacity}
-            onChange={(e) => setMaxCapacity(e.target.value)}
+            value={availableSlots}
+            onChange={(e) => setAvailableSlots(e.target.value)}
           />
         </div>
 
@@ -157,7 +157,7 @@ function CourseScheduleModal({ course, close }) {
       startTime: "",
       endTime: "",
       location: "",
-      maxCapacity: "",
+      availableSlots: "",
     },
     onSubmit: (values) => {
       if (!values.date) return
@@ -166,7 +166,7 @@ function CourseScheduleModal({ course, close }) {
         startTime: values.startTime,
         endTime: values.endTime,
         location: values.location,
-        maxCapacity: values.maxCapacity,
+        availableSlots: values.availableSlots,
       }
       setLocalSessions((prev) => [...prev, { date: values.date, session }])
       formik.resetForm()
@@ -182,7 +182,7 @@ function CourseScheduleModal({ course, close }) {
       startTime: "",
       endTime: "",
       location: "Face to Face",
-      maxCapacity: "",
+      availableSlots: "",
     },
     onSubmit: (values) => {
       const dates = generateDates(values.startDate, values.endDate, selectedDays)
@@ -193,7 +193,7 @@ function CourseScheduleModal({ course, close }) {
           startTime: values.startTime,
           endTime: values.endTime,
           location: values.location,
-          maxCapacity: values.maxCapacity,
+          availableSlots: values.availableSlots,
         },
       }))
       // avoid duplicates with already-local sessions
@@ -229,7 +229,7 @@ function CourseScheduleModal({ course, close }) {
           axios.post(`${API_URL}/api/schedules/session`, {
             course: course._id,
             date,
-            session: { ...session, availableSlots: session.maxCapacity },
+            session: { ...session },
           })
         )
       )
@@ -347,9 +347,9 @@ function CourseScheduleModal({ course, close }) {
                 </div>
 
                 <div className="csm-field">
-                  <label>Max Capacity *</label>
-                  <input type="number" name="maxCapacity" placeholder="e.g., 20"
-                    value={formik.values.maxCapacity}
+                  <label>Active Slots *</label>
+                  <input type="number" name="availableSlots" placeholder="e.g., 20"
+                    value={formik.values.availableSlots}
                     onChange={formik.handleChange}
                   />
                 </div>
@@ -447,9 +447,9 @@ function CourseScheduleModal({ course, close }) {
                   </select>
                 </div>
                 <div className="csm-field">
-                  <label>Max Capacity *</label>
-                  <input type="number" name="maxCapacity" placeholder="e.g., 20"
-                    value={bulkFormik.values.maxCapacity}
+                  <label>Active Slots *</label>
+                  <input type="number" name="availableSlots" placeholder="e.g., 20"
+                    value={bulkFormik.values.availableSlots}
                     onChange={bulkFormik.handleChange}
                   />
                 </div>
@@ -523,7 +523,7 @@ function CourseScheduleModal({ course, close }) {
                         <span className="csm-tag">{session.sessionType}</span>
                         <span className="csm-time">⏱ {session.startTime} - {session.endTime}</span>
                       </div>
-                      <div className="csm-avl-slot">{slotsLeft}<br /><span>spots left</span></div>
+                      <div className="csm-avl-slot">{session.availableSlots}<br /><span>Active slots</span></div>
                       <div className="csm-session-right">
                         <button
                           type="button"

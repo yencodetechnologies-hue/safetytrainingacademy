@@ -36,6 +36,7 @@ const EMPTY_FORM = {
   startTime: "09:00",
   endTime:   "17:00",
   location:  "Face to Face",
+  availableSlots: 20,
 };
 
 /* ─────────────────────────────────────────────────────────── */
@@ -271,8 +272,7 @@ function Schedule() {
             startTime:      form.startTime,
             endTime:        form.endTime,
             location:       form.location,
-            maxCapacity:    20,
-            availableSlots: 20,
+            availableSlots: Number(form.availableSlots),
             status:         "Active",
           },
         }),
@@ -548,6 +548,16 @@ function Schedule() {
                 >
                   {LOCATIONS.map(l => <option key={l}>{l}</option>)}
                 </select>
+              </div>
+              
+              <div className="f-group f-full">
+                <label>Active Slots *</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 20"
+                  value={form.availableSlots}
+                  onChange={e => setForm({ ...form, availableSlots: e.target.value })}
+                />
               </div>
 
               <div className="f-group f-full">

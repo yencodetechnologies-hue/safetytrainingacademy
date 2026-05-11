@@ -88,7 +88,7 @@ const getUpcomingSessions = async (req, res) => {
 
 const editSession = async (req, res) => {
   try {
-    const { startTime, endTime, maxCapacity } = req.body
+    const { startTime, endTime, maxCapacity, availableSlots } = req.body
  
     const schedule = await Schedule.findOne({ "sessions._id": req.params.id })
  
@@ -100,7 +100,7 @@ const editSession = async (req, res) => {
  
     if (startTime)   session.startTime   = startTime
     if (endTime)     session.endTime     = endTime
-    if (maxCapacity) session.maxCapacity = Number(maxCapacity)
+    if (availableSlots !== undefined) session.availableSlots = Number(availableSlots)
  
     await schedule.save()
  
@@ -114,7 +114,7 @@ const addSession = async (req, res) => {
   try {
     const { course, date, session } = req.body;
 
-    session.availableSlots = session.maxCapacity;
+    // availableSlots is now passed directly from the frontend
 
     let schedule = await Schedule.findOne({ course, date });
 
