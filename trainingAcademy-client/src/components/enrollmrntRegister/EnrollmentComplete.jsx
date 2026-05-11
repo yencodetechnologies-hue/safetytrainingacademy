@@ -44,31 +44,33 @@ function EnrollmentComplete() {
     }
 
     // ============================================
-    // ADDED: Google Ads conversion tracking
-    // Fires once when the confirmation page loads.
-    // Reads order data from React router state
-    // passed by the enrollment/payment submit handler.
-    // Required fields in enrollmentData:
-    //   - transactionId (string)
-    //   - amount (number, e.g. 350)
-    //   - currency (string, default "AUD")
-    //   - courseName (string)
-    //   - enrollmentType ("individual" | "company")
+    // Google Ads conversion tracking
+    // Fires for individual bookings only.
+    // Reads coursePrice, selectedCourse, paymentMethod
+    // from React router state (passed by BookNow.jsx).
     // ============================================
     useEffect(() => {
-        if (!enrollmentData || !enrollmentData.amount) return
+        if (!enrollmentData || enrollmentData.enrollmentType === "company") return
 
-        window.dataLayer = window.dataLayer || []
-        window.dataLayer.push({
-            event: "purchase",
-            ecommerce: {
-                transaction_id: enrollmentData.transactionId || `enrol_${Date.now()}`,
-                value: parseFloat(enrollmentData.amount),   // must be number not string
-                currency: enrollmentData.currency || "AUD",
-                course_name: enrollmentData.courseName || "",
+        setTimeout(() => {
+            window.dataLayer = window.dataLayer || []
+            window.dataLayer.push({
+                event: "purchase",
+                transaction_id: `enrol_${Date.now()}`,
+                value: parseFloat(enrollmentData.coursePrice || 0),
+                currency: "AUD",
+                course_name: enrollmentData.selectedCourse?.title || "",
+                course_id: enrollmentData.selectedCourse?._id || "",
                 enrollment_type: enrollmentData.enrollmentType || "individual",
-            }
-        })
+                payment_method: enrollmentData.paymentMethod || "",
+                items: [{
+                    item_id: enrollmentData.selectedCourse?._id || "",
+                    item_name: enrollmentData.selectedCourse?.title || "",
+                    quantity: 1,
+                    price: parseFloat(enrollmentData.coursePrice || 0)
+                }]
+            })
+        }, 500)
     }, [])
     // ============================================
     // END: Google Ads conversion tracking

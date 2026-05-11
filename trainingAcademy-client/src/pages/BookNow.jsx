@@ -997,7 +997,13 @@ function BookNow() {
                 const error = await enrollRef.current.submitForm();
                 if (error) { alert(error); return; }
                 navigate("/booking-success", {
-                    state: { email: paymentData.email || userDetails.email }
+                    state: {
+                        email: paymentData.email || userDetails.email,
+                        selectedCourse,
+                        coursePrice,
+                        paymentMethod: paymentData.paymentMethod,
+                        enrollmentType: isCompanyEnroll ? "company" : "individual",
+                    }
                 });
                 return;
             }
