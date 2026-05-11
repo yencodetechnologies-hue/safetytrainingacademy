@@ -67,10 +67,10 @@ exports.login = async (req, res) => {
       return res.json({
         token,
         user: {
-          id: student._id,   // 🔥 IMPORTANT
+          id: student._id,
           name: student.name,
           email: student.email,
-          phone: student.phone, // ✅ added
+          phone: student.phone,
           role: "Student"
         }
       });
@@ -80,7 +80,6 @@ exports.login = async (req, res) => {
     let user = await User.findOne({ email });
 
     if (!user) {
-      // Try finding by exact match with regex for case-insensitivity, escaping special characters
       const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       user = await User.findOne({ email: { $regex: new RegExp("^" + escapedEmail + "$", "i") } });
     }
@@ -88,7 +87,6 @@ exports.login = async (req, res) => {
     if (!user) {
       user = await Company.findOne({ email });
       if (!user) {
-          // Try finding company by case-insensitive regex if needed
           const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
           user = await Company.findOne({ email: { $regex: new RegExp("^" + escapedEmail + "$", "i") } });
       }
