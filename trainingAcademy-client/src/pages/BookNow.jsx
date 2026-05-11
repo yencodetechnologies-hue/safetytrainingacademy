@@ -457,7 +457,7 @@ function BookNow() {
             formData.append("courseCategory", selectedCourse.category);
             formData.append("courseName", selectedCourse.title);
             formData.append("price", coursePrice);
-            formData.append("enrollmentType", isCompanyEnroll ? "company" : enrollmentType);
+            formData.append("enrollmentType", (isCompanyEnroll || isPublicCompanyLink) ? "company" : enrollmentType);
             formData.append("sessionDate", selectedSession?.date);
             formData.append("startTime", selectedSession?.startTime);
             formData.append("endTime", selectedSession?.endTime);
@@ -875,7 +875,7 @@ function BookNow() {
                         formData.append("sessionDate", selectedSession?.date);
                         formData.append("startTime", selectedSession?.startTime);
                         formData.append("endTime", selectedSession?.endTime);
-                        formData.append("enrollmentType", isCompanyEnroll ? "company" : enrollmentType);
+                        formData.append("enrollmentType", (isCompanyEnroll || isPublicCompanyLink) ? "company" : enrollmentType);
                         formData.append("skipFlow", "true");
                         if (tokenData?.companyId) formData.append("companyId", tokenData.companyId);
                         else if (enrollId) formData.append("companyId", enrollId);
@@ -947,7 +947,7 @@ function BookNow() {
                     formData.append("sessionDate", selectedSession?.date);
                     formData.append("startTime", selectedSession?.startTime);
                     formData.append("endTime", selectedSession?.endTime);
-                    formData.append("enrollmentType", isCompanyEnroll ? "company" : enrollmentType);
+                    formData.append("enrollmentType", (isCompanyEnroll || isPublicCompanyLink) ? "company" : enrollmentType);
                     formData.append("skipFlow", "true");
                     if (tokenData?.companyId) formData.append("companyId", tokenData.companyId);
                     else if (enrollId) formData.append("companyId", enrollId);
