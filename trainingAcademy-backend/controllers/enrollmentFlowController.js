@@ -125,7 +125,9 @@ exports.createFlow = async (req, res) => {
       flowData.studentId = studentId;
     }
 
+    console.log("[EnrollmentFlow] Creating flow for student:", studentId, "companyId:", resolvedCompanyId, "source:", source);
     const flow = await EnrollmentFlow.create(flowData);
+    console.log("[EnrollmentFlow] Flow created successfully:", flow._id);
 
     if (courseId && mongoose.Types.ObjectId.isValid(courseId)) {
       await Course.findByIdAndUpdate(courseId, { $inc: { studentsEnrolled: 1 } });
@@ -306,15 +308,19 @@ exports.updateLLNDDate = async (req, res) => {
 // ✅ Final Enrollment
 exports.completeEnrollment = async (req, res) => {
   try {
-    const { flowId } = req.body;
+    console.log("[EnrollmentFlow] Completing enrollment for flowId:", flowId);
+    const flow = await EnrollmentFlow.findByIdAndUpdate(flowId, {
+      enrollmentStatus: "enrolled",
+      enrolledAt: new Date(),
+      currentStep: 4 // Note: Some parts of the system might expect 4 or 5
+    }, { new: true });
 
-    await EnrollmentFlow.findByIdAndUpdate(flowId, {
-      enrollment: {
-        status: "enrolled",
-        enrolledAt: new Date()
-      },
-      currentStep: 4
-    });
+    if (!flow) {
+      console.warn("[EnrollmentFlow] No flow found to complete:", flowId);
+      return res.status(404).json({ message: "Flow not found" });
+    }
+
+    console.log("[EnrollmentFlow] Enrollment completed successfully for flow:", flow._id);
 
     res.json({ message: "Enrollment completed 🎉" });
 

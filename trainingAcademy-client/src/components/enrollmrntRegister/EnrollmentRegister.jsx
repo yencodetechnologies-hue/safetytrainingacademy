@@ -241,6 +241,7 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
 
         setFormData(prev => ({
             ...prev,
+            userId: userDetails._id || prev.userId, // ✅ Prioritize ID from userDetails
             givenName: parts[0] || "",
             surname: parts.slice(1).join(" ") || "",
             email: userDetails.email || "",
@@ -381,6 +382,7 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
                 }
             })
 
+            console.log("[EnrollmentRegister] Submitting form for userId:", formData.userId, "flowId:", formData.flowId);
             const res = await fetch(`${API_URL}/api/enrollment-form`, {
                 method: "POST",
                 body: fd

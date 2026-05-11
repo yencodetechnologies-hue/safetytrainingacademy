@@ -5,6 +5,9 @@ const cloudinary = require("../config/cloudinary")
 const createEnrollmentForm = async (req, res) => {
   try {
     const data = req.body;
+    const { userId, flowId, studentId } = data;
+    console.log("[EnrollmentForm] createEnrollmentForm called. userId:", userId, "flowId:", flowId, "studentId:", studentId);
+
     const idDocumentUrl = req.files?.idDocument?.[0]?.path || null;
     const photoDocumentUrl = req.files?.photoDocument?.[0]?.path || null;
     const signatureUrl = req.files?.signature?.[0]?.path || null;
@@ -105,17 +108,35 @@ const createEnrollmentForm = async (req, res) => {
       enrollmentFormSubmittedAt: new Date()
     }
 
+    const studentIdToUse = userId || studentId;
+
     const form = await EnrollmentForm.findOneAndUpdate(
-      { studentId: data.userId },
+      { studentId: studentIdToUse },
       { $set: updateData },
       { returnDocument: "after", upsert: true }
     )
 
-    await EnrollmentFlow.findOneAndUpdate(
-      { studentId: data.userId },
-      { enrollmentFormId: form._id, currentStep: 5 },
-      { sort: { createdAt: -1 } }
-    )
+    // Update EnrollmentFlow as well
+    const flowUpdateData = { enrollmentFormId: form._id, currentStep: 5 };
+    
+    let flow;
+    if (flowId && flowId !== "null" && flowId !== "undefined") {
+      console.log("[EnrollmentForm] Updating flow by flowId:", flowId);
+      flow = await EnrollmentFlow.findByIdAndUpdate(flowId, flowUpdateData, { new: true });
+    } else {
+      console.log("[EnrollmentForm] Updating flow by studentId:", studentIdToUse);
+      flow = await EnrollmentFlow.findOneAndUpdate(
+        { studentId: studentIdToUse },
+        flowUpdateData,
+        { sort: { createdAt: -1 }, new: true }
+      )
+    }
+
+    if (!flow) {
+      console.warn("[EnrollmentForm] No EnrollmentFlow found to update for student:", studentIdToUse);
+    } else {
+      console.log("[EnrollmentForm] EnrollmentFlow updated successfully:", flow._id);
+    }
 
     res.status(201).json({ message: "Enrollment form submitted successfully" })
 
@@ -164,9 +185,12 @@ const updateEnrollmentStatus = async (req, res) => {
 
 const saveSection = async (req, res) => {
   try {
-    const { studentId, section, ...sectionData } = req.body
+    const { studentId, section, userId, flowId, ...sectionData } = req.body
+    const studentIdToUse = userId || studentId;
 
-    if (!studentId) return res.status(400).json({ message: "studentId required" })
+    console.log("[EnrollmentForm] saveSection called. section:", section, "studentId:", studentIdToUse, "flowId:", flowId);
+
+    if (!studentIdToUse) return res.status(400).json({ message: "studentId required" })
 
     let updateFields = {}
 
@@ -215,7 +239,7 @@ const saveSection = async (req, res) => {
     }
 
     const form = await EnrollmentForm.findOneAndUpdate(
-      { studentId },
+      { studentId: studentIdToUse },
       { $set: updateFields },
       { returnDocument: "after", upsert: true }
     )

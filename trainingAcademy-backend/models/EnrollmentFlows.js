@@ -100,9 +100,17 @@ enrollmentType: {
     ref: "EnrollmentForm"
   },
 
+  // ✅ Enrollment Status tracking
+  enrollmentStatus: { 
+    type: String, 
+    enum: ["pending", "enrolled", "completed"], 
+    default: "pending" 
+  },
+  enrolledAt: { type: Date },
+
   currentStep: {
     type: Number,
-    enum: [1, 2, 3, 4],
+    enum: [1, 2, 3, 4, 5],
     default: 1,
     index: true
   },
