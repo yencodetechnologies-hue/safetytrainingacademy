@@ -8,23 +8,24 @@ const jwt = require("jsonwebtoken");
 exports.register = async (req,res)=>{
  try{
 
- const {name,email,phone,password,role} = req.body;
+  const {name, email: rawEmail, phone, password, role} = req.body;
+  const email = rawEmail ? rawEmail.toLowerCase().trim() : "";
 
- const userExists = await User.findOne({email});
+  const userExists = await User.findOne({email});
 
- if(userExists){
-   return res.status(400).json({message:"User already exists"});
- }
+  if(userExists){
+    return res.status(400).json({message:"User already exists"});
+  }
 
- const salt = await bcrypt.genSalt(10);
-const hashedPassword = await bcrypt.hash(password || "123456", salt);
- const user = await User.create({
-   name,
-   email,
-   phone,
-   password:hashedPassword,
-   role,
- });
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password || "123456", salt);
+  const user = await User.create({
+    name,
+    email,
+    phone,
+    password:hashedPassword,
+    role,
+  });
 
 res.json({
 message:"Register success",
@@ -70,11 +71,22 @@ exports.login = async (req, res) => {
       });
     }
 
-    // 🔥 fallback → User
+    // 🔥 fallback → User (with case-insensitive fallback for legacy accounts)
     let user = await User.findOne({ email });
 
     if (!user) {
+      // Try finding by exact match with regex for case-insensitivity, escaping special characters
+      const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      user = await User.findOne({ email: { $regex: new RegExp("^" + escapedEmail + "$", "i") } });
+    }
+
+    if (!user) {
       user = await Company.findOne({ email });
+      if (!user) {
+          // Try finding company by case-insensitive regex if needed
+          const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          user = await Company.findOne({ email: { $regex: new RegExp("^" + escapedEmail + "$", "i") } });
+      }
     }
 
     if (!user) {
@@ -139,11 +151,20 @@ exports.autoLogin = async (req, res) => {
       });
     }
 
-    // 🔥 2. fallback → User
+    // 🔥 2. fallback → User (with case-insensitive fallback)
     let user = await User.findOne({ email });
 
     if (!user) {
+      const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      user = await User.findOne({ email: { $regex: new RegExp("^" + escapedEmail + "$", "i") } });
+    }
+
+    if (!user) {
       user = await Company.findOne({ email });
+      if (!user) {
+          const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          user = await Company.findOne({ email: { $regex: new RegExp("^" + escapedEmail + "$", "i") } });
+      }
     }
 
     if (!user) {
