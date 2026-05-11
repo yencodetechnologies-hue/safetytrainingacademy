@@ -25,7 +25,7 @@ router.put("/enrollment/:id", updateStudent);
 router.get("/enrollment/:id", getStudentById);
 router.put("/enrollment/:studentId/:courseId", updateStudentCourse);
 router.get("/", getAllStudents);
-router.post("/", uploadPayment.single("paymentSlip"), createStudent);
+router.post("/", createStudent);
 router.put("/:id", updateStudent);
 router.patch("/:id/status", updateStudentStatus);
 router.delete("/:id", deleteStudent);
