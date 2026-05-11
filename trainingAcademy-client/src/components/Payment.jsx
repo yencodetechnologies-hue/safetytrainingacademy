@@ -487,7 +487,8 @@ function Payment({
                             <span>Duration:</span>
                             <span>{selectedCourse?.duration || "0"}</span>
                         </div>
-                        {(!isEnrollmentLink || enrollmentLinkData?.payLater || tokenData?.payLater || initialPaymentData?.payLater) && (
+                        {/* Only show total if not an enrollment link OR if it's an agent link */}
+                        {(!isEnrollmentLink || (isEnrollmentLink && enrollmentLinkData?.agent)) && (
                             <div className="summary-row total">
                                 <span>Total:</span>
                                 <span>${coursePrice || selectedCourse?.sellingPrice || "0"}</span>
@@ -509,8 +510,8 @@ function Payment({
                 </div>
             )}
 
-            {/* Payment Method - Show if not an enrollment/company link OR if Pay Later is enabled */}
-            {(!isCompanyEnroll && !isEnrollmentLink || tokenData?.payLater || enrollmentLinkData?.payLater || initialPaymentData?.payLater) && (
+            {/* Payment Method - Show if not an enrollment/company link OR if it's an agent link OR if Pay Later is enabled */}
+            {(!isCompanyEnroll && !isEnrollmentLink || (isEnrollmentLink && enrollmentLinkData?.agent) || tokenData?.payLater || initialPaymentData?.payLater) && (
                 <div className="payment-method">
                     <label>Select Payment Method *</label>
                     <div

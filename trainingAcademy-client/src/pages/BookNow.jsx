@@ -125,7 +125,7 @@ function BookNow() {
                             const courseRes = await fetch(`${API_URL}/api/courses/${data.data.courseId}`)
                             if (courseRes.ok) {
                                 const course = await courseRes.json()
-                                setSelectedCourse(course)
+                                // We no longer call setSelectedCourse(course)
                             }
                         } catch (err) {
                             console.error("Failed to load token course details:", err)
@@ -133,12 +133,7 @@ function BookNow() {
                     }
 
                     if (data.data.sessionId || data.data.sessionDate) {
-                        setSelectedSession({
-                            _id: data.data.sessionId,
-                            date: data.data.sessionDate,
-                            startTime: data.data.startTime,
-                            endTime: data.data.endTime,
-                        })
+                        // We no longer call setSelectedSession(...)
                     }
                 } else if (data.expired) {
                     setTokenError("expired")
@@ -176,7 +171,9 @@ function BookNow() {
                             const courses = Array.isArray(coursesData) ? coursesData : coursesData.data || []
                             const course = courses.find(c => c.title === link.course)
                             if (course) {
-                                setSelectedCourse(course)
+                                // We no longer call setSelectedCourse(course) here
+                                // to ensure the student must select it manually.
+                                console.log("Enrollment link course specified:", course.title);
                             }
                         } catch (err) {
                             console.error("Failed to load enrollment link course details:", err)
