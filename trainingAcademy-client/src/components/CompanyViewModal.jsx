@@ -186,7 +186,6 @@ function LinkCard({ link, students }) {
 
 /* ── Main Modal ── */
 export default function CompanyViewModal({ company, onClose }) {
-    const navigate = useNavigate();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -343,13 +342,6 @@ export default function CompanyViewModal({ company, onClose }) {
                                             style={{ width: "fit-content" }}
                                         >
                                             <LinkIcon /> {linkCopied ? "Copied URL!" : "Copy Enrolment Link"}
-                                        </button>
-                                        <button 
-                                            className="cvm-link-btn-copy" 
-                                            onClick={() => navigate(`/book-now/company/${data?._id}`)}
-                                            style={{ width: "fit-content", background: "#7c3aed", color: "white" }}
-                                        >
-                                            Book Course / Add Link
                                         </button>
                                     </div>
                                 </div>
