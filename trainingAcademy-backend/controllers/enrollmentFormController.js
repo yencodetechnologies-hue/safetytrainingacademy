@@ -5,8 +5,20 @@ const cloudinary = require("../config/cloudinary")
 const createEnrollmentForm = async (req, res) => {
   try {
     const data = req.body;
-    const { userId, flowId, studentId } = data;
-    console.log("[EnrollmentForm] createEnrollmentForm called. userId:", userId, "flowId:", flowId, "studentId:", studentId);
+    let { userId, flowId, studentId } = data;
+
+    // ✅ Clean up "null"/"undefined" strings from frontend
+    if (userId === "null" || userId === "undefined") userId = null;
+    if (flowId === "null" || flowId === "undefined") flowId = null;
+    if (studentId === "null" || studentId === "undefined") studentId = null;
+
+    const studentIdToUse = userId || studentId;
+
+    console.log("[EnrollmentForm] createEnrollmentForm called. studentIdToUse:", studentIdToUse, "flowId:", flowId);
+
+    if (!studentIdToUse) {
+        return res.status(400).json({ message: "Student ID is missing. Please try logging in again." });
+    }
 
     const idDocumentUrl = req.files?.idDocument?.[0]?.path || null;
     const photoDocumentUrl = req.files?.photoDocument?.[0]?.path || null;
@@ -14,7 +26,7 @@ const createEnrollmentForm = async (req, res) => {
 
     // ✅ Use dot notation for qualifications so evidenceUrls is NOT wiped on final submit
     const updateData = {
-      studentId: data.userId,
+      studentId: studentIdToUse,
 
       personalDetails: {
         title: data.title,
@@ -108,7 +120,7 @@ const createEnrollmentForm = async (req, res) => {
       enrollmentFormSubmittedAt: new Date()
     }
 
-    const studentIdToUse = userId || studentId;
+
 
     const form = await EnrollmentForm.findOneAndUpdate(
       { studentId: studentIdToUse },
@@ -185,7 +197,13 @@ const updateEnrollmentStatus = async (req, res) => {
 
 const saveSection = async (req, res) => {
   try {
-    const { studentId, section, userId, flowId, ...sectionData } = req.body
+    let { studentId, section, userId, flowId, ...sectionData } = req.body
+
+    // ✅ Clean up "null"/"undefined" strings from frontend
+    if (userId === "null" || userId === "undefined") userId = null;
+    if (flowId === "null" || flowId === "undefined") flowId = null;
+    if (studentId === "null" || studentId === "undefined") studentId = null;
+
     const studentIdToUse = userId || studentId;
 
     console.log("[EnrollmentForm] saveSection called. section:", section, "studentId:", studentIdToUse, "flowId:", flowId);

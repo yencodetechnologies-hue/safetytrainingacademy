@@ -30,8 +30,8 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
     }
 
     const [formData, setFormData] = useState({
-        flowId: localStorage.getItem("flowId"),
-        userId: localStorage.getItem("enrollId"),
+        flowId: localStorage.getItem("flowId") !== "null" ? localStorage.getItem("flowId") : null,
+        userId: localStorage.getItem("enrollId") !== "null" ? localStorage.getItem("enrollId") : null,
         enrolledCourseId: urlParams.get("courseId") || "",
         title: "",
         surname: "",
