@@ -198,37 +198,44 @@ export default function LlndResults() {
   });
 
   useEffect(() => {
-  fetch(`${API_URL}/api/flow/llnd-results`)
-    .then(res => res.json())
-    .then(res => {
-      setData(res);
-      setFilteredData(res);
+    fetch(`${API_URL}/api/flow/llnd-results`)
+      .then(res => res.json())
+      .then(res => {
+        // ✅ Sort by completedDate (or date) descending - Latest first
+        const sorted = [...res].sort((a, b) => {
+          const dateA = new Date(a.completedDate || a.date);
+          const dateB = new Date(b.completedDate || b.date);
+          return dateB - dateA;
+        });
 
-      // 🔥 CALCULATE STATS
-      const total = res.length;
-      const passed = res.filter(r => r.result === "Passed").length;
-      const failed = res.filter(r => r.result === "Failed").length;
-      const pending = res.filter(r => r.status !== "Approved").length;
+        setData(sorted);
+        setFilteredData(sorted);
 
-      const avgScore =
-        total > 0
-          ? (res.reduce((sum, r) => sum + (r.score || 0), 0) / total).toFixed(2)
-          : 0;
+        // 🔥 CALCULATE STATS
+        const total = sorted.length;
+        const passed = sorted.filter(r => r.result === "Passed").length;
+        const failed = sorted.filter(r => r.result === "Failed").length;
+        const pending = sorted.filter(r => r.status !== "Approved").length;
 
-      const passRate =
-        total > 0 ? ((passed / total) * 100).toFixed(2) : 0;
+        const avgScore =
+          total > 0
+            ? (sorted.reduce((sum, r) => sum + (r.score || 0), 0) / total).toFixed(2)
+            : 0;
 
-      setStats({
-        totalAssessments: total,
-        passed,
-        failed,
-        pendingReview: pending,
-        averageScore: avgScore,
-        passRate,
-      });
-    })
-    .catch(err => console.error(err));
-}, []);
+        const passRate =
+          total > 0 ? ((passed / total) * 100).toFixed(2) : 0;
+
+        setStats({
+          totalAssessments: total,
+          passed,
+          failed,
+          pendingReview: pending,
+          averageScore: avgScore,
+          passRate,
+        });
+      })
+      .catch(err => console.error(err));
+  }, []);
 
 
 
@@ -355,34 +362,51 @@ export default function LlndResults() {
               </tr>
             </thead>
             <tbody>
-              {pageData.map((row) => (
-                <tr key={row.id}>
-                  <td className="lln-td-date">{row.date}</td>
-                  <td>
-                    <span className="lln-student-name">{row.student}</span>
-                    <span className="lln-student-email">{row.email}</span>
-                  </td>
-                  <td className="lln-td-course">{row.course}</td>
-                  <td>{row.bookingDate}</td>
-                  <td>{row.type}</td>
-                  <td>
-                    <span className={`lln-score ${row.score >= 80 ? "lln-score-high" : row.score >= 67 ? "lln-score-mid" : "lln-score-low"}`}>
-                      {row.score}%
-                    </span>
-                  </td>
-                  <td><ResultBadge result={row.result} /></td>
-                  <td><StatusBadge status={row.status} /></td>
-                  <td>
-                    <button
-                      className="lln-btn-view"
-                      onClick={() => setSelectedRecord(row)}
-                    >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-                      View Details
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {pageData.map((row) => {
+                // ✅ Helper to format date and time nicely
+                const formatDateTime = (dateStr) => {
+                  if (!dateStr) return { d: "N/A", t: "" };
+                  const d = new Date(dateStr);
+                  if (isNaN(d.getTime())) return { d: dateStr, t: "" };
+                  return {
+                    d: d.toLocaleDateString("en-AU", { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                    t: d.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: true })
+                  };
+                };
+                const { d, t } = formatDateTime(row.completedDate || row.date);
+
+                return (
+                  <tr key={row.id}>
+                    <td className="lln-td-date">
+                      <div style={{ fontWeight: '600', color: '#334155' }}>{d}</div>
+                      <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>{t}</div>
+                    </td>
+                    <td>
+                      <span className="lln-student-name">{row.student}</span>
+                      <span className="lln-student-email">{row.email}</span>
+                    </td>
+                    <td className="lln-td-course">{row.course}</td>
+                    <td>{row.bookingDate}</td>
+                    <td>{row.type}</td>
+                    <td>
+                      <span className={`lln-score ${row.score >= 80 ? "lln-score-high" : row.score >= 67 ? "lln-score-mid" : "lln-score-low"}`}>
+                        {row.score}%
+                      </span>
+                    </td>
+                    <td><ResultBadge result={row.result} /></td>
+                    <td><StatusBadge status={row.status} /></td>
+                    <td>
+                      <button
+                        className="lln-btn-view"
+                        onClick={() => setSelectedRecord(row)}
+                      >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                        View Details
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
