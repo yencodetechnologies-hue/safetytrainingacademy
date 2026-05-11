@@ -77,51 +77,49 @@ exports.createStudent = async (req, res) => {
 
     await student.save();
 
-    // ✅ Only create EnrollmentFlow if explicitly requested (e.g., Manual Admin Add)
-    // This prevents duplicate flow creation during public bookings.
-    if (data.isManualAdminAdd) {
-      const course = await Course.findById(data.courseId).lean();
-      let sessionData = {};
-      if (data.sessionId) {
-        const schedule = await Schedule.findOne({ "sessions._id": data.sessionId });
-        if (schedule) {
-          const session = schedule.sessions.id(data.sessionId);
-          if (session) {
-            sessionData = {
-              sessionDate: schedule.date,
-              startTime: session.startTime,
-              endTime: session.endTime
-            };
-          }
+    // ✅ Fetch session details if sessionId is provided
+    const course = await Course.findById(data.courseId).lean();
+    let sessionData = {};
+    if (data.sessionId) {
+      const schedule = await Schedule.findOne({ "sessions._id": data.sessionId });
+      if (schedule) {
+        const session = schedule.sessions.id(data.sessionId);
+        if (session) {
+          sessionData = {
+            sessionDate: schedule.date,
+            startTime: session.startTime,
+            endTime: session.endTime
+          };
         }
       }
-
-      const newFlow = new EnrollmentFlow({
-        studentId: student._id,
-        enrollmentType: data.enrollmentType || "individual",
-        companyId: data.companyId || null,
-        source: data.source || "Manual Admin Add",
-        ...sessionData,
-        items: [{
-          course: {
-            courseId: course?._id,
-            courseName: course?.title,
-            courseCategory: course?.courseCategory,
-            price: course?.sellingPrice || 0
-          },
-          payment: {
-            method: data.paymentMethod || "Bank Transfer",
-            status: data.paymentMethod === "Pay Later" ? "unpaid" : "pending",
-            transactionId: data.transactionId || `MANUAL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-            amount: course?.sellingPrice || 0
-          }
-        }],
-        status: "active",
-        currentStep: 4
-      });
-
-      await newFlow.save();
     }
+
+    // ✅ Create EnrollmentFlow so the student shows up in the Admin table
+    const newFlow = new EnrollmentFlow({
+      studentId: student._id,
+      enrollmentType: data.enrollmentType || "individual",
+      companyId: data.companyId || null,
+      source: "Manual Admin Add",
+      ...sessionData,
+      items: [{
+        course: {
+          courseId: course?._id,
+          courseName: course?.title,
+          courseCategory: course?.courseCategory,
+          price: course?.sellingPrice || 0
+        },
+        payment: {
+          method: data.paymentMethod || "Bank Transfer",
+          status: data.paymentMethod === "Pay Later" ? "unpaid" : "pending",
+          transactionId: data.transactionId || `MANUAL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          amount: course?.sellingPrice || 0
+        }
+      }],
+      status: "active",
+      currentStep: 4
+    });
+
+    await newFlow.save();
 
     res.json(student);
 

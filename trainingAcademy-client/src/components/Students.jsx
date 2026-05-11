@@ -301,7 +301,6 @@ function AddStudentModal({ onClose, onSave }) {
     sessionId: "",
     transactionId: "",
     paymentMethod: "Bank Transfer",
-    isManualAdminAdd: true,
   });
   const [courses, setCourses] = useState([]);
   const [sessions, setSessions] = useState([]);
