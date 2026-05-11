@@ -1173,7 +1173,7 @@ function BookNow() {
                     {step > 1 && step !== 3 && (
                         <button
                             className="prev-btn"
-                            disabled={step === 4 && enrollSection === 1}
+                            disabled={isProcessing || (step === 4 && enrollSection === 1)}
                             onClick={() => {
                                 if (step === 4) {
                                     if (enrollSection > 1) setEnrollSection(prev => prev - 1);
@@ -1190,6 +1190,7 @@ function BookNow() {
                         <button
                             className="next-btn"
                             disabled={
+                                isProcessing ||
                                 (step === 1 && !isCompany && !isCompanyEnroll && !selectedSession?._id) ||
                                 (step === 1 && isCompanyEnroll && !selectedSession?._id) ||
                                 (step === 1 && isCompany && !isCompanyEnroll && selectedCourses.length === 0) ||
