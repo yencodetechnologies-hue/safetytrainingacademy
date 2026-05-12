@@ -278,86 +278,28 @@ function BookNow() {
         const isCompanyPath = location.pathname.startsWith("/book-now/company/");
 
         if (isCompanyPath) {
-            // Priority: Use user from AuthContext, fallback to localStorage
-            const effectiveUser = loggedInUser || JSON.parse(localStorage.getItem("user") || "{}");
-            const storedRole = String(effectiveUser?.role || "").toLowerCase();
-            const storedId   = String(effectiveUser?._id || effectiveUser?.id || "");
-            const isAdmin = storedRole === "admin";
-            const isLoggedInAsThisCompany = (storedRole === "company" && storedId === String(enrollId)) || isAdmin;
-
-            if (isLoggedInAsThisCompany) {
-                // Dashboard flow — the company (or an admin) is logged in and
-                // managing its own bookings.
-                setIsCompanyEnroll(false);
-                setEnrollmentType("company");
-                setIsDashboardCompany(true);
-
-                // Initial pre-fill from stored user
-                if (!isAdmin) {
-                    setCompanyUser(effectiveUser);
-                    setPaymentData(prev => ({
-                        ...prev,
-                        name: effectiveUser.name || "",
-                        email: effectiveUser.email || "",
-                        phone: (effectiveUser.phone || effectiveUser.mobileNumber || effectiveUser.mobile || ""),
-                        agreed: true,
-                    }));
-                    setUserDetails({
-                        name: effectiveUser.name || "",
-                        email: effectiveUser.email || "",
-                        phone: (effectiveUser.phone || effectiveUser.mobileNumber || effectiveUser.mobile || ""),
-                    });
-                }
-
-                // 🔥 Always fetch latest company settings to ensure Pay Later toggle is up-to-date.
-                // If an admin is logged in, we override the pre-filled data with the company's 
-                // own info for a true dashboard experience.
-                fetch(`${API_URL}/api/companies/${enrollId}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            const companyData = data.data;
-                            
-                            if (isAdmin) {
-                                setCompanyUser({ ...companyData, id: companyData._id });
-                                setPaymentData(prev => ({
-                                    ...prev,
-                                    payLater: companyData.payLater
-                                }));
-                            } else {
-                                setCompanyUser({ ...effectiveUser, payLater: companyData.payLater });
-                                setPaymentData(prev => ({
-                                    ...prev,
-                                    payLater: companyData.payLater
-                                }));
-                            }
-                        }
-                    })
-                    .catch(err => console.error("Failed to sync company settings:", err))
-                    .finally(() => setIsLoading(false));
-            } else {
-                // Public / shared employee enrolment link — visitor enrols
-                // as an individual student, attached to this company.
-                setIsLoading(true);
-                fetch(`${API_URL}/api/companies/${enrollId}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            setTokenData({
-                                companyId: enrollId,
-                                payLater: data.data.payLater
-                            });
-                            setIsCompanyEnroll(false);
-                            setIsPublicCompanyLink(true);
-                            setEnrollmentType("individual");
-                            setIsDashboardCompany(false);
-                        } else {
-                            navigate("/");
-                        }
-                    })
-                    .catch(() => navigate("/"))
-                    .finally(() => setIsLoading(false));
-            }
+            // General Enrolment Link — always treat as individual employee enrollment
+            // regardless of whether the visitor is logged in, is the company, or is admin.
+            // This link is for employees to self-enrol, not for company bulk booking.
+            setIsLoading(true);
+            fetch(`${API_URL}/api/companies/${enrollId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        setTokenData({
+                            companyId: enrollId,
+                            payLater: data.data.payLater
+                        });
+                        setIsCompanyEnroll(false);
+                        setIsPublicCompanyLink(true);
+                        setEnrollmentType("individual");
+                        setIsDashboardCompany(false);
+                    } else {
+                        navigate("/");
+                    }
+                })
+                .catch(() => navigate("/"))
+                .finally(() => setIsLoading(false));
             return;
         }
 
@@ -457,7 +399,11 @@ function BookNow() {
             formData.append("courseCategory", selectedCourse.category);
             formData.append("courseName", selectedCourse.title);
             formData.append("price", coursePrice);
-            formData.append("enrollmentType", (isCompanyEnroll || isPublicCompanyLink) ? "company" : enrollmentType);
+            formData.append("enrollmentType",
+                isEnrollmentLink ? enrollmentType :
+                (isCompanyEnroll || isPublicCompanyLink) ? "company" :
+                enrollmentType
+            );
             formData.append("sessionDate", selectedSession?.date);
             formData.append("startTime", selectedSession?.startTime);
             formData.append("endTime", selectedSession?.endTime);
@@ -856,11 +802,10 @@ function BookNow() {
             // ✅ CARD PAYMENT FLOW (INDIVIDUAL)
             // ✅ ============================================================
             if (cardPaymentRef.current.paymentMethod === "Card Payment" && !isCompanyEnroll) {
-                const success = await cardPaymentRef.current.trigger()
-                if (!success) return
-
                 setIsProcessing(true)
                 try {
+                    const success = await cardPaymentRef.current.trigger()
+                    if (!success) return
                     let studentId = localStorage.getItem("enrollId");
                     let slipUrl = "";
 

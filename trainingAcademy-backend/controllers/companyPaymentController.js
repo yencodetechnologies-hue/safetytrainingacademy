@@ -3,6 +3,8 @@ const Company = require("../models/Company");
 const cloudinary = require("../config/cloudinary");
 const EnrollmentFlow = require("../models/EnrollmentFlows");
 const sendEmail = require("../config/sendEmail");
+const CourseLink = require("../models/CourseLink");
+const crypto = require("crypto");
 
 const fmtId = (id) => {
   const s = String(id).replace(/\D/g, "");
@@ -173,6 +175,9 @@ exports.createPayment = async (req, res) => {
     // ── Receipt upload (Cloudinary URL from multer) ───────────
     const receiptUrl = req.file?.path || "";
 
+    const isCard = paymentMethod === "Card";
+    const status = isCard ? "success" : "pending";
+
     const payment = await CompanyPayment.create({
       companyId,
       flowId: flowId || null,
@@ -186,9 +191,32 @@ exports.createPayment = async (req, res) => {
       receiptUrl,
       transactionReference: transactionReference || "",
       notes: notes || "",
-      status: "pending",
-      confirmed: false,
+      status: status,
+      confirmed: isCard,
     });
+
+    // ── AUTOMATIC LINK GENERATION for successful payments ──────
+    if (status === "success" && Array.isArray(courses) && courses.length > 0) {
+      await Promise.all(courses.map(async (course) => {
+        const token = crypto.randomBytes(20).toString("hex");
+        return CourseLink.create({
+          companyPaymentId: payment._id,
+          companyId: payment.companyId,
+          courseId: course.courseId,
+          courseName: course.courseName,
+          courseCode: course.courseCode || "",
+          sessionId: course.sessionId || null,
+          sessionDate: course.sessionDate || null,
+          startTime: course.startTime || "",
+          endTime: course.endTime || "",
+          maxUses: course.quantity || 1,
+          usedCount: 0,
+          token,
+          isActive: true,
+        });
+      }));
+      console.log(`[CompanyPayment] Generated links for payment: ${payment._id}`);
+    }
 
     res.status(201).json({ success: true, data: payment });
 
@@ -279,6 +307,35 @@ exports.confirmPayment = async (req, res) => {
     }
 
     res.json({ success: true, data: payment });
+
+    // ── GENERATE LINKS after admin confirmation ───────────────
+    if (Array.isArray(payment.courses) && payment.courses.length > 0) {
+      const CourseLink = require("../models/CourseLink");
+      const crypto = require("crypto");
+      
+      const existingLinks = await CourseLink.countDocuments({ companyPaymentId: payment._id });
+      if (existingLinks === 0) {
+        await Promise.all(payment.courses.map(async (course) => {
+          const token = crypto.randomBytes(20).toString("hex");
+          return CourseLink.create({
+            companyPaymentId: payment._id,
+            companyId: payment.companyId,
+            courseId: course.courseId,
+            courseName: course.courseName,
+            courseCode: course.courseCode || "",
+            sessionId: course.sessionId || null,
+            sessionDate: course.sessionDate || null,
+            startTime: course.startTime || "",
+            endTime: course.endTime || "",
+            maxUses: course.quantity || 1,
+            usedCount: 0,
+            token,
+            isActive: true,
+          });
+        }));
+        console.log(`[CompanyPayment] Generated links after confirmation for: ${payment._id}`);
+      }
+    }
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

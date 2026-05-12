@@ -8,6 +8,9 @@ const CourseLink = require("../models/CourseLink");
 const Course = require("../models/Course");
 const EnrollmentLink = require("../models/EnrollmentLink");
 const Schedule = require("../models/schedule");
+const LLNDAssessment = require("../models/LLNDAssessment");
+const EnrollmentForm = require("../models/EnrollmentForm");
+const Payment = require("../models/Payment");
 
 exports.createStudent = async (req, res) => {
   try {
@@ -243,10 +246,15 @@ exports.getAllStudents = async (req, res) => {
       }
 
       let agentName = "";
-      if (flow.enrollmentType && flow.enrollmentType.toLowerCase() === "agent" && flow.sourceToken) {
+      let linkName = "";
+      if (flow.source === "Enrollment Link" && flow.sourceToken) {
         try {
           const link = await EnrollmentLink.findById(flow.sourceToken).lean();
-          agentName = link?.name || "";
+          if (link?.agent) {
+            agentName = link?.name || "";
+          } else {
+            linkName = link?.name || "";
+          }
         } catch (e) {}
       }
 
@@ -254,10 +262,15 @@ exports.getAllStudents = async (req, res) => {
         id: student._id,
         flowId: flow._id,
         registerDate: flow.createdAt
-          ? new Date(flow.createdAt).toLocaleDateString("en-GB")
+          ? new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
           : "—",
         registerTime: flow.createdAt
-          ? new Date(flow.createdAt).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit', hour12: true })
+          ? new Date(flow.createdAt).toLocaleTimeString("en-AU", { 
+              timeZone: "Australia/Sydney", 
+              hour: '2-digit', 
+              minute: '2-digit', 
+              hour12: true 
+            })
           : "",
         name: student.name || "",
         email: student.email || "",
@@ -267,6 +280,7 @@ exports.getAllStudents = async (req, res) => {
           : "Individual",
         companyName,
         agentName,
+        linkName,
         courseCategory: item.course?.courseCategory || "",
         courseTitle: item.course?.courseName || "",
         course: item.course?.courseName || "",
@@ -274,8 +288,8 @@ exports.getAllStudents = async (req, res) => {
         transactionId: item.payment?.transactionId || "—",
         slipUrl: item.payment?.slipUrl || "—",
         courseBookingDate: flow.sessionDate
-          ? `${new Date(flow.sessionDate).toLocaleDateString("en-IN", {
-              day: "numeric", month: "short", year: "numeric"
+          ? `${new Date(flow.sessionDate).toLocaleDateString("en-AU", {
+              day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Sydney"
             })} | ${flow.startTime} - ${flow.endTime}`
           : "-",
         llndStatus: flow.llnd?.status === "completed" ? "Completed" : "Not Completed",
@@ -307,8 +321,18 @@ exports.deleteStudent = async (req, res) => {
       return res.status(404).json({ message: "Flow not found" });
     }
 
-    await EnrollmentFlow.findByIdAndDelete(req.params.id);
-    await StudentMain.findByIdAndDelete(flow.studentId);
+    const studentId = flow.studentId;
+
+    await Promise.all([
+      EnrollmentFlow.findByIdAndDelete(req.params.id),
+      studentId && LLNDAssessment.deleteMany({ student: studentId }),
+      studentId && EnrollmentForm.deleteMany({ studentId: studentId.toString() }),
+      studentId && Payment.deleteMany({ userId: studentId.toString() }),
+    ]);
+
+    if (studentId) {
+      await StudentMain.findByIdAndDelete(studentId);
+    }
 
     res.json({ message: "Deleted successfully" });
   } catch (err) {
@@ -400,7 +424,7 @@ exports.getStudentsByCompany = async (req, res) => {
         llnd: flow.llnd?.status === "completed" ? "Completed" : "Not Completed",
         form: flow.enrollmentFormId ? "Submitted" : "Not Submitted",
         training: flow.status === "active" ? "Active" : "Inactive",
-        enrolled: new Date(flow.createdAt).toLocaleString("en-AU"),
+        enrolled: new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
       };
     });
 
@@ -440,7 +464,7 @@ exports.getPaymentsByCompany = async (req, res) => {
 
           payments.push({
             id: `${payment._id}_${course.courseId}`,
-            date: new Date(payment.createdAt).toLocaleDateString("en-AU"),
+            date: new Date(payment.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
             student: `${usedCount}/${maxUses} enrolled`,
             course: course.courseName || "—",
             payment: isPaid ? "paid" : "pending",
@@ -453,7 +477,7 @@ exports.getPaymentsByCompany = async (req, res) => {
         // ✅ Fallback
         payments.push({
           id: payment._id,
-          date: new Date(payment.createdAt).toLocaleDateString("en-AU"),
+          date: new Date(payment.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
           student: "—",
           course: "—",
           payment: isPaid ? "paid" : "pending",
@@ -566,7 +590,7 @@ exports.getStudentsByLink = async (req, res) => {
         amount: `$${price}`,
         paymentStatus,
         llnd: flow.llnd?.status === "completed" ? "Completed" : "Not Completed",
-        enrolled: new Date(flow.createdAt).toLocaleString("en-AU"),
+        enrolled: new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
       };
     });
 
