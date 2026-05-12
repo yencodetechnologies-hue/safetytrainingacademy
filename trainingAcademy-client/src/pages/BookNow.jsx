@@ -802,11 +802,10 @@ function BookNow() {
             // ✅ CARD PAYMENT FLOW (INDIVIDUAL)
             // ✅ ============================================================
             if (cardPaymentRef.current.paymentMethod === "Card Payment" && !isCompanyEnroll) {
-                const success = await cardPaymentRef.current.trigger()
-                if (!success) return
-
                 setIsProcessing(true)
                 try {
+                    const success = await cardPaymentRef.current.trigger()
+                    if (!success) return
                     let studentId = localStorage.getItem("enrollId");
                     let slipUrl = "";
 
