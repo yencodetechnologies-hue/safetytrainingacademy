@@ -89,13 +89,6 @@ function EnrolmentLinkCard({ enrollLink }) {
           </svg>
           {copied ? "Copied!" : "Copy link"}
         </button>
-        <button 
-          className="cd-copy-btn" 
-          style={{ background: "var(--primary-color, #7b2ff7)", color: "white", border: "none" }}
-          onClick={() => window.open(enrollLink, "_self")}
-        >
-          Book Now
-        </button>
       </div>
     </div>
   );
