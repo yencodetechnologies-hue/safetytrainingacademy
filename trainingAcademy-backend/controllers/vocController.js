@@ -119,11 +119,13 @@ exports.createSubmission = async (req, res) => {
             }
         }
 
+        const phone = b.phone || b.mobile || b.mobileNumber || b.mobilePhone || ""
+
         const doc = {
             firstName: b.firstName,
             lastName: b.lastName,
             email: b.email,
-            phone: b.phone,
+            phone: phone,
             studentId: b.studentId || "",
             streetAddress: b.streetAddress,
             city: b.city,

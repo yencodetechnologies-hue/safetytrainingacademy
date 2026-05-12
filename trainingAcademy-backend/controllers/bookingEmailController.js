@@ -14,12 +14,13 @@ const formatBookingId = (id) => {
 // POST /api/booking-email/send-confirmation
 // ─────────────────────────────────────────────────────────────
 const sendBookingConfirmation = async (req, res) => {
-    const { name, email, phone, courseName, courseCode, courseDate, startTime, endTime, coursePrice, paymentMethod } = req.body;
+    const { name, email, phone, mobile, mobileNumber, mobilePhone, courseName, courseCode, courseDate, startTime, endTime, coursePrice, paymentMethod } = req.body;
 
+    const finalPhone = phone || mobile || mobileNumber || mobilePhone || "";
     const orderId = formatBookingId(Date.now().toString());
     const priceStr = `$${Number(coursePrice).toFixed(2)}`;
     const orderDateStr = new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" });
-    const billingAddressHtml = `${name}<br/>${email}<br/>${phone || ""}`;
+    const billingAddressHtml = `${name}<br/>${email}<br/>${finalPhone}`;
 
     // ✅ Default password — booking pannumbothu user-ku assign aagum
     const defaultPassword = "123456";
@@ -246,7 +247,7 @@ const sendBookingConfirmation = async (req, res) => {
             </tr>
             <tr>
               <td class="lbl">Mobile</td>
-              <td class="val">${phone || ""}</td>
+              <td class="val">${finalPhone}</td>
             </tr>
           </table>
         </div>
@@ -276,7 +277,7 @@ const sendBookingConfirmation = async (req, res) => {
     const adminMailData = {
         studentName: name,
         studentEmail: email,
-        studentMobile: phone || "—",
+        studentMobile: finalPhone || "—",
         courseName: courseName,
         courseDate: courseDateStr,
         courseTime: `${startTime} - ${endTime}`,
@@ -492,7 +493,7 @@ const sendEnrollmentLinkConfirmation = async (req, res) => {
     const adminMailData = {
         studentName: studentName,
         studentEmail: toEmail,
-        studentMobile: req.body.phone || "—",
+        studentMobile: req.body.phone || req.body.mobile || req.body.mobileNumber || req.body.mobilePhone || "—",
         courseName: courseName,
         courseDate: dateStr,
         courseTime: timeStr,

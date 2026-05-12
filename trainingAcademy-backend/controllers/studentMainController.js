@@ -21,6 +21,9 @@ exports.createStudent = async (req, res) => {
       nickname,
       email,
       phone,
+      mobile,
+      mobileNumber,
+      mobilePhone,
       password,
       courseId,
       sessionId,
@@ -29,6 +32,7 @@ exports.createStudent = async (req, res) => {
       enrollmentType,
       companyId
     } = req.body;
+    const finalPhone = phone || mobile || mobileNumber || mobilePhone || "";
     const data = req.body;
     const paymentSlipUrl = req.file ? req.file.path : null;
 
@@ -46,7 +50,7 @@ exports.createStudent = async (req, res) => {
       student = new StudentMain({
         name: data.name,
         email: data.email,
-        phone: data.phone,
+        phone: finalPhone,
         companyId: data.companyId || null,
         enrollmentType: data.enrollmentType || "individual",
         password: hashedPassword,
@@ -68,6 +72,9 @@ exports.createStudent = async (req, res) => {
       // booking through a company. This also keeps enrollmentType in sync.
       if (data.companyId && !student.companyId) {
         student.companyId = data.companyId;
+      }
+      if (finalPhone && !student.phone) {
+        student.phone = finalPhone;
       }
       if (data.enrollmentType && data.enrollmentType !== student.enrollmentType) {
         // Only escalate to "company"/"agent"; never silently downgrade a
