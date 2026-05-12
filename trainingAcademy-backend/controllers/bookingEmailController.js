@@ -1,4 +1,5 @@
 const sendEmail = require("../config/sendEmail");
+const adminBookingTemplate = require("../templates/adminBookingTemplate");
 
 const formatBookingId = (id) => {
     if (!id) return "00000000";
@@ -258,49 +259,21 @@ const sendBookingConfirmation = async (req, res) => {
 </body>
 </html>`;
 
-    const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:#ffffff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:22px;font-weight:700;">NEW BOOKING RECEIVED #${orderId}</h1>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p style="margin:0 0 20px;font-size:15px;color:#555;">New booking from <strong style="color:#333;">${name}</strong></p>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;background-color:#ffffff;border-radius:8px;border:1px solid #e2e8f0;">
-    <tr><td style="padding:20px;border-bottom:1px solid #e2e8f0;">
-        <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Product</p>
-        <p style="margin:0;font-size:15px;font-weight:600;color:#334155;">${courseName}</p>
-        <p style="margin:4px 0 0;font-size:13px;color:#64748b;">Booking ID: ${orderId} | ${courseDate} | ${startTime} - ${endTime} ×1</p>
-    </td></tr>
-    <tr><td style="padding:16px 20px;">
-        <table width="100%" cellpadding="4" cellspacing="0" border="0" style="font-size:14px;">
-            <tr style="background-color:#f8fafc;"><td style="padding:8px 12px;color:#64748b;">Quantity</td><td style="padding:8px 12px;text-align:right;font-weight:600;color:#334155;">1</td></tr>
-            <tr><td style="padding:8px 12px;color:#64748b;">Price</td><td style="padding:8px 12px;text-align:right;font-weight:600;color:#334155;">${priceStr}</td></tr>
-        </table>
-    </td></tr></table>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;background-color:#ffffff;border-radius:8px;border:1px solid #e2e8f0;">
-    <tr><td style="padding:20px;">
-        <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Order Details (Order #${orderId})</p>
-        <p style="margin:0 0 4px;font-size:14px;color:#334155;">Order Date: <strong>${orderDateStr}</strong></p>
-        <table width="100%" cellpadding="4" cellspacing="0" border="0" style="font-size:14px;margin-top:12px;">
-            <tr><td style="padding:8px 0;color:#334155;">Subtotal</td><td style="padding:8px 0;text-align:right;font-weight:600;color:#334155;">${priceStr}</td></tr>
-            <tr><td style="padding:8px 0;color:#334155;">Payment method</td><td style="padding:8px 0;text-align:right;font-weight:600;color:#334155;">${paymentMethod}</td></tr>
-            <tr style="border-top:2px solid #e2e8f0;"><td style="padding:12px 0 0;font-size:15px;font-weight:700;color:#334155;">Total</td><td style="padding:12px 0 0;text-align:right;font-size:15px;font-weight:700;color:#334155;">${priceStr}</td></tr>
-        </table>
-    </td></tr></table>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;border:1px solid #e2e8f0;">
-    <tr><td style="padding:20px;">
-        <p style="margin:0 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Billing Address</p>
-        <p style="margin:0;font-size:14px;color:#334155;line-height:1.6;">${billingAddressHtml}</p>
-    </td></tr></table>
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0 0 12px;font-size:14px;color:#334155;font-weight:600;">Congratulations on the sale. Please confirm payment before scheduling the course.</p>
-    <p style="margin:0;font-size:13px;color:#64748b;">Best regards,<br/><strong style="color:#334155;">Safety Training Academy System</strong></p>
-</td></tr>
-</table></td></tr></table></body></html>`;
+    const adminMailData = {
+        studentName: name,
+        studentEmail: email,
+        studentMobile: phone || "—",
+        courseName: courseName,
+        courseDate: courseDate,
+        courseTime: `${startTime} - ${endTime}`,
+        courseLocation: "3/14-16 Marjorie Street, Sefton NSW 2162",
+        bookingId: `#${orderId}`,
+        orderDate: orderDateStr,
+        quantity: 1,
+        subtotal: priceStr,
+        paymentMethod: paymentMethod,
+        total: priceStr
+    };
 
     try {
         console.log("--- Email Sending Diagnostics ---");
@@ -313,7 +286,7 @@ const sendBookingConfirmation = async (req, res) => {
             await sendEmail({
                 to: process.env.BOOKINGS_EMAIL,
                 subject: `New Booking #${orderId} - ${name} - ${courseName}`,
-                html: academyHtml
+                html: adminBookingTemplate(adminMailData)
             });
             console.log(`✅ Academy notification sent to ${process.env.BOOKINGS_EMAIL}`);
         } catch (academyErr) {
@@ -459,30 +432,29 @@ const sendEnrollmentLinkConfirmation = async (req, res) => {
 </td></tr>
 </table></td></tr></table></body></html>`;
 
-    const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:20px;">New Registration Received (via link)</h1>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p>New student registered via enrollment link.</p>
-    <table width="100%" cellpadding="10" cellspacing="0" style="background-color:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
-        <tr><td style="color:#64748b;width:130px;">Student Name</td><td><strong>${studentName}</strong></td></tr>
-        <tr><td style="color:#64748b;">Email</td><td>${toEmail}</td></tr>
-        <tr><td style="color:#64748b;">Course</td><td>${courseName}</td></tr>
-        <tr><td style="color:#64748b;">Date</td><td>${dateStr}</td></tr>
-        <tr><td style="color:#64748b;">Time</td><td>${timeStr}</td></tr>
-    </table>
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0;font-size:13px;color:#64748b;">Best regards,<br/><strong>Safety Training Academy System</strong></p>
-</td></tr>
-</table></body></html>`;
+    const adminMailData = {
+        studentName: studentName,
+        studentEmail: toEmail,
+        studentMobile: req.body.phone || "—",
+        courseName: courseName,
+        courseDate: dateStr,
+        courseTime: timeStr,
+        courseLocation: "3/14-16 Marjorie Street, Sefton NSW 2162",
+        bookingId: "LINK-REG",
+        orderDate: new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" }),
+        quantity: 1,
+        subtotal: "—",
+        paymentMethod: "Enrollment Link",
+        total: "—"
+    };
 
     try {
         if (process.env.BOOKINGS_EMAIL) {
-            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `NEW REGISTRATION (LINK) - ${studentName} - ${courseName}`, html: academyHtml });
+            await sendEmail({ 
+                to: process.env.BOOKINGS_EMAIL, 
+                subject: `NEW REGISTRATION (LINK) - ${studentName} - ${courseName}`, 
+                html: adminBookingTemplate(adminMailData) 
+            });
         }
         await sendEmail({ to: toEmail, subject: `Registration complete – ${courseName}`, html: studentHtml });
         res.status(200).json({ success: true });

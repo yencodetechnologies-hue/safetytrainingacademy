@@ -858,14 +858,14 @@ export default function Students() {
     .filter((s) => {
       const sSearch = search.toLowerCase();
       const matchSearch =
-        s.name?.toLowerCase().includes(sSearch) ||
-        s.email?.toLowerCase().includes(sSearch) ||
-        s.phone?.toLowerCase().includes(sSearch) ||
+        s.name?.toLowerCase().startsWith(sSearch) ||
+        s.email?.toLowerCase().startsWith(sSearch) ||
+        s.phone?.toLowerCase().startsWith(sSearch) ||
         s.courseTitle?.toLowerCase().includes(sSearch) ||
         s.courseCode?.toLowerCase().includes(sSearch) ||
-        s.companyName?.toLowerCase().includes(sSearch) ||
-        s.transactionId?.toLowerCase().includes(sSearch) ||
-        s.nickname?.toLowerCase().includes(sSearch);
+        s.companyName?.toLowerCase().startsWith(sSearch) ||
+        s.transactionId?.toLowerCase().startsWith(sSearch) ||
+        s.nickname?.toLowerCase().startsWith(sSearch);
       const matchStatus =
         statusFilter === "All Status" || s.status === statusFilter;
       return matchSearch && matchStatus;

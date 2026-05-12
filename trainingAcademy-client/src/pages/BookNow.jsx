@@ -535,7 +535,8 @@ function BookNow() {
                                 courseCode: selectedCourse?.courseCode || "",
                                 courseDate: selectedSession?.date || "To be confirmed",
                                 startTime: selectedSession?.startTime || "",
-                                endTime: selectedSession?.endTime || ""
+                                endTime: selectedSession?.endTime || "",
+                                phone: paymentData.phone
                             })
                         });
                     } catch (emailErr) {
