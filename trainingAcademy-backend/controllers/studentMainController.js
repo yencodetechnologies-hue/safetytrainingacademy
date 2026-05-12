@@ -8,6 +8,9 @@ const CourseLink = require("../models/CourseLink");
 const Course = require("../models/Course");
 const EnrollmentLink = require("../models/EnrollmentLink");
 const Schedule = require("../models/schedule");
+const LLNDAssessment = require("../models/LLNDAssessment");
+const EnrollmentForm = require("../models/EnrollmentForm");
+const Payment = require("../models/Payment");
 
 exports.createStudent = async (req, res) => {
   try {
@@ -243,10 +246,15 @@ exports.getAllStudents = async (req, res) => {
       }
 
       let agentName = "";
-      if (flow.enrollmentType && flow.enrollmentType.toLowerCase() === "agent" && flow.sourceToken) {
+      let linkName = "";
+      if (flow.source === "Enrollment Link" && flow.sourceToken) {
         try {
           const link = await EnrollmentLink.findById(flow.sourceToken).lean();
-          agentName = link?.name || "";
+          if (link?.agent) {
+            agentName = link?.name || "";
+          } else {
+            linkName = link?.name || "";
+          }
         } catch (e) {}
       }
 
@@ -272,6 +280,7 @@ exports.getAllStudents = async (req, res) => {
           : "Individual",
         companyName,
         agentName,
+        linkName,
         courseCategory: item.course?.courseCategory || "",
         courseTitle: item.course?.courseName || "",
         course: item.course?.courseName || "",
@@ -312,8 +321,18 @@ exports.deleteStudent = async (req, res) => {
       return res.status(404).json({ message: "Flow not found" });
     }
 
-    await EnrollmentFlow.findByIdAndDelete(req.params.id);
-    await StudentMain.findByIdAndDelete(flow.studentId);
+    const studentId = flow.studentId;
+
+    await Promise.all([
+      EnrollmentFlow.findByIdAndDelete(req.params.id),
+      studentId && LLNDAssessment.deleteMany({ student: studentId }),
+      studentId && EnrollmentForm.deleteMany({ studentId: studentId.toString() }),
+      studentId && Payment.deleteMany({ userId: studentId.toString() }),
+    ]);
+
+    if (studentId) {
+      await StudentMain.findByIdAndDelete(studentId);
+    }
 
     res.json({ message: "Deleted successfully" });
   } catch (err) {

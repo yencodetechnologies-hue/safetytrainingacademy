@@ -1052,6 +1052,11 @@ const handleToggleStatus = async (student) => {
                             {s.agentName || "Agent"}
                           </div>
                         )}
+                        {s.linkName && (
+                          <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "#059669" }}>
+                            {s.linkName}
+                          </div>
+                        )}
                       </td>
                       <td className="sm-email">{s.email}</td>
                       <td>{s.phone}</td>

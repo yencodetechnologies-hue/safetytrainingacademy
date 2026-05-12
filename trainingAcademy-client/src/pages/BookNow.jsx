@@ -399,7 +399,11 @@ function BookNow() {
             formData.append("courseCategory", selectedCourse.category);
             formData.append("courseName", selectedCourse.title);
             formData.append("price", coursePrice);
-            formData.append("enrollmentType", (isCompanyEnroll || isPublicCompanyLink) ? "company" : enrollmentType);
+            formData.append("enrollmentType",
+                isEnrollmentLink ? enrollmentType :
+                (isCompanyEnroll || isPublicCompanyLink) ? "company" :
+                enrollmentType
+            );
             formData.append("sessionDate", selectedSession?.date);
             formData.append("startTime", selectedSession?.startTime);
             formData.append("endTime", selectedSession?.endTime);
