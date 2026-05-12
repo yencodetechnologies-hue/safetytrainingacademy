@@ -580,9 +580,9 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
                     </p>
                     <button
                         className="es5-toast-btn"
-                        onClick={() => navigate("/student")}
+                        onClick={() => navigate("/enrollment-success")}
                     >
-                        Go to Dashboard
+                        Finish Enrollment
                     </button>
                 </div>
             )}

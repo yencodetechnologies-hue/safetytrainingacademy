@@ -857,15 +857,18 @@ export default function Students() {
   const filtered = students
     .filter((s) => {
       const sSearch = search.toLowerCase();
+      if (!sSearch) return statusFilter === "All Status" || s.status === statusFilter;
+
       const matchSearch =
-        s.name?.toLowerCase().startsWith(sSearch) ||
-        s.email?.toLowerCase().startsWith(sSearch) ||
-        s.phone?.toLowerCase().startsWith(sSearch) ||
-        s.courseTitle?.toLowerCase().includes(sSearch) ||
-        s.courseCode?.toLowerCase().includes(sSearch) ||
-        s.companyName?.toLowerCase().startsWith(sSearch) ||
-        s.transactionId?.toLowerCase().startsWith(sSearch) ||
-        s.nickname?.toLowerCase().startsWith(sSearch);
+        (s.name?.toLowerCase().startsWith(sSearch)) ||
+        (s.email?.toLowerCase().startsWith(sSearch)) ||
+        (s.phone?.toLowerCase().startsWith(sSearch)) ||
+        (s.nickname?.toLowerCase().startsWith(sSearch)) ||
+        (s.companyName?.toLowerCase().startsWith(sSearch)) ||
+        (s.transactionId?.toLowerCase().startsWith(sSearch)) ||
+        (s.courseCode?.toLowerCase().startsWith(sSearch)) ||
+        (s.courseTitle?.toLowerCase().startsWith(sSearch));
+
       const matchStatus =
         statusFilter === "All Status" || s.status === statusFilter;
       return matchSearch && matchStatus;
@@ -873,27 +876,14 @@ export default function Students() {
     .sort((a, b) => {
       if (!search) return 0;
       const sSearch = search.toLowerCase();
-
       const aName = a.name?.toLowerCase() || "";
       const bName = b.name?.toLowerCase() || "";
-      const aEmail = a.email?.toLowerCase() || "";
-      const bEmail = b.email?.toLowerCase() || "";
+      
+      const aStarts = aName.startsWith(sSearch);
+      const bStarts = bName.startsWith(sSearch);
 
-      // Check if any word in the name starts with the search
-      const aNameWords = aName.split(/\s+/);
-      const bNameWords = bName.split(/\s+/);
-      const aAnyWordStarts = aNameWords.some(w => w.startsWith(sSearch));
-      const bAnyWordStarts = bNameWords.some(w => w.startsWith(sSearch));
-
-      if (aAnyWordStarts && !bAnyWordStarts) return -1;
-      if (!aAnyWordStarts && bAnyWordStarts) return 1;
-
-      // Check if email starts with the search
-      const aEmailStarts = aEmail.startsWith(sSearch);
-      const bEmailStarts = bEmail.startsWith(sSearch);
-
-      if (aEmailStarts && !bEmailStarts) return -1;
-      if (!aEmailStarts && bEmailStarts) return 1;
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
 
       return 0;
     });

@@ -390,6 +390,21 @@ const EnrollmentRegister = forwardRef(({ userDetails, savedFormData, section, se
 
             const data = await res.json()
             if (!res.ok) throw new Error(data.message)
+
+            // ✅ If enrollment form is successful, ALSO complete the flow
+            if (formData.flowId) {
+                try {
+                    await fetch(`${API_URL}/api/flow/complete`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ flowId: formData.flowId }),
+                    });
+                } catch (flowErr) {
+                    console.error("[EnrollmentRegister] Flow complete error (swallowed):", flowErr);
+                    // We don't block the user if only the notification/flow-update fails
+                }
+            }
+
             return null
 
         } catch (err) {

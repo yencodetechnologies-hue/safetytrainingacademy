@@ -148,7 +148,7 @@ exports.createStudent = async (req, res) => {
           studentEmail: student.email,
           studentMobile: student.phone || "—",
           courseName: course?.title || "Course",
-          courseDate: sessionData.sessionDate ? new Date(sessionData.sessionDate).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Sydney" }) : "—",
+          courseDate: sessionData.sessionDate ? new Date(sessionData.sessionDate).toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Sydney" }) : "—",
           courseTime: (sessionData.startTime && sessionData.endTime) ? `${sessionData.startTime} - ${sessionData.endTime}` : "—",
           courseLocation: "3/14-16 Marjorie Street, Sefton NSW 2162",
           bookingId: `ADM-${Date.now().toString().slice(-6)}`,

@@ -259,12 +259,20 @@ const sendBookingConfirmation = async (req, res) => {
 </body>
 </html>`;
 
+    const courseDateStr = courseDate ? new Date(courseDate).toLocaleDateString("en-AU", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "Australia/Sydney"
+    }) : "To be confirmed";
+
     const adminMailData = {
         studentName: name,
         studentEmail: email,
         studentMobile: phone || "—",
         courseName: courseName,
-        courseDate: courseDate,
+        courseDate: courseDateStr,
         courseTime: `${startTime} - ${endTime}`,
         courseLocation: "3/14-16 Marjorie Street, Sefton NSW 2162",
         bookingId: `#${orderId}`,
@@ -403,7 +411,14 @@ const sendCompanyOrderConfirmation = async (req, res) => {
 const sendEnrollmentLinkConfirmation = async (req, res) => {
     const { toEmail, studentName, courseName, courseCode, courseDate, startTime, endTime } = req.body;
 
-    const dateStr = courseDate || "To be confirmed";
+    const dateStr = courseDate ? new Date(courseDate).toLocaleDateString("en-AU", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "Australia/Sydney"
+    }) : "To be confirmed";
+
     const timeStr = (startTime && endTime) ? `${startTime} - ${endTime}` : "To be confirmed";
 
     const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>

@@ -454,6 +454,7 @@ function BookNow() {
                     endTime: selectedSession?.endTime,
                     coursePrice,
                     paymentMethod: paymentData.paymentMethod,
+                    phone: paymentData.phone,
                 }),
             });
         } catch (err) {
@@ -1120,7 +1121,9 @@ function BookNow() {
                 )}
 
                 {step === 3 && (
-                    <CourseSelectionSuccess enrollmentData={{
+                    <CourseSelectionSuccess 
+                        onNext={() => setStep(4)}
+                        enrollmentData={{
                         selectedCourse,
                         courseDate: selectedSession?.date,
                         courseTime: `${selectedSession?.startTime} - ${selectedSession?.endTime}`,
@@ -1131,9 +1134,18 @@ function BookNow() {
                     }} />
                 )}
 
+                {step === 4 && (
+                    <EnrollmentRegister
+                        ref={enrollRef}
+                        userDetails={userDetails}
+                        section={enrollSection}
+                        setSection={setEnrollSection}
+                    />
+                )}
+
                 <div className={`next-wrapper ${step > 1 ? "has-prev" : ""}`}>
 
-                    {step > 1 && step !== 3 && (
+                    {step > 1 && step !== 3 && step !== 4 && (
                         <button
                             className="prev-btn"
                             disabled={step === 4 && enrollSection === 1}
@@ -1149,7 +1161,7 @@ function BookNow() {
                         </button>
                     )}
 
-                    {step !== 3 && (
+                    {step !== 3 && step !== 4 && (
                         <button
                             className="next-btn"
                             disabled={

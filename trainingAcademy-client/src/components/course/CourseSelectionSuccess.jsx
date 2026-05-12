@@ -5,7 +5,7 @@ import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { API_URL } from "../../data/service";
 
-export default function EnrollmentSuccess({ enrollmentData, onBackToHome }) {
+export default function EnrollmentSuccess({ enrollmentData, onBackToHome, onNext }) {
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
 
@@ -75,7 +75,11 @@ export default function EnrollmentSuccess({ enrollmentData, onBackToHome }) {
           console.error("Invalid user:", data.user);
         }
 
-        navigate("/student");
+        if (onNext) {
+          onNext();
+        } else {
+          navigate("/student");
+        }
       } else {
         alert("Login failed");
       }
@@ -179,7 +183,7 @@ export default function EnrollmentSuccess({ enrollmentData, onBackToHome }) {
 
         {/* Back to Home Button */}
         <button className="back-btn-enrl-wrap" onClick={handleGoToDashboard}>
-          Go to Dashboard
+          {onNext ? "Continue to Enrollment Form" : "Go to Dashboard"}
         </button>
 
       </div>

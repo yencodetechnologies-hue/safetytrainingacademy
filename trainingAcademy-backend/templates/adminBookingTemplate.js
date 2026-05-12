@@ -11,7 +11,7 @@ const adminBookingTemplate = (data) => `
     .eb-hdr { background: #0d2240; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
     .eb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
     .eb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
-    .eb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 4px 11px; border-radius: 2px; white-space: nowrap; }
+    .eb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 5px 12px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
     .eb-divider { height: 3px; background: #29b6e8; }
     .eb-alert { background: #0a1c33; padding: 9px 24px; font-size: 12px; color: #89c8e8; font-weight: 500; }
     .eb-content { padding: 18px 24px; }
@@ -40,11 +40,17 @@ const adminBookingTemplate = (data) => `
 <body>
   <div class="eb-body">
     <div class="eb-hdr">
-      <div>
-        <p class="eb-hdr-title">Safety Training Academy</p>
-        <p class="eb-hdr-sub">RTO #45234 &nbsp;·&nbsp; Admin Notification</p>
-      </div>
-      <span class="eb-badge">New Booking</span>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td>
+            <p class="eb-hdr-title">Safety Training Academy</p>
+            <p class="eb-hdr-sub">RTO #45234 &nbsp;·&nbsp; Admin Notification</p>
+          </td>
+          <td align="right" valign="top">
+            <span class="eb-badge">New Booking</span>
+          </td>
+        </tr>
+      </table>
     </div>
     <div class="eb-divider"></div>
     <div class="eb-alert">
