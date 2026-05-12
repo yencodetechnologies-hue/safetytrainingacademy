@@ -8,10 +8,10 @@ const adminBookingTemplate = (data) => `
   <style>
     body { margin: 0; padding: 24px; background: #f0f2f5; font-family: 'Helvetica Neue', Arial, sans-serif; }
     .eb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
-    .eb-hdr { background: #0d2240; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .eb-hdr { background: #0d2240; padding: 16px 24px; }
     .eb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
     .eb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
-    .eb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 5px 12px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
+    .eb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
     .eb-divider { height: 3px; background: #29b6e8; }
     .eb-alert { background: #0a1c33; padding: 9px 24px; font-size: 12px; color: #89c8e8; font-weight: 500; }
     .eb-content { padding: 18px 24px; }

@@ -59,10 +59,10 @@ const sendBookingConfirmation = async (req, res) => {
   <style>
     body { margin: 0; padding: 24px; background: #f0f2f5; font-family: 'Helvetica Neue', Arial, sans-serif; }
     .sb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
-    .sb-hdr { background: #0d2240; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .sb-hdr { background: #0d2240; padding: 16px 24px; }
     .sb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
     .sb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
-    .sb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 4px 11px; border-radius: 2px; white-space: nowrap; }
+    .sb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
     .sb-divider { height: 3px; background: #29b6e8; }
     .sb-banner { background: #0a1c33; padding: 13px 24px; text-align: center; }
     .sb-banner-text { font-size: 14px; font-weight: 700; color: #ffffff; margin: 0; }
@@ -106,11 +106,17 @@ const sendBookingConfirmation = async (req, res) => {
   <div class="sb-body">
     <!-- Header -->
     <div class="sb-hdr">
-      <div>
-        <p class="sb-hdr-title">Safety Training Academy</p>
-        <p class="sb-hdr-sub">RTO #45234 &nbsp;·&nbsp; Booking Confirmation</p>
-      </div>
-      <span class="sb-badge">Confirmed</span>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td>
+            <p class="sb-hdr-title">Safety Training Academy</p>
+            <p class="sb-hdr-sub">RTO #45234 &nbsp;·&nbsp; Booking Confirmation</p>
+          </td>
+          <td align="right" valign="top">
+            <span class="sb-badge">Confirmed</span>
+          </td>
+        </tr>
+      </table>
     </div>
     <div class="sb-divider"></div>
 
@@ -128,7 +134,7 @@ const sendBookingConfirmation = async (req, res) => {
         <div class="sb-section-head"><span>Product</span></div>
         <div class="sb-section-body">
           <p class="sb-course-title">${courseName}</p>
-          <p class="sb-course-meta">Booking ID: #${orderId} &nbsp;|&nbsp; ${courseDate} &nbsp;|&nbsp; ${startTime} - ${endTime}</p>
+          <p class="sb-course-meta">Booking ID: #${orderId} &nbsp;|&nbsp; ${new Date(courseDate).toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Sydney" })} &nbsp;|&nbsp; ${startTime} - ${endTime}</p>
           <table class="sb-table">
             <tr>
               <td class="lbl">Quantity</td>
@@ -336,17 +342,35 @@ const sendCompanyOrderConfirmation = async (req, res) => {
     const linksHtml = links.map(l => `
         <tr><td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;">
             <p style="margin:0 0 4px;font-size:14px;font-weight:600;color:#334155;">${l.courseName}</p>
-            <p style="margin:0 0 4px;font-size:13px;color:#64748b;">Date: ${l.courseDateDisplay}</p>
+            <p style="margin:0 0 4px;font-size:13px;color:#64748b;">Date: ${l.courseDateDisplay || (l.courseDate ? new Date(l.courseDate).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Sydney" }) : "TBC")}</p>
             <p style="margin:0;font-size:13px;"><a href="${l.fullUrl}" style="color:#3b82f6;">${l.fullUrl}</a></p>
         </td></tr>`).join("");
 
-    const companyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+    const companyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+    .co-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
+</style>
+</head>
 <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:#ffffff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:22px;font-weight:700;">Thank you for your booking – Order #${orderId}</h1>
+<tr><td style="background:#0d2240;color:#ffffff;padding:20px 30px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td>
+            <p style="margin:0; font-size:16px; font-weight:700;">Safety Training Academy</p>
+            <p style="margin:2px 0 0; font-size:10px; color:#29b6e8; text-transform:uppercase; font-weight:600; letter-spacing:0.8px;">Company Booking</p>
+          </td>
+          <td align="right" valign="top">
+            <span class="co-badge">Confirmed</span>
+          </td>
+        </tr>
+    </table>
+</td></tr>
+<tr><td style="height:3px; background:#29b6e8;"></td></tr>
+<tr><td style="background:#0a1c33; padding:10px 30px; font-size:12px; color:#89c8e8; font-weight:500;">
+    &#10003; Thank you for your booking – Order #${orderId}
 </td></tr>
 <tr><td style="padding:30px;">
     <p style="margin:0 0 16px;font-size:15px;color:#555;">Dear <strong>${companyName}</strong>,</p>
@@ -421,13 +445,31 @@ const sendEnrollmentLinkConfirmation = async (req, res) => {
 
     const timeStr = (startTime && endTime) ? `${startTime} - ${endTime}` : "To be confirmed";
 
-    const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+    const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+    .er-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
+</style>
+</head>
 <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:#ffffff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:22px;font-weight:700;">Registration complete – ${courseName}</h1>
+<tr><td style="background:#0d2240;color:#ffffff;padding:20px 30px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td>
+            <p style="margin:0; font-size:16px; font-weight:700;">Safety Training Academy</p>
+            <p style="margin:2px 0 0; font-size:10px; color:#29b6e8; text-transform:uppercase; font-weight:600; letter-spacing:0.8px;">Enrollment Confirmation</p>
+          </td>
+          <td align="right" valign="top">
+            <span class="er-badge">Registered</span>
+          </td>
+        </tr>
+    </table>
+</td></tr>
+<tr><td style="height:3px; background:#29b6e8;"></td></tr>
+<tr><td style="background:#0a1c33; padding:10px 30px; font-size:12px; color:#89c8e8; font-weight:500;">
+    &#10003; Registration complete – ${courseName}
 </td></tr>
 <tr><td style="padding:30px;">
     <p style="margin:0 0 16px;font-size:15px;color:#555;">Dear <strong>${studentName}</strong>,</p>
@@ -507,15 +549,34 @@ const sendCompanyPortalWelcome = async (req, res) => {
         <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Company portal (for you)</p>
         <p style="margin:0 0 24px;font-size:14px;color:#334155;"><a href="${loginBaseUrl}" style="color:#3b82f6;">${loginBaseUrl}</a></p>` : "";
 
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+    .cp-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
+  </style>
+</head>
 <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:#ffffff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:22px;font-weight:700;">Your company portal is ready</h1>
+<tr><td style="background:#0d2240;color:#ffffff;padding:20px 30px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td>
+            <p style="margin:0; font-size:16px; font-weight:700;">Safety Training Academy</p>
+            <p style="margin:2px 0 0; font-size:10px; color:#29b6e8; text-transform:uppercase; font-weight:600; letter-spacing:0.8px;">Company Portal Notification</p>
+          </td>
+          <td align="right" valign="top">
+            <span class="cp-badge">Welcome</span>
+          </td>
+        </tr>
+    </table>
+</td></tr>
+<tr><td style="height:3px; background:#29b6e8;"></td></tr>
+<tr><td style="background:#0a1c33; padding:10px 30px; font-size:12px; color:#89c8e8; font-weight:500;">
+    &#10003; Your company portal access has been successfully configured.
 </td></tr>
 <tr><td style="padding:30px;">
+    <h2 style="margin:0 0 20px;font-size:18px;font-weight:700;color:#1a1a1a;">Your company portal is ready</h2>
     <p style="margin:0 0 20px;font-size:15px;color:#555;">Hello <strong>${companyName}</strong>,</p>
     <p style="margin:0 0 20px;font-size:15px;color:#555;">Your company account is ready. Training booked through the employee link is billed to your company.</p>
     ${credentialsHtml}
