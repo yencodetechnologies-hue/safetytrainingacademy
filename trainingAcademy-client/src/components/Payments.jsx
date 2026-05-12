@@ -241,7 +241,7 @@ const Payment = () => {
                         <span className="course-name">{p.course}</span>
                       </div>
                     </td>
-                    <td>{p.sessionDate ? new Date(p.sessionDate).toLocaleDateString() : "—"}</td>
+                    <td>{p.sessionDate || "—"}</td>
                     <td>{p.type || "Individual"}</td>
                     <td>{p.transId || "—"}</td>
                     <td className="amount">${p.amount}</td>

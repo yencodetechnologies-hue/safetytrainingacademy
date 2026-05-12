@@ -83,6 +83,12 @@ exports.createFlow = async (req, res) => {
       // Bank Transfer / Card remain "pending" until admin confirms
     }
 
+    // Card payments are charged in real-time via eWay — createFlow is only
+    // called after a successful charge, so mark the payment as success immediately.
+    if (resolvedMethod === "Card Payment") {
+      resolvedPaymentStatus = "success";
+    }
+
     // If price is still 0, look up the course's price as fallback
     if (!resolvedPrice && courseId) {
       const course = await Course.findById(courseId)
