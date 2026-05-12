@@ -371,7 +371,8 @@ exports.getFlow = async (req, res) => {
 
 exports.getWeeklyBookings = async (req, res) => {
   try {
-    const dateParam = req.query.date ? new Date(req.query.date) : new Date()
+    const nowSydney = new Date(new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
+    const dateParam = req.query.date ? new Date(req.query.date) : nowSydney
     const start = new Date(dateParam)
     const day = start.getDay()
     const diff = start.getDate() - day + (day === 0 ? -6 : 1)
@@ -382,12 +383,19 @@ exports.getWeeklyBookings = async (req, res) => {
     end.setDate(start.getDate() + 6)
     end.setHours(23, 59, 59, 999)
 
-    // Build keys from local calendar fields (YYYY-MM-DD) instead of
-    // toISOString() — which converts to UTC and shifts the date by a day on
-    // any non-UTC server (e.g. IST +05:30), causing real bookings to land in
-    // a key that the frontend never asks for.
-    const localDateKey = (d) =>
-      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+    const localDateKey = (d) => {
+      // en-ZA format is YYYY/MM/DD, easy to transform to YYYY-MM-DD
+      const parts = new Intl.DateTimeFormat('en-AU', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        timeZone: 'Australia/Sydney'
+      }).formatToParts(d);
+      const y = parts.find(p => p.type === 'year').value;
+      const m = parts.find(p => p.type === 'month').value;
+      const d1 = parts.find(p => p.type === 'day').value;
+      return `${y}-${m}-${d1}`;
+    };
 
     const counts = {}
     for (let i = 0; i < 7; i += 1) {
@@ -406,9 +414,15 @@ exports.getWeeklyBookings = async (req, res) => {
       if (counts[key] !== undefined) counts[key] += 1
     })
 
+    const rangeStartDay = new Intl.DateTimeFormat('en-AU', { day: 'numeric', timeZone: 'Australia/Sydney' }).format(start);
+    const rangeStartMonth = new Intl.DateTimeFormat('en-AU', { month: 'short', timeZone: 'Australia/Sydney' }).format(start);
+    const rangeEndDay = new Intl.DateTimeFormat('en-AU', { day: 'numeric', timeZone: 'Australia/Sydney' }).format(end);
+    const rangeEndMonth = new Intl.DateTimeFormat('en-AU', { month: 'short', timeZone: 'Australia/Sydney' }).format(end);
+    const rangeYear = new Intl.DateTimeFormat('en-AU', { year: 'numeric', timeZone: 'Australia/Sydney' }).format(end);
+
     res.json({
       counts,
-      range: `${start.getDate()} ${start.toLocaleString("en", { month: "short" })} - ${end.getDate()} ${end.toLocaleString("en", { month: "short" })} ${end.getFullYear()}`
+      range: `${rangeStartDay} ${rangeStartMonth} - ${rangeEndDay} ${rangeEndMonth} ${rangeYear}`
     })
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -435,11 +449,19 @@ exports.getLLNDResults = async (req, res) => {
         id: flow._id,
 
         date: flow.llnd?.completedAt 
-          ? new Date(flow.llnd.completedAt).toISOString().split("T")[0] 
-          : flow.createdAt.toISOString().split("T")[0],
+          ? new Date(flow.llnd.completedAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }) 
+          : new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
 
         completedDate: flow.llnd?.completedAt 
-          ? new Date(flow.llnd.completedAt).toLocaleString("en-AU", { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) 
+          ? new Date(flow.llnd.completedAt).toLocaleString("en-AU", { 
+              timeZone: "Australia/Sydney",
+              year: 'numeric', 
+              month: '2-digit', 
+              day: '2-digit', 
+              hour: '2-digit', 
+              minute: '2-digit', 
+              second: '2-digit' 
+            }) 
           : null,
 
         student: student?.name,
@@ -447,7 +469,7 @@ exports.getLLNDResults = async (req, res) => {
         phone: student?.phone,
 
         course: item.course?.courseName,
-        bookingDate: flow.createdAt.toISOString().split("T")[0],
+        bookingDate: new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
 
         // 🔥 FIX HERE
         type:
@@ -508,8 +530,12 @@ exports.getAllPayments = async (req, res) => {
           id: payment.paymentId,
           enrollmentId: enroll._id,   // 🔥 ADD THIS
           itemId: item._id,
-          date: payment.paidAt || enroll.createdAt,
-          sessionDate: enroll.sessionDate,
+          date: payment.paidAt 
+            ? new Date(payment.paidAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
+            : new Date(enroll.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
+          sessionDate: enroll.sessionDate 
+            ? new Date(enroll.sessionDate).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
+            : null,
           student: enroll.studentId?.name,
           email: enroll.studentId?.email,
 
@@ -583,7 +609,7 @@ exports.updatePaymentStatus = async (req, res) => {
       const student = enrollment.studentId;
       const courseName = item.course?.courseName || "Your Course";
       const sessionDate = enrollment.sessionDate
-        ? new Date(enrollment.sessionDate).toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
+        ? new Date(enrollment.sessionDate).toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" })
         : "To be confirmed";
       const timeStr = enrollment.startTime && enrollment.endTime
         ? `${enrollment.startTime} - ${enrollment.endTime}`

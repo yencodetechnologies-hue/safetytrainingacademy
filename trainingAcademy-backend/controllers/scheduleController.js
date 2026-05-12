@@ -43,7 +43,7 @@ const getUpcomingSessions = async (req, res) => {
             const isSunday = dateObj.getDay() === 0
 
             const day = dateObj.getDate().toString()
-            const mon = dateObj.toLocaleString("en-AU", { month: "short" })
+            const mon = dateObj.toLocaleString("en-AU", { month: "short", timeZone: "Australia/Sydney" })
 
             const activeSession = schedule.sessions?.find(s => s.status === "Active")
             if (!activeSession) return
@@ -255,8 +255,8 @@ if(schedule.sessions.length === 0){
 
 const getActiveCoursIds = async (req, res) => {
   try {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const nowSydney = new Date(new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
+    const today = new Date(nowSydney.getFullYear(), nowSydney.getMonth(), nowSydney.getDate());
 
     const schedules = await Schedule.find({
       date: { $gte: today }

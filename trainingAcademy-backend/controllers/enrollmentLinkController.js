@@ -96,7 +96,7 @@ const enroll = async (req, res) => {
     if (link.maxUses && link.usage >= link.maxUses) {
       return res.status(400).json({ success: false, message: "Link has reached max uses" });
     }
-    const today = new Date().toLocaleDateString("en-AU");
+    const today = new Date().toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" });
     link.students.push({ name, email, date: today });
     link.usage += 1;
     await link.save();

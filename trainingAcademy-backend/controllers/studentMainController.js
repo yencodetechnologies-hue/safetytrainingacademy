@@ -254,10 +254,15 @@ exports.getAllStudents = async (req, res) => {
         id: student._id,
         flowId: flow._id,
         registerDate: flow.createdAt
-          ? new Date(flow.createdAt).toLocaleDateString("en-GB")
+          ? new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
           : "—",
         registerTime: flow.createdAt
-          ? new Date(flow.createdAt).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit', hour12: true })
+          ? new Date(flow.createdAt).toLocaleTimeString("en-AU", { 
+              timeZone: "Australia/Sydney", 
+              hour: '2-digit', 
+              minute: '2-digit', 
+              hour12: true 
+            })
           : "",
         name: student.name || "",
         email: student.email || "",
@@ -274,8 +279,8 @@ exports.getAllStudents = async (req, res) => {
         transactionId: item.payment?.transactionId || "—",
         slipUrl: item.payment?.slipUrl || "—",
         courseBookingDate: flow.sessionDate
-          ? `${new Date(flow.sessionDate).toLocaleDateString("en-IN", {
-              day: "numeric", month: "short", year: "numeric"
+          ? `${new Date(flow.sessionDate).toLocaleDateString("en-AU", {
+              day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Sydney"
             })} | ${flow.startTime} - ${flow.endTime}`
           : "-",
         llndStatus: flow.llnd?.status === "completed" ? "Completed" : "Not Completed",
@@ -400,7 +405,7 @@ exports.getStudentsByCompany = async (req, res) => {
         llnd: flow.llnd?.status === "completed" ? "Completed" : "Not Completed",
         form: flow.enrollmentFormId ? "Submitted" : "Not Submitted",
         training: flow.status === "active" ? "Active" : "Inactive",
-        enrolled: new Date(flow.createdAt).toLocaleString("en-AU"),
+        enrolled: new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
       };
     });
 
@@ -440,7 +445,7 @@ exports.getPaymentsByCompany = async (req, res) => {
 
           payments.push({
             id: `${payment._id}_${course.courseId}`,
-            date: new Date(payment.createdAt).toLocaleDateString("en-AU"),
+            date: new Date(payment.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
             student: `${usedCount}/${maxUses} enrolled`,
             course: course.courseName || "—",
             payment: isPaid ? "paid" : "pending",
@@ -453,7 +458,7 @@ exports.getPaymentsByCompany = async (req, res) => {
         // ✅ Fallback
         payments.push({
           id: payment._id,
-          date: new Date(payment.createdAt).toLocaleDateString("en-AU"),
+          date: new Date(payment.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
           student: "—",
           course: "—",
           payment: isPaid ? "paid" : "pending",
@@ -566,7 +571,7 @@ exports.getStudentsByLink = async (req, res) => {
         amount: `$${price}`,
         paymentStatus,
         llnd: flow.llnd?.status === "completed" ? "Completed" : "Not Completed",
-        enrolled: new Date(flow.createdAt).toLocaleString("en-AU"),
+        enrolled: new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
       };
     });
 

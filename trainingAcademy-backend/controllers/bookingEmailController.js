@@ -17,7 +17,7 @@ const sendBookingConfirmation = async (req, res) => {
 
     const orderId = formatBookingId(Date.now().toString());
     const priceStr = `$${Number(coursePrice).toFixed(2)}`;
-    const orderDateStr = new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    const orderDateStr = new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" });
     const billingAddressHtml = `${name}<br/>${email}<br/>${phone || ""}`;
 
     // ✅ Default password — booking pannumbothu user-ku assign aagum
@@ -218,7 +218,7 @@ const sendCompanyOrderConfirmation = async (req, res) => {
 
     const orderId = formatBookingId(rawOrderId || Date.now().toString());
     const priceStr = `$${Number(totalAmount).toFixed(2)}`;
-    const orderDateStr = new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    const orderDateStr = new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" });
 
     const linksHtml = links.map(l => `
         <tr><td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;">
