@@ -70,6 +70,22 @@ const studentMainSchema = new mongoose.Schema(
       ref: "LLNDAssessment"
     },
 
+    // 👤 Profile Data
+    profileImage: { type: String, default: "" },
+    bio: { type: String, default: "" },
+    dob: { type: String, default: "" },
+    address: {
+      street: { type: String, default: "" },
+      city: { type: String, default: "" },
+      state: { type: String, default: "" },
+      zip: { type: String, default: "" },
+    },
+    emergencyContact: {
+      name: { type: String, default: "" },
+      phone: { type: String, default: "" },
+      relationship: { type: String, default: "" },
+    },
+
     // 🔥 Payment
     paymentMethod: String,
     transactionId: String,

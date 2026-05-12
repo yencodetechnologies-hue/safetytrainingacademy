@@ -154,24 +154,31 @@ exports.getStudentProfile = async (req, res) => {
       f.enrollmentFormId
     ).length;
 
+    const EnrollmentForm = require("../models/EnrollmentForm");
+    const latestForm = await EnrollmentForm.findOne({ studentId: student._id.toString() })
+      .sort({ createdAt: -1 })
+      .lean();
+
     res.json({
       _id: student._id,
       name: student.name,
       email: student.email,
       phone: student.phone,
+      profileImage: student.profileImage || latestForm?.photoDocumentUrl || "",
       studentId: `STU-${new Date(student.createdAt).getFullYear()}-${String(student._id).slice(-6).toUpperCase()}`,
       createdAt: student.createdAt,
-      dob: student.dob || "",
+      dob: student.dob || latestForm?.personalDetails?.dob || "",
       bio: student.bio || "",
       address: {
-        street: student.address?.street || "",
-        city: student.address?.city || "",
-        state: student.address?.state || "",
-        zip: student.address?.zip || "",
+        street: student.address?.street || latestForm?.address?.residential?.address || "",
+        city: student.address?.city || latestForm?.address?.residential?.suburb || "",
+        state: student.address?.state || latestForm?.address?.residential?.state || "",
+        zip: student.address?.zip || latestForm?.address?.residential?.postcode || "",
       },
       emergencyContact: {
-        name: student.emergencyContact?.name || "",
-        phone: student.emergencyContact?.phone || "",
+        name: student.emergencyContact?.name || latestForm?.emergencyContact?.name || "",
+        phone: student.emergencyContact?.phone || latestForm?.emergencyContact?.contactNumber || "",
+        relationship: student.emergencyContact?.relationship || latestForm?.emergencyContact?.relationship || "",
       },
       stats: {
         total: totalCourses,
