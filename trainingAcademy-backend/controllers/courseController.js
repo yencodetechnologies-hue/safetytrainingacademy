@@ -99,6 +99,21 @@ const parseBody = (body) => {
         }
     })
 
+    // Handbook object mapping
+    if (parsed.handbookTitle !== undefined || parsed.handbookUrl !== undefined || parsed.handbookPdf !== undefined || parsed.handbookCardImage !== undefined) {
+        parsed.handbook = {
+            title: parsed.handbookTitle,
+            pdf: parsed.handbookPdf,
+            url: parsed.handbookUrl,
+            cardImage: parsed.handbookCardImage
+        }
+        // Clean up flat fields to avoid DB pollution if not in schema
+        delete parsed.handbookTitle
+        delete parsed.handbookPdf
+        delete parsed.handbookUrl
+        delete parsed.handbookCardImage
+    }
+
     return parsed
 }
 
@@ -151,14 +166,24 @@ const createCourse = async (req, res) => {
         }
 
         let imageUrl = req.body.image
-        if (req.file) imageUrl = req.file.path
+        if (req.files?.image) imageUrl = req.files.image[0].path
 
-        const parsed = parseBody(req.body)
+        let handbookPdf = req.body.handbookPdf
+        if (req.files?.handbookPdf) handbookPdf = req.files.handbookPdf[0].path
+
+        let handbookCardImage = req.body.handbookCardImage
+        if (req.files?.handbookCardImage) handbookCardImage = req.files.handbookCardImage[0].path
+
+        let syllabusUrl = req.body.syllabusUrl
+        if (req.files?.syllabusPdf) syllabusUrl = req.files.syllabusPdf[0].path
+        console.log("Saving Course with Syllabus URL:", syllabusUrl)
+
+        const parsed = parseBody({ ...req.body, handbookPdf, handbookCardImage })
 
         // ✅ Resolve category to ObjectId
         parsed.category = await resolveCategory(parsed.category)
 
-        const course = new Course({ ...parsed, image: imageUrl, slug })
+        const course = new Course({ ...parsed, image: imageUrl, slug, syllabusUrl })
         const savedCourse = await course.save()
 
         // Return with populated category as string
@@ -212,33 +237,54 @@ const getCourses = async (req, res) => {
 
 const updateCourse = async (req, res) => {
     try {
-        let updateData = parseBody(req.body)
+        const existingCourse = await Course.findById(req.params.id)
+        if (!existingCourse) return res.status(404).json({ message: "Course not found" })
 
-        // Slug is now manual. Only touch it if the admin actually sent a
-        // value; never silently rebuild from title.
+        let handbookPdf = req.body.handbookPdf
+        if (req.files?.handbookPdf) {
+            handbookPdf = req.files.handbookPdf[0].path
+        }
+
+        let handbookCardImage = req.body.handbookCardImage
+        if (req.files?.handbookCardImage) {
+            handbookCardImage = req.files.handbookCardImage[0].path
+        }
+
+        let syllabusUrl = req.body.syllabusUrl
+        if (req.files?.syllabusPdf) {
+            syllabusUrl = req.files.syllabusPdf[0].path
+        }
+
+        let updateData = parseBody({ ...req.body, handbookPdf, handbookCardImage })
+        if (syllabusUrl) updateData.syllabusUrl = syllabusUrl
+
+        // Slug handling
         if (req.body.slug !== undefined) {
             const cleanSlug = buildSlug(req.body.slug)
             if (!cleanSlug) {
-                return res.status(400).json({
-                    field: "slug",
-                    message: "Slug is required",
-                })
+                return res.status(400).json({ field: "slug", message: "Slug is required" })
             }
             if (await isSlugTaken(cleanSlug, req.params.id)) {
-                return res.status(409).json({
-                    field: "slug",
-                    message: "already exists, try a different one",
-                })
+                return res.status(409).json({ field: "slug", message: "already exists, try a different one" })
             }
             updateData.slug = cleanSlug
         } else {
-            // Defensive: if some old client doesn't send slug, leave it
-            // alone (don't strip the existing one).
             delete updateData.slug
         }
 
-        if (req.file) {
-            updateData.image = req.file.path
+        if (req.files?.image) {
+            updateData.image = req.files.image[0].path
+        }
+
+        // Merge handbook data to preserve existing if not provided in request
+        // (Note: parseBody already created updateData.handbook if handbook fields were in body)
+        if (updateData.handbook) {
+            updateData.handbook = {
+                title: updateData.handbook.title !== undefined ? updateData.handbook.title : existingCourse.handbook?.title,
+                pdf: updateData.handbook.pdf !== undefined ? updateData.handbook.pdf : existingCourse.handbook?.pdf,
+                url: updateData.handbook.url !== undefined ? updateData.handbook.url : existingCourse.handbook?.url,
+                cardImage: updateData.handbook.cardImage !== undefined ? updateData.handbook.cardImage : existingCourse.handbook?.cardImage
+            }
         }
 
         // ✅ Resolve category to ObjectId

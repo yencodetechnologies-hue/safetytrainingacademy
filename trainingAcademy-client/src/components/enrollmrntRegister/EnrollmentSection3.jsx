@@ -2,6 +2,7 @@ import { useState } from "react"
 import "../../styles/EnrollmentSection3.css"
 import { API_URL } from "../../data/service"
 import { useEffect } from "react"
+import ValidationToast from "./ValidationToast"
 
 const EDUCATION_LEVELS = [
     { value: "12", label: "12 — Year 12 or equivalent" },
@@ -43,6 +44,10 @@ const TRAINING_REASONS = [
 
 function EnrollmentSection3({ data, setData, prev, next }) {
 
+    const [errors, setErrors] = useState([])
+    const [showToast, setShowToast] = useState(false)
+    const [missingFieldsNames, setMissingFieldsNames] = useState([])
+
     // ✅ FIXED: restore qualEvidences from data.qualEvidences or data.qualEvidenceUrls
     const [qualEvidences, setQualEvidences] = useState(() => {
         // First priority: already-built qualEvidences object
@@ -76,7 +81,12 @@ function EnrollmentSection3({ data, setData, prev, next }) {
         }
     }, [data.qualEvidenceUrls])
 
-    const set = (key, value) => setData(p => ({ ...p, [key]: value }))
+    const set = (key, value) => {
+        setData(p => ({ ...p, [key]: value }))
+        if (errors.includes(key)) {
+            setErrors(prev => prev.filter(e => e !== key))
+        }
+    }
 
     const syncEvidences = (evidences) => {
         const urls = Object.entries(evidences)
@@ -163,19 +173,57 @@ function EnrollmentSection3({ data, setData, prev, next }) {
     const reasonOther = data.trainingReason === "other"
 
     const handleNext = () => {
+        const newErrors = []
+        const missingNames = []
+
+        const fieldLabels = {
+            educationLevel: "Highest School Level",
+            yearCompleted: "Year completed",
+            employmentStatus: "Employment status",
+            trainingReason: "Training reason",
+            trainingReasonOther: "Other Training Reason"
+        }
+
+        if (!data.educationLevel) {
+            newErrors.push("educationLevel")
+            missingNames.push(fieldLabels.educationLevel)
+        }
+        if (!neverAttended && !data.yearCompleted) {
+            newErrors.push("yearCompleted")
+            missingNames.push(fieldLabels.yearCompleted)
+        }
         if (!data.employmentStatus) {
-            alert("Please select your employment status.")
-            return
+            newErrors.push("employmentStatus")
+            missingNames.push(fieldLabels.employmentStatus)
         }
         if (!data.trainingReason) {
-            alert("Please select your reason for undertaking training.")
-            return
+            newErrors.push("trainingReason")
+            missingNames.push(fieldLabels.trainingReason)
         }
         if (reasonOther && !data.trainingReasonOther?.trim()) {
-            alert("Please provide details for 'Other' reason.")
+            newErrors.push("trainingReasonOther")
+            missingNames.push(fieldLabels.trainingReasonOther)
+        }
+
+        if (newErrors.length > 0) {
+            setErrors(newErrors)
+            setMissingFieldsNames(missingNames)
+            setShowToast(true)
             return
         }
         next()
+    }
+
+    const closeToastAndScroll = () => {
+        setShowToast(false)
+        if (errors.length > 0) {
+            const firstError = errors[0]
+            const el = document.getElementById(`s3-${firstError}`)
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" })
+                el.focus()
+            }
+        }
     }
 
     return (
@@ -196,7 +244,9 @@ function EnrollmentSection3({ data, setData, prev, next }) {
 
             <div className="s3-card">
                 <h4 className="s3-card-title">PRIOR EDUCATION</h4>
-                <p className="s3-subtitle">What was your highest completed level at school?</p>
+                <p className={`s3-subtitle ${errors.includes("educationLevel") ? "s3-label-error" : ""}`} id="s3-educationLevel">
+                    What was your highest completed level at school? <span className="s3-required">*</span>
+                </p>
 
                 <div className="s3-radio-grid">
                     {EDUCATION_LEVELS.map(level => (
@@ -230,11 +280,12 @@ function EnrollmentSection3({ data, setData, prev, next }) {
 
                         <div className="s3-row-2">
                             <div className="s3-field">
-                                <label className="s3-label">
+                                <label className={`s3-label ${errors.includes("yearCompleted") ? "s3-label-error" : ""}`}>
                                     Year completed <span className="s3-required">*</span>
                                 </label>
                                 <input
-                                    className="s3-input"
+                                    id="s3-yearCompleted"
+                                    className={`s3-input ${errors.includes("yearCompleted") ? "s3-input-error" : ""}`}
                                     placeholder="e.g. 2010"
                                     maxLength={4}
                                     value={data.yearCompleted || ""}
@@ -446,8 +497,10 @@ function EnrollmentSection3({ data, setData, prev, next }) {
                 )}
             </div>
 
-            <div className="s3-card">
-                <h4 className="s3-card-title">EMPLOYMENT STATUS</h4>
+            <div className="s3-card" id="s3-employmentStatus">
+                <h4 className={`s3-card-title ${errors.includes("employmentStatus") ? "s3-label-error" : ""}`}>
+                    EMPLOYMENT STATUS <span className="s3-required">*</span>
+                </h4>
 
                 <div className="s3-radio-grid">
                     {EMPLOYMENT_STATUSES.map(status => (
@@ -518,8 +571,10 @@ function EnrollmentSection3({ data, setData, prev, next }) {
                 </div>
             </div>
 
-            <div className="s3-card">
-                <h4 className="s3-card-title">REASON FOR UNDERTAKING TRAINING </h4>
+            <div className="s3-card" id="s3-trainingReason">
+                <h4 className={`s3-card-title ${errors.includes("trainingReason") ? "s3-label-error" : ""}`}>
+                    REASON FOR UNDERTAKING TRAINING <span className="s3-required">*</span>
+                </h4>
 
                 <div className="s3-radio-grid">
                     {TRAINING_REASONS.map(reason => (
@@ -539,17 +594,33 @@ function EnrollmentSection3({ data, setData, prev, next }) {
 
                 {reasonOther && (
                     <div className="s3-field s3-field-full" style={{ marginTop: 12 }}>
-                        <label className="s3-label">
+                        <label className={`s3-label ${errors.includes("trainingReasonOther") ? "s3-label-error" : ""}`}>
                             Other — details <span className="s3-required">*</span>
                         </label>
                         <input
-                            className="s3-input-full"
+                            id="s3-trainingReasonOther"
+                            className={`s3-input-full ${errors.includes("trainingReasonOther") ? "s3-input-error" : ""}`}
                             value={data.trainingReasonOther || ""}
                             onChange={e => set("trainingReasonOther", e.target.value)}
                         />
                     </div>
                 )}
             </div>
+
+            <div className="s3-footer">
+                <button className="s3-prev-btn" onClick={prev}>
+                    Previous
+                </button>
+                <button className="s3-next-btn" onClick={handleNext}>
+                    Next
+                </button>
+            </div>
+
+            <ValidationToast 
+                show={showToast} 
+                onOk={closeToastAndScroll} 
+                missingFields={missingFieldsNames} 
+            />
 
         </div>
     )

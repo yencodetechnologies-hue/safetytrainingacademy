@@ -7,36 +7,110 @@ const sendEmail = require("../config/sendEmail");
 
 const PORTAL_URL = process.env.CLIENT_ORIGIN?.split(",")[0]?.trim() || "https://safetytrainingacademy.edu.au";
 
-const buildCompanyWelcomeHtml = ({ companyName, email, password }) => `
-<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:#ffffff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:22px;font-weight:700;">Your company portal is ready</h1>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p style="margin:0 0 20px;font-size:15px;color:#555;">Hello <strong>${companyName}</strong>,</p>
-    <p style="margin:0 0 20px;font-size:15px;color:#555;">Your company account has been created with Safety Training Academy. You can now log in to the company portal to manage employee enrolments.</p>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;background-color:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
-    <tr><td style="padding:20px;">
-        <p style="margin:0 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Your sign-in details</p>
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:14px;color:#334155;">
-            <tr><td style="padding:6px 0;color:#64748b;width:140px;">Company name</td><td style="padding:6px 0;font-weight:600;">${companyName}</td></tr>
-            <tr><td style="padding:6px 0;color:#64748b;">Email (login)</td><td style="padding:6px 0;font-weight:600;">${email}</td></tr>
-            <tr><td style="padding:6px 0;color:#64748b;">Password</td><td style="padding:6px 0;font-family:monospace;font-weight:600;background-color:#fef3c7;padding:4px 10px;border-radius:4px;">${password}</td></tr>
-        </table>
-        <p style="margin:12px 0 0;font-size:13px;color:#64748b;">Keep this email confidential.</p>
-    </td></tr></table>
-    <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#334155;">Company Portal Login</p>
-    <p style="margin:0 0 24px;"><a href="${PORTAL_URL}/company/login" style="display:inline-block;padding:12px 24px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;text-decoration:none;border-radius:6px;font-weight:600;">Log in to portal</a></p>
-    <p style="margin:0;font-size:14px;color:#64748b;">Questions? Contact us at <a href="mailto:info@safetytrainingacademy.edu.au" style="color:#3b82f6;">info@safetytrainingacademy.edu.au</a> or call 1300 976 097.</p>
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0;font-size:13px;color:#64748b;">Kind regards,<br/><strong>Safety Training Academy</strong></p>
-</td></tr>
-</table></td></tr></table></body></html>`;
+const buildCompanyWelcomeHtml = ({ companyName, email, password }) => {
+  const portalUrl = `${PORTAL_URL}/login`;
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STA Company Portal Registration</title>
+  <style>
+    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: 'Helvetica Neue', Arial, sans-serif; }
+    .cr-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
+    .cr-hdr { background: #0d2240; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .cr-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
+    .cr-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
+    .cr-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 4px 11px; border-radius: 2px; white-space: nowrap; }
+    .cr-divider { height: 3px; background: #29b6e8; }
+    .cr-banner { background: #0a1c33; padding: 14px 24px; text-align: center; }
+    .cr-banner-text { font-size: 14px; font-weight: 700; color: #ffffff; margin: 0; letter-spacing: 0.2px; }
+    .cr-content { padding: 20px 24px; }
+    .cr-greeting { font-size: 14px; color: #1a1a1a; margin: 0 0 10px; }
+    .cr-intro { font-size: 13px; color: #555555; line-height: 1.7; margin: 0 0 16px; }
+    .cr-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 14px; }
+    .cr-section-head { background: #0d2240; padding: 7px 14px; }
+    .cr-section-head span { font-size: 10px; font-weight: 700; color: #29b6e8; letter-spacing: 1px; text-transform: uppercase; }
+    .cr-section-body { padding: 11px 14px; }
+    .cr-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .cr-table td { padding: 5px 0; vertical-align: top; }
+    .cr-table .lbl { color: #666666; width: 38%; font-weight: 500; }
+    .cr-table .val { color: #1a1a1a; font-weight: 700; }
+    .cr-table .val-blue { color: #1a7fbf; font-weight: 600; }
+    .cr-pw-box { background: #fff8e6; border: 1px solid #f0d080; border-radius: 3px; padding: 4px 10px; font-size: 13px; font-weight: 700; color: #7a5500; display: inline-block; letter-spacing: 1px; }
+    .cr-notice { font-size: 11px; color: #888888; margin: 8px 0 0; font-style: italic; }
+    .cr-cta-section { margin-bottom: 14px; }
+    .cr-cta-label { font-size: 12px; font-weight: 700; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 8px; }
+    .cr-btn { display: inline-block; background: #0d2240; color: #ffffff; text-decoration: none; padding: 10px 24px; border-radius: 3px; font-size: 13px; font-weight: 700; letter-spacing: 0.3px; }
+    .cr-help { font-size: 12px; color: #555555; margin-bottom: 14px; line-height: 1.7; }
+    .cr-help a { color: #1a7fbf; }
+    .cr-sign { font-size: 12.5px; color: #555555; border-top: 1px solid #e0e0e0; padding-top: 14px; line-height: 1.7; }
+    .cr-sign strong { color: #1a1a1a; }
+    .cr-footer { background: #0d2240; padding: 13px 24px; text-align: center; }
+    .cr-footer-brand { font-size: 12px; font-weight: 700; color: #ffffff; margin-bottom: 3px; }
+    .cr-footer-info { font-size: 11px; color: #6fa8c8; line-height: 1.9; margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="cr-body">
+    <div class="cr-hdr">
+      <div>
+        <p class="cr-hdr-title">Safety Training Academy</p>
+        <p class="cr-hdr-sub">RTO #45234 &nbsp;·&nbsp; Company Portal</p>
+      </div>
+      <span class="cr-badge">Welcome</span>
+    </div>
+    <div class="cr-divider"></div>
+    <div class="cr-banner">
+      <p class="cr-banner-text">&#10003; &nbsp;Your company portal is ready</p>
+    </div>
+    <div class="cr-content">
+      <p class="cr-greeting">Hello <strong>${companyName}</strong>,</p>
+      <p class="cr-intro">Your company account has been created with Safety Training Academy. You can now log in to the company portal to manage employee enrolments.</p>
+      <div class="cr-section">
+        <div class="cr-section-head"><span>Your sign-in details</span></div>
+        <div class="cr-section-body">
+          <table class="cr-table">
+            <tr>
+              <td class="lbl">Company name</td>
+              <td class="val">${companyName}</td>
+            </tr>
+            <tr>
+              <td class="lbl">Email (login)</td>
+              <td class="val-blue">${email}</td>
+            </tr>
+            <tr>
+              <td class="lbl">Password</td>
+              <td><span class="cr-pw-box">${password}</span></td>
+            </tr>
+          </table>
+          <p class="cr-notice">&#128274; Keep these credentials confidential. We recommend changing your password after first login.</p>
+        </div>
+      </div>
+      <div class="cr-cta-section">
+        <p class="cr-cta-label">Company portal login</p>
+        <a href="${portalUrl}" class="cr-btn">Log in to portal &rarr;</a>
+      </div>
+      <p class="cr-help">
+        Questions? Contact us at <a href="mailto:info@safetytrainingacademy.edu.au">info@safetytrainingacademy.edu.au</a> or call <a href="tel:1300976097">1300 976 097</a>.
+      </p>
+      <div class="cr-sign">
+        Kind regards,<br>
+        <strong>Safety Training Academy</strong>
+      </div>
+    </div>
+    <div class="cr-footer">
+      <div class="cr-footer-brand">Safety Training Academy</div>
+      <p class="cr-footer-info">
+        2 Wellington St, Sefton NSW 2162 &nbsp;·&nbsp; RTO #45234<br>
+        1300 976 097 &nbsp;·&nbsp; info@safetytrainingacademy.edu.au
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+};
 
 // ─── GET ALL COMPANIES ───────────────────────────────────────────
 exports.getAllCompanies = async (req, res) => {

@@ -398,7 +398,7 @@
 }
 
 .s5-submit-btn {
-    background: #7c3aed;
+    background: linear-gradient(135deg, #6a11cb, #d414c5);
     border: none;
     border-radius: 10px;
     padding: 13px 32px;
@@ -407,11 +407,15 @@
     color: #fff;
     cursor: pointer;
     font-family: inherit;
-    transition: background 0.2s;
+    transition: opacity 0.2s, transform 0.1s;
 }
 
 .s5-submit-btn:hover {
-    background: #6d28d9;
+    opacity: 0.92;
+}
+
+.s5-submit-btn:active {
+    transform: scale(0.98);
 }
 
 .es5-toast {
@@ -435,18 +439,18 @@
 }
 
 .es5-toast-btn {
-    background: #7c3aed;
+    background: linear-gradient(135deg, #6a11cb, #d414c5);
     color: #fff;
     border: none;
     padding: 10px 24px;
     border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
-    transition: background 0.2s;
+    transition: opacity 0.2s, transform 0.1s;
 }
 
 .es5-toast-btn:hover {
-    background: #6d28d9;
+    opacity: 0.92;
 }
 
 .s5-preview-section {
@@ -499,6 +503,15 @@
     border-radius: 8px;
     font-size: 13px;
     color: #374151;
+}
+
+.s5-input-error {
+    border-color: #dc2626 !important;
+    background: #fef2f2 !important;
+}
+
+.s5-label-error {
+    color: #dc2626 !important;
 }
 
 /* Responsive */

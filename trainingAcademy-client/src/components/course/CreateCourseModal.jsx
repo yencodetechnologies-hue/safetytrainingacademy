@@ -41,6 +41,14 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
     const [comboDescription, setComboDescription] = useState("")
     const [comboPrice, setComboPrice] = useState("")
     const [comboDuration, setComboDuration] = useState("")
+    const [handbookTitle, setHandbookTitle] = useState("")
+    const [handbookFile, setHandbookFile] = useState(null)
+    const [handbookUrl, setHandbookUrl] = useState("")
+    const [existingHandbookPdf, setExistingHandbookPdf] = useState("")
+    const [handbookCardImageFile, setHandbookCardImageFile] = useState(null)
+    const [existingHandbookCardImage, setExistingHandbookCardImage] = useState("")
+    const [syllabusFile, setSyllabusFile] = useState(null)
+    const [existingSyllabusUrl, setExistingSyllabusUrl] = useState("")
 
     // Yup schema — only the slug is enforced strictly here. Other fields
     // already have permissive backend handling, so we don't lock them down.
@@ -153,6 +161,27 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
                 formData.append("image", values.courseImage)
             }
 
+            // handbook logic
+            formData.append("handbookTitle", handbookTitle)
+            if (handbookFile) {
+                formData.append("handbookPdf", handbookFile)
+            } else {
+                formData.append("handbookPdf", existingHandbookPdf || "")
+            }
+
+            if (handbookCardImageFile) {
+                formData.append("handbookCardImage", handbookCardImageFile)
+            } else {
+                formData.append("handbookCardImage", existingHandbookCardImage || "")
+            }
+            formData.append("handbookUrl", handbookUrl)
+
+            if (syllabusFile) {
+                formData.append("syllabusPdf", syllabusFile)
+            } else {
+                formData.append("syllabusPdf", existingSyllabusUrl || "")
+            }
+
             try {
 
                 if (editCourse) {
@@ -209,6 +238,11 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
             setComboDescription(editCourse.comboDescription || "");
             setComboPrice(editCourse.comboPrice || "");
             setComboDuration(editCourse.comboDuration || "");
+            setHandbookTitle(editCourse.handbook?.title || "");
+            setHandbookUrl(editCourse.handbook?.url || "");
+            setExistingHandbookPdf(editCourse.handbook?.pdf || "");
+            setExistingHandbookCardImage(editCourse.handbook?.cardImage || "");
+            setExistingSyllabusUrl(editCourse.syllabusUrl || "");
         }
     }, [editCourse]);
 
@@ -637,46 +671,110 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
 
                         {activeTab === "requirements" && (
                             <div className="requirements-section">
-
                                 <DynamicField
                                     label="Course Requirement"
                                     placeholder="Course Requirement..."
                                     values={requirements}
                                     setValues={setRequirements}
                                 />
-                                <div className="handbook-card">
 
+                                <div className="handbook-card" style={{ marginTop: '20px' }}>
                                     <div className="handbook-header">
                                         <span className="icon">📄</span>
-                                        <h3>Upload handbook (Optional)</h3>
+                                        <h3>Upload Code of Practice (Optional)</h3>
                                     </div>
-
                                     <p className="handbook-desc">
-                                        Upload a PDF or enter a URL. This handbook is shown on the course details page with a view option.
+                                        Upload a PDF or enter a URL. This document is shown on the course details page with a view option.
                                     </p>
-
-                                    <label>Handbook title</label>
-                                    <input type="text" placeholder="e.g., Code of Practice Managing the Risk..." />
-
-                                    <label>Upload handbook</label>
-                                    <div className="upload-btn">
-                                        <input type="file" accept="application/pdf" />
-                                        <span>⬆ Choose PDF</span>
+                                    <label>Course of Practice title</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g., Code of Practice Managing the Risk..."
+                                        value={handbookTitle}
+                                        onChange={(e) => setHandbookTitle(e.target.value)}
+                                    />
+                                    <label>Upload Course of Practice</label>
+                                    <div className="upload-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <div className="upload-btn" style={{ flex: 1 }}>
+                                            <input
+                                                type="file"
+                                                accept="application/pdf"
+                                                onChange={(e) => {
+                                                    setHandbookFile(e.target.files[0]);
+                                                    setExistingHandbookPdf("");
+                                                }}
+                                            />
+                                            <span>
+                                                {handbookFile ? handbookFile.name : (existingHandbookPdf ? "📄 Existing PDF" : "⬆ Choose PDF")}
+                                            </span>
+                                        </div>
+                                        {(handbookFile || existingHandbookPdf) && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setHandbookFile(null);
+                                                    setExistingHandbookPdf("");
+                                                }}
+                                                style={{
+                                                    background: '#ff4d4f',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    padding: '8px 12px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Remove
+                                            </button>
+                                        )}
                                     </div>
-
-                                    <div className="divider">
-                                        <span></span>
-                                        <p>OR</p>
-                                        <span></span>
-                                    </div>
-
-                                    <label>Enter handbook URL</label>
-                                    <input type="text" placeholder="https://... (external link)" />
-
                                 </div>
 
+                                <div className="handbook-card" style={{ marginTop: '20px' }}>
+                                    <div className="handbook-header">
+                                        <span className="icon">📚</span>
+                                        <h3>Upload Course Syllabus (Optional)</h3>
+                                    </div>
+                                    <p className="handbook-desc">
+                                        Upload the course syllabus [PDF]. This will be viewable by students on the course details page.
+                                    </p>
+                                    <label>Upload Syllabus PDF</label>
+                                    <div className="upload-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <div className="upload-btn" style={{ flex: 1 }}>
+                                            <input
+                                                type="file"
+                                                accept="application/pdf"
+                                                onChange={(e) => {
+                                                    setSyllabusFile(e.target.files[0]);
+                                                    setExistingSyllabusUrl("");
+                                                }}
+                                            />
+                                            <span>
+                                                {syllabusFile ? syllabusFile.name : (existingSyllabusUrl ? "📄 Existing Syllabus" : "⬆ Choose Syllabus PDF")}
+                                            </span>
+                                        </div>
+                                        {(syllabusFile || existingSyllabusUrl) && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setSyllabusFile(null);
+                                                    setExistingSyllabusUrl("");
+                                                }}
+                                                style={{
+                                                    background: '#ff4d4f',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    padding: '8px 12px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
-
                         )}
 
                         {activeTab === "pathways" && (

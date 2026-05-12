@@ -12,6 +12,8 @@ import {
   getCourseVariants,
 } from "../../../utils/coursePrice";
 import BookingModal from "../../course/BookingModal";
+import logo from "../../../assets/SafetyTrainingAcademylogo.png";
+import PdfViewer from "../../common/PdfViewer";
 
 // ── Mock data fallbacks (used when API fields are empty) ─────────────────────
 const MOCK_ABOUT =
@@ -211,6 +213,19 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
   // ── Session display ───────────────────────────────────────────────────────
   const sessionPages = chunkArray(sessions, PAGE_SIZE);
 
+  const handleViewPDF = (pdfUrl) => {
+    if (!pdfUrl) return;
+    let fixedUrl = pdfUrl;
+    if (pdfUrl.includes("res.cloudinary.com")) {
+      // Remove any potential fl_attachment to ensure it opens in browser
+      fixedUrl = pdfUrl.replace("/fl_attachment/", "/");
+      if (!fixedUrl.startsWith("http")) fixedUrl = `https://${fixedUrl.replace(/^\/+/, "")}`;
+    } else if (!pdfUrl.startsWith("http")) {
+      fixedUrl = `${API_URL}/${pdfUrl}`;
+    }
+    window.open(fixedUrl, "_blank");
+  };
+
 
 
   return (
@@ -220,7 +235,6 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
       <div className="cdm-topbar">
         <button className="cdm-back-btn" onClick={() => navigate(-1)}>‹</button>
         <span className="cdm-topbar-title">Course details</span>
-        <a href="tel:1300976097" className="cdm-topbar-phone">☎ Call</a>
       </div>
 
       <PublicNavbar courses={courses} />
@@ -483,6 +497,48 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
           </>
         )}
       </div>
+
+      {/* Handbook Cards (Only show striped card if NO large cardImage exists) */}
+      {(() => {
+        if (course.handbook?.cardImage) return null; // Hide if large image exists
+
+        let hUrl = course.handbook?.url || course.handbook?.pdf;
+        if (!hUrl) return null;
+
+        let finalUrl = hUrl;
+        if (hUrl.startsWith("res.cloudinary.com")) {
+          finalUrl = `https://${hUrl}`;
+        } else if (!hUrl.startsWith("http") && !hUrl.startsWith("/")) {
+          finalUrl = `${API_URL}/${hUrl}`;
+        }
+
+        return (
+          <div
+            onClick={() => handleViewPDF(course.handbook?.url || course.handbook?.pdf)}
+            style={{ cursor: 'pointer' }}
+            className="cdm-hb-card"
+          >
+            <div className="cdm-hb-inner">
+              <img src={logo} alt="STA Logo" className="cdm-hb-logo" />
+              <h3 className="cdm-hb-title">{course.handbook?.title || "CODE OF PRACTICE"}</h3>
+              <div className="cdm-hb-subtitle">Click to download the {course.handbook?.title || "CODE OF PRACTICE"} [PDF]</div>
+            </div>
+          </div>
+        );
+      })()}
+
+      <div
+        onClick={() => handleViewPDF("/resources/participant-handbook.pdf")}
+        style={{ cursor: 'pointer' }}
+        className="cdm-hb-card"
+      >
+        <div className="cdm-hb-inner">
+          <img src={logo} alt="STA Logo" className="cdm-hb-logo" />
+          <h3 className="cdm-hb-title">Participant Handbook</h3>
+          <div className="cdm-hb-subtitle">Click to download the Participant Handbook [PDF]</div>
+        </div>
+      </div>
+
 
       {/* ── Why Choose STA ── */}
       <div className="cdm-section">

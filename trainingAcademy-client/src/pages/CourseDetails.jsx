@@ -9,6 +9,8 @@ import { API_URL } from "../data/service"
 import { useNavigate, useLocation } from "react-router-dom"
 import { cdnImage } from "../utils/cdnImage"
 import BookingModal from "../components/course/BookingModal"
+import logo from "../assets/SafetyTrainingAcademylogo.png"
+import PdfViewer from '../components/common/PdfViewer';
 
 function chunkArray(arr, size) {
     if (!arr) return []
@@ -52,6 +54,20 @@ function CourseDetails() {
     const [selectedOptionId, setSelectedOptionId] = useState(null)
     const swipeRef = useRef(null)
     const isMobile = useIsMobile()
+
+    const handleViewPDF = (pdfUrl) => {
+        if (!pdfUrl) return;
+        let fixedUrl = pdfUrl;
+        if (pdfUrl.includes("res.cloudinary.com")) {
+            // Remove any potential fl_attachment if it exists or just use the clean URL
+            fixedUrl = pdfUrl.replace("/fl_attachment/", "/");
+            // Ensure protocol is present
+            if (!fixedUrl.startsWith("http")) fixedUrl = `https://${fixedUrl.replace(/^\/+/, "")}`;
+        } else if (!pdfUrl.startsWith("http")) {
+            fixedUrl = `${API_URL}/${pdfUrl}`;
+        }
+        window.open(fixedUrl, "_blank");
+    };
 
     useEffect(() => {
         if (!fetchSlug && !fallbackId) return
@@ -134,12 +150,14 @@ function CourseDetails() {
         .filter(c => c._id !== course._id)
         .slice(0, 4)
 
-    const openBooking = (type) => {
-        if (isExperience || isSlbl) {
+    const openBooking = (type, forceSkipModal = false) => {
+        if ((isExperience || isSlbl) && !forceSkipModal) {
             setSelectedOptionId(type || null)
             setShowModal(true)
         } else {
-            navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)
+            const query = fromPortal ? "?fromPortal=true" : ""
+            const typeParam = type ? `${query ? "&" : "?"}type=${type}` : ""
+            navigate(`/book-now/course/${course.slug}${query}${typeParam}`)
         }
     }
 
@@ -163,7 +181,7 @@ function CourseDetails() {
                     <p className="cdp-price-note">All inclusive — no hidden fees</p>
                     <button
                         className="cdp-btn-book"
-                        onClick={() => openBooking()}
+                        onClick={() => openBooking(null, true)}
                     >
                         BOOK NOW — ${sellingPrice}
                     </button>
@@ -186,13 +204,13 @@ function CourseDetails() {
                     <p className="cdp-price-note">All inclusive — no hidden fees</p>
                     <button
                         className="cdp-btn-book cdp-btn-exp-with"
-                        onClick={() => openBooking("with-experience")}
+                        onClick={() => openBooking("with-experience", true)}
                     >
                         ${course.withExperiencePrice} &nbsp; Book With Experience
                     </button>
                     <button
                         className="cdp-btn-book cdp-btn-exp-without"
-                        onClick={() => openBooking("without-experience")}
+                        onClick={() => openBooking("without-experience", true)}
                     >
                         ${course.withoutExperiencePrice} &nbsp; Book Without Experience
                     </button>
@@ -216,7 +234,7 @@ function CourseDetails() {
                     </p>
                     <button
                         className="cdp-btn-book"
-                        onClick={() => openBooking()}
+                        onClick={() => openBooking(null, true)}
                     >
                         Book Now — Pick a Date
                     </button>
@@ -308,9 +326,6 @@ function CourseDetails() {
             <button className="cdp-sb-btn-voc" onClick={() => navigate(`/voc?courseId=${course._id}${fromPortal ? "&fromPortal=true" : ""}`)}>
                 Already Trained? Book VOC
             </button>
-            <a href="tel:1300976097" style={{ textDecoration: "none" }}>
-                <button className="cdp-sb-btn-call">☎ Call 1300 976 097</button>
-            </a>
             <ul className="cdp-sb-mini-list">
                 <li><span>✓</span> Certificate same day</li>
                 <li><span>✓</span> Sunday sessions available</li>
@@ -514,6 +529,7 @@ function CourseDetails() {
                         </div>
                     </div>
 
+
                     {Array.isArray(course?.outcomePoints) && course.outcomePoints.filter(Boolean).length > 0 && (
                         <div className="cdp-card">
                             <div className="cdp-card-title">What you will learn</div>
@@ -600,9 +616,50 @@ function CourseDetails() {
 
                     <SidebarPriceCard />
 
+                    {/* Handbook Cards (Sidebar - Only show striped card if NO large cardImage exists) */}
+                    {(() => {
+                        if (course.handbook?.cardImage) return null; // Hide striped card if large image exists
+
+                        const finalUrl = (() => {
+                            let hUrl = course.handbook?.url || course.handbook?.pdf;
+                            if (!hUrl) return null;
+                            let clean = hUrl.replace(/^https?:\/\//, "").replace(/^\/+/, "");
+                            return `https://${clean}`;
+                        })();
+
+                        if (!finalUrl) return null;
+
+                        return (
+                            <div
+                                onClick={() => handleViewPDF(course.handbook?.url || course.handbook?.pdf)}
+                                style={{ cursor: 'pointer' }}
+                                className="cdp-hb-card"
+                            >
+                                <div className="cdp-hb-inner">
+                                    <img src={logo} alt="STA Logo" className="cdp-hb-logo" />
+                                    <h3 className="cdp-hb-title">{course.handbook?.title || "CODE OF PRACTICE"}</h3>
+                                    <div className="cdp-hb-subtitle">Click to download the {course.handbook?.title || "CODE OF PRACTICE"} [PDF]</div>
+                                </div>
+                            </div>
+                        );
+                    })()}
+
+                    <div
+                        onClick={() => handleViewPDF("/resources/participant-handbook.pdf")}
+                        style={{ cursor: 'pointer' }}
+                        className="cdp-hb-card"
+                    >
+                        <div className="cdp-hb-inner">
+                            <img src={logo} alt="STA Logo" className="cdp-hb-logo" />
+                            <h3 className="cdp-hb-title">Participant Handbook</h3>
+                            <div className="cdp-hb-subtitle">Click to download the Participant Handbook [PDF]</div>
+                        </div>
+                    </div>
+
+
                     {relatedCourses.length > 0 && (
                         <div className="cdp-sb-card">
-                            <div className="cdp-sb-title">Related courses</div>
+                            <div className="cdp-sb-title">Course of Practice</div>
                             {relatedCourses.map((c, i) => (
                                 <div
                                     className="cdp-related-course"
@@ -659,7 +716,6 @@ function CourseDetails() {
                     >
                         Book Now — Pick a Date
                     </button>
-                    <a href="tel:1300976097" className="cdp-sticky-call">☎ 1300 976 097</a>
                 </div>
             </div>
 

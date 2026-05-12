@@ -36,6 +36,7 @@ const courseSchema = new mongoose.Schema({
   feesCharges: [String],
   optionalCharges: [String],
   outcomePoints: [String],
+  syllabusUrl: String,
 
   // REQUIREMENTS
   requirements: [String],
@@ -43,7 +44,8 @@ const courseSchema = new mongoose.Schema({
   handbook: {
     title: String,
     pdf: String,
-    url: String
+    url: String,
+    cardImage: String
   },
 
   // PATHWAYS

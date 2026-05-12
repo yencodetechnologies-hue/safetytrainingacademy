@@ -974,17 +974,33 @@
 }
 
 .mlp-modal-close {
-  background: #f0f8ff;
-  border: 1px solid #bae0f7;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  font-size: 13px;
-  color: #0d2240;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #94a3b8;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 4px;
+}
+
+/* Enquiry Section with Light Blue Background */
+.mlp-section-enquire {
+  background-color: #00AEEF !important; /* Exact light blue from screenshot */
+  padding: 40px 20px !important;
+  text-align: center;
+  margin: 0 !important;
+}
+
+.mlp-section-enquire .mlp-enquire-btn {
+  margin-top: 0;
+  background-color: #0D2240; /* Dark navy for strong contrast */
+  color: white;
+  border: none;
+  width: 100%;
+  padding: 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .mlp-modal-body {

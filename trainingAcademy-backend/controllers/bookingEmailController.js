@@ -48,83 +48,215 @@ const sendBookingConfirmation = async (req, res) => {
             </table>
         </td></tr></table>`;
 
-    const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:#ffffff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:22px;font-weight:700;">Booking Confirmed #${orderId}</h1>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p style="margin:0 0 16px;font-size:15px;color:#555;">Dear <strong style="color:#333;">${name}</strong>,</p>
-    <p style="margin:0 0 24px;font-size:15px;color:#555;">Thank you for booking with <strong>Safety Training Academy</strong>. Your booking has been successfully received!</p>
+    const studentHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STA Booking Confirmation</title>
+  <style>
+    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: 'Helvetica Neue', Arial, sans-serif; }
+    .sb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
+    .sb-hdr { background: #0d2240; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .sb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
+    .sb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
+    .sb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 4px 11px; border-radius: 2px; white-space: nowrap; }
+    .sb-divider { height: 3px; background: #29b6e8; }
+    .sb-banner { background: #0a1c33; padding: 13px 24px; text-align: center; }
+    .sb-banner-text { font-size: 14px; font-weight: 700; color: #ffffff; margin: 0; }
+    .sb-banner-id { color: #29b6e8; }
+    .sb-content { padding: 18px 24px; }
+    .sb-greeting { font-size: 14px; color: #1a1a1a; margin: 0 0 8px; }
+    .sb-intro { font-size: 13px; color: #555555; line-height: 1.7; margin: 0 0 14px; }
+    .sb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+    .sb-section-head { background: #0d2240; padding: 7px 14px; }
+    .sb-section-head span { font-size: 10px; font-weight: 700; color: #29b6e8; letter-spacing: 1px; text-transform: uppercase; }
+    .sb-section-body { padding: 11px 14px; }
+    .sb-course-title { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px; }
+    .sb-course-meta { font-size: 11px; color: #555555; margin: 0 0 10px; }
+    .sb-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .sb-table td { padding: 4px 0; vertical-align: top; }
+    .sb-table .lbl { color: #666666; width: 40%; font-weight: 500; }
+    .sb-table .val { color: #1a1a1a; font-weight: 700; }
+    .sb-table .val-reg { color: #1a1a1a; font-weight: 400; }
+    .sb-table .val-blue { color: #1a7fbf; font-weight: 600; }
+    .sb-pw-box { background: #fff8e6; border: 1px solid #f0d080; border-radius: 3px; padding: 3px 9px; font-size: 12.5px; font-weight: 700; color: #7a5500; display: inline-block; letter-spacing: 1px; }
+    .sb-portal-note { font-size: 12px; color: #555555; margin: 0 0 10px; line-height: 1.6; }
+    .sb-total-row td { border-top: 2px solid #e0e0e0; padding-top: 8px; font-weight: 700; }
+    .sb-total-val { text-align: right; font-size: 15px; font-weight: 700; color: #0d2240; }
+    .sb-checklist { border: 2px solid #d4940a; border-radius: 4px; padding: 11px 14px; margin-bottom: 12px; background: #fffbf0; }
+    .sb-checklist-title { font-size: 11px; font-weight: 700; color: #7a5500; margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .sb-checklist-addr { font-size: 12px; color: #7a5500; margin: 0 0 8px; }
+    .sb-checklist ul { margin: 0 0 8px; padding-left: 18px; font-size: 12px; color: #7a5500; line-height: 1.8; }
+    .sb-checklist-provide { font-size: 12px; font-weight: 700; color: #7a5500; margin: 0 0 4px; }
+    .sb-bank { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+    .sb-bank-head { background: #0d2240; padding: 7px 14px; }
+    .sb-bank-head span { font-size: 10px; font-weight: 700; color: #29b6e8; letter-spacing: 1px; text-transform: uppercase; }
+    .sb-bank-body { padding: 11px 14px; }
+    .sb-bank-note { font-size: 11px; color: #c07000; margin: 8px 0 0; }
+    .sb-bank-note strong { color: #0d2240; }
+    .sb-footer { background: #0d2240; padding: 13px 24px; text-align: center; }
+    .sb-footer-brand { font-size: 12px; font-weight: 700; color: #ffffff; margin-bottom: 3px; }
+    .sb-footer-info { font-size: 11px; color: #6fa8c8; line-height: 1.9; margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="sb-body">
+    <!-- Header -->
+    <div class="sb-hdr">
+      <div>
+        <p class="sb-hdr-title">Safety Training Academy</p>
+        <p class="sb-hdr-sub">RTO #45234 &nbsp;·&nbsp; Booking Confirmation</p>
+      </div>
+      <span class="sb-badge">Confirmed</span>
+    </div>
+    <div class="sb-divider"></div>
 
-    <!-- 1. Product Box (Matches Company Style) -->
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;background-color:#ffffff;border-radius:8px;border:1px solid #e2e8f0;">
-    <tr><td style="padding:20px;border-bottom:1px solid #e2e8f0;">
-        <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Product</p>
-        <p style="margin:0;font-size:15px;font-weight:600;color:#334155;">${courseName}</p>
-        <p style="margin:4px 0 0;font-size:13px;color:#64748b;">Booking ID: ${orderId} | ${courseDate} | ${startTime} - ${endTime} ×1</p>
-    </td></tr>
-    <tr><td style="padding:16px 20px;">
-        <table width="100%" cellpadding="4" cellspacing="0" border="0" style="font-size:14px;">
-            <tr style="background-color:#f8fafc;"><td style="padding:8px 12px;color:#64748b;">Quantity</td><td style="padding:8px 12px;text-align:right;font-weight:600;color:#334155;">1</td></tr>
-            <tr><td style="padding:8px 12px;color:#64748b;">Price</td><td style="padding:8px 12px;text-align:right;font-weight:600;color:#334155;">${priceStr}</td></tr>
-        </table>
-    </td></tr></table>
-
-    <!-- 2. Student Login (Distinct Section) -->
-    ${loginCredentialsHtml}
-
-    <!-- 3. Important Checklist -->
-    <div style="margin-bottom:24px;padding:16px;background-color:#fef3c7;border-radius:6px;border-left:4px solid #f59e0b;">
-        <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#92400e;">⚠️ Important: Course Preparation Checklist</p>
-        <p style="margin:0 0 8px;font-size:13px;color:#334155;">Course Address: <strong>3/14-16 Marjorie Street, Sefton NSW 2162</strong></p>
-        <ul style="margin:0 0 12px;padding-left:20px;font-size:13px;color:#334155;">
-            <li style="margin-bottom:6px;">ID reflecting your name and address.</li>
-            <li style="margin-bottom:6px;">PPE — high visibility vest and steel cap boots.</li>
-            <li style="margin-bottom:6px;"><strong>USI:</strong> <a href="https://www.usi.gov.au/your-usi/create-usi" style="color:#3b82f6;">Create USI</a></li>
-        </ul>
-        <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#334155;">We provide:</p>
-        <ul style="margin:0 0 8px;padding-left:20px;font-size:13px;color:#334155;">
-            <li>Beverages, Lunchroom, Toilets, and easy council parking.</li>
-        </ul>
+    <!-- Banner -->
+    <div class="sb-banner">
+      <p class="sb-banner-text">&#10003; &nbsp;Booking Confirmed &nbsp;<span class="sb-banner-id">#${orderId}</span></p>
     </div>
 
-    ${bankDetailsHtml}
+    <div class="sb-content">
+      <p class="sb-greeting">Dear <strong>${name}</strong>,</p>
+      <p class="sb-intro">Thank you for booking with <strong>Safety Training Academy</strong>. Your booking has been successfully received!</p>
 
-    <!-- 4. Order Details -->
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;background-color:#ffffff;border-radius:8px;border:1px solid #e2e8f0;">
-    <tr><td style="padding:20px;">
-        <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Order Details (Order #${orderId})</p>
-        <p style="margin:0 0 4px;font-size:14px;color:#334155;">Order Date: <strong>${orderDateStr}</strong></p>
-        <table width="100%" cellpadding="4" cellspacing="0" border="0" style="font-size:14px;margin-top:12px;">
-            <tr><td style="padding:8px 0;color:#334155;">Subtotal</td><td style="padding:8px 0;text-align:right;font-weight:600;color:#334155;">${priceStr}</td></tr>
-            <tr><td style="padding:8px 0;color:#334155;">Payment method</td><td style="padding:8px 0;text-align:right;font-weight:600;color:#334155;">${paymentMethod}</td></tr>
-            <tr style="border-top:2px solid #e2e8f0;"><td style="padding:12px 0 0;font-size:15px;font-weight:700;color:#334155;">Total</td><td style="padding:12px 0 0;text-align:right;font-size:15px;font-weight:700;color:#334155;">${priceStr}</td></tr>
-        </table>
-    </td></tr></table>
+      <!-- Course / Product -->
+      <div class="sb-section">
+        <div class="sb-section-head"><span>Product</span></div>
+        <div class="sb-section-body">
+          <p class="sb-course-title">${courseName}</p>
+          <p class="sb-course-meta">Booking ID: #${orderId} &nbsp;|&nbsp; ${courseDate} &nbsp;|&nbsp; ${startTime} - ${endTime}</p>
+          <table class="sb-table">
+            <tr>
+              <td class="lbl">Quantity</td>
+              <td style="text-align:right; color: #1a1a1a; font-weight:400;">1</td>
+            </tr>
+            <tr>
+              <td class="lbl">Price</td>
+              <td style="text-align:right; color: #1a1a1a; font-weight:700;">${priceStr}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
 
-    <!-- 5. Billing Address -->
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;background-color:#ffffff;border-radius:8px;border:1px solid #e2e8f0;">
-    <tr><td style="padding:20px;">
-        <p style="margin:0 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Billing Address</p>
-        <p style="margin:0;font-size:14px;color:#334155;line-height:1.6;">${billingAddressHtml}</p>
-    </td></tr></table>
+      <!-- Student Portal Login -->
+      <div class="sb-section">
+        <div class="sb-section-head"><span>&#128274; Your student portal login</span></div>
+        <div class="sb-section-body">
+          <p class="sb-portal-note">An account has been created for you. Use the credentials below to access your student portal:</p>
+          <table class="sb-table">
+            <tr>
+              <td class="lbl">Email</td>
+              <td class="val-blue">${email}</td>
+            </tr>
+            <tr>
+              <td class="lbl">Password</td>
+              <td><span class="sb-pw-box">${defaultPassword}</span></td>
+            </tr>
+          </table>
+        </div>
+      </div>
 
-    <!-- 6. Footer / Contact -->
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
-    <tr><td style="padding:20px;">
-        <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Contact Details</p>
-        <p style="margin:0 0 4px;font-size:14px;color:#334155;">Email: <a href="mailto:info@safetytrainingacademy.edu.au" style="color:#3b82f6;">info@safetytrainingacademy.edu.au</a></p>
-        <p style="margin:0;font-size:14px;color:#334155;">Business: 1300 976 097 | M: 0483 878 887</p>
-    </td></tr></table>
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0;font-size:13px;color:#64748b;">Kind regards,<br/><strong style="color:#334155;">Safety Training Academy</strong><br/>Training Team | 1300 976 097</p>
-</td></tr>
-</table></td></tr></table></body></html>`;
+      <!-- Course Preparation Checklist -->
+      <div class="sb-checklist">
+        <p class="sb-checklist-title">&#9888; Important: Course preparation checklist</p>
+        <p class="sb-checklist-addr">Course Address: <strong>3/14-16 Marjorie Street, Sefton NSW 2162</strong></p>
+        <ul>
+          <li>ID reflecting your name and address.</li>
+          <li>PPE — high visibility vest and steel cap boots.</li>
+          <li>USI: <a href="https://www.usi.gov.au/students/get-a-usi" style="color:#c07000;">Create USI</a></li>
+        </ul>
+        <p class="sb-checklist-provide">We provide:</p>
+        <ul>
+          <li>Beverages, Lunchroom, Toilets, and easy council parking.</li>
+        </ul>
+      </div>
+
+      <!-- Bank Transfer Details (Conditional) -->
+      ${paymentMethod === "Bank Transfer" ? `
+      <div class="sb-bank">
+        <div class="sb-bank-head"><span>Bank transfer details</span></div>
+        <div class="sb-bank-body">
+          <table class="sb-table">
+            <tr>
+              <td class="lbl">Bank</td>
+              <td class="val">Commonwealth Bank</td>
+            </tr>
+            <tr>
+              <td class="lbl">Account name</td>
+              <td class="val">AIET College</td>
+            </tr>
+            <tr>
+              <td class="lbl">BSB</td>
+              <td class="val">062 141</td>
+            </tr>
+            <tr>
+              <td class="lbl">Account no</td>
+              <td class="val">10490235</td>
+            </tr>
+          </table>
+          <p class="sb-bank-note">Please use order number <strong>#${orderId}</strong> or your full name as payment reference.</p>
+        </div>
+      </div>
+      ` : ""}
+
+      <!-- Order Details -->
+      <div class="sb-section">
+        <div class="sb-section-head"><span>Order details (#${orderId})</span></div>
+        <div class="sb-section-body">
+          <p style="font-size:12px; color: #555555; margin: 0 0 8px;">Order Date: <strong style="color: #1a1a1a;">${orderDateStr}</strong></p>
+          <table class="sb-table">
+            <tr>
+              <td class="lbl">Subtotal</td>
+              <td style="text-align:right; color: #1a1a1a; font-weight:400;">${priceStr}</td>
+            </tr>
+            <tr>
+              <td class="lbl">Payment method</td>
+              <td style="text-align:right; color: #1a1a1a; font-weight:400;">${paymentMethod}</td>
+            </tr>
+            <tr class="sb-total-row">
+              <td class="lbl" style="font-weight:700; color: #1a1a1a;">Total</td>
+              <td class="sb-total-val">${priceStr}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- Billing Address -->
+      <div class="sb-section">
+        <div class="sb-section-head"><span>Billing address</span></div>
+        <div class="sb-section-body">
+          <table class="sb-table">
+            <tr>
+              <td class="lbl">Name</td>
+              <td class="val">${name}</td>
+            </tr>
+            <tr>
+              <td class="lbl">Email</td>
+              <td class="val-blue">${email}</td>
+            </tr>
+            <tr>
+              <td class="lbl">Mobile</td>
+              <td class="val">${phone || ""}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="sb-footer">
+      <div class="sb-footer-brand">Safety Training Academy</div>
+      <p class="sb-footer-info">
+        2 Wellington St, Sefton NSW 2162 &nbsp;·&nbsp; RTO #45234<br>
+        1300 976 097 &nbsp;·&nbsp; info@safetytrainingacademy.edu.au
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
 
     const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">

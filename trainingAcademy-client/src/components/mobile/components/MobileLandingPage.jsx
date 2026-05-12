@@ -562,7 +562,7 @@ export default function MobileLandingPage({ courses = [] }) {
 
       {/* ── Enquire Now button ── */}
       <div className="mlp-divider" />
-      <div className="mlp-section">
+      <div className="mlp-section mlp-section-enquire">
         <button className="mlp-enquire-btn" onClick={() => setShowEnquire(true)}>
           Enquire Now
         </button>

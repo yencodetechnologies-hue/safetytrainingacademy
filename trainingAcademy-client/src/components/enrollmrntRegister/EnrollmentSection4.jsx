@@ -1,6 +1,7 @@
 import "../../styles/EnrollmentSection4.css"
 import { useState } from "react"
 import { API_URL } from "../../data/service"
+import ValidationToast from "./ValidationToast"
 
 const INDIGENOUS_OPTIONS = [
     "Aboriginal but not Torres Strait Islander origin",
@@ -23,7 +24,16 @@ const DISABILITY_TYPES = [
 
 function EnrollmentSection4({ data, setData, prev, next }) {
 
-    const set = (key, value) => setData(p => ({ ...p, [key]: value }))
+    const [errors, setErrors] = useState([])
+    const [showToast, setShowToast] = useState(false)
+    const [missingFieldsNames, setMissingFieldsNames] = useState([])
+
+    const set = (key, value) => {
+        setData(p => ({ ...p, [key]: value }))
+        if (errors.includes(key)) {
+            setErrors(prev => prev.filter(e => e !== key))
+        }
+    }
 
     const toggleDisability = (type) => {
         const current = data.disabilityTypes || []
@@ -38,27 +48,57 @@ function EnrollmentSection4({ data, setData, prev, next }) {
     const hasDisability = data.hasDisability === "yes"
 
     const handleNext = () => {
+        const newErrors = []
+        const missingNames = []
+
+        const fieldLabels = {
+            countryOfBirth: "Country of Birth",
+            speaksOtherLanguage: "Language spoken at home",
+            otherLanguage: "Other language",
+            indigenousStatus: "Indigenous status",
+            hasDisability: "Disability status"
+        }
+
         if (!data.countryOfBirth?.trim()) {
-            alert("Please enter your Country of Birth.")
-            return
+            newErrors.push("countryOfBirth")
+            missingNames.push(fieldLabels.countryOfBirth)
         }
         if (!data.speaksOtherLanguage) {
-            alert("Please select if you speak a language other than English at home.")
-            return
+            newErrors.push("speaksOtherLanguage")
+            missingNames.push(fieldLabels.speaksOtherLanguage)
         }
         if (speaksOtherLang && !data.otherLanguage?.trim()) {
-            alert("Please enter the language you speak at home.")
-            return
+            newErrors.push("otherLanguage")
+            missingNames.push(fieldLabels.otherLanguage)
         }
         if (!data.indigenousStatus) {
-            alert("Please select your Indigenous Status.")
-            return
+            newErrors.push("indigenousStatus")
+            missingNames.push(fieldLabels.indigenousStatus)
         }
         if (!data.hasDisability) {
-            alert("Please select if you have a disability, impairment or long-term condition.")
+            newErrors.push("hasDisability")
+            missingNames.push(fieldLabels.hasDisability)
+        }
+
+        if (newErrors.length > 0) {
+            setErrors(newErrors)
+            setMissingFieldsNames(missingNames)
+            setShowToast(true)
             return
         }
         next()
+    }
+
+    const closeToastAndScroll = () => {
+        setShowToast(false)
+        if (errors.length > 0) {
+            const firstError = errors[0]
+            const el = document.getElementById(`s4-${firstError}`)
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" })
+                el.focus()
+            }
+        }
     }
 
     return (
@@ -78,18 +118,19 @@ function EnrollmentSection4({ data, setData, prev, next }) {
                 <div className="s4-row-2">
 
                     <div className="s4-field">
-                        <label className="s4-label">
+                        <label className={`s4-label ${errors.includes("countryOfBirth") ? "s4-label-error" : ""}`}>
                             Country of Birth <span className="s4-required">*</span>
                         </label>
                         <input
-                            className="s4-input"
+                            id="s4-countryOfBirth"
+                            className={`s4-input ${errors.includes("countryOfBirth") ? "s4-input-error" : ""}`}
                             value={data.countryOfBirth || ""}
                             onChange={e => set("countryOfBirth", e.target.value)}
                         />
                     </div>
 
-                    <div className="s4-field">
-                        <label className="s4-label">
+                    <div className="s4-field" id="s4-speaksOtherLanguage">
+                        <label className={`s4-label ${errors.includes("speaksOtherLanguage") ? "s4-label-error" : ""}`}>
                             Do you speak a language other than English at home?
                             <span className="s4-required"> *</span>
                         </label>
@@ -124,11 +165,12 @@ function EnrollmentSection4({ data, setData, prev, next }) {
                 {/* Language (if Yes) */}
                 {speaksOtherLang && (
                     <div className="s4-field s4-field-full">
-                        <label className="s4-label">
+                        <label className={`s4-label ${errors.includes("otherLanguage") ? "s4-label-error" : ""}`}>
                             Language (if Yes) <span className="s4-required">*</span>
                         </label>
                         <input
-                            className="s4-input-full"
+                            id="s4-otherLanguage"
+                            className={`s4-input-full ${errors.includes("otherLanguage") ? "s4-input-error" : ""}`}
                             value={data.otherLanguage || ""}
                             onChange={e => set("otherLanguage", e.target.value)}
                         />
@@ -139,51 +181,52 @@ function EnrollmentSection4({ data, setData, prev, next }) {
                 <div className="s4-row-2" style={{ marginTop: 8 }}>
 
                     <div className="s4-field">
-                        <label className="s4-label">
+                        <label className={`s4-label ${errors.includes("indigenousStatus") ? "s4-label-error" : ""}`}>
                             Indigenous Status <span className="s4-required">*</span>
                         </label>
                         <select
-    className="s4-select"
-    value={data.indigenousStatus || ""}
-    onChange={async (e) => {
-        const value = e.target.value
-        set("indigenousStatus", value)
+                            id="s4-indigenousStatus"
+                            className={`s4-select ${errors.includes("indigenousStatus") ? "s4-input-error" : ""}`}
+                            value={data.indigenousStatus || ""}
+                            onChange={async (e) => {
+                                const value = e.target.value
+                                set("indigenousStatus", value)
 
-        // ✅ உடனே save
-        try {
-            await fetch(`${API_URL}/api/enrollment-form/section`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    studentId: data.userId,
-                    section: 4,
-                    language: {
-                        countryOfBirth: data.countryOfBirth,
-                        otherLanguage: data.otherLanguage,
-                        speaksOtherLanguage: data.speaksOtherLanguage,
-                        indigenousStatus: value,  // ✅ new value
-                    },
-                    specialNeeds: {
-                        hasDisability: data.hasDisability === "yes",
-                        types: data.disabilityTypes,
-                        other: data.disabilityNotes
-                    }
-                })
-            })
-        } catch (err) {
-            console.error("Save error:", err)
-        }
-    }}
->
-    <option value="">Select...</option>
-    {INDIGENOUS_OPTIONS.map(opt => (
-        <option key={opt}>{opt}</option>
-    ))}
-</select>
+                                // ✅ உடனே save
+                                try {
+                                    await fetch(`${API_URL}/api/enrollment-form/section`, {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({
+                                            studentId: data.userId,
+                                            section: 4,
+                                            language: {
+                                                countryOfBirth: data.countryOfBirth,
+                                                otherLanguage: data.otherLanguage,
+                                                speaksOtherLanguage: data.speaksOtherLanguage,
+                                                indigenousStatus: value,  // ✅ new value
+                                            },
+                                            specialNeeds: {
+                                                hasDisability: data.hasDisability === "yes",
+                                                types: data.disabilityTypes,
+                                                other: data.disabilityNotes
+                                            }
+                                        })
+                                    })
+                                } catch (err) {
+                                    console.error("Save error:", err)
+                                }
+                            }}
+                        >
+                            <option value="">Select...</option>
+                            {INDIGENOUS_OPTIONS.map(opt => (
+                                <option key={opt}>{opt}</option>
+                            ))}
+                        </select>
                     </div>
 
-                    <div className="s4-field">
-                        <label className="s4-label">
+                    <div className="s4-field" id="s4-hasDisability">
+                        <label className={`s4-label ${errors.includes("hasDisability") ? "s4-label-error" : ""}`}>
                             Do you consider yourself to have a disability, impairment
                             or long-term condition?
                             <span className="s4-required"> *</span>
@@ -251,6 +294,21 @@ function EnrollmentSection4({ data, setData, prev, next }) {
 
                 </div>
             )}
+
+            <div className="s4-footer">
+                <button className="s4-prev-btn" onClick={prev}>
+                    Previous
+                </button>
+                <button className="s4-next-btn" onClick={handleNext}>
+                    Next
+                </button>
+            </div>
+
+            <ValidationToast 
+                show={showToast} 
+                onOk={closeToastAndScroll} 
+                missingFields={missingFieldsNames} 
+            />
 
         </div>
     )

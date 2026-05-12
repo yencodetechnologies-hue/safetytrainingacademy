@@ -152,15 +152,21 @@
 }
 
 @keyframes s3FadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-4px);
-    }
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
+
+.s3-input-error {
+    border-color: #dc2626 !important;
+    background: #fef2f2 !important;
+}
+
+.s3-label-error {
+    color: #dc2626 !important;
+}
+
 .s3-page {
     max-width: 900px;
     margin: 0 auto;
@@ -428,7 +434,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #7c3aed;
+    background: linear-gradient(135deg, #6a11cb, #d414c5);
     border: none;
     border-radius: 10px;
     padding: 13px 28px;
@@ -437,11 +443,15 @@
     color: #fff;
     cursor: pointer;
     font-family: inherit;
-    transition: background 0.2s;
+    transition: opacity 0.2s, transform 0.1s;
 }
 
 .s3-next-btn:hover {
-    background: #6d28d9;
+    opacity: 0.92;
+}
+
+.s3-next-btn:active {
+    transform: scale(0.98);
 }
 
 /* Responsive */

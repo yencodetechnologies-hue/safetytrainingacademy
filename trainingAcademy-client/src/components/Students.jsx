@@ -854,14 +854,49 @@ export default function Students() {
   }, []);
 
   // ── Filter & Paginate ──────────────────────────────────────────────────────
-  const filtered = students.filter((s) => {
-    const matchSearch =
-      s.name?.toLowerCase().includes(search.toLowerCase()) ||
-      s.email?.toLowerCase().includes(search.toLowerCase());
-    const matchStatus =
-      statusFilter === "All Status" || s.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  const filtered = students
+    .filter((s) => {
+      const sSearch = search.toLowerCase();
+      const matchSearch =
+        s.name?.toLowerCase().includes(sSearch) ||
+        s.email?.toLowerCase().includes(sSearch) ||
+        s.phone?.toLowerCase().includes(sSearch) ||
+        s.courseTitle?.toLowerCase().includes(sSearch) ||
+        s.courseCode?.toLowerCase().includes(sSearch) ||
+        s.companyName?.toLowerCase().includes(sSearch) ||
+        s.transactionId?.toLowerCase().includes(sSearch) ||
+        s.nickname?.toLowerCase().includes(sSearch);
+      const matchStatus =
+        statusFilter === "All Status" || s.status === statusFilter;
+      return matchSearch && matchStatus;
+    })
+    .sort((a, b) => {
+      if (!search) return 0;
+      const sSearch = search.toLowerCase();
+
+      const aName = a.name?.toLowerCase() || "";
+      const bName = b.name?.toLowerCase() || "";
+      const aEmail = a.email?.toLowerCase() || "";
+      const bEmail = b.email?.toLowerCase() || "";
+
+      // Check if any word in the name starts with the search
+      const aNameWords = aName.split(/\s+/);
+      const bNameWords = bName.split(/\s+/);
+      const aAnyWordStarts = aNameWords.some(w => w.startsWith(sSearch));
+      const bAnyWordStarts = bNameWords.some(w => w.startsWith(sSearch));
+
+      if (aAnyWordStarts && !bAnyWordStarts) return -1;
+      if (!aAnyWordStarts && bAnyWordStarts) return 1;
+
+      // Check if email starts with the search
+      const aEmailStarts = aEmail.startsWith(sSearch);
+      const bEmailStarts = bEmail.startsWith(sSearch);
+
+      if (aEmailStarts && !bEmailStarts) return -1;
+      if (!aEmailStarts && bEmailStarts) return 1;
+
+      return 0;
+    });
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice(

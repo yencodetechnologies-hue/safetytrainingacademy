@@ -12,6 +12,15 @@ export default function StudentMyCourses() {
 
   // If navigated here with state.tab = "browse", start on browse tab
   const [tab, setTab] = useState(location.state?.tab || "enrolled");
+  
+  // Sync tab with location state (e.g. when clicking sidebar links)
+  useEffect(() => {
+    if (location.state?.tab) {
+      setTab(location.state.tab);
+    } else {
+      setTab("enrolled"); // Default to enrolled if no state (e.g. clicking 'My Courses')
+    }
+  }, [location.state]);
 
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -21,6 +30,7 @@ export default function StudentMyCourses() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
   const [browseCourses, setBrowseCourses] = useState([]);
+  const [categoryList, setCategoryList] = useState([]);
   const [enrolledCourseDetails, setEnrolledCourseDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,19 +49,23 @@ export default function StudentMyCourses() {
       const studentId = user?.id;
       if (!studentId) throw new Error("Student ID not found. Please login again.");
 
-      const [dashRes, coursesRes] = await Promise.all([
+      const [dashRes, coursesRes, catsRes] = await Promise.all([
         fetch(`${API_URL}/api/student/dashboard/${studentId}`),
-        fetch(`${API_URL}/api/courses`)
+        fetch(`${API_URL}/api/courses`),
+        fetch(`${API_URL}/api/categories`)
       ]);
 
       if (!dashRes.ok) throw new Error("Failed to fetch dashboard data");
       if (!coursesRes.ok) throw new Error("Failed to fetch courses");
+      if (!catsRes.ok) throw new Error("Failed to fetch categories");
 
       const dash = await dashRes.json();
       const courses = await coursesRes.json();
+      const categories = await catsRes.json();
 
       setDashboardData(dash);
       setBrowseCourses(courses);
+      setCategoryList(categories); // Already sorted by 'order' from backend
       setEnrolledCourseDetails(dash.enrolledCourses || []);
 
     } catch (err) {
@@ -77,13 +91,36 @@ export default function StudentMyCourses() {
     fetchData();
   };
 
-  const filtered = browseCourses.filter((c) => {
-    const matchesSearch = c.title?.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || c.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const filtered = browseCourses
+    .filter((c) => {
+      const sSearch = search.toLowerCase();
+      const matchesSearch = c.title?.toLowerCase().includes(sSearch);
+      const matchesCategory = selectedCategory === "All" || c.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      if (!search) return 0;
+      const sSearch = search.toLowerCase();
+      const aTitle = a.title?.toLowerCase() || "";
+      const bTitle = b.title?.toLowerCase() || "";
+      
+      const aStarts = aTitle.startsWith(sSearch);
+      const bStarts = bTitle.startsWith(sSearch);
+      
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+      
+      return 0;
+    });
 
-  const categories = ["All", ...new Set(browseCourses.map(c => c.category).filter(Boolean))];
+  // Only show categories that actually have courses, but keep the Admin's 'order'
+  const usedCategoryNames = new Set(browseCourses.map(c => c.category).filter(Boolean));
+  const sortedCategories = [
+    "All", 
+    ...categoryList
+      .map(cat => cat.name)
+      .filter(name => usedCategoryNames.has(name))
+  ];
 
   if (showAssessment) {
     return (
@@ -146,8 +183,14 @@ export default function StudentMyCourses() {
   return (
     <div className="mc-wrapper">
       <div className="mc-header">
-        <h1 className="mc-title">My Courses</h1>
-        <p className="mc-subtitle">Manage your enrolled courses and discover new certifications</p>
+        <h1 className="mc-title">
+          {tab === "enrolled" ? "My Enrolled Courses" : "Browse New Courses"}
+        </h1>
+        <p className="mc-subtitle">
+          {tab === "enrolled" 
+            ? "Manage your enrolled courses and certifications" 
+            : "Discover new certifications and advance your career"}
+        </p>
       </div>
 
       {assessmentPassed && (
@@ -188,21 +231,6 @@ export default function StudentMyCourses() {
           </div>
         </div>
       )}
-
-      <div className="mc-tabs">
-        <button
-          className={`mc-tab ${tab === "enrolled" ? "mc-tab--active" : ""}`}
-          onClick={() => setTab("enrolled")}
-        >
-          Enrolled Courses
-        </button>
-        <button
-          className={`mc-tab ${tab === "browse" ? "mc-tab--active" : ""}`}
-          onClick={() => setTab("browse")}
-        >
-          Browse Courses
-        </button>
-      </div>
 
       {tab === "enrolled" && (
         <div className="mc-enrolled">
@@ -293,7 +321,7 @@ export default function StudentMyCourses() {
           </div>
 
           <div className="mc-categories">
-            {categories.map((cat) => (
+            {sortedCategories.map((cat) => (
               <button
                 key={cat}
                 className={`mc-category-btn ${selectedCategory === cat ? "active" : ""}`}

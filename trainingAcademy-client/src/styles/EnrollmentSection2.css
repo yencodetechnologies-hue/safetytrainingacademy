@@ -110,6 +110,13 @@
     background: #fff;
 }
 
+.usi-error-msg {
+    color: #dc2626;
+    font-size: 12px;
+    margin: 4px 0 0;
+    font-weight: 500;
+}
+
 .usi-hint {
     font-size: 13px;
     color: #888;
@@ -304,7 +311,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #7c3aed;
+    background: linear-gradient(135deg, #6a11cb, #d414c5);
     border: none;
     border-radius: 10px;
     padding: 13px 28px;
@@ -313,11 +320,15 @@
     color: #fff;
     cursor: pointer;
     font-family: inherit;
-    transition: background 0.2s;
+    transition: opacity 0.2s, transform 0.1s;
 }
 
 .usi-next-btn:hover {
-    background: #6d28d9;
+    opacity: 0.92;
+}
+
+.usi-next-btn:active {
+    transform: scale(0.98);
 }
 
 /* ===== FILE UPLOAD + PREVIEW ===== */
@@ -459,6 +470,16 @@
         transform: translateY(0);
     }
 }
+
+.usi-input-error {
+    border-color: #dc2626 !important;
+    background: #fef2f2 !important;
+}
+
+.usi-label-error {
+    color: #dc2626 !important;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
     .usi-input-row,

@@ -503,7 +503,132 @@
 
 @keyframes cdm-shimmer {
   0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  100% { background-position: -200% 0;  }
+}
+
+.cdm-hb-card {
+  background: #02afef;
+  background-image: repeating-linear-gradient(
+    45deg,
+    #02afef,
+    #02afef 12px,
+    #0086b9 12px,
+    #0086b9 24px
+  );
+  border-radius: 12px;
+  padding: 10px;
+  margin: 14px 16px;
+  display: block;
+  text-decoration: none;
+}
+
+.cdm-hb-inner {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.cdm-hb-inner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #7cfc00;
+}
+
+.cdm-hb-logo {
+  height: 28px;
+  margin-bottom: 8px;
+}
+
+.cdm-hb-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #02afef;
+  margin: 0;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.cdm-hb-subtitle {
+  font-size: 8px;
+  font-weight: 700;
+  color: #000;
+  margin-top: 4px;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+
+/* Large Handbook Card Section (Mobile) */
+/* Branded Handbook Section (Reference Style) - Mobile */
+.cdm-handbook-section {
+    background-color: #f0f9ff;
+    background-image: repeating-linear-gradient(
+        45deg,
+        rgba(0, 174, 239, 0.03) 0px,
+        rgba(0, 174, 239, 0.03) 2px,
+        transparent 2px,
+        transparent 4px
+    );
+    border-top: 1px solid #bae6fd;
+    border-bottom: 1px solid #bae6fd;
+    padding: 40px 15px;
+    margin: 30px 0;
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+}
+
+.cdm-large-hb-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.cdm-large-hb-card {
+    display: block;
+    position: relative;
+    text-decoration: none;
+    line-height: 0;
+}
+
+.cdm-large-hb-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.cdm-large-hb-cta {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #00AEEF;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 700;
+    border: 1.5px solid white;
+    padding: 6px 16px;
+    border-radius: 30px;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(4px);
+    text-transform: uppercase;
+    text-align: center;
 }
 
 .cdm-no-sessions {

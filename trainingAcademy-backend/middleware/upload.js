@@ -4,33 +4,49 @@ const cloudinary = require("../config/cloudinary")
 
 const courseStorage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: "courses",
-allowed_formats: ["jpg", "png", "jpeg", "webp", "pdf"]
+  params: async (req, file) => {
+    const cleanName = file.originalname.split(".")[0].replace(/[^a-zA-Z0-9]/g, "_")
+    return {
+      folder: "courses",
+      resource_type: "auto", 
+      public_id: `${cleanName}-${Date.now()}`,
+    }
   }
 })
 
 const paymentStorage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: "payment-slips",
-    allowed_formats: ["jpg", "png", "jpeg", "webp", "pdf"],
-    transformation: [{ width: 1000, crop: "limit", quality: "auto" }]
+  params: async (req, file) => {
+    const cleanName = file.originalname.split(".")[0].replace(/[^a-zA-Z0-9]/g, "_")
+    return {
+      folder: "payment-slips",
+      resource_type: "auto",
+      public_id: `${cleanName}-${Date.now()}`,
+    }
   }
 })
-// middleware/upload.js-ல் add பண்ணுங்க
+
 const enrollmentStorage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: "enrollment-docs",
-    allowed_formats: ["jpg", "png", "jpeg", "webp", "pdf"]
+  params: async (req, file) => {
+    const cleanName = file.originalname.split(".")[0].replace(/[^a-zA-Z0-9]/g, "_")
+    return {
+      folder: "enrollment-docs",
+      resource_type: "auto",
+      public_id: `${cleanName}-${Date.now()}`,
+    }
   }
 })
+
 const galleryStorage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: "gallery",
-    allowed_formats: ["jpg", "png", "jpeg", "webp", "pdf"]
+  params: async (req, file) => {
+    const cleanName = file.originalname.split(".")[0].replace(/[^a-zA-Z0-9]/g, "_")
+    return {
+      folder: "gallery",
+      resource_type: "auto",
+      public_id: `${cleanName}-${Date.now()}`,
+    }
   }
 })
 
@@ -38,7 +54,7 @@ const categoryStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "categories",
-    allowed_formats: ["jpg", "png", "jpeg", "webp"]
+    resource_type: "auto"
   }
 })
 
@@ -46,7 +62,7 @@ const sliderStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "sliders",
-    allowed_formats: ["jpg", "png", "jpeg", "webp"]
+    resource_type: "auto"
   }
 })
 
@@ -54,10 +70,9 @@ const partnerStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "partners",
-    allowed_formats: ["jpg", "png", "jpeg", "webp", "svg"]
+    resource_type: "auto"
   }
 })
-
 
 const uploadGallery = multer({ storage: galleryStorage })
 const uploadEnrollment = multer({ storage: enrollmentStorage })

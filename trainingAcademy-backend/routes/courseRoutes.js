@@ -15,16 +15,24 @@ const {
 } = require("../controllers/courseController")
 
 router.get("/", getCourses)
-// Reorder route — MUST be before /:id route so it doesn't get treated as an id.
 router.put("/reorder/all", reorderCourses)
-
-// Slug-based routes — also MUST come before /:id, otherwise the ":id"
-// pattern would swallow them.
 router.get("/slug-available/:slug", checkSlugAvailability)
 router.get("/slug/:slug", getCourseBySlug)
 
-router.post("/", uploadCourse.single("image"), parseFormData, createCourse)
-router.put("/:id", uploadCourse.single("image"), parseFormData, updateCourse)
+router.post("/", uploadCourse.fields([
+    { name: "image",            maxCount: 1 },
+    { name: "handbookPdf",      maxCount: 1 },
+    { name: "handbookCardImage",maxCount: 1 },
+    { name: "syllabusPdf",      maxCount: 1 }
+]), parseFormData, createCourse)
+
+router.put("/:id", uploadCourse.fields([
+    { name: "image",            maxCount: 1 },
+    { name: "handbookPdf",      maxCount: 1 },
+    { name: "handbookCardImage",maxCount: 1 },
+    { name: "syllabusPdf",      maxCount: 1 }
+]), parseFormData, updateCourse)
+
 router.delete("/:id", deleteCourse)
 router.get("/:id", getCourseById)
 
