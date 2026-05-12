@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom"
 import "./BookingModal.css"
 
 export function getBookingType(course) {
-    if (course?.experienceBasedBooking)   return "experience"
+    const bypassKeywords = ["excavator", "haul truck", "skid steer"]
+    const isBypass = bypassKeywords.some(kw => course?.title?.toLowerCase().includes(kw))
+    
+    if (course?.experienceBasedBooking || isBypass)   return "experience"
     if (course?.slblPrice)                return "slbl"
     return "standard"
 }
@@ -104,33 +107,7 @@ export default function BookingModal({ course, onClose, initialSelection = null,
     const [shake,    setShake]    = useState(false)
     const [showErr,  setShowErr]  = useState(false)
 
-    // ── Bypass Logic — direct navigate if keywords match and initial selection exists ──
-    React.useEffect(() => {
-        const bypassKeywords = ["excavator", "haul truck", "skid steer"];
-        const isBypass = bypassKeywords.some(kw => course?.title?.toLowerCase().includes(kw));
-        
-        if (isBypass && initialSelection) {
-            // Re-use logic from handleConfirm but as a one-off effect
-            const base = course.slug ? `/book-now/course/${course.slug}` : `/book-now?courseId=${course._id}`;
-            const join = (qs) => {
-                const hasQ = base.includes("?");
-                const sep = hasQ ? "&" : "?";
-                const params = [qs, extraQueryParams.replace(/^&/, "")].filter(Boolean).join("&");
-                return params ? `${base}${sep}${params}` : base;
-            };
-            
-            const routes = {
-                "with-experience":    join("type=with-experience"),
-                "without-experience": join("type=without-experience"),
-                "slbl":               join("type=slbl"),
-                "sl":                 join("type=sl"),
-                "voc":                `/voc?courseId=${course._id}${extraQueryParams.startsWith('&') || extraQueryParams.startsWith('?') ? extraQueryParams : (extraQueryParams ? '&' + extraQueryParams : '')}`,
-                "standard":           join(""), 
-            };
-            onClose();
-            navigate(routes[initialSelection] || join(""));
-        }
-    }, [course, initialSelection, navigate, onClose, extraQueryParams]);
+
 
     if (!course) return null;
     const selectedOption = options.find(o => o.id === selected)

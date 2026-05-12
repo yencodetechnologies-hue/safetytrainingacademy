@@ -126,29 +126,17 @@ function CourseDetails() {
     const savings = originalPrice - sellingPrice
 
     const isSlbl = !!course?.slblPrice
-    const isExperience = !!course?.experienceBasedBooking && !isSlbl
+    const bypassKeywords = ["excavator", "haul truck", "skid steer"]
+    const isBypass = bypassKeywords.some(kw => course?.title?.toLowerCase().includes(kw))
+    const isExperience = (!!course?.experienceBasedBooking || isBypass) && !isSlbl
 
     const relatedCourses = courses
         .filter(c => c._id !== course._id)
         .slice(0, 4)
 
     const openBooking = (type) => {
-        // Direct navigation for specific earthmoving courses ONLY if a type is already chosen
-        const bypassKeywords = ['excavator', 'haul truck', 'skid steer'];
-        const isBypass = bypassKeywords.some(kw => 
-            course.title?.toLowerCase().includes(kw)
-        );
-
-        // For bypass courses, if no type is passed (e.g. from mobile bottom bar), default to with-experience
-        const activeType = type || (isBypass ? "with-experience" : null);
-
-        if (activeType && isBypass) {
-            navigate(`/book-now/course/${course.slug}?type=${activeType}${fromPortal ? "&fromPortal=true" : ""}`);
-            return;
-        }
-
         if (isExperience || isSlbl) {
-            setSelectedOptionId(activeType || null)
+            setSelectedOptionId(type || null)
             setShowModal(true)
         } else {
             navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)
@@ -175,7 +163,7 @@ function CourseDetails() {
                     <p className="cdp-price-note">All inclusive — no hidden fees</p>
                     <button
                         className="cdp-btn-book"
-                        onClick={() => navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)}
+                        onClick={() => openBooking()}
                     >
                         BOOK NOW — ${sellingPrice}
                     </button>
@@ -228,7 +216,7 @@ function CourseDetails() {
                     </p>
                     <button
                         className="cdp-btn-book"
-                        onClick={() => navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)}
+                        onClick={() => openBooking()}
                     >
                         Book Now — Pick a Date
                     </button>
@@ -264,7 +252,7 @@ function CourseDetails() {
                     <div className="cdp-sb-note">All inclusive · SafeWork NSW card fee included</div>
                     <button
                         className="cdp-sb-btn-main"
-                        onClick={() => navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)}
+                        onClick={() => openBooking()}
                     >
                         BOOK NOW — ${sellingPrice}
                     </button>
@@ -310,7 +298,7 @@ function CourseDetails() {
                     <div className="cdp-sb-note">All inclusive · SafeWork NSW card fee included</div>
                     <button
                         className="cdp-sb-btn-main"
-                        onClick={() => navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`)}
+                        onClick={() => openBooking()}
                     >
                         Book Now — Pick a Date
                     </button>

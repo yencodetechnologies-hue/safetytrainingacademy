@@ -182,6 +182,10 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
   // back to the existing single-button UI.
   const variants = getCourseVariants(course);
   const isVariantCourse = variants.length > 1;
+  const BYPASS_KEYWORDS = ['excavator', 'haul truck', 'skid steer'];
+  const shouldBypassModal = BYPASS_KEYWORDS.some(kw => 
+    course.title?.toLowerCase().includes(kw)
+  );
 
   // Helper: build the deep link for one variant. Mirrors the convention
   // used everywhere else (`?type=with-experience` etc.).
@@ -207,11 +211,7 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
   // ── Session display ───────────────────────────────────────────────────────
   const sessionPages = chunkArray(sessions, PAGE_SIZE);
 
-  // ── Bypass Modal Logic for specific courses ──────────────────────────────
-  const BYPASS_KEYWORDS = ["excavator", "haul truck", "skid steer"];
-  const shouldBypassModal = BYPASS_KEYWORDS.some(kw => 
-    course.title?.toLowerCase().includes(kw)
-  );
+
 
   return (
     <div className="cdm-root">
@@ -373,15 +373,12 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
                   const sunday = isSunday(s.date);
                   const handleBook = (e) => {
                     e.stopPropagation();
-                    if (isVariantCourse) {
-                      if (shouldBypassModal) {
-                        document.getElementById("cdm-variants")?.scrollIntoView({ behavior: "smooth" });
-                      } else {
+                    if (isVariantCourse && !shouldBypassModal) {
                         setSelectedSession(s);
                         setShowModal(true);
-                      }
                     } else {
-                      navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${fromPortal ? "&fromPortal=true" : ""}`);
+                      const typePart = shouldBypassModal ? "&type=with-experience" : "";
+                      navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${typePart}${fromPortal ? "&fromPortal=true" : ""}`);
                     }
                   };
                   return (
@@ -423,15 +420,12 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
                       const sunday = isSunday(s.date);
                       return (
                         <div key={s.id} className="cdm-date-slot"  onClick={() => {
-                          if (isVariantCourse) {
-                            if (shouldBypassModal) {
-                              document.getElementById("cdm-variants")?.scrollIntoView({ behavior: "smooth" });
-                            } else {
+                          if (isVariantCourse && !shouldBypassModal) {
                               setSelectedSession(s);
                               setShowModal(true);
-                            }
                           } else {
-                            navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${fromPortal ? "&fromPortal=true" : ""}`);
+                            const typePart = shouldBypassModal ? "&type=with-experience" : "";
+                            navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${typePart}${fromPortal ? "&fromPortal=true" : ""}`);
                           }
                         }} >
                           <div className={`cdm-date-cal ${sunday ? "sunday" : ""}`}>
@@ -453,16 +447,13 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
                             className="cdm-book-slot-btn"
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (isVariantCourse) {
-                                if (shouldBypassModal) {
-                                  document.getElementById("cdm-variants")?.scrollIntoView({ behavior: "smooth" });
+                                if (isVariantCourse && !shouldBypassModal) {
+                                    setSelectedSession(s);
+                                    setShowModal(true);
                                 } else {
-                                  setSelectedSession(s);
-                                  setShowModal(true);
+                                  const typePart = shouldBypassModal ? "&type=with-experience" : "";
+                                  navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${typePart}${fromPortal ? "&fromPortal=true" : ""}`);
                                 }
-                              } else {
-                                navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${fromPortal ? "&fromPortal=true" : ""}`);
-                              }
                             }}
                           >
                             Book
@@ -537,14 +528,12 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
         <button
           className="cdm-sticky-book"
           onClick={() => {
-            if (isVariantCourse) {
-              if (shouldBypassModal) {
-                navigate(`/book-now/course/${course.slug}?type=with-experience${fromPortal ? "&fromPortal=true" : ""}`);
-              } else {
-                setShowModal(true);
-              }
+            if (isVariantCourse && !shouldBypassModal) {
+              setShowModal(true);
             } else {
-              navigate(`/book-now/course/${course.slug}${fromPortal ? "?fromPortal=true" : ""}`);
+              const typePart = shouldBypassModal ? "?type=with-experience" : "";
+              const fromPart = fromPortal ? (typePart ? "&fromPortal=true" : "?fromPortal=true") : "";
+              navigate(`/book-now/course/${course.slug}${typePart}${fromPart}`);
             }
           }}
         >
