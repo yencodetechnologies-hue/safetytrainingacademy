@@ -242,21 +242,6 @@ function CourseLinkCards({ companyId }) {
             Share these links with specific employees for each course booking.
           </p>
         </div>
-        <button
-          onClick={() => navigate(`/book-now/company/${companyId}`)}
-          style={{
-            padding: "10px 18px",
-            fontSize: "13px",
-            fontWeight: 700,
-            borderRadius: "10px",
-            border: "none",
-            cursor: "pointer",
-            background: "#4f46e5",
-            color: "#fff",
-          }}
-        >
-          Add New Link
-        </button>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "16px" }}>
