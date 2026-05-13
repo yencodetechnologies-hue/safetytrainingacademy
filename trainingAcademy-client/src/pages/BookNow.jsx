@@ -577,7 +577,49 @@ function BookNow() {
 
                 setIsProcessing(true)
                 try {
-                    // ✅ 1. Register Company
+                    // ✅ 1. Build courses payload (no side effects)
+                    const coursesPayload = selectedCourses.map(sc => ({
+                        courseId:      sc.course._id,
+                        courseName:    sc.course.title,
+                        courseCode:    sc.course.courseCode,
+                        quantity:      sc.quantity,
+                        pricePerPerson: getIndividualCoursePrice(sc.course),
+                        sessionId:     sc.session?._id || "",
+                        sessionDate:   sc.session?.date || null,
+                        startTime:     sc.session?.startTime || "",
+                        endTime:       sc.session?.endTime || "",
+                    }))
+
+                    // ✅ 2. Charge card via eWAY FIRST — before creating any account.
+                    //    If the card is wrong the company is never registered, so the
+                    //    user can fix their card details and retry without hitting
+                    //    "account already registered".
+                    let ewayTransactionRef = paymentData.transactionId || ""
+                    if (paymentData.paymentMethod === "Card Payment") {
+                        const ewayRes = await fetch(`${API_URL}/api/payment/create`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                amount: coursePrice,
+                                email: paymentData.email,
+                                name: paymentData.name,
+                                phone: paymentData.phone,
+                                cardName: paymentData.cardName,
+                                cardNumber: paymentData.cardNumber,
+                                expiryMonth: paymentData.expiryMonth,
+                                expiryYear: paymentData.expiryYear,
+                                cvv: paymentData.cvv,
+                                currency: "AUD",
+                                userId: paymentData.phone,
+                                description: `Company booking - ${paymentData.name}`,
+                            })
+                        })
+                        const ewayData = await ewayRes.json()
+                        if (!ewayData.success) throw new Error(ewayData.message || "Card payment declined. Please check your card details and try again.")
+                        ewayTransactionRef = ewayData.gatewayTransactionId || ""
+                    }
+
+                    // ✅ 3. Register Company — only reached after successful payment
                     const res = await fetch(`${API_URL}/api/companies/register`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -594,25 +636,12 @@ function BookNow() {
 
                     const companyId = data.data._id
 
-                    // ✅ 2. Build courses payload
-                    const coursesPayload = selectedCourses.map(sc => ({
-                        courseId:      sc.course._id,
-                        courseName:    sc.course.title,
-                        courseCode:    sc.course.courseCode,
-                        quantity:      sc.quantity,
-                        pricePerPerson: getIndividualCoursePrice(sc.course),
-                        sessionId:     sc.session?._id || "",
-                        sessionDate:   sc.session?.date || null,
-                        startTime:     sc.session?.startTime || "",
-                        endTime:       sc.session?.endTime || "",
-                    }))
-
-                    // ✅ 3. Build FormData
+                    // ✅ 4. Build FormData
                     const formData = new FormData()
                     formData.append("companyId", companyId)
                     formData.append("amount", coursePrice)
                     formData.append("paymentMethod", paymentData.paymentMethod || "Bank Transfer")
-                    formData.append("transactionReference", paymentData.transactionId || "")
+                    formData.append("transactionReference", ewayTransactionRef)
                     formData.append("courseCount", selectedCourses.length)
                     formData.append("notes", "")
 
@@ -632,7 +661,7 @@ function BookNow() {
                         formData.append("receipt", paymentData.paymentSlip)
                     }
 
-                    // ✅ 4. Create CompanyPayment
+                    // ✅ 5. Create CompanyPayment
                     const paymentRes = await fetch(`${API_URL}/api/company-payments`, {
                         method: "POST",
                         body: formData
@@ -717,11 +746,37 @@ function BookNow() {
                         endTime:       sc.session?.endTime || "",
                     }))
 
+                    // Charge card via eWAY if card payment (before recording anything)
+                    let ewayTransactionRef = paymentData.transactionId || ""
+                    if (paymentData.paymentMethod === "Card Payment") {
+                        const ewayRes = await fetch(`${API_URL}/api/payment/create`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                amount: coursePrice,
+                                email: paymentData.email,
+                                name: paymentData.name,
+                                phone: paymentData.phone,
+                                cardName: paymentData.cardName,
+                                cardNumber: paymentData.cardNumber,
+                                expiryMonth: paymentData.expiryMonth,
+                                expiryYear: paymentData.expiryYear,
+                                cvv: paymentData.cvv,
+                                currency: "AUD",
+                                userId: paymentData.phone,
+                                description: `Company booking - ${paymentData.name}`,
+                            })
+                        })
+                        const ewayData = await ewayRes.json()
+                        if (!ewayData.success) throw new Error(ewayData.message || "Card payment declined. Please try again.")
+                        ewayTransactionRef = ewayData.gatewayTransactionId || ""
+                    }
+
                     const formData = new FormData()
                     formData.append("companyId", companyId)
                     formData.append("amount", coursePrice)
                     formData.append("paymentMethod", paymentData.paymentMethod || "Bank Transfer")
-                    formData.append("transactionReference", paymentData.transactionId || "")
+                    formData.append("transactionReference", ewayTransactionRef)
                     formData.append("courseCount", selectedCourses.length)
                     formData.append("notes", "")
 
@@ -818,6 +873,7 @@ function BookNow() {
                         formData.append("phone", paymentData.phone);
                         formData.append("paymentMethod", paymentData.paymentMethod);
                         formData.append("transactionId", paymentData.transactionId || "");
+                        formData.append("ewayTransactionId", paymentData.ewayTransactionId || "");
                         formData.append("courseId", selectedCourse?._id);
                         formData.append("sessionDate", selectedSession?.date);
                         formData.append("startTime", selectedSession?.startTime);
@@ -832,6 +888,7 @@ function BookNow() {
                             body: formData,
                         });
                         const data = await res.json();
+                        if (!res.ok) throw new Error(data.message || "Enrollment failed. Please contact support.");
                         studentId = data._id;
                         localStorage.setItem("enrollId", studentId);
                         slipUrl = data.courses?.[0]?.slipUrl || "";

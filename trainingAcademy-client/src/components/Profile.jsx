@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 import "../styles/Profile.css"
 import { API_URL } from "../data/service"
+import { AuthContext } from "../context/AuthContext"
 
 function Field({ label, value, fieldKey, type = "text", editing, form, onSet }) {
   return (
@@ -29,16 +30,17 @@ function Field({ label, value, fieldKey, type = "text", editing, form, onSet }) 
 }
 
 export default function Profile() {
-  const [profile,   setProfile]   = useState(null)
+  const { user } = useContext(AuthContext)
+  const [profile, setProfile] = useState(null)
   const [enrollDoc, setEnrollDoc] = useState(null)
-  const [loading,   setLoading]   = useState(true)
-  const [editing,   setEditing]   = useState(false)
-  const [saving,    setSaving]    = useState(false)
-  const [form,      setForm]      = useState({})
-  const [error,     setError]     = useState("")
-  const [success,   setSuccess]   = useState("")
+  const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({})
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
 
-  const studentId = localStorage.getItem("enrollId") || localStorage.getItem("studentId")
+  const studentId = user?.id || user?._id || localStorage.getItem("studentId")
 
   // ── Fetch both APIs ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -82,30 +84,30 @@ export default function Profile() {
   // ── Flatten both API responses → flat form ─────────────────────────────────
   const buildForm = (p, e) => ({
     // Personal
-    givenName:      e?.personalDetails?.givenName     || p?.name  || "",
-    surname:        e?.personalDetails?.surname       || "",
-    middleName:     e?.personalDetails?.middleName    || "",
-    preferredName:  e?.personalDetails?.preferredName || "",
-    dob:            e?.personalDetails?.dob
-                      ? e.personalDetails.dob.split("T")[0]
-                      : (p?.dob || ""),
-    gender:         e?.personalDetails?.gender        || "",
-    email:          e?.personalDetails?.email         || p?.email || "",
-    mobilePhone:    e?.personalDetails?.mobilePhone   || p?.phone || "",
-    homePhone:      e?.personalDetails?.homePhone     || "",
-    workPhone:      e?.personalDetails?.workPhone     || "",
-    bio:            p?.bio || "",
+    givenName: e?.personalDetails?.givenName || p?.name || "",
+    surname: e?.personalDetails?.surname || "",
+    middleName: e?.personalDetails?.middleName || "",
+    preferredName: e?.personalDetails?.preferredName || "",
+    dob: e?.personalDetails?.dob
+      ? e.personalDetails.dob.split("T")[0]
+      : (p?.dob || ""),
+    gender: e?.personalDetails?.gender || "",
+    email: e?.personalDetails?.email || p?.email || "",
+    mobilePhone: e?.personalDetails?.mobilePhone || p?.phone || "",
+    homePhone: e?.personalDetails?.homePhone || "",
+    workPhone: e?.personalDetails?.workPhone || "",
+    bio: p?.bio || "",
 
     // Address — all from enrollment form residential
-    residentialAddress: e?.address?.residential?.address  || "",
-    suburb:             e?.address?.residential?.suburb   || "",
-    state:              e?.address?.residential?.state    || "",
-    postcode:           e?.address?.residential?.postcode || "",
+    residentialAddress: e?.address?.residential?.address || "",
+    suburb: e?.address?.residential?.suburb || "",
+    state: e?.address?.residential?.state || "",
+    postcode: e?.address?.residential?.postcode || "",
 
     // Emergency
-    emergencyName:         e?.emergencyContact?.name          || "",
-    emergencyRelationship: e?.emergencyContact?.relationship  || "",
-    emergencyPhone:        e?.emergencyContact?.contactNumber || "",
+    emergencyName: e?.emergencyContact?.name || "",
+    emergencyRelationship: e?.emergencyContact?.relationship || "",
+    emergencyPhone: e?.emergencyContact?.contactNumber || "",
   })
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
@@ -120,45 +122,45 @@ export default function Profile() {
         studentId,
         section: 1,
         personalDetails: {
-          title:         form.title        || enrollDoc?.personalDetails?.title || "",
-          surname:       form.surname,
-          givenName:     form.givenName,
-          middleName:    form.middleName,
+          title: form.title || enrollDoc?.personalDetails?.title || "",
+          surname: form.surname,
+          givenName: form.givenName,
+          middleName: form.middleName,
           preferredName: form.preferredName,
-          dob:           form.dob,
-          gender:        form.gender,
-          email:         form.email,
-          homePhone:     form.homePhone,
-          workPhone:     form.workPhone,
-          mobilePhone:   form.mobilePhone,
+          dob: form.dob,
+          gender: form.gender,
+          email: form.email,
+          homePhone: form.homePhone,
+          workPhone: form.workPhone,
+          mobilePhone: form.mobilePhone,
         },
         address: {
           residential: {
-            address:  form.residentialAddress,
-            suburb:   form.suburb,
-            state:    form.state,
+            address: form.residentialAddress,
+            suburb: form.suburb,
+            state: form.state,
             postcode: form.postcode,
           },
           // keep existing postal as-is
           postal: {
-            address:  enrollDoc?.address?.postal?.address  || "",
-            suburb:   enrollDoc?.address?.postal?.suburb   || "",
-            state:    enrollDoc?.address?.postal?.state    || "",
+            address: enrollDoc?.address?.postal?.address || "",
+            suburb: enrollDoc?.address?.postal?.suburb || "",
+            state: enrollDoc?.address?.postal?.state || "",
             postcode: enrollDoc?.address?.postal?.postcode || "",
           }
         },
         emergencyContact: {
-          name:          form.emergencyName,
-          relationship:  form.emergencyRelationship,
+          name: form.emergencyName,
+          relationship: form.emergencyRelationship,
           contactNumber: form.emergencyPhone,
-          consent:       enrollDoc?.emergencyContact?.consent ?? false,
+          consent: enrollDoc?.emergencyContact?.consent ?? false,
         }
       }
 
       const res = await fetch(`${API_URL}/api/enrollment-form/section`, {
-        method:  "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify(payload),
+        body: JSON.stringify(payload),
       })
 
       const data = await res.json()
@@ -192,29 +194,29 @@ export default function Profile() {
 
   const joinedDate = profile?.createdAt
     ? new Date(profile.createdAt).toLocaleDateString("en-AU", {
-        day: "numeric", month: "short", year: "numeric"
-      })
+      day: "numeric", month: "short", year: "numeric"
+    })
     : "—"
 
   const p = profile
   const e = enrollDoc
 
-  const displayName    = [e?.personalDetails?.givenName, e?.personalDetails?.surname]
-                           .filter(Boolean).join(" ") || p?.name || "Student"
-  const displayEmail   = e?.personalDetails?.email      || p?.email || "—"
-  const displayPhone   = e?.personalDetails?.mobilePhone || p?.phone || "—"
-  const displayDob     = e?.personalDetails?.dob
-                           ? new Date(e.personalDetails.dob).toLocaleDateString("en-AU")
-                           : "—"
-  const displayGender    = e?.personalDetails?.gender        || "—"
+  const displayName = [e?.personalDetails?.givenName, e?.personalDetails?.surname]
+    .filter(Boolean).join(" ") || p?.name || "Student"
+  const displayEmail = e?.personalDetails?.email || p?.email || "—"
+  const displayPhone = e?.personalDetails?.mobilePhone || p?.phone || "—"
+  const displayDob = e?.personalDetails?.dob
+    ? new Date(e.personalDetails.dob).toLocaleDateString("en-AU")
+    : "—"
+  const displayGender = e?.personalDetails?.gender || "—"
   const displayPreferred = e?.personalDetails?.preferredName || "—"
-  const displayStreet    = e?.address?.residential?.address  || "—"
-  const displaySuburb    = e?.address?.residential?.suburb   || "—"
-  const displayState     = e?.address?.residential?.state    || "—"
-  const displayPostcode  = e?.address?.residential?.postcode || "—"
-  const displayEName     = e?.emergencyContact?.name          || "—"
-  const displayERel      = e?.emergencyContact?.relationship  || "—"
-  const displayEPhone    = e?.emergencyContact?.contactNumber || "—"
+  const displayStreet = e?.address?.residential?.address || "—"
+  const displaySuburb = e?.address?.residential?.suburb || "—"
+  const displayState = e?.address?.residential?.state || "—"
+  const displayPostcode = e?.address?.residential?.postcode || "—"
+  const displayEName = e?.emergencyContact?.name || "—"
+  const displayERel = e?.emergencyContact?.relationship || "—"
+  const displayEPhone = e?.emergencyContact?.contactNumber || "—"
 
   return (
     <div className="sp-page">
@@ -244,7 +246,7 @@ export default function Profile() {
       </div>
 
       {success && <div className="sp-toast sp-toast-success">✓ {success}</div>}
-      {error   && <div className="sp-toast sp-toast-error">⚠ {error}</div>}
+      {error && <div className="sp-toast sp-toast-error">⚠ {error}</div>}
 
       <div className="sp-layout">
 
@@ -252,7 +254,13 @@ export default function Profile() {
         <div className="sp-card-wrap">
           <div className="sp-profile-card">
             <div className="sp-avatar-wrap">
-              <div className="sp-avatar"><i className="fa-solid fa-user" /></div>
+              <div className="sp-avatar">
+                {p?.profileImage ? (
+                  <img src={p.profileImage} alt="Profile" className="sp-avatar-img" />
+                ) : (
+                  <i className="fa-solid fa-user" />
+                )}
+              </div>
             </div>
             <h2 className="sp-card-name">{displayName}</h2>
             <p className="sp-card-id">{p?.studentId || "—"}</p>
@@ -274,21 +282,21 @@ export default function Profile() {
               <p>Your basic personal details</p>
             </div>
             <div className="sp-grid-2">
-              <Field label="Given Name"     value={e?.personalDetails?.givenName || p?.name} fieldKey="givenName"
+              <Field label="Given Name" value={e?.personalDetails?.givenName || p?.name} fieldKey="givenName"
                 editing={editing} form={form} onSet={set} />
-              <Field label="Surname"        value={e?.personalDetails?.surname}   fieldKey="surname"
+              <Field label="Surname" value={e?.personalDetails?.surname} fieldKey="surname"
                 editing={editing} form={form} onSet={set} />
-              <Field label="Preferred Name" value={displayPreferred}              fieldKey="preferredName"
+              <Field label="Preferred Name" value={displayPreferred} fieldKey="preferredName"
                 editing={editing} form={form} onSet={set} />
-              <Field label="Gender"         value={displayGender}                 fieldKey="gender"
+              <Field label="Gender" value={displayGender} fieldKey="gender"
                 editing={editing} form={form} onSet={set} />
-              <Field label="Email Address"  value={displayEmail}                  fieldKey="email" type="email"
+              <Field label="Email Address" value={displayEmail} fieldKey="email" type="email"
                 editing={editing} form={form} onSet={set} />
-              <Field label="Mobile Phone"   value={displayPhone}                  fieldKey="mobilePhone" type="tel"
+              <Field label="Mobile Phone" value={displayPhone} fieldKey="mobilePhone" type="tel"
                 editing={editing} form={form} onSet={set} />
-              <Field label="Date of Birth"  value={displayDob}                    fieldKey="dob" type="date"
+              <Field label="Date of Birth" value={displayDob} fieldKey="dob" type="date"
                 editing={editing} form={form} onSet={set} />
-              <Field label="Home Phone"     value={e?.personalDetails?.homePhone || "—"} fieldKey="homePhone" type="tel"
+              <Field label="Home Phone" value={e?.personalDetails?.homePhone || "—"} fieldKey="homePhone" type="tel"
                 editing={editing} form={form} onSet={set} />
             </div>
             <div className="sp-grid-1">
@@ -304,13 +312,13 @@ export default function Profile() {
               <p>Your residential address</p>
             </div>
             <div className="sp-grid-1">
-              <Field label="Street Address" value={displayStreet}   fieldKey="residentialAddress"
+              <Field label="Street Address" value={displayStreet} fieldKey="residentialAddress"
                 editing={editing} form={form} onSet={set} />
             </div>
             <div className="sp-grid-3">
-              <Field label="Suburb"   value={displaySuburb}   fieldKey="suburb"
+              <Field label="Suburb" value={displaySuburb} fieldKey="suburb"
                 editing={editing} form={form} onSet={set} />
-              <Field label="State"    value={displayState}    fieldKey="state"
+              <Field label="State" value={displayState} fieldKey="state"
                 editing={editing} form={form} onSet={set} />
               <Field label="Postcode" value={displayPostcode} fieldKey="postcode"
                 editing={editing} form={form} onSet={set} />
@@ -324,11 +332,11 @@ export default function Profile() {
               <p>Person to contact in case of emergency</p>
             </div>
             <div className="sp-grid-2">
-              <Field label="Contact Name"         value={displayEName}  fieldKey="emergencyName"
+              <Field label="Contact Name" value={displayEName} fieldKey="emergencyName"
                 editing={editing} form={form} onSet={set} />
-              <Field label="Relationship"         value={displayERel}   fieldKey="emergencyRelationship"
+              <Field label="Relationship" value={displayERel} fieldKey="emergencyRelationship"
                 editing={editing} form={form} onSet={set} />
-              <Field label="Contact Phone"        value={displayEPhone} fieldKey="emergencyPhone" type="tel"
+              <Field label="Contact Phone" value={displayEPhone} fieldKey="emergencyPhone" type="tel"
                 editing={editing} form={form} onSet={set} />
             </div>
           </div>

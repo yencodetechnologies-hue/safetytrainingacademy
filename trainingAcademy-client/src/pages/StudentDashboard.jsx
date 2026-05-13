@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import "../styles/StudentDashboard.css";
 import LLNDAssessment from "../components/llnd/LLNDAssessment";
 import { useNavigate } from "react-router-dom";
-import { API_URL } from "../data/service";  
+import { API_URL } from "../data/service";
 
 export default function StudentDashboard() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -43,7 +43,7 @@ export default function StudentDashboard() {
   const assessmentPassed = data?.assessmentPassed ?? false;
   const enrollmentFormApproved = data?.enrollmentFormApproved ?? false;
   const assessmentScore = data?.assessmentScore ?? null;
-  
+
   const paymentMethod = data?.paymentMethod || "";
   const enrollmentType = data?.enrollmentType || "";
 

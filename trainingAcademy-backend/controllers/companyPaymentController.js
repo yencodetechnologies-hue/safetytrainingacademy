@@ -175,8 +175,16 @@ exports.createPayment = async (req, res) => {
     // ── Receipt upload (Cloudinary URL from multer) ───────────
     const receiptUrl = req.file?.path || "";
 
-    const isCard = paymentMethod === "Card";
-    const status = isCard ? "success" : "pending";
+    const isCard = paymentMethod === "Card" || paymentMethod === "Card Payment";
+
+    // Card payments must have a real eWAY transactionReference to be auto-confirmed.
+    const isCardConfirmed = isCard && !!transactionReference;
+    let status = isCardConfirmed ? "success" : "pending";
+    let confirmed = isCardConfirmed;
+
+    if (isCard && !transactionReference) {
+      console.warn(`[CompanyPayment] Card payment created without transactionReference! Setting to pending. Company: ${companyId}`);
+    }
 
     const payment = await CompanyPayment.create({
       companyId,
@@ -192,7 +200,7 @@ exports.createPayment = async (req, res) => {
       transactionReference: transactionReference || "",
       notes: notes || "",
       status: status,
-      confirmed: isCard,
+      confirmed: confirmed,
     });
 
     // ── AUTOMATIC LINK GENERATION for successful payments ──────

@@ -1,10 +1,14 @@
 const axios = require('axios');
 const Payment = require('../models/Payment');
 
-const EWAY_BASE_URL =
-  (process.env.EWAY_ENVIRONMENT || '').trim() === 'Production'
-    ? 'https://api.ewaypayments.com'
-    : 'https://api.sandbox.ewaypayments.com';
+const EWAY_ENV = (process.env.EWAY_ENVIRONMENT || 'Sandbox').trim();
+const IS_PRODUCTION = EWAY_ENV.toLowerCase() === 'production';
+
+const EWAY_BASE_URL = IS_PRODUCTION
+  ? 'https://api.ewaypayments.com'
+  : 'https://api.sandbox.ewaypayments.com';
+
+console.log(`[eWAY] Initialize: Environment=${EWAY_ENV}, URL=${EWAY_BASE_URL}`);
 
 function getEwayAuthHeader() {
   const apiKey = (process.env.EWAY_API_KEY || '').trim();
@@ -12,6 +16,8 @@ function getEwayAuthHeader() {
   
   if (!apiKey || !apiPassword) {
     console.error('CRITICAL: eWAY API credentials missing in environment variables');
+  } else {
+    console.log(`[eWAY] Credentials loaded: Key(${apiKey.length} chars, starts with ${apiKey.slice(0, 5)}...), Pass(${apiPassword.length} chars)`);
   }
 
   const credentials = Buffer.from(`${apiKey}:${apiPassword}`).toString('base64');
@@ -59,6 +65,36 @@ function randomInvoiceNumber() {
   return String(Math.floor(Math.random() * 90000000) + 10000000);
 }
 
+function translateEwayErrors(errors) {
+  if (!errors) return 'Payment processing error';
+  
+  const errorMap = {
+    'V6000': 'Validation error. Please check your information.',
+    'V6021': 'Invalid cardholder name. Please enter the name exactly as it appears on your card.',
+    'V6022': 'Invalid card number. Please check your 16-digit card number.',
+    'V6023': 'Invalid CVN (the 3 digits on the back of your card).',
+    'V6040': 'Invalid expiry month. Please check your card.',
+    'V6041': 'Invalid expiry year. Please check your card.',
+    'V6042': 'Invalid expiry month. Please check your card.',
+    'V6043': 'Invalid expiry year. Please check your card.',
+    'V6044': 'Your card has expired. Please use a different card.',
+    'V6045': 'Invalid CVN (the 3 digits on the back of your card).',
+    'V6153': 'Invalid CVN (the 3 digits on the back of your card). Please check and try again.',
+    'V6011': 'Invalid amount.',
+    'V6012': 'Invalid amount.',
+    'V6013': 'Invalid invoice number.',
+    'V6014': 'Invalid invoice reference.',
+    'V6081': 'Invalid CVN.',
+    'V6082': 'Invalid CVN.',
+  };
+
+  const codes = String(errors).split(',').map(c => c.trim());
+  const messages = codes.map(code => errorMap[code] || `Error ${code}: Please check your card details.`);
+  
+  // Return unique messages
+  return [...new Set(messages)].join(' ');
+}
+
 // ============================================
 // 1. CREATE PAYMENT (Direct Card)
 exports.createPayment = async (req, res) => {
@@ -70,6 +106,14 @@ exports.createPayment = async (req, res) => {
       currency = 'AUD', userId, description,
       courseName, // ADDED: for GTM tracking
     } = req.body;
+
+    // Log request (sanitize card)
+    console.log('[eWAY] createPayment called:', {
+      amount, email, name, phone, cardName, 
+      cardNumber: cardNumber ? 'XXXX...' : 'missing',
+      expiryMonth, expiryYear, cvv: cvv ? 'XXX' : 'missing',
+      userId, description
+    });
 
     const numericAmount = parseFloat(amount); // CHANGE 2: store as number
 
@@ -112,29 +156,37 @@ exports.createPayment = async (req, res) => {
       Method: 'ProcessPayment',
     };
 
-    console.log('eWAY Request:', JSON.stringify(requestData, null, 2));
+    // Sanitize request for logging
+    const logRequest = { ...requestData, Customer: { ...requestData.Customer, CardDetails: { ...requestData.Customer.CardDetails, Number: 'XXXX-XXXX-XXXX-' + requestData.Customer.CardDetails.Number.slice(-4), CVN: 'XXX' } } };
+    console.log('[eWAY] Request:', JSON.stringify(logRequest, null, 2));
 
     const ewayResponse = await callEwayTransaction(requestData);
 
-    console.log('eWAY Response:', JSON.stringify(ewayResponse, null, 2));
+    console.log('[eWAY] Response:', JSON.stringify({
+      TransactionID: ewayResponse.TransactionID,
+      TransactionStatus: ewayResponse.TransactionStatus,
+      ResponseCode: ewayResponse.ResponseCode,
+      ResponseMessage: ewayResponse.ResponseMessage,
+      Errors: ewayResponse.Errors
+    }, null, 2));
 
     if (ewayResponse.Errors) {
       payment.status = 'failed';
       await payment.save();
       return res.status(400).json({
         success: false,
-        message: ewayResponse.Errors,
+        message: translateEwayErrors(ewayResponse.Errors),
       });
     }
 
-    const isApproved = ewayResponse.TransactionStatus === true;
+    // STRICT CHECK: TransactionStatus must be true AND ResponseCode must be "00" (Approved)
+    const isApproved = ewayResponse.TransactionStatus === true && ewayResponse.ResponseCode === '00';
 
     payment.gatewayTransactionId = String(ewayResponse.TransactionID || '');
     payment.status = isApproved ? 'completed' : 'failed';
     payment.authorizationCode = ewayResponse.AuthorisationCode || '';
     await payment.save();
 
-    // CHANGE 3: return order object for GTM tracking
     return res.json({
       success: isApproved,
       transactionId: payment.transactionId,
@@ -150,7 +202,7 @@ exports.createPayment = async (req, res) => {
       } : null,
       message: isApproved
         ? 'Payment successful'
-        : `Payment declined: ${ewayResponse.ResponseCode} - ${ewayResponse.ResponseMessage}`,
+        : `Payment declined: ${ewayResponse.ResponseCode} - ${ewayResponse.ResponseMessage || 'Declined by bank'}`,
     });
   } catch (error) {
     const ewayErrorResponse = error.response?.data;
@@ -205,7 +257,18 @@ exports.createPaymentWithToken = async (req, res) => {
       TransactionType: 'Purchase',
     };
 
+    // Sanitize request for logging
+    console.log('[eWAY Token Payment] Request:', JSON.stringify({ ...requestData, Customer: { TokenCustomerID: 'XXXXXX' } }, null, 2));
+
     const ewayResponse = await callEwayTransaction(requestData);
+
+    console.log('[eWAY Token Payment] Response:', JSON.stringify({
+      TransactionID: ewayResponse.TransactionID,
+      TransactionStatus: ewayResponse.TransactionStatus,
+      ResponseCode: ewayResponse.ResponseCode,
+      ResponseMessage: ewayResponse.ResponseMessage,
+      Errors: ewayResponse.Errors
+    }, null, 2));
 
     if (ewayResponse.Errors) {
       payment.status = 'failed';
@@ -213,11 +276,12 @@ exports.createPaymentWithToken = async (req, res) => {
       return res.status(400).json({
         success: false,
         transactionId: payment.transactionId,
-        message: ewayResponse.Errors,
+        message: translateEwayErrors(ewayResponse.Errors),
       });
     }
 
-    const isApproved = ewayResponse.TransactionStatus === true;
+    // STRICT CHECK
+    const isApproved = ewayResponse.TransactionStatus === true && ewayResponse.ResponseCode === '00';
 
     payment.gatewayTransactionId = String(ewayResponse.TransactionID || '');
     payment.status = isApproved ? 'completed' : 'failed';
@@ -228,7 +292,7 @@ exports.createPaymentWithToken = async (req, res) => {
       success: isApproved,
       transactionId: payment.transactionId,
       status: payment.status,
-      message: isApproved ? 'Payment successful' : 'Payment declined',
+      message: isApproved ? 'Payment successful' : `Payment declined: ${ewayResponse.ResponseCode} - ${ewayResponse.ResponseMessage || 'Declined by bank'}`,
     });
   } catch (error) {
     console.error('Token Payment Error:', error.response?.data || error.message);
@@ -264,10 +328,28 @@ exports.createPaymentToken = async (req, res) => {
       TransactionType: 'Purchase',
     };
 
+    console.log('[eWAY Create Token] Request: (Card details hidden)');
+
     const ewayResponse = await callEwayTransaction(requestData);
 
+    console.log('[eWAY Create Token] Response:', JSON.stringify({
+      TransactionStatus: ewayResponse.TransactionStatus,
+      ResponseCode: ewayResponse.ResponseCode,
+      ResponseMessage: ewayResponse.ResponseMessage,
+      Errors: ewayResponse.Errors
+    }, null, 2));
+
     if (ewayResponse.Errors) {
-      return res.status(400).json({ success: false, error: ewayResponse.Errors });
+      return res.status(400).json({ success: false, error: translateEwayErrors(ewayResponse.Errors) });
+    }
+
+    const isSuccess = ewayResponse.TransactionStatus === true || ewayResponse.ResponseCode === '00';
+
+    if (!isSuccess) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Token creation failed: ${ewayResponse.ResponseCode} - ${ewayResponse.ResponseMessage}` 
+      });
     }
 
     return res.json({
