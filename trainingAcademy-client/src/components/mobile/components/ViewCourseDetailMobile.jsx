@@ -215,8 +215,10 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
     if (!pdfUrl) return;
     let fixedUrl = pdfUrl;
     if (pdfUrl.includes("res.cloudinary.com")) {
-      // Remove any potential fl_attachment to ensure it opens in browser
-      fixedUrl = pdfUrl.replace("/fl_attachment/", "/");
+      fixedUrl = pdfUrl.replace(/\/fl_attachment[^/]*\//g, "/");
+      if (fixedUrl.includes("/raw/upload/")) {
+        fixedUrl = fixedUrl.replace("/raw/upload/", "/raw/upload/fl_attachment:false/");
+      }
       if (!fixedUrl.startsWith("http")) fixedUrl = `https://${fixedUrl.replace(/^\/+/, "")}`;
     } else if (!pdfUrl.startsWith("http")) {
       fixedUrl = `${API_URL}/${pdfUrl}`;

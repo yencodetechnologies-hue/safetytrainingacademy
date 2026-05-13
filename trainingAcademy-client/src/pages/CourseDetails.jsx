@@ -59,9 +59,12 @@ function CourseDetails() {
         if (!pdfUrl) return;
         let fixedUrl = pdfUrl;
         if (pdfUrl.includes("res.cloudinary.com")) {
-            // Remove any potential fl_attachment if it exists or just use the clean URL
-            fixedUrl = pdfUrl.replace("/fl_attachment/", "/");
-            // Ensure protocol is present
+            // Remove any existing fl_attachment flag first
+            fixedUrl = pdfUrl.replace(/\/fl_attachment[^/]*\//g, "/");
+            // For raw uploads: add fl_attachment:false so browser displays inline instead of downloading
+            if (fixedUrl.includes("/raw/upload/")) {
+                fixedUrl = fixedUrl.replace("/raw/upload/", "/raw/upload/fl_attachment:false/");
+            }
             if (!fixedUrl.startsWith("http")) fixedUrl = `https://${fixedUrl.replace(/^\/+/, "")}`;
         } else if (!pdfUrl.startsWith("http")) {
             fixedUrl = `${API_URL}/${pdfUrl}`;
