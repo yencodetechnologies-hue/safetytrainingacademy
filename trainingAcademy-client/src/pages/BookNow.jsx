@@ -577,24 +577,7 @@ function BookNow() {
 
                 setIsProcessing(true)
                 try {
-                    // ✅ 1. Register Company
-                    const res = await fetch(`${API_URL}/api/companies/register`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            companyName: paymentData.name,
-                            email:       paymentData.email,
-                            password:    "123456",
-                            mobileNumber: paymentData.phone,
-                            contactPerson: paymentData.contactPerson || "",
-                        })
-                    })
-                    const data = await res.json()
-                    if (!res.ok) throw new Error(data.message || "Registration failed")
-
-                    const companyId = data.data._id
-
-                    // ✅ 2. Build courses payload
+                    // ✅ 1. Build courses payload (no side effects)
                     const coursesPayload = selectedCourses.map(sc => ({
                         courseId:      sc.course._id,
                         courseName:    sc.course.title,
@@ -607,7 +590,10 @@ function BookNow() {
                         endTime:       sc.session?.endTime || "",
                     }))
 
-                    // ✅ 3. Charge card via eWAY if card payment (before recording anything)
+                    // ✅ 2. Charge card via eWAY FIRST — before creating any account.
+                    //    If the card is wrong the company is never registered, so the
+                    //    user can fix their card details and retry without hitting
+                    //    "account already registered".
                     let ewayTransactionRef = paymentData.transactionId || ""
                     if (paymentData.paymentMethod === "Card Payment") {
                         const ewayRes = await fetch(`${API_URL}/api/payment/create`, {
@@ -629,9 +615,26 @@ function BookNow() {
                             })
                         })
                         const ewayData = await ewayRes.json()
-                        if (!ewayData.success) throw new Error(ewayData.message || "Card payment declined. Please try again.")
+                        if (!ewayData.success) throw new Error(ewayData.message || "Card payment declined. Please check your card details and try again.")
                         ewayTransactionRef = ewayData.gatewayTransactionId || ""
                     }
+
+                    // ✅ 3. Register Company — only reached after successful payment
+                    const res = await fetch(`${API_URL}/api/companies/register`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            companyName: paymentData.name,
+                            email:       paymentData.email,
+                            password:    "123456",
+                            mobileNumber: paymentData.phone,
+                            contactPerson: paymentData.contactPerson || "",
+                        })
+                    })
+                    const data = await res.json()
+                    if (!res.ok) throw new Error(data.message || "Registration failed")
+
+                    const companyId = data.data._id
 
                     // ✅ 4. Build FormData
                     const formData = new FormData()
@@ -870,6 +873,7 @@ function BookNow() {
                         formData.append("phone", paymentData.phone);
                         formData.append("paymentMethod", paymentData.paymentMethod);
                         formData.append("transactionId", paymentData.transactionId || "");
+                        formData.append("ewayTransactionId", paymentData.ewayTransactionId || "");
                         formData.append("courseId", selectedCourse?._id);
                         formData.append("sessionDate", selectedSession?.date);
                         formData.append("startTime", selectedSession?.startTime);

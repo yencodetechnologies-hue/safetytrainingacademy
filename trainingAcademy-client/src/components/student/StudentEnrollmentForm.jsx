@@ -43,7 +43,7 @@ export default function StudentEnrollmentForm() {
         if (formRes.ok) {
           const formData = await formRes.json();
           if (formData.length > 0) {
-            const data = formData[0];``
+            const data = formData[0]; ``
             if (data?.personalDetails?.dob) {
               data.personalDetails.dob = data.personalDetails.dob.split("T")[0];
             }
