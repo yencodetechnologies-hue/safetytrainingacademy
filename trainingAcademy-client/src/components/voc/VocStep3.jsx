@@ -45,48 +45,79 @@ function VocStep3({ details = {}, courses, onBack, onComplete }) {
 
         if (method === "card") {
             if (!card.name || !card.number || !card.month || !card.year || !card.cvv) {
-                alert("Please fill in all card details.")
+                setError("Please fill in all card details.")
                 return
             }
         } else {
             if (!bank.refId.trim()) {
-                alert("Please enter your Transaction / Reference ID.")
+                setError("Please enter your Transaction / Reference ID.")
                 return
             }
             if (!bank.proof) {
-                alert("Please upload your payment receipt.")
+                setError("Please upload your payment receipt.")
                 return
             }
-        }
-
-        const fd = new FormData()
-        fd.append("firstName",     details.firstName     || "")
-        fd.append("lastName",      details.lastName      || "")
-        fd.append("email",         details.email         || "")
-        fd.append("phone",         details.phone         || "")
-        fd.append("studentId",     details.studentId     || "")
-        fd.append("streetAddress", details.streetAddress || "")
-        fd.append("city",          details.city          || "")
-        fd.append("state",         details.state         || "")
-        fd.append("postcode",      details.postcode      || "")
-        fd.append("courses",       JSON.stringify(courses))
-        fd.append("paymentMethod", method)
-
-        if (method === "card") {
-            fd.append("card", JSON.stringify({
-                name:   card.name,
-                number: card.number.replace(/\s/g, ""),
-                month:  card.month,
-                year:   card.year,
-                cvv:    card.cvv,
-            }))
-        } else {
-            fd.append("bank",  JSON.stringify({ refId: bank.refId.trim() }))
-            fd.append("proof", bank.proof)
         }
 
         try {
             setSubmitting(true)
+
+            let ewayTransactionId = ""
+
+            // ── Step 1: charge card via eWay (same endpoint as main booking) ──
+            if (method === "card") {
+                const payRes = await fetch(`${API_URL}/api/payment/pay`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        cardName:    card.name,
+                        cardNumber:  card.number.replace(/\s/g, ""),
+                        expiryMonth: card.month,
+                        expiryYear:  card.year,
+                        cvv:         card.cvv,
+                        amount:      total,
+                        email:       details.email,
+                        name:        `${details.firstName} ${details.lastName}`.trim(),
+                        phone:       details.phone,
+                        userId:      details.phone,
+                        description: `VOC Assessment Payment`,
+                    }),
+                })
+                const payResult = await payRes.json()
+                if (!payResult.success) {
+                    setError(payResult.message || "Your card was declined. Please check your card details or try a different card.")
+                    return
+                }
+                ewayTransactionId = payResult.transactionId || payResult.gatewayTransactionId || ""
+            }
+
+            // ── Step 2: submit VOC record ──
+            const fd = new FormData()
+            fd.append("firstName",     details.firstName     || "")
+            fd.append("lastName",      details.lastName      || "")
+            fd.append("email",         details.email         || "")
+            fd.append("phone",         details.phone         || "")
+            fd.append("studentId",     details.studentId     || "")
+            fd.append("streetAddress", details.streetAddress || "")
+            fd.append("city",          details.city          || "")
+            fd.append("state",         details.state         || "")
+            fd.append("postcode",      details.postcode      || "")
+            fd.append("courses",       JSON.stringify(courses))
+            fd.append("paymentMethod", method)
+
+            if (method === "card") {
+                fd.append("card", JSON.stringify({
+                    name:        card.name,
+                    last4:       card.number.replace(/\s/g, "").slice(-4),
+                    expiryMonth: card.month,
+                    expiryYear:  card.year,
+                }))
+                fd.append("ewayTransactionId", ewayTransactionId)
+            } else {
+                fd.append("bank",  JSON.stringify({ refId: bank.refId.trim() }))
+                fd.append("proof", bank.proof)
+            }
+
             const res = await fetch(`${API_URL}/api/voc`, { method: "POST", body: fd })
             if (!res.ok) {
                 const payload = await res.json().catch(() => ({}))

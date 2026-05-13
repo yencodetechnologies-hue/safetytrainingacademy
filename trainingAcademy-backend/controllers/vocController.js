@@ -1,65 +1,5 @@
-const axios = require("axios")
 const VocSubmission = require("../models/VocSubmission")
 const sendEmail = require("../config/sendEmail")
-
-// ── eWay ──────────────────────────────────────────────────────
-const EWAY_BASE_URL = (process.env.EWAY_ENVIRONMENT || "").trim().toLowerCase() === "production"
-    ? "https://api.ewaypayments.com"
-    : "https://api.sandbox.ewaypayments.com"
-
-function ewayAuth() {
-    const key  = (process.env.EWAY_API_KEY      || "").trim()
-    const pass = (process.env.EWAY_API_PASSWORD || "").trim()
-    return `Basic ${Buffer.from(`${key}:${pass}`).toString("base64")}`
-}
-
-const EWAY_ERRORS = {
-    V6021: "Invalid cardholder name.",
-    V6022: "Invalid card number. Please check your 16-digit card number.",
-    V6023: "Invalid CVV.",
-    V6040: "Invalid expiry month.",
-    V6041: "Invalid expiry year.",
-    V6044: "Your card has expired.",
-    V6045: "Invalid CVV.",
-}
-function translateEwayErrors(errors) {
-    if (!errors) return "Payment processing error."
-    const msgs = String(errors).split(",").map(c => EWAY_ERRORS[c.trim()] || `Payment declined (${c.trim()}).`)
-    return [...new Set(msgs)].join(" ")
-}
-
-async function chargeCardViaEway({ amount, email, firstName, lastName, phone, cardName, cardNumber, expiryMonth, expiryYear, cvv }) {
-    const inv = String(Math.floor(Math.random() * 90000000) + 10000000)
-    const payload = {
-        Customer: {
-            Reference: email,
-            Email: email,
-            FirstName: firstName,
-            LastName: lastName || firstName,
-            Phone: phone || "",
-            CardDetails: {
-                Name: cardName,
-                Number: String(cardNumber).replace(/\s/g, ""),
-                ExpiryMonth: String(expiryMonth).padStart(2, "0"),
-                ExpiryYear: String(expiryYear).slice(-2),
-                CVN: String(cvv),
-            },
-        },
-        Payment: {
-            TotalAmount: Math.round(amount * 100),
-            InvoiceNumber: inv,
-            InvoiceDescription: "VOC Assessment Payment",
-            InvoiceReference: `VOC-${inv}`,
-            CurrencyCode: "AUD",
-        },
-        TransactionType: "Purchase",
-        Method: "ProcessPayment",
-    }
-    const res = await axios.post(`${EWAY_BASE_URL}/Transaction`, payload, {
-        headers: { Authorization: ewayAuth(), "Content-Type": "application/json" },
-    })
-    return res.data
-}
 
 // ─────────────────────────────────────────────────────────────
 // Helpers
@@ -197,52 +137,15 @@ exports.createSubmission = async (req, res) => {
         }
 
         if (paymentMethod === "card") {
-            const cardRaw = typeof b.card === "string" ? safeJson(b.card) : (b.card || {})
-            if (!cardRaw.number || !cardRaw.cvv) {
-                return res.status(400).json({ error: "Card number and CVV are required." })
+            // Payment was already charged via /api/payment/pay on the frontend.
+            // We store the returned transaction ID + safe card metadata only.
+            const ewayTxId = String(b.ewayTransactionId || "").trim()
+            if (!ewayTxId) {
+                return res.status(400).json({ error: "Payment transaction ID is required." })
             }
-            let ewayRes
-            try {
-                ewayRes = await chargeCardViaEway({
-                    amount:      doc.amount,
-                    email:       b.email,
-                    firstName:   b.firstName,
-                    lastName:    b.lastName,
-                    phone:       b.phone,
-                    cardName:    cardRaw.name,
-                    cardNumber:  cardRaw.number,
-                    expiryMonth: cardRaw.month,
-                    expiryYear:  cardRaw.year,
-                    cvv:         cardRaw.cvv,
-                })
-            } catch (ewayErr) {
-                console.error("[VOC eWay Error]", ewayErr.response?.data || ewayErr.message)
-                const errData = ewayErr.response?.data
-                return res.status(402).json({
-                    error: errData?.Errors ? translateEwayErrors(errData.Errors) : "Payment failed. Please try again.",
-                })
-            }
-
-            if (ewayRes.Errors) {
-                return res.status(402).json({ error: translateEwayErrors(ewayRes.Errors) })
-            }
-
-            const approved = ewayRes.TransactionStatus === true && ewayRes.ResponseCode === "00"
-            if (!approved) {
-                return res.status(402).json({
-                    error: `Payment declined: ${ewayRes.ResponseCode} — ${ewayRes.ResponseMessage || "Declined by bank"}`,
-                })
-            }
-
-            const ewayTxId = String(ewayRes.TransactionID || "")
-            doc.card = {
-                name:          String(cardRaw.name || "").trim(),
-                last4:         String(cardRaw.number).replace(/\s/g, "").slice(-4),
-                expiryMonth:   String(cardRaw.month || ""),
-                expiryYear:    String(cardRaw.year || ""),
-                transactionId: ewayTxId,
-            }
-            doc.ewayTransactionId = ewayTxId
+            doc.card = sanitizeCard(b.card)
+            doc.card.transactionId = ewayTxId
+            doc.ewayTransactionId  = ewayTxId
             doc.bank = { refId: "", proofUrl: "" }
         } else {
             const bank = typeof b.bank === "string" ? safeJson(b.bank) : (b.bank || {})
