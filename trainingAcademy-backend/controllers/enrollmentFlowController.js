@@ -1,4 +1,5 @@
 const EnrollmentFlow = require("../models/EnrollmentFlows");
+const Payment = require("../models/Payment");
 const CourseLink = require("../models/CourseLink");
 const Course = require("../models/Course");
 const Schedule = require("../models/schedule");
@@ -25,11 +26,19 @@ exports.createFlow = async (req, res) => {
       quantity,
       paymentMethod,
       transactionId,
+      ewayTransactionId,
       slipUrl,
       companyId,
       source,
       sourceToken
     } = req.body;
+
+    // For card payments the bank-ref transactionId field is empty;
+    // persist the eWay transaction ID instead.
+    const resolvedTransactionId =
+      paymentMethod === "Card Payment" && ewayTransactionId
+        ? ewayTransactionId
+        : (transactionId || "");
 
     const seats = Math.max(Number(quantity) || 1, 1);
 
@@ -122,11 +131,12 @@ exports.createFlow = async (req, res) => {
           courseName,
         },
         payment: {
-          amount:        resolvedPrice,
-          method:        resolvedMethod,
-          transactionId: transactionId || "",
-          slipUrl:       slipUrl || "",
-          status:        resolvedPaymentStatus,
+          amount:               resolvedPrice,
+          method:               resolvedMethod,
+          transactionId:        resolvedTransactionId,
+          gatewayTransactionId: paymentMethod === "Card Payment" ? (ewayTransactionId || "") : "",
+          slipUrl:              slipUrl || "",
+          status:               resolvedPaymentStatus,
         }
       }],
       meta: {
@@ -196,9 +206,10 @@ exports.updatePayment = async (req, res) => {
           "items.$.payment.status": payment.status,
           "items.$.payment.paymentId": payment.paymentId,
           "items.$.payment.amount": payment.amount,
-          "items.$.payment.method": payment.method,           // ✅ payment method
-          "items.$.payment.transactionId": payment.transactionId, // ✅ transaction ID
-          "items.$.payment.slipUrl": paymentSlipUrl,          // ✅ image URL
+          "items.$.payment.method": payment.method,
+          "items.$.payment.transactionId": payment.transactionId,
+          "items.$.payment.gatewayTransactionId": payment.gatewayTransactionId || "",
+          "items.$.payment.slipUrl": paymentSlipUrl,
           "items.$.payment.paidAt": new Date(),
           currentStep: 2
         }
@@ -540,6 +551,31 @@ exports.getAllPayments = async (req, res) => {
       }
     });
 
+    // Collect all transactionIds that don't yet have a gatewayTransactionId stored
+    const missingTxnIds = [];
+    enrollments.forEach(enroll => {
+      enroll.items.forEach(item => {
+        const p = item.payment;
+        if (p?.transactionId && !p.gatewayTransactionId) {
+          missingTxnIds.push(p.transactionId);
+        }
+      });
+    });
+
+    // Bulk-fetch gatewayTransactionId from Payment collection for those records
+    const gatewayMap = {};
+    if (missingTxnIds.length > 0) {
+      const paymentDocs = await Payment.find(
+        { transactionId: { $in: missingTxnIds } },
+        { transactionId: 1, gatewayTransactionId: 1 }
+      ).lean();
+      paymentDocs.forEach(doc => {
+        if (doc.gatewayTransactionId) {
+          gatewayMap[doc.transactionId] = doc.gatewayTransactionId;
+        }
+      });
+    }
+
     let payments = [];
     let stats = {
       pending: 0,
@@ -560,6 +596,7 @@ exports.getAllPayments = async (req, res) => {
         const payment = item.payment;
         if (!payment) return;
 
+<<<<<<< HEAD
         const amount = payment.amount || item.course.price || 0;
         
         // Find gateway ID: 1st by transactionId, 2nd by fuzzy match (normalized phone + amount)
@@ -570,16 +607,26 @@ exports.getAllPayments = async (req, res) => {
           const fKey = `${cleanStudentPhone}_${amount}`;
           gId = fuzzyMap[fKey] || "—";
         }
+=======
+        const gatewayTransactionId =
+          payment.gatewayTransactionId ||
+          gatewayMap[payment.transactionId] ||
+          "";
+>>>>>>> 03b8133bb073dc7aff978b3b08288654436b95ea
 
         payments.push({
           id: payment.paymentId,
           enrollmentId: enroll._id,
           itemId: item._id,
           createdAt: payment.paidAt || enroll.createdAt,
+<<<<<<< HEAD
           date: payment.paidAt 
+=======
+          date: payment.paidAt
+>>>>>>> 03b8133bb073dc7aff978b3b08288654436b95ea
             ? new Date(payment.paidAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
             : new Date(enroll.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
-          sessionDate: enroll.sessionDate 
+          sessionDate: enroll.sessionDate
             ? new Date(enroll.sessionDate).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
             : null,
           student: enroll.studentId?.name,
@@ -590,10 +637,17 @@ exports.getAllPayments = async (req, res) => {
 
           amount: amount,
 
+<<<<<<< HEAD
           status: payment.status,
           transId: payment.transactionId,
           gatewayTransId: gId,
           method: payment.method,
+=======
+          status:              payment.status,
+          transId:             payment.transactionId,
+          gatewayTransactionId,
+          method:              payment.method,
+>>>>>>> 03b8133bb073dc7aff978b3b08288654436b95ea
           type: enroll.enrollmentType || "Individual",
           slipUrl: payment.slipUrl || null,
         });

@@ -33,7 +33,7 @@ const safeJson = (str) => {
 // Reuses the VOC confirmation HTML body from bookingEmailController so we have
 // one source of truth for the brand template.
 const sendVocConfirmationEmail = async ({ toEmail, firstName, lastName, submissionId, amountPaid, paymentMethod }) => {
-    const shortId = String(submissionId).slice(0, 8)
+    const shortId = String(submissionId).slice(-8).toUpperCase()
     const priceStr = `$${Number(amountPaid).toFixed(2)}`
 
     const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
@@ -144,8 +144,9 @@ exports.createSubmission = async (req, res) => {
                 return res.status(400).json({ error: "Payment transaction ID is required." })
             }
             doc.card = sanitizeCard(b.card)
-            doc.card.transactionId = ewayTxId
-            doc.ewayTransactionId  = ewayTxId
+            doc.card.transactionId    = ewayTxId
+            doc.ewayTransactionId     = ewayTxId
+            doc.gatewayTransactionId  = ewayTxId
             doc.bank = { refId: "", proofUrl: "" }
         } else {
             const bank = typeof b.bank === "string" ? safeJson(b.bank) : (b.bank || {})
@@ -168,7 +169,7 @@ exports.createSubmission = async (req, res) => {
             toEmail: submission.email,
             firstName: submission.firstName,
             lastName: submission.lastName,
-            submissionId: submission._id,
+            submissionId: submission._id.toString(),
             amountPaid: submission.amount,
             paymentMethod: paymentMethod === "card" ? "Credit / Debit Card" : "Bank Transfer",
         })

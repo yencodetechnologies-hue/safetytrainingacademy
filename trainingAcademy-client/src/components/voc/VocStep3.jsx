@@ -1,6 +1,19 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import "./VocStep3.css"
 import { API_URL } from "../../data/service"
+
+function luhnCheck(value) {
+    const digits = value.replace(/\D/g, "")
+    if (digits.length < 13 || digits.length > 19) return false
+    let sum = 0, isEven = false
+    for (let i = digits.length - 1; i >= 0; i--) {
+        let d = parseInt(digits[i], 10)
+        if (isEven) { d *= 2; if (d > 9) d -= 9 }
+        sum += d
+        isEven = !isEven
+    }
+    return sum % 10 === 0
+}
 
 const MONTHS = ["01","02","03","04","05","06","07","08","09","10","11","12"]
 const YEARS = Array.from({ length: 12 }, (_, i) => String(new Date().getFullYear() + i).slice(-2))
@@ -35,17 +48,32 @@ function VocStep3({ details = {}, courses, onBack, onComplete }) {
 
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState("")
+    const processingRef = useRef(false)
 
     const formatCard = (val) => {
         return val.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim()
     }
 
     const handleSubmit = async () => {
+        if (processingRef.current) return
         setError("")
 
         if (method === "card") {
             if (!card.name || !card.number || !card.month || !card.year || !card.cvv) {
                 setError("Please fill in all card details.")
+                return
+            }
+            const digits = card.number.replace(/\D/g, "")
+            if (digits.length < 13 || digits.length > 19) {
+                setError("Card number must be 13–19 digits.")
+                return
+            }
+            if (!luhnCheck(card.number)) {
+                setError("Invalid card number. Please check and try again.")
+                return
+            }
+            if (!/^\d{3,4}$/.test(card.cvv)) {
+                setError("CVV must be 3 or 4 digits.")
                 return
             }
         } else {
@@ -59,6 +87,7 @@ function VocStep3({ details = {}, courses, onBack, onComplete }) {
             }
         }
 
+        processingRef.current = true
         try {
             setSubmitting(true)
 
@@ -147,6 +176,7 @@ function VocStep3({ details = {}, courses, onBack, onComplete }) {
         } catch (err) {
             setError(err.message || "Submission failed. Please try again.")
         } finally {
+            processingRef.current = false
             setSubmitting(false)
         }
     }

@@ -47,6 +47,13 @@ exports.createStudent = async (req, res) => {
       }
     }
 
+    // For card payments the bank-transfer transactionId field is empty;
+    // use the eWay transaction ID so it's visible in the admin panel.
+    const resolvedTransactionId =
+      data.paymentMethod === "Card Payment" && ewayTransactionId
+        ? ewayTransactionId
+        : (transactionId || "");
+
     let student = await StudentMain.findOne({ email: data.email });
 
     const rawPassword =
@@ -70,7 +77,7 @@ exports.createStudent = async (req, res) => {
             courseId: data.courseId,
             sessionId: data.sessionId,
             paymentMethod: data.paymentMethod,
-            transactionId: data.transactionId,
+            transactionId: resolvedTransactionId,
             slipUrl: paymentSlipUrl,
             step: 2
           }
@@ -104,7 +111,7 @@ exports.createStudent = async (req, res) => {
           courseId: data.courseId,
           sessionId: data.sessionId,
           paymentMethod: data.paymentMethod,
-          transactionId: data.transactionId,
+          transactionId: resolvedTransactionId,
           slipUrl: paymentSlipUrl,
           step: 2
         });
@@ -520,6 +527,7 @@ exports.getPaymentsByCompany = async (req, res) => {
             total,
             paid: isPaid ? total : 0,
             balance: isPaid ? 0 : total,
+            gatewayTransactionId: payment.card?.gatewayTransactionId || payment.gatewayTransactionId || "",
           });
         }
       } else {
@@ -533,6 +541,7 @@ exports.getPaymentsByCompany = async (req, res) => {
           total: payment.amount || 0,
           paid: isPaid ? payment.amount || 0 : 0,
           balance: isPaid ? 0 : payment.amount || 0,
+          gatewayTransactionId: payment.card?.gatewayTransactionId || payment.gatewayTransactionId || "",
         });
       }
     }
@@ -546,7 +555,7 @@ exports.getPaymentsByCompany = async (req, res) => {
 
 exports.paySelected = async (req, res) => {
   try {
-    const { flowIds, amount, method, companyId, transactionId } = req.body;
+    const { flowIds, amount, method, companyId, transactionId, gatewayTransactionId } = req.body;
     const receiptUrl = req.file?.path || "";
     const ids = JSON.parse(flowIds || "[]");
 
@@ -565,6 +574,7 @@ exports.paySelected = async (req, res) => {
         $set: {
           "items.0.payment.method": method,
           "items.0.payment.transactionId": transactionId || "",
+          "items.0.payment.gatewayTransactionId": isCard ? (gatewayTransactionId || transactionId || "") : "",
           "items.0.payment.slipUrl": receiptUrl,
           "items.0.payment.status": status,
         }
@@ -583,6 +593,7 @@ exports.paySelected = async (req, res) => {
         courseCount: ids.length,
         receiptUrl,
         transactionReference: transactionId || "",
+        gatewayTransactionId: isCard ? (gatewayTransactionId || transactionId || "") : "",
         status: status,
         confirmed: confirmed,
       });

@@ -63,6 +63,10 @@ function ReceiptModal({ row, onClose, onConfirm }) {
               <div className="cp2-info-val cp2-amount">${Number(row.amount || 0).toFixed(2)}</div>
             </div>
             <div className="cp2-info-box">
+              <div className="cp2-info-label">Transaction ID</div>
+              <div className="cp2-info-val" style={{ fontFamily: "monospace", fontSize: 13 }}>{row.transactionId}</div>
+            </div>
+            <div className="cp2-info-box">
               <div className="cp2-info-label">Payment Method</div>
               <div className="cp2-info-val">{row.paymentMethod}</div>
             </div>
@@ -325,10 +329,11 @@ const CompanyPayment = () => {
             courseCount:   p.courseCount || 0,
             type:          (p.courses && p.courses.length > 0) ? "course_purchase" : "student_payment",
             amount:        p.amount || 0,
-            paymentMethod: p.paymentMethod || "—",
-            status:        p.status || "pending",
-            receiptUrl:    p.receiptUrl || "",
-            confirmed:     p.confirmed || false,
+            paymentMethod:       p.paymentMethod || "—",
+            transactionId:       p.gatewayTransactionId || "—",
+            status:              p.status || "pending",
+            receiptUrl:          p.receiptUrl || "",
+            confirmed:           p.confirmed || false,
           })));
           setCurrentPage(1);
         }
@@ -483,6 +488,7 @@ const CompanyPayment = () => {
                     <th>Mobile</th>
                     <th>Courses / Students</th>
                     <th>Amount</th>
+                    <th>Transaction ID</th>
                     <th>Method</th>
                     <th>Status</th>
                     <th>Action</th>
@@ -490,7 +496,7 @@ const CompanyPayment = () => {
                 </thead>
                 <tbody>
                   {paginatedRows.length === 0 ? (
-                    <tr><td colSpan={10} className="cp2-empty">No records found.</td></tr>
+                    <tr><td colSpan={11} className="cp2-empty">No records found.</td></tr>
                   ) : paginatedRows.map(r => (
                     <tr key={r.id} className={r.confirmed ? "cp2-row-confirmed" : ""}>
                       <td className="cp2-td-muted">
@@ -503,6 +509,7 @@ const CompanyPayment = () => {
                       <td className="cp2-td-muted">{r.mobile}</td>
                       <td className="cp2-td-center">{renderCoursesCell(r)}</td>
                       <td className="cp2-td-amount">${Number(r.amount).toFixed(2)}</td>
+                      <td className="cp2-td-mono" style={{ fontSize: 11 }}>{r.transactionId}</td>
                       <td className="cp2-td-method">{r.paymentMethod}</td>
                       <td><StatusBadge status={r.status} confirmed={r.confirmed} /></td>
                       <td>
@@ -560,6 +567,10 @@ const CompanyPayment = () => {
                   <div className="cp2-mc-row">
                     <span className="cp2-mc-label">Amount</span>
                     <span className="cp2-td-amount">${Number(r.amount).toFixed(2)}</span>
+                  </div>
+                  <div className="cp2-mc-row">
+                    <span className="cp2-mc-label">Transaction ID</span>
+                    <span style={{ fontFamily: "monospace", fontSize: 11 }}>{r.transactionId}</span>
                   </div>
                   <div className="cp2-mc-row">
                     <span className="cp2-mc-label">Method</span>
