@@ -87,7 +87,7 @@ function ReceiptModal({ row, onClose, onConfirm }) {
                 />
                 <button
                   className="cp2-open-btn"
-                  onClick={() => window.open(row.receiptUrl, "_blank")}
+                  onClick={() => { const u = row.receiptUrl; window.open(/\.pdf($|\?)/i.test(u) ? `https://docs.google.com/viewer?url=${encodeURIComponent(u)}` : u, "_blank"); }}
                 >
                   Open in New Tab ↗
                 </button>
