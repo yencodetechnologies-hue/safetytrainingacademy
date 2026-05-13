@@ -1,7 +1,8 @@
 import "../styles/PublicNavbar.css";
 import logo from "../assets/SafetyTrainingAcademylogo.png";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { API_URL } from "../data/service";
 
 const mobileMenuItems = [
   { label: "Home", path: "/" },
@@ -17,13 +18,30 @@ const mobileMenuItems = [
   { label: "Sign In", path: "/login" },
 ];
 
-function PublicNavbar({ courses = [] }) {
+function PublicNavbar({ courses: propCourses }) {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [showResources, setShowResources] = useState(false);
-  const [showComboDropdown, setShowComboDropdown] = useState(false);
+  const [courses, setCourses] = useState(propCourses || []);
+
+  useEffect(() => {
+    if (!propCourses || propCourses.length === 0) {
+      const fetchCourses = async () => {
+        try {
+          const res = await fetch(`${API_URL}/api/courses?status=Active`);
+          const data = await res.json();
+          setCourses(Array.isArray(data) ? data : []);
+        } catch (err) {
+          console.error("Navbar fetch error:", err);
+        }
+      };
+      fetchCourses();
+    } else {
+      setCourses(propCourses);
+    }
+  }, [propCourses]);
 
   const groupedCourses = courses.reduce((acc, course) => {
     if (!acc[course.category]) acc[course.category] = [];

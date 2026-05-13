@@ -7,6 +7,7 @@ import { API_URL } from "../../data/service"
 
 function ComboCourses() {
     const [courses, setCourses] = useState([])
+    const [allCourses, setAllCourses] = useState([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -14,6 +15,7 @@ function ComboCourses() {
             .then(res => res.json())
             .then(data => {
                 const list = Array.isArray(data) ? data : []
+                setAllCourses(list)
                 // Show courses that have comboEnabled flag OR belong to "Combo Courses" category
                 const combo = list.filter(c =>
                     (c?.comboEnabled === true || c?.category?.toLowerCase().includes("combo")) && 
@@ -27,7 +29,7 @@ function ComboCourses() {
 
     return (
         <section>
-            <PublicNavbar />
+            <PublicNavbar courses={allCourses} />
             <div className="all-courses-wrapper">
                 <div className="all-courses-header">
                     <h2>Combo Courses</h2>

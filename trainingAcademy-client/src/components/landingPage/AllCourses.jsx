@@ -58,7 +58,7 @@ function AllCourses() {
 
   return (
     <section>
-      <PublicNavbar />
+      <PublicNavbar courses={courses} />
       <div className="all-courses-wrapper">
         <div className="all-courses-header">
           <h2>{selectedCategory ? selectedCategory : "All Courses"}</h2>

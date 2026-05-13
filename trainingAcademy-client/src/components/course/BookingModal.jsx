@@ -19,8 +19,8 @@ export function getBookingOptions(course) {
             {
                 id: "with-experience",
                 label: "With Experience",
-                price: course.withExperiencePrice,
-                originalPrice: course.withExperienceOriginal,
+                price: course.withExperiencePrice || course.comboPrice || course.sellingPrice,
+                originalPrice: course.withExperienceOriginal || course.originalPrice,
                 dur: course.duration || "1 day",
                 description: "Already have experience in this field",
                 isVoc: false,
@@ -28,8 +28,8 @@ export function getBookingOptions(course) {
             {
                 id: "without-experience",
                 label: "Without Experience",
-                price: course.withoutExperiencePrice,
-                originalPrice: course.withoutExperienceOriginal,
+                price: course.withoutExperiencePrice || course.comboPrice || course.sellingPrice,
+                originalPrice: course.withoutExperienceOriginal || course.originalPrice,
                 dur: course.duration || "1 day",
                 description: "No prior experience needed",
                 isVoc: false,

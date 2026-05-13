@@ -165,10 +165,8 @@ function CourseDetails() {
     const HeroPriceCard = () => (
         <div className="cdp-price-card">
 
-            {/* SLBL */}
             {isSlbl && (
                 <>
-                    <div className="cdp-pc-label">Course Fee</div>
                     <div className="cdp-price-row">
                         <span className="cdp-price-now">${sellingPrice}</span>
                         {course.slblStrikePrice && (
@@ -178,42 +176,46 @@ function CourseDetails() {
                             <span className="cdp-save-badge">Save ${savings}</span>
                         )}
                     </div>
-                    <p className="cdp-price-note">All inclusive — no hidden fees</p>
+                    <p className="cdp-price-note">
+                        All inclusive — no hidden fees · SafeWork NSW card fee included
+                    </p>
                     <button
                         className="cdp-btn-book"
                         onClick={() => openBooking(null, true)}
                     >
-                        BOOK NOW — ${sellingPrice}
+                        Book Now — Pick a Date
                     </button>
                 </>
             )}
 
-            {/* EXPERIENCE */}
             {isExperience && (
                 <>
-                    <div className="cdp-pc-label">Course Fee</div>
                     <div className="cdp-price-row">
                         <span className="cdp-price-now">${course.withExperiencePrice}</span>
                         {course.withExperienceOriginal && (
                             <span className="cdp-price-old">${course.withExperienceOriginal}</span>
                         )}
-                        {course.withExperienceOriginal > course.withExperiencePrice && (
-                            <span className="cdp-save-badge">Save ${course.withExperienceOriginal - course.withExperiencePrice}</span>
+                        {(course.withExperienceOriginal || originalPrice) > course.withExperiencePrice && (
+                            <span className="cdp-save-badge">Save ${(course.withExperienceOriginal || originalPrice) - course.withExperiencePrice}</span>
                         )}
                     </div>
-                    <p className="cdp-price-note">All inclusive — no hidden fees</p>
-                    <button
-                        className="cdp-btn-book cdp-btn-exp-with"
-                        onClick={() => openBooking("with-experience", true)}
-                    >
-                        ${course.withExperiencePrice} &nbsp; Book With Experience
-                    </button>
-                    <button
-                        className="cdp-btn-book cdp-btn-exp-without"
-                        onClick={() => openBooking("without-experience", true)}
-                    >
-                        ${course.withoutExperiencePrice} &nbsp; Book Without Experience
-                    </button>
+                    <p className="cdp-price-note">
+                        All inclusive — no hidden fees · SafeWork NSW card fee included
+                    </p>
+                    <div className="cdp-exp-btns">
+                        <button
+                            className="cdp-btn-book cdp-btn-exp-with"
+                            onClick={() => openBooking("with-experience", true)}
+                        >
+                            ${course.withExperiencePrice} &nbsp; Book With Experience
+                        </button>
+                        <button
+                            className="cdp-btn-book cdp-btn-exp-without"
+                            onClick={() => openBooking("without-experience", true)}
+                        >
+                            ${course.withoutExperiencePrice} &nbsp; Book Without Experience
+                        </button>
+                    </div>
                 </>
             )}
 

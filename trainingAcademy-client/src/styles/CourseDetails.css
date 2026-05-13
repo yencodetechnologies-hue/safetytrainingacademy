@@ -238,6 +238,13 @@ grid-template-columns:1fr;
   background: #0ea5d4;
 }
 
+.cdp-exp-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
 .cdp-btn-voc {
   display: block;
   width: 100%;

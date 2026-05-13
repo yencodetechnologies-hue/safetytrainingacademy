@@ -208,8 +208,6 @@ function AboutPage() {
                     nationally recognized training programs
                 </p>
                 <div className="ab-cta-btns">
-                    {/* Same fix as Contact.jsx — /courses is the admin
-                        listing; the public page lives at /all-courses. */}
                     <Link to="/book-now" className="ab-cta-btn ab-cta-white">Enrol Now</Link>
                     <Link to="/all-courses" className="ab-cta-btn ab-cta-outline">View Courses</Link>
                 </div>
