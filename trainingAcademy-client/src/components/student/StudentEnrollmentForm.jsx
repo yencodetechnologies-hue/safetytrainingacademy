@@ -188,36 +188,7 @@ export default function StudentEnrollmentForm() {
         section={step}
         setSection={setStep}
       />
-      <div className={`next-wrapper ${step > 1 ? "has-prev" : ""}`}>
-
-        {step > 1 && (
-          <button className="prev-btn" onClick={() => setStep(prev => prev - 1)}>
-            Previous
-          </button>
-        )}
-
-        {step < totalSteps ? (
-          <button className="next-btn" onClick={async () => {
-            await enrollmentRef.current?.saveSection(step)
-            setStep(prev => prev + 1)
-          }}>
-            Next
-          </button>
-        ) : (
-          <button
-            className="next-btn"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            style={{
-              opacity: isSubmitting ? 0.7 : 1,
-              cursor: isSubmitting ? "not-allowed" : "pointer"
-            }}
-          >
-            {isSubmitting ? "Submitting..." : "Submit"}
-          </button>
-        )}
-
-      </div>
+      {/* Removed redundant buttons because EnrollmentRegister internal sections already have them */}
     </section>
   );
 }

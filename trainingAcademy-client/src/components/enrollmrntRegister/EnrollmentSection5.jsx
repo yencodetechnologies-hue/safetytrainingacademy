@@ -2,14 +2,23 @@ import { useRef, useEffect, useState } from "react"
 import "../../styles/EnrollmentSection5.css"
 import { useNavigate } from "react-router-dom"
 import { API_URL } from "../../data/service"
+import ValidationToast from "./ValidationToast"
 
 function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
 
-    const set = (key, value) => setData(p => ({ ...p, [key]: value }))
+    const [errors, setErrors] = useState([])
+    const set = (key, value) => {
+        setData(p => ({ ...p, [key]: value }))
+        if (errors.includes(key)) {
+            setErrors(prev => prev.filter(e => e !== key))
+        }
+    }
     const canvasRef = useRef(null)
     const [isDrawing, setIsDrawing] = useState(false)
     const [hasSignature, setHasSignature] = useState(false)
-    const [showToast, setShowToast] = useState(false)
+    const [showToast, setShowToast] = useState(false) // Success toast
+    const [showErrorToast, setShowErrorToast] = useState(false) // Validation toast
+    const [missingFieldsNames, setMissingFieldsNames] = useState([])
     const [idFileError, setIdFileError] = useState("")
     const [photoFileError, setPhotoFileError] = useState("")
     const navigate = useNavigate()
@@ -138,24 +147,72 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
     }
 
     const handleValidation = () => {
-        if (!data.acceptPrivacy) return "Please read and accept the Privacy Notice."
-        if (!data.acceptTerms) return "Please accept the Terms & Conditions."
-        if (!data.studentName?.trim()) return "Please enter your Student Name."
-        if (!data.declarationDate) return "Please enter the Date."
-        if (!hasSignature) return "Please provide your Online Signature."
-        if (!data.idDocument && !data.idDocumentUrl) return "Please upload your Identification document."
+        const newErrors = []
+        const missingNames = []
+
+        const fieldLabels = {
+            acceptPrivacy: "Privacy Policy Acceptance",
+            acceptTerms: "Terms & Conditions Acceptance",
+            studentName: "Student Name",
+            declarationDate: "Declaration Date",
+            signature: "Online Signature",
+            idDocument: "Identification Document"
+        }
+
+        if (!data.acceptPrivacy) {
+            newErrors.push("acceptPrivacy")
+            missingNames.push(fieldLabels.acceptPrivacy)
+        }
+        if (!data.acceptTerms) {
+            newErrors.push("acceptTerms")
+            missingNames.push(fieldLabels.acceptTerms)
+        }
+        if (!data.studentName?.trim()) {
+            newErrors.push("studentName")
+            missingNames.push(fieldLabels.studentName)
+        }
+        if (!data.declarationDate) {
+            newErrors.push("declarationDate")
+            missingNames.push(fieldLabels.declarationDate)
+        }
+        if (!hasSignature) {
+            newErrors.push("signature")
+            missingNames.push(fieldLabels.signature)
+        }
+        if (!data.idDocument && !data.idDocumentUrl) {
+            newErrors.push("idDocument")
+            missingNames.push(fieldLabels.idDocument)
+        }
+
+        if (newErrors.length > 0) {
+            setErrors(newErrors)
+            setMissingFieldsNames(missingNames)
+            setShowErrorToast(true)
+            return "error"
+        }
         return null
+    }
+
+    const closeErrorToastAndScroll = () => {
+        setShowErrorToast(false)
+        if (errors.length > 0) {
+            const firstError = errors[0]
+            const el = document.getElementById(`s5-${firstError}`)
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" })
+                el.focus()
+            }
+        }
     }
 
     const handleSubmit = async () => {
         const error = handleValidation()
-        if (error) {
-            alert(error)
-            return
-        }
+        if (error) return
+
         const apiError = await validateAndSubmit()
         if (apiError) {
-            alert(apiError)
+            setMissingFieldsNames([apiError])
+            setShowErrorToast(true)
             return
         }
         setShowToast(true)
@@ -264,7 +321,7 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
             </div>
 
             <div className="s5-card">
-                <label className="s5-checkbox-label">
+                <label className={`s5-checkbox-label ${errors.includes("acceptPrivacy") ? "s5-label-error" : ""}`} id="s5-acceptPrivacy">
                     <input
                         type="checkbox"
                         checked={data.acceptPrivacy || false}
@@ -273,7 +330,7 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
                     I have read and understood the Privacy Notice.
                     <span className="s5-required"> *</span>
                 </label>
-                <label className="s5-checkbox-label" style={{ marginTop: 12 }}>
+                <label className={`s5-checkbox-label ${errors.includes("acceptTerms") ? "s5-label-error" : ""}`} style={{ marginTop: 12 }} id="s5-acceptTerms">
                     <input
                         type="checkbox"
                         checked={data.acceptTerms || false}
@@ -293,22 +350,24 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
                 </ul>
                 <div className="s5-row-2" style={{ marginTop: 16 }}>
                     <div className="s5-field">
-                        <label className="s5-label">
+                        <label className={`s5-label ${errors.includes("studentName") ? "s5-label-error" : ""}`}>
                             Student Name <span className="s5-required">*</span>
                         </label>
                         <input
-                            className="s5-input"
+                            id="s5-studentName"
+                            className={`s5-input ${errors.includes("studentName") ? "s5-input-error" : ""}`}
                             value={data.studentName || ""}
                             onChange={e => set("studentName", e.target.value)}
                         />
                     </div>
                     <div className="s5-field">
-                        <label className="s5-label">
+                        <label className={`s5-label ${errors.includes("declarationDate") ? "s5-label-error" : ""}`}>
                             Date <span className="s5-required">*</span>
                         </label>
                         <input
+                            id="s5-declarationDate"
                             type="date"
-                            className="s5-input"
+                            className={`s5-input ${errors.includes("declarationDate") ? "s5-input-error" : ""}`}
                             value={data.declarationDate || ""}
                             onChange={e => set("declarationDate", e.target.value)}
                         />
@@ -316,11 +375,11 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
                 </div>
             </div>
 
-            <div className="s5-card">
-                <label className="s5-label">
+            <div className="s5-card" id="s5-signature">
+                <label className={`s5-label ${errors.includes("signature") ? "s5-label-error" : ""}`}>
                     Online Signature <span className="s5-required">*</span>
                 </label>
-                <div className="s5-signature-wrapper">
+                <div className={`s5-signature-wrapper ${errors.includes("signature") ? "s5-dropzone-error" : ""}`}>
                     <canvas
                         ref={canvasRef}
                         className="s5-signature-canvas"
@@ -358,16 +417,16 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
             <div className="s5-upload-row">
 
                 {/* ✅ ID Document upload card */}
-                <div className="s5-upload-card">
+                <div className="s5-upload-card" id="s5-idDocument">
                     <div className="s5-upload-card-header">
                         <span className="s5-upload-icon">📄</span>
-                        <span className="s5-upload-label">
+                        <span className={`s5-upload-label ${errors.includes("idDocument") ? "s5-label-error" : ""}`}>
                             Identification document <span className="s5-required">*</span>
                         </span>
                     </div>
                     <p className="s5-upload-hint">e.g. Passport / Driver Licence</p>
                     <div
-                        className={`s5-dropzone ${(data.idDocument || data.idDocumentUrl) ? "s5-dropzone-active" : ""} ${idFileError ? "s5-dropzone-error" : ""}`}
+                        className={`s5-dropzone ${(data.idDocument || data.idDocumentUrl) ? "s5-dropzone-active" : ""} ${idFileError || errors.includes("idDocument") ? "s5-dropzone-error" : ""}`}
                         onClick={() => handleFileClick("s5-id-input")}
                     >
                         {data.idDocument ? (
@@ -521,12 +580,27 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
                     </p>
                     <button
                         className="es5-toast-btn"
-                        onClick={() => navigate("/student")}
+                        onClick={() => navigate("/enrollment-success")}
                     >
-                        Go to Dashboard
+                        Finish Enrollment
                     </button>
                 </div>
             )}
+
+            <div className="s5-footer">
+                <button className="s5-prev-btn" onClick={prev}>
+                    Previous
+                </button>
+                <button className="s5-submit-btn" onClick={handleSubmit}>
+                    Submit Enrollment
+                </button>
+            </div>
+
+            <ValidationToast 
+                show={showErrorToast} 
+                onOk={closeErrorToastAndScroll} 
+                missingFields={missingFieldsNames} 
+            />
 
         </div>
     )

@@ -11,21 +11,17 @@ function CourseCard({ course, fromPortal }) {
     const [showModal, setShowModal] = useState(false)
     const [selectedOptionId, setSelectedOptionId] = useState(null)
 
-    const BYPASS_KEYWORDS = ["excavator", "haul truck", "skid steer"];
-    const shouldBypassModal = BYPASS_KEYWORDS.some(kw => 
-        course.title?.toLowerCase().includes(kw)
-    );
-
     const options = getBookingOptions(course)
     const sellingPrice = course?.sellingPrice || null
     const originalPrice = course?.originalPrice || null
     const savings = originalPrice > sellingPrice ? originalPrice - sellingPrice : null
 
-    const displayPrice = course?.slblPrice
-        ? course.slblPrice
-        : course?.withExperiencePrice || sellingPrice
+    // Prioritize comboPrice if comboEnabled
+    let displayPrice = course?.comboEnabled && course?.comboPrice 
+        ? course.comboPrice 
+        : (course?.slblPrice ? course.slblPrice : (course?.withExperiencePrice || sellingPrice))
 
-    const displayOriginal = course?.slblStrikePrice
+    let displayOriginal = course?.slblStrikePrice
         ? course.slblStrikePrice
         : course?.withExperienceOriginal || originalPrice
 
@@ -107,12 +103,8 @@ function CourseCard({ course, fromPortal }) {
                                     key={i}
                                     className={`cc-card-opt-box ${opt.isVoc ? "cc-card-opt-box--voc" : "cc-card-opt-box--display"}`}
                                     onClick={() => {
-                                        if (shouldBypassModal) {
-                                            navigate(`/book-now/course/${course.slug}?type=${opt.id}${fromPortal ? "&fromPortal=true" : ""}`)
-                                        } else {
-                                            setSelectedOptionId(opt.id)
-                                            setShowModal(true)
-                                        }
+                                        setSelectedOptionId(opt.id)
+                                        setShowModal(true)
                                     }}
                                     title={`Click to book ${opt.label}`}
                                 >
@@ -131,11 +123,7 @@ function CourseCard({ course, fromPortal }) {
                     <button
                         className="course-btn course-btn--primary"
                         onClick={() => {
-                            if (shouldBypassModal) {
-                                navigate(`/book-now/course/${course.slug}?type=with-experience${fromPortal ? "&fromPortal=true" : ""}`)
-                            } else {
-                                setShowModal(true)
-                            }
+                            setShowModal(true)
                         }}
                     >
                         Book Now

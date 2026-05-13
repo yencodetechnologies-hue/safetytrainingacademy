@@ -14,9 +14,10 @@ function ComboCourses() {
             .then(res => res.json())
             .then(data => {
                 const list = Array.isArray(data) ? data : []
-                // Combo-enabled active courses only.
+                // Show courses that have comboEnabled flag OR belong to "Combo Courses" category
                 const combo = list.filter(c =>
-                    c?.comboEnabled === true && c?.status !== "Inactive"
+                    (c?.comboEnabled === true || c?.category?.toLowerCase().includes("combo")) && 
+                    c?.status !== "Inactive"
                 )
                 setCourses(combo)
                 setLoading(false)

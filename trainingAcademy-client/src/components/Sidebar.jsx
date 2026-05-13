@@ -60,6 +60,13 @@ function Sidebar({ user }) {
 
   const getActiveFromPath = () => {
     const currentMenu = menu[user?.role] || []
+    
+    // Special case for Student My Courses vs Buy New Course
+    if (user?.role === "Student" && location.pathname === "/student/my-courses") {
+      if (location.state?.tab === "browse") return "Buy New Course";
+      return "My Courses";
+    }
+
     const matched = [...currentMenu]
       .sort((a, b) => b.path.length - a.path.length)
       .find(item => location.pathname.startsWith(item.path))

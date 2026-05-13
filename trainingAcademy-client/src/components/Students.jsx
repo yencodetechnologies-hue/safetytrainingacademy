@@ -854,14 +854,39 @@ export default function Students() {
   }, []);
 
   // ── Filter & Paginate ──────────────────────────────────────────────────────
-  const filtered = students.filter((s) => {
-    const matchSearch =
-      s.name?.toLowerCase().includes(search.toLowerCase()) ||
-      s.email?.toLowerCase().includes(search.toLowerCase());
-    const matchStatus =
-      statusFilter === "All Status" || s.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  const filtered = students
+    .filter((s) => {
+      const sSearch = search.toLowerCase();
+      if (!sSearch) return statusFilter === "All Status" || s.status === statusFilter;
+
+      const matchSearch =
+        (s.name?.toLowerCase().startsWith(sSearch)) ||
+        (s.email?.toLowerCase().startsWith(sSearch)) ||
+        (s.phone?.toLowerCase().startsWith(sSearch)) ||
+        (s.nickname?.toLowerCase().startsWith(sSearch)) ||
+        (s.companyName?.toLowerCase().startsWith(sSearch)) ||
+        (s.transactionId?.toLowerCase().startsWith(sSearch)) ||
+        (s.courseCode?.toLowerCase().startsWith(sSearch)) ||
+        (s.courseTitle?.toLowerCase().startsWith(sSearch));
+
+      const matchStatus =
+        statusFilter === "All Status" || s.status === statusFilter;
+      return matchSearch && matchStatus;
+    })
+    .sort((a, b) => {
+      if (!search) return 0;
+      const sSearch = search.toLowerCase();
+      const aName = a.name?.toLowerCase() || "";
+      const bName = b.name?.toLowerCase() || "";
+      
+      const aStarts = aName.startsWith(sSearch);
+      const bStarts = bName.startsWith(sSearch);
+
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+
+      return 0;
+    });
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice(

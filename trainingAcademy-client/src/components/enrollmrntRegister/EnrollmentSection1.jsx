@@ -1,11 +1,21 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import "../../styles/EnrollmentRegister.css"
+import ValidationToast from "./ValidationToast"
 
 const STATES = ["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"]
 
 function EnrollmentSection1({ userDetails, data, setData, next }) {
     
-    const set = (key, value) => setData(p => ({ ...p, [key]: value }))
+    const [errors, setErrors] = useState([])
+    const [showToast, setShowToast] = useState(false)
+    const [missingFieldsNames, setMissingFieldsNames] = useState([])
+
+    const set = (key, value) => {
+        setData(p => ({ ...p, [key]: value }))
+        if (errors.includes(key)) {
+            setErrors(prev => prev.filter(e => e !== key))
+        }
+    }
 
     useEffect(() => {
         if (!userDetails || !userDetails.name) return
@@ -19,16 +29,53 @@ function EnrollmentSection1({ userDetails, data, setData, next }) {
         }))
     }, [userDetails])
 
-    const handleSubmit = () => {
+    const handleNext = () => {
         const required = [
             "title", "surname", "givenName", "dob", "gender",
             "mobilePhone", "email", "residentialAddress",
             "suburb", "state", "postcode"
         ]
+        const newErrors = []
+        const missingNames = []
+
+        const fieldLabels = {
+            title: "Title",
+            surname: "Surname",
+            givenName: "Given Name",
+            dob: "Date of Birth",
+            gender: "Gender",
+            mobilePhone: "Mobile Phone",
+            email: "Email",
+            residentialAddress: "Residential Address",
+            suburb: "Suburb",
+            state: "State",
+            postcode: "Postcode"
+        }
+
         for (const field of required) {
             if (!data[field]) {
-                alert("Please fill in all required fields.")
-                return
+                newErrors.push(field)
+                missingNames.push(fieldLabels[field])
+            }
+        }
+
+        if (newErrors.length > 0) {
+            setErrors(newErrors)
+            setMissingFieldsNames(missingNames)
+            setShowToast(true)
+            return
+        }
+        next()
+    }
+
+    const closeToastAndScroll = () => {
+        setShowToast(false)
+        if (errors.length > 0) {
+            const firstError = errors[0]
+            const el = document.getElementById(`er-${firstError}`)
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" })
+                el.focus()
             }
         }
     }
@@ -46,8 +93,8 @@ function EnrollmentSection1({ userDetails, data, setData, next }) {
                     Please complete <strong>full name</strong> and <strong>date of birth</strong> as listed on your ID documents.
                 </p>
 
-                <div className="er-field-group">
-                    <label className="er-label">
+                <div className="er-field-group" id="er-title">
+                    <label className={`er-label ${errors.includes("title") ? "er-label-error" : ""}`}>
                         Title (please tick) <span className="er-required">*</span>
                     </label>
                     <div className="er-radio-row">
@@ -69,21 +116,23 @@ function EnrollmentSection1({ userDetails, data, setData, next }) {
 
                 <div className="er-row-3">
                     <div className="er-field-group">
-                        <label className="er-label">
+                        <label className={`er-label ${errors.includes("surname") ? "er-label-error" : ""}`}>
                             Surname <span className="er-required">*</span>
                         </label>
                         <input
-                            className="er-input"
+                            id="er-surname"
+                            className={`er-input ${errors.includes("surname") ? "er-input-error" : ""}`}
                             value={data.surname || ""}
                             onChange={e => set("surname", e.target.value)}
                         />
                     </div>
                     <div className="er-field-group">
-                        <label className="er-label">
+                        <label className={`er-label ${errors.includes("givenName") ? "er-label-error" : ""}`}>
                             Given name <span className="er-required">*</span>
                         </label>
                         <input
-                            className="er-input"
+                            id="er-givenName"
+                            className={`er-input ${errors.includes("givenName") ? "er-input-error" : ""}`}
                             value={data.givenName || ""}
                             onChange={e => set("givenName", e.target.value)}
                         />
@@ -111,18 +160,19 @@ function EnrollmentSection1({ userDetails, data, setData, next }) {
                         />
                     </div>
                     <div className="er-field-group">
-                        <label className="er-label">
+                        <label className={`er-label ${errors.includes("dob") ? "er-label-error" : ""}`}>
                             Date of Birth <span className="er-required">*</span>
                         </label>
                         <input
+                            id="er-dob"
                             type="date"
-                            className="er-input"
+                            className={`er-input ${errors.includes("dob") ? "er-input-error" : ""}`}
                             value={data.dob || ""}
                             onChange={e => set("dob", e.target.value)}
                         />
                     </div>
-                    <div className="er-field-group">
-                        <label className="er-label">
+                    <div className="er-field-group" id="er-gender">
+                        <label className={`er-label ${errors.includes("gender") ? "er-label-error" : ""}`}>
                             Gender (please tick) <span className="er-required">*</span>
                         </label>
                         <div className="er-radio-row">
@@ -166,22 +216,24 @@ function EnrollmentSection1({ userDetails, data, setData, next }) {
 
                 <div className="er-row-2">
                     <div className="er-field-group">
-                        <label className="er-label">
+                        <label className={`er-label ${errors.includes("mobilePhone") ? "er-label-error" : ""}`}>
                             Mobile Phone <span className="er-required">*</span>
                         </label>
                         <input
-                            className="er-input"
+                            id="er-mobilePhone"
+                            className={`er-input ${errors.includes("mobilePhone") ? "er-input-error" : ""}`}
                             value={data.mobilePhone || ""}
                             onChange={e => set("mobilePhone", e.target.value)}
                         />
                     </div>
                     <div className="er-field-group">
-                        <label className="er-label">
+                        <label className={`er-label ${errors.includes("email") ? "er-label-error" : ""}`}>
                             Email <span className="er-required">*</span>
                         </label>
                         <input
+                            id="er-email"
                             type="email"
-                            className="er-input"
+                            className={`er-input ${errors.includes("email") ? "er-input-error" : ""}`}
                             value={data.email || ""}
                             onChange={e => set("email", e.target.value)}
                         />
@@ -189,11 +241,12 @@ function EnrollmentSection1({ userDetails, data, setData, next }) {
                 </div>
 
                 <div className="er-field-group-full">
-                    <label className="er-label">
+                    <label className={`er-label ${errors.includes("residentialAddress") ? "er-label-error" : ""}`}>
                         Residential Address <span className="er-required">*</span>
                     </label>
                     <input
-                        className="er-input-full"
+                        id="er-residentialAddress"
+                        className={`er-input-full ${errors.includes("residentialAddress") ? "er-input-error" : ""}`}
                         value={data.residentialAddress || ""}
                         onChange={e => set("residentialAddress", e.target.value)}
                     />
@@ -201,21 +254,23 @@ function EnrollmentSection1({ userDetails, data, setData, next }) {
 
                 <div className="er-row-3">
                     <div className="er-field-group">
-                        <label className="er-label">
+                        <label className={`er-label ${errors.includes("suburb") ? "er-label-error" : ""}`}>
                             Suburb <span className="er-required">*</span>
                         </label>
                         <input
-                            className="er-input"
+                            id="er-suburb"
+                            className={`er-input ${errors.includes("suburb") ? "er-input-error" : ""}`}
                             value={data.suburb || ""}
                             onChange={e => set("suburb", e.target.value)}
                         />
                     </div>
                     <div className="er-field-group">
-                        <label className="er-label">
+                        <label className={`er-label ${errors.includes("state") ? "er-label-error" : ""}`}>
                             State <span className="er-required">*</span>
                         </label>
                         <select
-                            className="er-select"
+                            id="er-state"
+                            className={`er-select ${errors.includes("state") ? "er-input-error" : ""}`}
                             value={data.state || ""}
                             onChange={e => set("state", e.target.value)}
                         >
@@ -224,11 +279,12 @@ function EnrollmentSection1({ userDetails, data, setData, next }) {
                         </select>
                     </div>
                     <div className="er-field-group">
-                        <label className="er-label">
+                        <label className={`er-label ${errors.includes("postcode") ? "er-label-error" : ""}`}>
                             Postcode <span className="er-required">*</span>
                         </label>
                         <input
-                            className="er-input"
+                            id="er-postcode"
+                            className={`er-input ${errors.includes("postcode") ? "er-input-error" : ""}`}
                             value={data.postcode || ""}
                             onChange={e => set("postcode", e.target.value)}
                         />
@@ -345,6 +401,18 @@ function EnrollmentSection1({ userDetails, data, setData, next }) {
                     </div>
                 </div>
             </div>
+
+            <div className="er-submit-row">
+                <button className="er-submit-btn" onClick={handleNext}>
+                    Next
+                </button>
+            </div>
+
+            <ValidationToast 
+                show={showToast} 
+                onOk={closeToastAndScroll} 
+                missingFields={missingFieldsNames} 
+            />
 
         </div>
     )
