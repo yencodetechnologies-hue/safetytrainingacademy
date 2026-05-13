@@ -256,12 +256,8 @@ const Payment = () => {
                     </td>
                     <td className="td-muted">{p.sessionDate || "—"}</td>
                     <td className="td-muted">{p.method || "Individual"}</td>
-<<<<<<< HEAD
                     <td className="td-mono">{p.transId || "—"}</td>
                     <td className="td-mono" style={{ color: '#6366f1', fontWeight: '600' }}>{p.gatewayTransId || "—"}</td>
-=======
-                    <td className="td-mono">{p.gatewayTransactionId || p.transId || "—"}</td>
->>>>>>> 03b8133bb073dc7aff978b3b08288654436b95ea
                     <td className="amount">${p.amount}</td>
                     <td className="td-muted">{p.date}</td>
                     <td>
@@ -365,12 +361,8 @@ const Payment = () => {
                 <h4>Transaction Details</h4>
                 <div className="detail-row">
                   <p><strong>Amount:</strong> <span className="text-green">${selectedPayment.amount}</span></p>
-<<<<<<< HEAD
                   <p><strong>Transaction ID:</strong> {selectedPayment.transId}</p>
                   <p><strong>Gateway Trans ID:</strong> <span style={{ color: '#4f46e5', fontWeight: '700' }}>{selectedPayment.gatewayTransId || "—"}</span></p>
-=======
-                  <p><strong>Transaction ID:</strong> {selectedPayment.gatewayTransactionId || selectedPayment.transId}</p>
->>>>>>> 03b8133bb073dc7aff978b3b08288654436b95ea
                 </div>
               </div>
 
