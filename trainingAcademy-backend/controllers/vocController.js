@@ -144,8 +144,9 @@ exports.createSubmission = async (req, res) => {
                 return res.status(400).json({ error: "Payment transaction ID is required." })
             }
             doc.card = sanitizeCard(b.card)
-            doc.card.transactionId = ewayTxId
-            doc.ewayTransactionId  = ewayTxId
+            doc.card.transactionId    = ewayTxId
+            doc.ewayTransactionId     = ewayTxId
+            doc.gatewayTransactionId  = ewayTxId
             doc.bank = { refId: "", proofUrl: "" }
         } else {
             const bank = typeof b.bank === "string" ? safeJson(b.bank) : (b.bank || {})

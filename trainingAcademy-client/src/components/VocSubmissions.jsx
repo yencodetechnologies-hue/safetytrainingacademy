@@ -92,10 +92,10 @@ function ViewModal({ submission, onClose }) {
                 <div className="modal-section">
                     <h4 className="modal-section-title">💲 Payment</h4>
                     <div className="modal-detail-row"><span>Method</span><span>{paymentLabel(s.paymentMethod)}</span></div>
-                    {s.ewayTransactionId && (
+                    {(s.gatewayTransactionId || s.ewayTransactionId) && (
                         <div className="modal-detail-row">
                             <span>Transaction ID</span>
-                            <span style={{ fontFamily: "monospace", fontSize: 13 }}>{s.ewayTransactionId}</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 13 }}>{s.gatewayTransactionId || s.ewayTransactionId}</span>
                         </div>
                     )}
                     {s.paymentMethod === "card" && (
@@ -335,7 +335,7 @@ export default function VocSubmissions() {
                                                 )}
                                             </td>
                                             <td>{fmtCurrency(s.amount)}</td>
-                                            <td style={{ fontFamily: "monospace", fontSize: 11 }}>{s.ewayTransactionId || "—"}</td>
+                                            <td style={{ fontFamily: "monospace", fontSize: 11 }}>{s.gatewayTransactionId || s.ewayTransactionId || "—"}</td>
                                             <td>{paymentLabel(s.paymentMethod)}</td>
                                             <td><StatusBadge status={s.status} /></td>
                                             <td>

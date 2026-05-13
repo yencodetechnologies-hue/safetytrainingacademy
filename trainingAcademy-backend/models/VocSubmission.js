@@ -45,7 +45,8 @@ const vocSubmissionSchema = new mongoose.Schema(
             transactionId: { type: String, default: "" },
         },
 
-        ewayTransactionId: { type: String, default: "" },
+        ewayTransactionId:    { type: String, default: "" },
+        gatewayTransactionId: { type: String, default: "" },
 
         // Bank path
         bank: {
