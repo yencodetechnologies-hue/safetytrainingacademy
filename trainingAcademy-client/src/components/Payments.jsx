@@ -120,15 +120,11 @@ const Payment = () => {
       const q = searchQuery.toLowerCase().trim();
       if (!q) return true;
       
-      // Split name into words to check if any part starts with the query
-      const nameWords = (p.student || "").toLowerCase().split(" ");
-      const nameMatch = nameWords.some(word => word.startsWith(q));
-
       return (
-        nameMatch ||
-        p.email?.toLowerCase().includes(q) ||
-        p.course?.toLowerCase().includes(q) ||
-        p.transId?.toLowerCase().includes(q)
+        p.student?.toLowerCase().startsWith(q) ||
+        p.email?.toLowerCase().startsWith(q) ||
+        p.course?.toLowerCase().startsWith(q) ||
+        p.transId?.toLowerCase().startsWith(q)
       );
     });
 

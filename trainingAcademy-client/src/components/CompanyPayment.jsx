@@ -354,11 +354,13 @@ const CompanyPayment = () => {
   ];
 
   const filtered = rows.filter(r => {
-    const q = search.toLowerCase();
-    const matchQ = !q
-      || r.company.toLowerCase().includes(q)
-      || r.email.toLowerCase().includes(q)
-      || r.orderId.toLowerCase().includes(q);
+    const q = search.toLowerCase().trim();
+    if (!q) return true;
+
+    const matchQ = r.company.toLowerCase().startsWith(q)
+      || r.email.toLowerCase().startsWith(q)
+      || r.orderId.toLowerCase().startsWith(q);
+      
     const matchS = !statusFilter
       || (statusFilter === "confirmed" && r.confirmed)
       || (statusFilter === "pending"   && r.status === "pending")
