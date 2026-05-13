@@ -110,7 +110,7 @@ export default function StudentEnrollmentForm() {
   if (error) return <div>Error: {error}</div>;
   if (!userDetails) return <div>No user details found.</div>;
 
-  const canAccess = true; // Bypassed verification as per user request
+  const canAccess = paymentVerified && assessmentPassed;
 
 
   if (!canAccess) {

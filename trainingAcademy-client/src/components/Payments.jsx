@@ -229,7 +229,7 @@ const Payment = () => {
               ) : (
                 paginatedPayments.map((p, index) => (
                   <tr key={p.id || p.transId || index}>
-                    <td>{new Date(p.date).toLocaleDateString()}</td>
+                    <td>{p.date}</td>
                     <td>
                       <div className="student-info">
                         <span className="name">{p.student}</span>
@@ -245,7 +245,7 @@ const Payment = () => {
                     <td>{p.type || "Individual"}</td>
                     <td>{p.transId || "—"}</td>
                     <td className="amount">${p.amount}</td>
-                    <td>{new Date(p.date).toLocaleDateString()}</td>
+                    <td>{p.date}</td>
                     <td>
                       <span className={`status-badge ${formatStatus(p.status).toLowerCase()}`}>
                         {formatStatus(p.status)}

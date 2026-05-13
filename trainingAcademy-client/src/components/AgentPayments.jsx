@@ -54,8 +54,11 @@ export default function AgentPayments() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "—";
+    // If it's already a formatted string (like DD/MM/YYYY), return it
+    if (typeof dateStr === "string" && dateStr.includes("/")) return dateStr;
     const d = new Date(dateStr);
-    return d.toLocaleDateString("en-GB");
+    if (isNaN(d.getTime())) return dateStr || "—";
+    return d.toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" });
   };
 
   return (

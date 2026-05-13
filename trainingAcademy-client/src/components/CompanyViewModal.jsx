@@ -88,7 +88,7 @@ function LinkCard({ link, students }) {
                     <p className="cvm-link-course-name">{link.courseName || "—"}</p>
                     <p className="cvm-link-course-meta">
                         {link.courseCode || ""}
-                        {link.sessionDate ? ` · ${new Date(link.sessionDate).toLocaleDateString("en-AU")}` : ""}
+                        {link.sessionDate ? ` · ${new Date(link.sessionDate).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })}` : ""}
                         {link.startTime ? ` · ${link.startTime}${link.endTime ? ` – ${link.endTime}` : ""}` : ""}
                     </p>
                 </div>
@@ -215,8 +215,8 @@ export default function CompanyViewModal({ company, onClose }) {
         if (!dateStr) return { date: "—", time: "" };
         const d = new Date(dateStr);
         return {
-            date: d.toLocaleDateString("en-GB"),
-            time: d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true }),
+            date: d.toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
+            time: d.toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true, timeZone: "Australia/Sydney" }),
         };
     };
 

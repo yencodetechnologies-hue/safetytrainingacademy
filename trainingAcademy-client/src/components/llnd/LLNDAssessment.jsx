@@ -228,7 +228,7 @@ function LLNDAssessment(props) {
                 name: userDetails?.name || "Student",
                 email: userDetails?.email || "",
                 phone: userDetails?.phone || "",
-                date: new Date().toLocaleDateString(),
+                date: new Date().toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
                 answers: answers
             }
 
@@ -249,7 +249,7 @@ function LLNDAssessment(props) {
             name: userDetails?.name || "Student",
             email: userDetails?.email || "",
             phone: userDetails?.phone || "",
-            date: new Date().toLocaleDateString(),
+            date: new Date().toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
             answers: answers
         }
 

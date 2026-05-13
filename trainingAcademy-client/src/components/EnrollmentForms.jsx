@@ -42,8 +42,8 @@ function EnrollmentModal({ form, onClose, onStatusChange }) {
   const language = raw.language || {};
 
   const reviewedDate = raw.updatedAt
-    ? new Date(raw.updatedAt).toLocaleDateString()
-    : new Date().toLocaleDateString();
+    ? new Date(raw.updatedAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
+    : new Date().toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" });
 
   const statusConfig = {
     Approved: { bg: "#f0fdf4", border: "#bbf7d0", color: "#16a34a", icon: "✓" },
@@ -177,7 +177,7 @@ function EnrollmentModal({ form, onClose, onStatusChange }) {
                   <div className="modal-field">
                     <span className="field-label">Date of Birth</span>
                     <span className="field-value">
-                      {p.dob ? new Date(p.dob).toLocaleDateString() : "N/A"}
+                      {p.dob ? new Date(p.dob).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }) : "N/A"}
                     </span>
                   </div>
                   <div className="modal-field">
@@ -524,7 +524,7 @@ function EnrollmentModal({ form, onClose, onStatusChange }) {
                     <span className="field-label">Submitted At</span>
                     <span className="field-value">
                       {raw.enrollmentFormSubmittedAt
-                        ? new Date(raw.enrollmentFormSubmittedAt).toLocaleString()
+                        ? new Date(raw.enrollmentFormSubmittedAt).toLocaleString("en-AU", { timeZone: "Australia/Sydney" })
                         : "N/A"}
                     </span>
                   </div>
@@ -595,7 +595,7 @@ function EnrollmentForms() {
         const student = studentMap[sid] || {};
         return {
           id: item._id,
-          date: new Date(item.createdAt).toLocaleDateString(),
+          date: new Date(item.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
           name: `${item.personalDetails?.givenName || ""} ${item.personalDetails?.surname || ""}`.trim(),
           email: item.personalDetails?.email,
           phone: item.personalDetails?.mobilePhone,

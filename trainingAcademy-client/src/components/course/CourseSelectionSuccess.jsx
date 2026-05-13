@@ -33,11 +33,12 @@ export default function EnrollmentSuccess({ enrollmentData, onBackToHome, onNext
   const formatDate = (dateString) => {
     if (!dateString) return "Date not available";
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-IN", {
+    return date.toLocaleDateString("en-AU", {
       weekday: "short",
       day: "numeric",
       month: "long",
-      year: "numeric"
+      year: "numeric",
+      timeZone: "Australia/Sydney"
     });
   };
 

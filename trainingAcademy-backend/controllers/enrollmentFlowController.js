@@ -604,6 +604,9 @@ exports.updatePaymentStatus = async (req, res) => {
     }
 
     item.payment.status = status;
+    if (status === "success") {
+      item.payment.paidAt = new Date();
+    }
 
     if (status === "failed") {
       item.payment.rejectionReason = reason;

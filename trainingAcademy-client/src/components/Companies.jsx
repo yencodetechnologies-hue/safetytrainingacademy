@@ -143,7 +143,7 @@ function LinksModal({ company, onClose }) {
                                                 <td style={{ padding: "12px", color: "#9ca3af" }}>{i + 1}</td>
                                                 <td style={{ padding: "12px", fontWeight: 600, color: "#1a1a2e" }}>{link.courseName || "—"}</td>
                                                 <td style={{ padding: "12px", color: "#555" }}>
-                                                    {link.sessionDate ? new Date(link.sessionDate).toLocaleDateString("en-GB") : "—"}
+                                                    {link.sessionDate ? new Date(link.sessionDate).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }) : "—"}
                                                 </td>
                                                 <td style={{ padding: "12px", textAlign: "center" }}>
                                                     <span style={{
@@ -566,11 +566,12 @@ export default function Companies() {
                                 <tr key={company._id}>
                                     <td>
                                         <div className="cell-date-main">
-                                            {new Date(company.createdAt).toLocaleDateString("en-GB")}
+                                            {new Date(company.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })}
                                         </div>
                                         <div className="cell-date-time">
-                                            {new Date(company.createdAt).toLocaleTimeString("en-IN", {
+                                            {new Date(company.createdAt).toLocaleTimeString("en-AU", {
                                                 hour: "2-digit", minute: "2-digit", hour12: true,
+                                                timeZone: "Australia/Sydney"
                                             })}
                                         </div>
                                     </td>

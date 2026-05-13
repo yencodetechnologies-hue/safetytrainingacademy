@@ -12,13 +12,13 @@ const fmtId = (id) => {
 };
 
 const fmtDate = (d) => d
-  ? new Date(d).toLocaleDateString("en-AU", { weekday: "short", year: "numeric", month: "short", day: "numeric" })
+  ? new Date(d).toLocaleDateString("en-AU", { weekday: "short", year: "numeric", month: "short", day: "numeric", timeZone: "Australia/Sydney" })
   : "TBC";
 
 const buildOrderEmails = (payment) => {
   const orderId = fmtId(payment._id.toString());
   const priceStr = `$${Number(payment.amount).toFixed(2)}`;
-  const orderDate = new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const orderDate = new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" });
 
   const coursesHtml = (payment.courses || []).map(c => `
         <tr><td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;">
