@@ -90,7 +90,9 @@ function PayModal({ selected, payments, grouped = [], company, onClose, onSucces
               amount: courseGroups.reduce((sum, g) => sum + g.total, 0),
               paymentMethod: "Card",
               transactionReference: ewayData.transactionId,
-              courses
+              courses,
+              status: "success",
+              confirmed: true,
             }),
           });
         }
