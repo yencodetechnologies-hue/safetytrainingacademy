@@ -10,14 +10,14 @@ const adminBookingTemplate = (data) => `
     .eb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
     .eb-hdr { background: #0d2240; padding: 16px 24px; }
     .eb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
-    .eb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
-    .eb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
-    .eb-divider { height: 3px; background: #29b6e8; }
+    .eb-hdr-sub { font-size: 10px; color: #f43f5e; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
+    .eb-badge { background: #f43f5e; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
+    .eb-divider { height: 3px; background: #f43f5e; }
     .eb-alert { background: #0a1c33; padding: 9px 24px; font-size: 12px; color: #89c8e8; font-weight: 500; }
     .eb-content { padding: 18px 24px; }
     .eb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
     .eb-section-head { background: #0d2240; padding: 7px 14px; }
-    .eb-section-head span { font-size: 10px; font-weight: 700; color: #29b6e8; letter-spacing: 1px; text-transform: uppercase; }
+    .eb-section-head span { font-size: 10px; font-weight: 700; color: #f43f5e; letter-spacing: 1px; text-transform: uppercase; }
     .eb-section-body { padding: 11px 14px; }
     .eb-course-title { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 10px; }
     .eb-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
@@ -48,6 +48,7 @@ const adminBookingTemplate = (data) => `
           </td>
           <td align="right" valign="top">
             <span class="eb-badge">New Booking</span>
+            <p style="margin: 4px 0 0; font-size: 11px; font-weight: 700; color: #ffffff; text-align: right;">${data.bookingId}</p>
           </td>
         </tr>
       </table>
@@ -97,6 +98,36 @@ const adminBookingTemplate = (data) => `
               <td class="lbl">Booking ID</td>
               <td class="val">${data.bookingId}</td>
             </tr>
+            ${data.paymentMethod === "Card Payment" ? `
+            <tr>
+              <td class="lbl">Gateway Transaction ID</td>
+              <td class="val">${data.gatewayTransactionId || "—"}</td>
+            </tr>
+            <tr>
+              <td class="lbl">Phone Number</td>
+              <td class="val">${data.studentMobile}</td>
+            </tr>
+            ` : ""}
+            ${data.paymentMethod === "Pay Later" ? `
+            <tr>
+              <td class="lbl">Mode of Payment</td>
+              <td class="val">Pay Later (Pending Payment)</td>
+            </tr>
+            <tr>
+              <td class="lbl">Phone Number</td>
+              <td class="val">${data.studentMobile}</td>
+            </tr>
+            ` : ""}
+            ${data.paymentMethod === "Bank Transfer" ? `
+            <tr>
+              <td class="lbl">Bank Transfer ID</td>
+              <td class="val">${data.bankTransferId || "—"}</td>
+            </tr>
+            <tr>
+              <td class="lbl">Phone Number</td>
+              <td class="val">${data.studentMobile}</td>
+            </tr>
+            ` : ""}
             <tr>
               <td class="lbl">Order date</td>
               <td class="val-reg">${data.orderDate}</td>

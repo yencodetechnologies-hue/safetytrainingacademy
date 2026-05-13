@@ -222,6 +222,7 @@ const Payment = () => {
                 <th>Schedule Date</th>
                 <th>Method</th>
                 <th>Transaction ID</th>
+                <th>Gateway Trans ID</th>
                 <th>Amount</th>
                 <th>Payment date</th>
                 <th>Status</th>
@@ -256,6 +257,7 @@ const Payment = () => {
                     <td className="td-muted">{p.sessionDate || "—"}</td>
                     <td className="td-muted">{p.method || "Individual"}</td>
                     <td className="td-mono">{p.transId || "—"}</td>
+                    <td className="td-mono" style={{ color: '#6366f1', fontWeight: '600' }}>{p.gatewayTransId || "—"}</td>
                     <td className="amount">${p.amount}</td>
                     <td className="td-muted">{p.date}</td>
                     <td>
@@ -360,6 +362,7 @@ const Payment = () => {
                 <div className="detail-row">
                   <p><strong>Amount:</strong> <span className="text-green">${selectedPayment.amount}</span></p>
                   <p><strong>Transaction ID:</strong> {selectedPayment.transId}</p>
+                  <p><strong>Gateway Trans ID:</strong> <span style={{ color: '#4f46e5', fontWeight: '700' }}>{selectedPayment.gatewayTransId || "—"}</span></p>
                 </div>
               </div>
 

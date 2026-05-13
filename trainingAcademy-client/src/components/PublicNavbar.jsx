@@ -12,7 +12,7 @@ const mobileMenuItems = [
   { label: "Contact", path: "/contact" },
   { label: "Forms", path: "/forms" },
   { label: "Fees & Refund", path: "/fees-refund" },
-  { label: "Unique Student Identifier (USI)", path: "/usi" },
+  { label: "Unique Student Identifier (USI)", path: "https://www.usi.gov.au/students/get-a-usi" },
   { label: "Code of Practice", path: "/code-of-practice" },
   { label: "Gallery", path: "/gallery" },
   { label: "Sign In", path: "/login" },
@@ -126,7 +126,7 @@ function PublicNavbar({ courses: propCourses }) {
                 <div className="resources-dropdown">
                   <div onClick={() => navigate("/forms")}>Forms</div>
                   <div onClick={() => navigate("/fees-refund")}>Fees & Refund</div>
-                  <div onClick={() => navigate("/usi")}>Unique Student Identifier (USI)</div>
+                  <div onClick={() => window.open("https://www.usi.gov.au/students/get-a-usi", "_blank")}>Unique Student Identifier (USI)</div>
                   <div onClick={() => navigate("/code-of-practice")}>Code of Practice ▸</div>
                   <div onClick={() => navigate("/gallery")}>Gallery</div>
                 </div>
@@ -164,7 +164,14 @@ function PublicNavbar({ courses: propCourses }) {
                 <div
                   key={index}
                   className="mobile-fullmenu-item"
-                  onClick={() => { navigate(item.path); closeMenu(); }}
+                  onClick={() => { 
+                    if (item.path.startsWith("http")) {
+                      window.open(item.path, "_blank");
+                    } else {
+                      navigate(item.path); 
+                    }
+                    closeMenu(); 
+                  }}
                 >
                   {item.label}
                 </div>

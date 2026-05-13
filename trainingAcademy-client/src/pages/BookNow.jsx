@@ -409,7 +409,7 @@ function BookNow() {
             formData.append("endTime", selectedSession?.endTime);
             formData.append("sessionId", selectedSession?._id || "");
             formData.append("paymentMethod", paymentData.paymentMethod || "");
-            formData.append("transactionId", paymentData.transactionId || "");
+            formData.append("transactionId", paymentData.transactionId || paymentData.ewayTransactionId || "");
             formData.append("slipUrl", slipUrl);
             if (isEnrollmentLink) {
                 formData.append("source", "Enrollment Link");
@@ -455,6 +455,8 @@ function BookNow() {
                     coursePrice,
                     paymentMethod: paymentData.paymentMethod,
                     phone: paymentData.phone,
+                    gatewayTransactionId: paymentData.ewayTransactionId || paymentData.transactionId || "",
+                    bankTransferId: paymentData.transactionId || ""
                 }),
             });
         } catch (err) {

@@ -47,13 +47,6 @@ const formsData = [
     category: "Technical Support",
     items: [
       {
-        title: "USI Creation Guide",
-        desc: "Need a USI? Follow this step-by-step guide to create yours in minutes.",
-        icon: "fa-solid fa-id-card",
-        type: "Guide",
-        link: "https://www.usi.gov.au/students/get-a-usi"
-      },
-      {
         title: "Code of Practice",
         desc: "Our commitment to providing high-quality, professional training services.",
         icon: "fa-solid fa-gavel",

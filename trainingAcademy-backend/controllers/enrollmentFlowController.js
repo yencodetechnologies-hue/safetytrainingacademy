@@ -4,8 +4,9 @@ const Course = require("../models/Course");
 const Schedule = require("../models/schedule");
 const mongoose = require("mongoose");
 const sendEmail = require("../config/sendEmail");
-const { sendLLNCompletionNotification, sendEnrollmentFormCompletionNotification } = require("./bookingEmailController");
+const { sendLLNCompletionNotification, sendEnrollmentFormCompletionNotification, formatBookingId } = require("./bookingEmailController");
 const Company = require("../models/Company");
+const Payment = require("../models/Payment");
 
 // ✅ Create new flow
 exports.createFlow = async (req, res) => {
@@ -281,7 +282,9 @@ exports.saveLLND = async (req, res) => {
             studentEmail: student.email,
             studentName: student.name,
             score: score,
-            isPassed: isPassed
+            isPassed: isPassed,
+            bookingId: `#${formatBookingId(populated._id)}`,
+            studentPhone: student.phone || student.mobileNumber || student.mobile || "—"
           }
         }, null); // pass null for res since we already sent response
       }
@@ -344,10 +347,17 @@ exports.completeEnrollment = async (req, res) => {
       const populated = await EnrollmentFlow.findById(flowId).populate("studentId");
       if (populated && populated.studentId) {
         const student = populated.studentId;
+        const bookingId = formatBookingId(populated._id);
+        const firstItem = populated.items?.[0] || {};
+        const gatewayTransactionId = firstItem.payment?.transactionId || "—";
+
         sendEnrollmentFormCompletionNotification({
           body: {
             studentEmail: student.email,
-            studentName: student.name
+            studentName: student.name,
+            bookingId: `#${bookingId}`,
+            studentPhone: student.phone || student.mobileNumber || student.mobile || "—",
+            gatewayTransactionId: gatewayTransactionId
           }
         }, null);
       }
@@ -509,11 +519,26 @@ exports.getLLNDResults = async (req, res) => {
 
 exports.getAllPayments = async (req, res) => {
   try {
-    const enrollments = await EnrollmentFlow.find({
-      studentId: { $ne: null }
-    })
-      .populate("studentId", "name email")
-      .sort({ createdAt: -1 });
+    const [enrollments, gatewayPayments] = await Promise.all([
+      EnrollmentFlow.find({ studentId: { $ne: null } })
+        .populate("studentId", "name email phone mobileNumber mobile")
+        .sort({ createdAt: -1 }),
+      Payment.find({}, "transactionId gatewayTransactionId userId amount")
+    ]);
+
+    const gatewayMap = {};
+    const fuzzyMap = {}; // cleanPhone_amount -> gatewayId
+
+    gatewayPayments.forEach(p => {
+      if (p.transactionId) gatewayMap[p.transactionId] = p.gatewayTransactionId;
+      
+      // Fallback: match by normalized phone and amount
+      if (p.userId && p.amount) {
+        const cleanPhone = String(p.userId).replace(/\D/g, "");
+        const key = `${cleanPhone}_${p.amount}`;
+        fuzzyMap[key] = p.gatewayTransactionId;
+      }
+    });
 
     let payments = [];
     let stats = {
@@ -528,15 +553,29 @@ exports.getAllPayments = async (req, res) => {
         return; // Agent enrollments belong in AgentPayments, not the regular payments queue
       }
 
+      const rawPhone = enroll.studentId?.phone || enroll.studentId?.mobileNumber || enroll.studentId?.mobile || "";
+      const cleanStudentPhone = rawPhone.replace(/\D/g, "");
+
       enroll.items.forEach(item => {
         const payment = item.payment;
         if (!payment) return;
+
+        const amount = payment.amount || item.course.price || 0;
+        
+        // Find gateway ID: 1st by transactionId, 2nd by fuzzy match (normalized phone + amount)
+        let gId = "—";
+        if (payment.transactionId && gatewayMap[payment.transactionId]) {
+          gId = gatewayMap[payment.transactionId];
+        } else if (cleanStudentPhone && amount) {
+          const fKey = `${cleanStudentPhone}_${amount}`;
+          gId = fuzzyMap[fKey] || "—";
+        }
 
         payments.push({
           id: payment.paymentId,
           enrollmentId: enroll._id,
           itemId: item._id,
-          createdAt: payment.paidAt || enroll.createdAt, // ✅ Add this for time formatting
+          createdAt: payment.paidAt || enroll.createdAt,
           date: payment.paidAt 
             ? new Date(payment.paidAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
             : new Date(enroll.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
@@ -549,10 +588,11 @@ exports.getAllPayments = async (req, res) => {
           course: item.course.courseName,
           code: item.course.courseId,
 
-          amount: payment.amount || item.course.price || 0,
+          amount: amount,
 
           status: payment.status,
           transId: payment.transactionId,
+          gatewayTransId: gId,
           method: payment.method,
           type: enroll.enrollmentType || "Individual",
           slipUrl: payment.slipUrl || null,
@@ -562,7 +602,6 @@ exports.getAllPayments = async (req, res) => {
         
         if (payment.status === "success" || payment.status === "completed") {
           stats.success++;
-          const amount = payment.amount || item.course.price || 0;
           stats.totalAmount += amount;
         }
 

@@ -1,52 +1,82 @@
-import React, { useState } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
+import React, { useState } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
 
-// Cloudinary PDF worker setup
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+
+// PDF worker
+pdfjs.GlobalWorkerOptions.workerSrc =
+  `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 const PdfViewer = ({ fileUrl }) => {
-    const [numPages, setNumPages] = useState(null);
-    const [pageNumber, setPageNumber] = useState(1);
-    const [loading, setLoading] = useState(true);
+  const [numPages, setNumPages] = useState(0);
+  const [pageNumber, setPageNumber] = useState(1);
 
-    function onDocumentLoadSuccess({ numPages }) {
-        setNumPages(numPages);
-        setLoading(false);
-    }
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    setNumPages(numPages);
+  };
 
-    return (
-        <div className="pdf-viewer-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f8fafc', padding: '20px', borderRadius: '12px' }}>
-            <div style={{ marginBottom: '15px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <button 
-                    disabled={pageNumber <= 1} 
-                    onClick={() => setPageNumber(prev => prev - 1)}
-                    style={{ padding: '5px 15px', borderRadius: '5px', border: '1px solid #ccc', background: 'white', cursor: pageNumber <= 1 ? 'not-allowed' : 'pointer' }}
-                >
-                    Previous
-                </button>
-                <span style={{ fontWeight: '600' }}>Page {pageNumber} of {numPages}</span>
-                <button 
-                    disabled={pageNumber >= numPages} 
-                    onClick={() => setPageNumber(prev => prev + 1)}
-                    style={{ padding: '5px 15px', borderRadius: '5px', border: '1px solid #ccc', background: 'white', cursor: pageNumber >= numPages ? 'not-allowed' : 'pointer' }}
-                >
-                    Next
-                </button>
-            </div>
+  return (
+    <div
+      style={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: 20,
+      }}
+    >
+      {/* Buttons */}
+      <div
+        style={{
+          display: "flex",
+          gap: 10,
+          alignItems: "center",
+          marginBottom: 20,
+        }}
+      >
+        <button
+          onClick={() => setPageNumber((p) => p - 1)}
+          disabled={pageNumber <= 1}
+        >
+          Prev
+        </button>
 
-            <div style={{ maxWidth: '100%', overflowX: 'auto', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', background: 'white' }}>
-                <Document
-                    file={fileUrl}
-                    onLoadSuccess={onDocumentLoadSuccess}
-                    loading={<div style={{ padding: '20px' }}>Loading PDF...</div>}
-                >
-                    <Page pageNumber={pageNumber} width={window.innerWidth > 768 ? 600 : window.innerWidth - 60} />
-                </Document>
-            </div>
-        </div>
-    );
+        <span>
+          {pageNumber} / {numPages}
+        </span>
+
+        <button
+          onClick={() => setPageNumber((p) => p + 1)}
+          disabled={pageNumber >= numPages}
+        >
+          Next
+        </button>
+      </div>
+
+      {/* PDF */}
+      <div
+        style={{
+          background: "#fff",
+          padding: 10,
+          borderRadius: 10,
+          boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+        }}
+      >
+        <Document
+          file={fileUrl}
+          onLoadSuccess={onDocumentLoadSuccess}
+          loading={<p>Loading PDF...</p>}
+          error={<p>Failed to load PDF</p>}
+        >
+          <Page
+            pageNumber={pageNumber}
+            width={600}
+          />
+        </Document>
+      </div>
+    </div>
+  );
 };
 
 export default PdfViewer;

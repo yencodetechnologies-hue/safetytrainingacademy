@@ -14,7 +14,7 @@ const formatBookingId = (id) => {
 // POST /api/booking-email/send-confirmation
 // ─────────────────────────────────────────────────────────────
 const sendBookingConfirmation = async (req, res) => {
-    const { name, email, phone, mobile, mobileNumber, mobilePhone, courseName, courseCode, courseDate, startTime, endTime, coursePrice, paymentMethod } = req.body;
+    const { name, email, phone, mobile, mobileNumber, mobilePhone, courseName, courseCode, courseDate, startTime, endTime, coursePrice, paymentMethod, gatewayTransactionId, bankTransferId } = req.body;
 
     const finalPhone = phone || mobile || mobileNumber || mobilePhone || "";
     const orderId = formatBookingId(Date.now().toString());
@@ -287,7 +287,9 @@ const sendBookingConfirmation = async (req, res) => {
         quantity: 1,
         subtotal: priceStr,
         paymentMethod: paymentMethod,
-        total: priceStr
+        total: priceStr,
+        gatewayTransactionId: gatewayTransactionId || "—",
+        bankTransferId: bankTransferId || "—"
     };
 
     try {
@@ -398,7 +400,7 @@ const sendCompanyOrderConfirmation = async (req, res) => {
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:#ffffff;padding:24px 30px;text-align:center;">
+<tr><td style="background:#f43f5e;color:#ffffff;padding:24px 30px;text-align:center;">
     <h1 style="margin:0;font-size:22px;font-weight:700;">NEW COMPANY BOOKING #${orderId}</h1>
 </td></tr>
 <tr><td style="padding:30px;">
@@ -637,8 +639,13 @@ const sendVOCConfirmation = async (req, res) => {
     const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:20px;">NEW VOC SUBMISSION</h1>
+<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td><h1 style="margin:0;font-size:20px;">NEW VOC SUBMISSION</h1></td>
+            <td align="right"><span style="font-size:12px;font-weight:700;background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">ID: ${shortId}</span></td>
+        </tr>
+    </table>
 </td></tr>
 <tr><td style="padding:30px;">
     <p>A new VOC submission has been received.</p>
@@ -647,7 +654,7 @@ const sendVOCConfirmation = async (req, res) => {
         <tr><td style="color:#64748b;">Email</td><td>${toEmail}</td></tr>
         <tr><td style="color:#64748b;">Amount</td><td><strong>${priceStr}</strong></td></tr>
         <tr><td style="color:#64748b;">Payment</td><td>${paymentMethod}</td></tr>
-        <tr><td style="color:#64748b;">Submission ID</td><td><code>${submissionId}</code></td></tr>
+        <tr><td style="color:#64748b;">Submission ID</td><td><strong>#${shortId}</strong></td></tr>
     </table>
     <p style="margin-top:20px;">Please log in to the admin portal to review this submission.</p>
 </td></tr>
@@ -728,7 +735,7 @@ const sendCompanyBankTransfer = async (req, res) => {
     const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:24px 30px;text-align:center;">
+<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;text-align:center;">
     <h1 style="margin:0;font-size:20px;">Company Bank Transfer Submitted</h1>
 </td></tr>
 <tr><td style="padding:30px;">
@@ -759,7 +766,7 @@ const sendCompanyBankTransfer = async (req, res) => {
 // 9. LLN Completion Notification
 // ─────────────────────────────────────────────────────────────
 const sendLLNCompletionNotification = async (req, res) => {
-    const { studentEmail, studentName, score, isPassed } = req.body;
+    const { studentEmail, studentName, score, isPassed, bookingId, studentPhone } = req.body;
 
     const status = isPassed ? "Passed" : "Under Review";
     const statusColor = isPassed ? "#16a34a" : "#ca8a04";
@@ -791,14 +798,21 @@ const sendLLNCompletionNotification = async (req, res) => {
     const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:20px;">LLN ASSESSMENT COMPLETED</h1>
+<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td><h1 style="margin:0;font-size:20px;">LLN ASSESSMENT COMPLETED</h1></td>
+            <td align="right"><span style="font-size:12px;font-weight:700;background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">ID: ${bookingId || "—"}</span></td>
+        </tr>
+    </table>
 </td></tr>
 <tr><td style="padding:30px;">
     <p>A student has completed their LLN Assessment.</p>
     <table width="100%" cellpadding="10" cellspacing="0" style="background-color:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
         <tr><td style="color:#64748b;width:130px;">Student Name</td><td><strong>${studentName}</strong></td></tr>
         <tr><td style="color:#64748b;">Email</td><td>${studentEmail}</td></tr>
+        <tr><td style="color:#64748b;">Phone Number</td><td><strong>${studentPhone || "—"}</strong></td></tr>
+        <tr><td style="color:#64748b;">Booking ID</td><td><strong>${bookingId || "—"}</strong></td></tr>
         <tr><td style="color:#64748b;">Score</td><td><strong>${Number(score).toFixed(1)}%</strong></td></tr>
         <tr><td style="color:#64748b;">Status</td><td><span style="color:${statusColor};font-weight:700;">${status}</span></td></tr>
     </table>
@@ -822,7 +836,7 @@ const sendLLNCompletionNotification = async (req, res) => {
 // 10. Enrollment Form Completion Notification
 // ─────────────────────────────────────────────────────────────
 const sendEnrollmentFormCompletionNotification = async (req, res) => {
-    const { studentEmail, studentName } = req.body;
+    const { studentEmail, studentName, bookingId, studentPhone, gatewayTransactionId } = req.body;
 
     const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
@@ -844,14 +858,22 @@ const sendEnrollmentFormCompletionNotification = async (req, res) => {
     const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:20px;">ENROLLMENT FORM SUBMITTED</h1>
+<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td><h1 style="margin:0;font-size:20px;">ENROLLMENT FORM SUBMITTED</h1></td>
+            <td align="right"><span style="font-size:12px;font-weight:700;background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">ID: ${bookingId || "—"}</span></td>
+        </tr>
+    </table>
 </td></tr>
 <tr><td style="padding:30px;">
     <p>A student has submitted their enrollment form and is awaiting review.</p>
     <table width="100%" cellpadding="10" cellspacing="0" style="background-color:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
         <tr><td style="color:#64748b;width:130px;">Student Name</td><td><strong>${studentName}</strong></td></tr>
         <tr><td style="color:#64748b;">Email</td><td>${studentEmail}</td></tr>
+        <tr><td style="color:#64748b;">Phone Number</td><td><strong>${studentPhone || "—"}</strong></td></tr>
+        <tr><td style="color:#64748b;">Booking ID</td><td><strong>${bookingId || "—"}</strong></td></tr>
+        <tr><td style="color:#64748b;">Transaction ID</td><td><strong>${gatewayTransactionId || "—"}</strong></td></tr>
     </table>
     <p style="margin-top:20px;">Please log in to the admin portal to review the form and documents.</p>
 </td></tr>
@@ -893,7 +915,7 @@ const sendCompanyCardPayment = async (req, res) => {
     const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:24px 30px;text-align:center;">
+<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;text-align:center;">
     <h1 style="margin:0;font-size:20px;">Company Card Payment Applied</h1>
 </td></tr>
 <tr><td style="padding:30px;">
@@ -927,4 +949,5 @@ module.exports = {
     sendCompanyCardPayment,
     sendLLNCompletionNotification,
     sendEnrollmentFormCompletionNotification,
+    formatBookingId,
 };
