@@ -562,7 +562,6 @@ exports.getAllPayments = async (req, res) => {
     });
 
     // Bulk-fetch gatewayTransactionId from Payment collection for those records
-    const gatewayMap = {};
     if (missingTxnIds.length > 0) {
       const paymentDocs = await Payment.find(
         { transactionId: { $in: missingTxnIds } },
