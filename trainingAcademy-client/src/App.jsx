@@ -54,6 +54,7 @@ import Reports from "./components/Reports"
 import VocSubmissions from "./components/VocSubmissions"
 import Sliders from "./components/Sliders"
 import Partners from "./components/Partners"
+import PublicForms from "./components/PublicForms"
 
 function App() {
 
@@ -90,6 +91,7 @@ function App() {
                 <Route path="/course" element={<CourseCard />} />
                 <Route path="/all-courses" element={<AllCourses />} />
                 <Route path="/combo-courses" element={<ComboCourses />} />
+                <Route path="/forms" element={<PublicForms />} />
                 <Route path="/enrollment-success" element={<EnrollmentSuccess />} />
 
 

@@ -10,7 +10,7 @@ import { useNavigate, useLocation } from "react-router-dom"
 import { cdnImage } from "../utils/cdnImage"
 import BookingModal from "../components/course/BookingModal"
 import logo from "../assets/SafetyTrainingAcademylogo.png"
-import { openPdf } from '../utils/openPdf';
+import PdfViewer from '../components/common/PdfViewer';
 
 function chunkArray(arr, size) {
     if (!arr) return []
@@ -58,10 +58,18 @@ function CourseDetails() {
     const handleViewPDF = (pdfUrl) => {
         if (!pdfUrl) return;
         let fixedUrl = pdfUrl;
-        if (!fixedUrl.startsWith("http")) {
-            fixedUrl = pdfUrl.startsWith("/") ? `${window.location.origin}${pdfUrl}` : `${API_URL}/${pdfUrl}`;
+        if (pdfUrl.includes("res.cloudinary.com")) {
+            // Remove any existing fl_attachment flag first
+            fixedUrl = pdfUrl.replace(/\/fl_attachment[^/]*\//g, "/");
+            // For raw uploads: add fl_attachment:false so browser displays inline instead of downloading
+            if (fixedUrl.includes("/raw/upload/")) {
+                fixedUrl = fixedUrl.replace("/raw/upload/", "/raw/upload/fl_attachment:false/");
+            }
+            if (!fixedUrl.startsWith("http")) fixedUrl = `https://${fixedUrl.replace(/^\/+/, "")}`;
+        } else if (!pdfUrl.startsWith("http")) {
+            fixedUrl = `${API_URL}/${pdfUrl}`;
         }
-        openPdf(fixedUrl);
+        window.open(fixedUrl, "_blank");
     };
 
     useEffect(() => {

@@ -1,0 +1,148 @@
+.pf-root {
+  background-color: #f5f3ff;
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.pf-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Hero Section */
+.pf-hero {
+  background: linear-gradient(135deg, #7b2ff7 0%, #4f46e5 100%);
+  color: white;
+  padding: 80px 0;
+  text-align: center;
+}
+
+.pf-hero h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.pf-hero p {
+  font-size: 1.15rem;
+  opacity: 0.9;
+  max-width: 650px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Content Area */
+.pf-content {
+  padding: 60px 0;
+}
+
+.pf-section {
+  margin-bottom: 50px;
+}
+
+.pf-section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e1b4b;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e0e7ff;
+}
+
+/* Grid & Cards */
+.pf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.pf-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  gap: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #eef2ff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.pf-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: #7b2ff730;
+}
+
+.pf-card-icon {
+  width: 50px;
+  height: 50px;
+  background: #f5f3ff;
+  color: #7b2ff7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.pf-card-body h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e1b4b;
+  margin-bottom: 8px;
+}
+
+.pf-card-body p {
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+/* Card Footer */
+.pf-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.pf-badge {
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.pf-badge-online { background: #dcfce7; color: #166534; }
+.pf-badge-pdf { background: #fee2e2; color: #991b1b; }
+.pf-badge-guide { background: #e0f2fe; color: #075985; }
+
+.pf-action-btn {
+  background: white;
+  color: #7b2ff7;
+  border: 1px solid #7b2ff7;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pf-action-btn:hover {
+  background: #7b2ff7;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pf-hero { padding: 50px 0; }
+  .pf-hero h1 { font-size: 2.2rem; }
+  .pf-grid { grid-template-columns: 1fr; }
+  .pf-card { padding: 20px; }
+}

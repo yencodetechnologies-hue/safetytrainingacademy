@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/CompanyPayment.css';
 import { API_URL } from "../data/service";
-import { openPdf } from "../utils/openPdf";
 
 function StatusBadge({ status, confirmed }) {
   if (status === "success" && confirmed) return <span className="cp2-badge cp2-badge--confirmed">✓ Confirmed</span>;
@@ -88,7 +87,7 @@ function ReceiptModal({ row, onClose, onConfirm }) {
                 />
                 <button
                   className="cp2-open-btn"
-                  onClick={() => openPdf(row.receiptUrl)}
+                  onClick={() => window.open(row.receiptUrl, "_blank")}
                 >
                   Open in New Tab ↗
                 </button>
@@ -355,13 +354,11 @@ const CompanyPayment = () => {
   ];
 
   const filtered = rows.filter(r => {
-    const q = search.toLowerCase().trim();
-    if (!q) return true;
-
-    const matchQ = r.company.toLowerCase().startsWith(q)
-      || r.email.toLowerCase().startsWith(q)
-      || r.orderId.toLowerCase().startsWith(q);
-      
+    const q = search.toLowerCase();
+    const matchQ = !q
+      || r.company.toLowerCase().includes(q)
+      || r.email.toLowerCase().includes(q)
+      || r.orderId.toLowerCase().includes(q);
     const matchS = !statusFilter
       || (statusFilter === "confirmed" && r.confirmed)
       || (statusFilter === "pending"   && r.status === "pending")

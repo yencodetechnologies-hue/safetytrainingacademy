@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from "axios";
 import '../styles/Payments.css';
 import { API_URL } from "../data/service";
-import { openPdf } from "../utils/openPdf";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -121,11 +120,15 @@ const Payment = () => {
       const q = searchQuery.toLowerCase().trim();
       if (!q) return true;
       
+      // Split name into words to check if any part starts with the query
+      const nameWords = (p.student || "").toLowerCase().split(" ");
+      const nameMatch = nameWords.some(word => word.startsWith(q));
+
       return (
-        p.student?.toLowerCase().startsWith(q) ||
-        p.email?.toLowerCase().startsWith(q) ||
-        p.course?.toLowerCase().startsWith(q) ||
-        p.transId?.toLowerCase().startsWith(q)
+        nameMatch ||
+        p.email?.toLowerCase().includes(q) ||
+        p.course?.toLowerCase().includes(q) ||
+        p.transId?.toLowerCase().includes(q)
       );
     });
 
@@ -368,7 +371,7 @@ const Payment = () => {
                       <p style={{ fontSize: '13px', color: '#555', marginBottom: '12px' }}>PDF Receipt</p>
                       <button
                         className="open-pdf"
-                        onClick={() => openPdf(selectedPayment.slipUrl)}
+                        onClick={() => window.open(selectedPayment.slipUrl, "_blank")}
                         style={{ padding: '8px 18px', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
                       >
                         Open PDF in New Tab
