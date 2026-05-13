@@ -184,10 +184,7 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
   // back to the existing single-button UI.
   const variants = getCourseVariants(course);
   const isVariantCourse = variants.length > 1;
-  const BYPASS_KEYWORDS = ['excavator', 'haul truck', 'skid steer'];
-  const shouldBypassModal = BYPASS_KEYWORDS.some(kw => 
-    course.title?.toLowerCase().includes(kw)
-  );
+  const shouldBypassModal = false; // Always show modal options
 
   // Helper: build the deep link for one variant. Mirrors the convention
   // used everywhere else (`?type=with-experience` etc.).
