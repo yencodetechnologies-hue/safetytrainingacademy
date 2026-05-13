@@ -16,11 +16,21 @@ const {
   getPaymentDetails,
 } = require("../controllers/companyPaymentController");
 
+const IMG_TRANSFORM = [
+  { quality: "auto:good", fetch_format: "auto" },
+  { width: 2000, height: 2000, crop: "limit" },
+];
+
 const receiptStorage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder:          "company-receipts",
-    allowed_formats: ["jpg", "jpeg", "png", "webp", "pdf"],
+  params: async (_req, file) => {
+    const isPdf = file.mimetype === "application/pdf" || file.originalname.toLowerCase().endsWith(".pdf");
+    return {
+      folder: "company-receipts",
+      allowed_formats: ["jpg", "jpeg", "png", "webp", "pdf"],
+      resource_type: "auto",
+      ...(isPdf ? {} : { transformation: IMG_TRANSFORM }),
+    };
   },
 });
 
