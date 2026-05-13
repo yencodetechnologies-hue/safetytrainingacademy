@@ -578,11 +578,30 @@
   color: var(--cp2-green);
 }
 
+/* Desktop Pagination - hide on mobile */
+.cp2-pagination-desktop {
+  display: flex;
+  justify-content: center;
+}
+
+/* Mobile Pagination - hide by default (on desktop) */
+.cp2-pagination-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .cp2-pagination-desktop {
+    display: none;
+  }
+  .cp2-pagination-mobile {
+    display: flex;
+    justify-content: center;
+  }
+}
+
 /* ── Responsive ── */
 @media (max-width: 1024px) {
-  .cp2-stats { grid-template-columns: repeat(2, 1fr);
-  .cp2-pagination-mobile{display: none;}
-  }
+  .cp2-stats { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {

@@ -9,7 +9,6 @@
 .payment-container {
   padding: 20px;
   background-color: var(--bg-gray);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .payment-header h2 {

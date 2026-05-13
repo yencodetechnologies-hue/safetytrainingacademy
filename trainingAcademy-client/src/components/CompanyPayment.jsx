@@ -517,11 +517,13 @@ const CompanyPayment = () => {
             </div>
 
             {/* ✅ Desktop Pagination */}
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
+            <div className="cp2-pagination-desktop">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
 
             <div className="cp2-mobile-list">
               {paginatedRows.length === 0 ? (
@@ -571,11 +573,13 @@ const CompanyPayment = () => {
             </div>
 
             {/* ✅ Mobile Pagination */}
-            <Pagination className="cp2-pagination-mobile"
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
+            <div className="cp2-pagination-mobile">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
           </>
         )}
       </div>
