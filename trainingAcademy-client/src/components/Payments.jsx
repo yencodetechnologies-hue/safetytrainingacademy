@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from "axios";
 import '../styles/Payments.css';
 import { API_URL } from "../data/service";
+import { openPdf } from "../utils/openPdf";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -367,7 +368,7 @@ const Payment = () => {
                       <p style={{ fontSize: '13px', color: '#555', marginBottom: '12px' }}>PDF Receipt</p>
                       <button
                         className="open-pdf"
-                        onClick={() => window.open(selectedPayment.slipUrl, "_blank")}
+                        onClick={() => openPdf(selectedPayment.slipUrl)}
                         style={{ padding: '8px 18px', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
                       >
                         Open PDF in New Tab

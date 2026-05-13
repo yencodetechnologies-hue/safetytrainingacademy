@@ -13,7 +13,7 @@ import {
 } from "../../../utils/coursePrice";
 import BookingModal from "../../course/BookingModal";
 import logo from "../../../assets/SafetyTrainingAcademylogo.png";
-import PdfViewer from "../../common/PdfViewer";
+import { openPdf } from "../../../utils/openPdf";
 
 // ── Mock data fallbacks (used when API fields are empty) ─────────────────────
 const MOCK_ABOUT =
@@ -214,14 +214,10 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
   const handleViewPDF = (pdfUrl) => {
     if (!pdfUrl) return;
     let fixedUrl = pdfUrl;
-    if (pdfUrl.includes("res.cloudinary.com")) {
-      // Remove any potential fl_attachment to ensure it opens in browser
-      fixedUrl = pdfUrl.replace("/fl_attachment/", "/");
-      if (!fixedUrl.startsWith("http")) fixedUrl = `https://${fixedUrl.replace(/^\/+/, "")}`;
-    } else if (!pdfUrl.startsWith("http")) {
-      fixedUrl = `${API_URL}/${pdfUrl}`;
+    if (!fixedUrl.startsWith("http")) {
+      fixedUrl = pdfUrl.startsWith("/") ? `${window.location.origin}${pdfUrl}` : `${API_URL}/${pdfUrl}`;
     }
-    window.open(fixedUrl, "_blank");
+    openPdf(fixedUrl);
   };
 
 

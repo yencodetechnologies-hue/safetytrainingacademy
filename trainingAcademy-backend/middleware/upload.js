@@ -14,13 +14,15 @@ const FILE_SIZE_LIMIT = 15 * 1024 * 1024 // 15 MB
 
 const courseStorage = new CloudinaryStorage({
   cloudinary,
-  params: async (req, file) => {
+  params: async (_req, file) => {
     const cleanName = file.originalname.split(".")[0].replace(/[^a-zA-Z0-9]/g, "_")
     const isPdf = isPdfFile(file)
     const extension = file.originalname.split(".").pop()
     return {
       folder: "courses",
+      // PDFs must use "raw" — Cloudinary won't serve them via /image/upload/
       resource_type: isPdf ? "raw" : "auto",
+      // For raw uploads, include the extension in public_id (Cloudinary won't add it automatically)
       public_id: isPdf ? `${cleanName}-${Date.now()}.${extension}` : `${cleanName}-${Date.now()}`,
       ...(isPdf ? {} : { transformation: IMG_TRANSFORM }),
     }
@@ -29,7 +31,7 @@ const courseStorage = new CloudinaryStorage({
 
 const paymentStorage = new CloudinaryStorage({
   cloudinary,
-  params: async (req, file) => {
+  params: async (_req, file) => {
     const cleanName = file.originalname.split(".")[0].replace(/[^a-zA-Z0-9]/g, "_")
     const isPdf = isPdfFile(file)
     return {
@@ -43,7 +45,7 @@ const paymentStorage = new CloudinaryStorage({
 
 const enrollmentStorage = new CloudinaryStorage({
   cloudinary,
-  params: async (req, file) => {
+  params: async (_req, file) => {
     const cleanName = file.originalname.split(".")[0].replace(/[^a-zA-Z0-9]/g, "_")
     const isPdf = isPdfFile(file)
     return {
@@ -57,7 +59,7 @@ const enrollmentStorage = new CloudinaryStorage({
 
 const galleryStorage = new CloudinaryStorage({
   cloudinary,
-  params: async (req, file) => {
+  params: async (_req, file) => {
     const cleanName = file.originalname.split(".")[0].replace(/[^a-zA-Z0-9]/g, "_")
     return {
       folder: "gallery",
