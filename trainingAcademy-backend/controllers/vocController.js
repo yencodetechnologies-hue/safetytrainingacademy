@@ -132,7 +132,7 @@ exports.createSubmission = async (req, res) => {
             state: b.state,
             postcode: b.postcode,
             courses,
-            amount: courses.length * VocSubmission.PRICE_PER_COURSE,
+            amount: courses.reduce((sum, c) => sum + (Number(c.price) || VocSubmission.PRICE_PER_COURSE), 0),
             paymentMethod,
         }
 

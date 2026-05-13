@@ -20,7 +20,7 @@ const YEARS = Array.from({ length: 12 }, (_, i) => String(new Date().getFullYear
 
 function VocStep3({ details = {}, courses, onBack, onComplete }) {
 
-    const total = courses.reduce((sum, c) => sum + (c.price || 150), 0)
+    const total = courses.reduce((sum, c) => sum + (Number(c.price) || 150), 0)
 
     const [method, setMethod] = useState("card") // "card" | "bank"
 
@@ -286,7 +286,7 @@ function VocStep3({ details = {}, courses, onBack, onComplete }) {
                         </div>
 
                         <div className="v3-bank-table">
-                            <p className="v3-bank-transfer-heading">TRANSFER ${total}.00 TO:</p>
+                            <p className="v3-bank-transfer-heading">TRANSFER ${total.toFixed(2)} TO:</p>
                             <div className="v3-bank-row">
                                 <span>Bank:</span><strong>Commonwealth Bank</strong>
                             </div>

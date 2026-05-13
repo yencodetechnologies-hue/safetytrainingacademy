@@ -21,6 +21,7 @@ const vocSubmissionSchema = new mongoose.Schema(
             type: [{
                 _id:  false,
                 name: { type: String, required: true },
+                price: { type: Number, default: 150 },
                 date: { type: String, required: true }, // human-readable, e.g. "Tue, 12 May 2026"
             }],
             validate: v => Array.isArray(v) && v.length > 0,

@@ -89,8 +89,9 @@ function VocStep2({ courses, setCourses, onNext, onBack, preselectedCourseId }) 
         if (pt === "experience") seedName = `${match.title} (Without Experience)`
         else if (pt === "slbl")  seedName = `${match.title} (Single License)`
 
+        const vPrice = match.vocPrice || match.sellingPrice || 150
         seededRef.current = true
-        setCourses([{ name: seedName, date: "" }])
+        setCourses([{ name: seedName, price: vPrice, date: "" }])
     }, [preselectedCourseId, dbCourses, courses.length, setCourses])
 
     // Group titles by category and store their vocPrice
@@ -105,7 +106,7 @@ function VocStep2({ courses, setCourses, onNext, onBack, preselectedCourseId }) 
             if (!groups[cat]) groups[cat] = new Set()
 
             const pt = c.pricingType || (c.experienceBasedBooking ? "experience" : "standard")
-            const vPrice = c.vocPrice || 150
+            const vPrice = c.vocPrice || c.sellingPrice || 150
 
             if (pt === "experience") {
                 groups[cat].add(JSON.stringify({ name: `${c.title} (With Experience)`, price: vPrice }))
@@ -124,7 +125,7 @@ function VocStep2({ courses, setCourses, onNext, onBack, preselectedCourseId }) 
         return out
     }, [dbCourses])
 
-    const total = courses.reduce((sum, c) => sum + (c.price || 150), 0)
+    const total = courses.reduce((sum, c) => sum + (Number(c.price) || 150), 0)
 
     const addCourse = () => {
         if (!selected) return
@@ -157,7 +158,7 @@ function VocStep2({ courses, setCourses, onNext, onBack, preselectedCourseId }) 
     }
 
     // Determine display price (if only one item selected, show its price, else show default)
-    const displayPrice = selected ? JSON.parse(selected).price : 150
+    const displayPrice = selected ? JSON.parse(selected).price : (courses[0]?.price || 150)
 
     return (
         <div className="v2-wrap">
@@ -220,7 +221,7 @@ function VocStep2({ courses, setCourses, onNext, onBack, preselectedCourseId }) 
                                         <span className="v2-course-check">✔</span>
                                         <div>
                                             <p className="v2-course-name">{c.name}</p>
-                                            <p className="v2-course-price">${c.price || 150}.00</p>
+                                            <p className="v2-course-price">${Number(c.price || 0).toFixed(2)}</p>
                                         </div>
                                     </div>
                                     <button className="v2-delete-btn" onClick={() => removeCourse(i)}>🗑</button>
