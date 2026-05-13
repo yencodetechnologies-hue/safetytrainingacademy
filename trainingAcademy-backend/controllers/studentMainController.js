@@ -555,7 +555,7 @@ exports.getPaymentsByCompany = async (req, res) => {
 
 exports.paySelected = async (req, res) => {
   try {
-    const { flowIds, amount, method, companyId, transactionId } = req.body;
+    const { flowIds, amount, method, companyId, transactionId, gatewayTransactionId } = req.body;
     const receiptUrl = req.file?.path || "";
     const ids = JSON.parse(flowIds || "[]");
 
@@ -574,6 +574,7 @@ exports.paySelected = async (req, res) => {
         $set: {
           "items.0.payment.method": method,
           "items.0.payment.transactionId": transactionId || "",
+          "items.0.payment.gatewayTransactionId": isCard ? (gatewayTransactionId || transactionId || "") : "",
           "items.0.payment.slipUrl": receiptUrl,
           "items.0.payment.status": status,
         }
@@ -592,6 +593,7 @@ exports.paySelected = async (req, res) => {
         courseCount: ids.length,
         receiptUrl,
         transactionReference: transactionId || "",
+        gatewayTransactionId: isCard ? (gatewayTransactionId || transactionId || "") : "",
         status: status,
         confirmed: confirmed,
       });

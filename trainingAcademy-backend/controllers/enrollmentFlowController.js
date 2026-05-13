@@ -1,4 +1,5 @@
 const EnrollmentFlow = require("../models/EnrollmentFlows");
+const Payment = require("../models/Payment");
 const CourseLink = require("../models/CourseLink");
 const Course = require("../models/Course");
 const Schedule = require("../models/schedule");
@@ -204,9 +205,10 @@ exports.updatePayment = async (req, res) => {
           "items.$.payment.status": payment.status,
           "items.$.payment.paymentId": payment.paymentId,
           "items.$.payment.amount": payment.amount,
-          "items.$.payment.method": payment.method,           // ✅ payment method
-          "items.$.payment.transactionId": payment.transactionId, // ✅ transaction ID
-          "items.$.payment.slipUrl": paymentSlipUrl,          // ✅ image URL
+          "items.$.payment.method": payment.method,
+          "items.$.payment.transactionId": payment.transactionId,
+          "items.$.payment.gatewayTransactionId": payment.gatewayTransactionId || "",
+          "items.$.payment.slipUrl": paymentSlipUrl,
           "items.$.payment.paidAt": new Date(),
           currentStep: 2
         }
@@ -524,6 +526,31 @@ exports.getAllPayments = async (req, res) => {
       .populate("studentId", "name email")
       .sort({ createdAt: -1 });
 
+    // Collect all transactionIds that don't yet have a gatewayTransactionId stored
+    const missingTxnIds = [];
+    enrollments.forEach(enroll => {
+      enroll.items.forEach(item => {
+        const p = item.payment;
+        if (p?.transactionId && !p.gatewayTransactionId) {
+          missingTxnIds.push(p.transactionId);
+        }
+      });
+    });
+
+    // Bulk-fetch gatewayTransactionId from Payment collection for those records
+    const gatewayMap = {};
+    if (missingTxnIds.length > 0) {
+      const paymentDocs = await Payment.find(
+        { transactionId: { $in: missingTxnIds } },
+        { transactionId: 1, gatewayTransactionId: 1 }
+      ).lean();
+      paymentDocs.forEach(doc => {
+        if (doc.gatewayTransactionId) {
+          gatewayMap[doc.transactionId] = doc.gatewayTransactionId;
+        }
+      });
+    }
+
     let payments = [];
     let stats = {
       pending: 0,
@@ -541,15 +568,20 @@ exports.getAllPayments = async (req, res) => {
         const payment = item.payment;
         if (!payment) return;
 
+        const gatewayTransactionId =
+          payment.gatewayTransactionId ||
+          gatewayMap[payment.transactionId] ||
+          "";
+
         payments.push({
           id: payment.paymentId,
           enrollmentId: enroll._id,
           itemId: item._id,
-          createdAt: payment.paidAt || enroll.createdAt, // ✅ Add this for time formatting
-          date: payment.paidAt 
+          createdAt: payment.paidAt || enroll.createdAt,
+          date: payment.paidAt
             ? new Date(payment.paidAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
             : new Date(enroll.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
-          sessionDate: enroll.sessionDate 
+          sessionDate: enroll.sessionDate
             ? new Date(enroll.sessionDate).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
             : null,
           student: enroll.studentId?.name,
@@ -562,7 +594,7 @@ exports.getAllPayments = async (req, res) => {
 
           status:              payment.status,
           transId:             payment.transactionId,
-          gatewayTransactionId: payment.gatewayTransactionId || "",
+          gatewayTransactionId,
           method:              payment.method,
           type: enroll.enrollmentType || "Individual",
           slipUrl: payment.slipUrl || null,

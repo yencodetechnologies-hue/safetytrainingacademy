@@ -90,6 +90,7 @@ function PayModal({ selected, payments, grouped = [], company, onClose, onSucces
               amount: courseGroups.reduce((sum, g) => sum + g.total, 0),
               paymentMethod: "Card",
               transactionReference: ewayData.transactionId,
+              gatewayTransactionId: ewayData.gatewayTransactionId || "",
               courses,
               status: "success",
               confirmed: true,
@@ -100,11 +101,12 @@ function PayModal({ selected, payments, grouped = [], company, onClose, onSucces
         // For student groups, update flows
         if (studentGroups.length > 0) {
           const fd = new FormData();
-          fd.append("flowIds",       JSON.stringify(studentGroups.flatMap(g => g.rows.map(r => r.id))));
-          fd.append("amount",        studentGroups.reduce((sum, g) => sum + g.total, 0));
-          fd.append("method",        "Card Payment");
-          fd.append("companyId",     user.id);
-          fd.append("transactionId", ewayData.transactionId);
+          fd.append("flowIds",              JSON.stringify(studentGroups.flatMap(g => g.rows.map(r => r.id))));
+          fd.append("amount",               studentGroups.reduce((sum, g) => sum + g.total, 0));
+          fd.append("method",               "Card Payment");
+          fd.append("companyId",            user.id);
+          fd.append("transactionId",        ewayData.transactionId);
+          fd.append("gatewayTransactionId", ewayData.gatewayTransactionId || "");
 
           await fetch(`${API_URL}/api/students/company/pay-selected`, {
             method: "POST",
