@@ -172,9 +172,7 @@
 .courses-heading {
     font-size: 20px;
     font-weight: 700;
-    background: linear-gradient(90deg, #7c3aed, #c026d3);
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #7c3aed;
     margin: 0 0 14px 0;
 }
 
@@ -193,7 +191,7 @@
     background: white;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
-    padding: 20px 24px;
+    padding: 16px 24px;
     transition: box-shadow 0.2s;
 }
 
@@ -204,8 +202,9 @@
 .course-left {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
     flex: 1;
+    align-items: flex-start;
 }
 
 .course-top-row {
@@ -245,32 +244,39 @@
 }
 
 .drag-handle {
-    color: black;
-    font-size: 16px;
+    color: #9ca3af;
+    font-size: 14px;
     cursor: grab;
-    margin-right: 4px;
+    margin-right: 2px;
 }
 
 .course-title {
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 17px;
+    font-weight: 700;
     color: #111827;
-    margin: 0;
-    
+    margin: 2px 0 0 0;
 }
 
 .course-info {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: #6b7280;
-    flex-wrap: wrap;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px;
+    font-size: 14px;
+    color: #4b5563;
+    margin-top: 2px;
+    flex-wrap: nowrap; /* Prevent wrapping unless absolutely necessary */
 }
 
 .course-info p {
     margin: 0;
-    font-size: medium;
+    display: flex;
+    align-items: center;
+}
+
+.course-info span {
+    color: #9ca3af;
+    font-size: 12px;
 }
 
 .original-price {
@@ -287,13 +293,13 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-top: 8px;
+    margin-top: 16px;
 }
 
 .enrolled-students {
-    font-size: 13px;
+    font-size: 12px;
     color: #6b7280;
-    font-weight: 500;
+    font-weight: 400;
 }
 
 /* ===== RIGHT SIDE STATUS + ACTIONS ===== */
@@ -301,7 +307,7 @@
 .course-status {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     flex-shrink: 0;
 }
 
