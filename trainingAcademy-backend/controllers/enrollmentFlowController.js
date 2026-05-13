@@ -24,11 +24,19 @@ exports.createFlow = async (req, res) => {
       quantity,
       paymentMethod,
       transactionId,
+      ewayTransactionId,
       slipUrl,
       companyId,
       source,
       sourceToken
     } = req.body;
+
+    // For card payments the bank-ref transactionId field is empty;
+    // persist the eWay transaction ID instead.
+    const resolvedTransactionId =
+      paymentMethod === "Card Payment" && ewayTransactionId
+        ? ewayTransactionId
+        : (transactionId || "");
 
     const seats = Math.max(Number(quantity) || 1, 1);
 
@@ -123,7 +131,7 @@ exports.createFlow = async (req, res) => {
         payment: {
           amount:        resolvedPrice,
           method:        resolvedMethod,
-          transactionId: transactionId || "",
+          transactionId: resolvedTransactionId,
           slipUrl:       slipUrl || "",
           status:        resolvedPaymentStatus,
         }

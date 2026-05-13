@@ -47,6 +47,13 @@ exports.createStudent = async (req, res) => {
       }
     }
 
+    // For card payments the bank-transfer transactionId field is empty;
+    // use the eWay transaction ID so it's visible in the admin panel.
+    const resolvedTransactionId =
+      data.paymentMethod === "Card Payment" && ewayTransactionId
+        ? ewayTransactionId
+        : (transactionId || "");
+
     let student = await StudentMain.findOne({ email: data.email });
 
     const rawPassword =
@@ -70,7 +77,7 @@ exports.createStudent = async (req, res) => {
             courseId: data.courseId,
             sessionId: data.sessionId,
             paymentMethod: data.paymentMethod,
-            transactionId: data.transactionId,
+            transactionId: resolvedTransactionId,
             slipUrl: paymentSlipUrl,
             step: 2
           }
@@ -104,7 +111,7 @@ exports.createStudent = async (req, res) => {
           courseId: data.courseId,
           sessionId: data.sessionId,
           paymentMethod: data.paymentMethod,
-          transactionId: data.transactionId,
+          transactionId: resolvedTransactionId,
           slipUrl: paymentSlipUrl,
           step: 2
         });
