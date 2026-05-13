@@ -66,29 +66,49 @@ function VocStep3({ details = {}, courses, onBack, onComplete }) {
 
             // ── Step 1: charge card via eWay (same endpoint as main booking) ──
             if (method === "card") {
-                const payRes = await fetch(`${API_URL}/api/payment/pay`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        cardName:    card.name,
-                        cardNumber:  card.number.replace(/\s/g, ""),
-                        expiryMonth: card.month,
-                        expiryYear:  card.year,
-                        cvv:         card.cvv,
-                        amount:      total,
-                        email:       details.email,
-                        name:        `${details.firstName} ${details.lastName}`.trim(),
-                        phone:       details.phone,
-                        userId:      details.phone,
-                        description: `VOC Assessment Payment`,
-                    }),
-                })
-                const payResult = await payRes.json()
-                if (!payResult.success) {
+                let payRes
+                try {
+                    payRes = await fetch(`${API_URL}/api/payment/pay`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            cardName:    card.name,
+                            cardNumber:  card.number.replace(/\s/g, ""),
+                            expiryMonth: card.month,
+                            expiryYear:  card.year,
+                            cvv:         card.cvv,
+                            amount:      total,
+                            email:       details.email,
+                            name:        `${details.firstName} ${details.lastName}`.trim(),
+                            phone:       details.phone,
+                            userId:      details.phone,
+                            description: `VOC Assessment Payment`,
+                        }),
+                    })
+                } catch {
+                    setError("Network error. Please check your connection and try again.")
+                    return
+                }
+
+                const payResult = await payRes.json().catch(() => ({}))
+
+                if (!payRes.ok || !payResult.success) {
                     setError(payResult.message || "Your card was declined. Please check your card details or try a different card.")
                     return
                 }
-                ewayTransactionId = payResult.transactionId || payResult.gatewayTransactionId || ""
+
+                // Prefer the internal tracking ID; fall back to the eWay gateway ID.
+                // Use String() so numeric eWay transaction IDs (e.g. 0) become "0"
+                // rather than a falsy empty string.
+                ewayTransactionId = payResult.transactionId
+                    || (payResult.gatewayTransactionId !== undefined
+                        ? String(payResult.gatewayTransactionId)
+                        : "")
+
+                if (!ewayTransactionId) {
+                    setError("Payment processing error. Please try again.")
+                    return
+                }
             }
 
             // ── Step 2: submit VOC record ──

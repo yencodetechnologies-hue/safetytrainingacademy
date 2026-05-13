@@ -182,7 +182,10 @@ exports.createPayment = async (req, res) => {
     // STRICT CHECK: TransactionStatus must be true AND ResponseCode must be "00" (Approved)
     const isApproved = ewayResponse.TransactionStatus === true && ewayResponse.ResponseCode === '00';
 
-    payment.gatewayTransactionId = String(ewayResponse.TransactionID || '');
+    const gatewayTxId = ewayResponse.TransactionID != null
+      ? String(ewayResponse.TransactionID)
+      : '';
+    payment.gatewayTransactionId = gatewayTxId;
     payment.status = isApproved ? 'completed' : 'failed';
     payment.authorizationCode = ewayResponse.AuthorisationCode || '';
     await payment.save();
@@ -190,7 +193,7 @@ exports.createPayment = async (req, res) => {
     return res.json({
       success: isApproved,
       transactionId: payment.transactionId,
-      gatewayTransactionId: String(ewayResponse.TransactionID || ''),
+      gatewayTransactionId: gatewayTxId,
       status: payment.status,
       order: isApproved ? {
         transactionId: payment.transactionId,
