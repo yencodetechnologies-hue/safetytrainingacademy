@@ -70,6 +70,18 @@ function ReceiptModal({ row, onClose, onConfirm }) {
               <div className="cp2-info-label">Date &amp; Time</div>
               <div className="cp2-info-val">{row.date} · {row.time}</div>
             </div>
+            {(row.transactionReference || row.gatewayTransactionId) && (
+              <div className="cp2-info-box" style={{ gridColumn: "1 / -1" }}>
+                <div className="cp2-info-label">
+                  {row.paymentMethod === "Card" || row.paymentMethod === "Card Payment"
+                    ? "eWay Transaction ID"
+                    : "Transaction / Reference ID"}
+                </div>
+                <div className="cp2-info-val" style={{ fontFamily: "monospace", letterSpacing: "0.04em" }}>
+                  {row.transactionReference || row.gatewayTransactionId}
+                </div>
+              </div>
+            )}
           </div>
           <div className="cp2-status-row">
             <span className="cp2-info-label">Status</span>
@@ -325,10 +337,12 @@ const CompanyPayment = () => {
             courseCount:   p.courseCount || 0,
             type:          (p.courses && p.courses.length > 0) ? "course_purchase" : "student_payment",
             amount:        p.amount || 0,
-            paymentMethod: p.paymentMethod || "—",
-            status:        p.status || "pending",
-            receiptUrl:    p.receiptUrl || "",
-            confirmed:     p.confirmed || false,
+            paymentMethod:        p.paymentMethod || "—",
+            status:               p.status || "pending",
+            receiptUrl:           p.receiptUrl || "",
+            confirmed:            p.confirmed || false,
+            transactionReference: p.transactionReference || "",
+            gatewayTransactionId: p.gatewayTransactionId || "",
           })));
           setCurrentPage(1);
         }
