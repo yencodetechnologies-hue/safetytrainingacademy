@@ -6,10 +6,12 @@ const courseStorage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
     const cleanName = file.originalname.split(".")[0].replace(/[^a-zA-Z0-9]/g, "_")
+    const isPdf = file.mimetype === "application/pdf" || file.originalname.toLowerCase().endsWith(".pdf")
+    const extension = file.originalname.split(".").pop()
     return {
       folder: "courses",
-      resource_type: "auto", 
-      public_id: `${cleanName}-${Date.now()}`,
+      resource_type: isPdf ? "raw" : "auto", 
+      public_id: isPdf ? `${cleanName}-${Date.now()}.${extension}` : `${cleanName}-${Date.now()}`,
     }
   }
 })
