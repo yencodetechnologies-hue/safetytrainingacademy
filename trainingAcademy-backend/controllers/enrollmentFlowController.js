@@ -7,7 +7,6 @@ const mongoose = require("mongoose");
 const sendEmail = require("../config/sendEmail");
 const { sendLLNCompletionNotification, sendEnrollmentFormCompletionNotification, formatBookingId } = require("./bookingEmailController");
 const Company = require("../models/Company");
-const Payment = require("../models/Payment");
 
 // ✅ Create new flow
 exports.createFlow = async (req, res) => {
@@ -596,7 +595,6 @@ exports.getAllPayments = async (req, res) => {
         const payment = item.payment;
         if (!payment) return;
 
-<<<<<<< HEAD
         const amount = payment.amount || item.course.price || 0;
         
         // Find gateway ID: 1st by transactionId, 2nd by fuzzy match (normalized phone + amount)
@@ -607,23 +605,13 @@ exports.getAllPayments = async (req, res) => {
           const fKey = `${cleanStudentPhone}_${amount}`;
           gId = fuzzyMap[fKey] || "—";
         }
-=======
-        const gatewayTransactionId =
-          payment.gatewayTransactionId ||
-          gatewayMap[payment.transactionId] ||
-          "";
->>>>>>> 03b8133bb073dc7aff978b3b08288654436b95ea
 
         payments.push({
           id: payment.paymentId,
           enrollmentId: enroll._id,
           itemId: item._id,
           createdAt: payment.paidAt || enroll.createdAt,
-<<<<<<< HEAD
-          date: payment.paidAt 
-=======
           date: payment.paidAt
->>>>>>> 03b8133bb073dc7aff978b3b08288654436b95ea
             ? new Date(payment.paidAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
             : new Date(enroll.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
           sessionDate: enroll.sessionDate
@@ -637,17 +625,10 @@ exports.getAllPayments = async (req, res) => {
 
           amount: amount,
 
-<<<<<<< HEAD
           status: payment.status,
           transId: payment.transactionId,
           gatewayTransId: gId,
           method: payment.method,
-=======
-          status:              payment.status,
-          transId:             payment.transactionId,
-          gatewayTransactionId,
-          method:              payment.method,
->>>>>>> 03b8133bb073dc7aff978b3b08288654436b95ea
           type: enroll.enrollmentType || "Individual",
           slipUrl: payment.slipUrl || null,
         });
