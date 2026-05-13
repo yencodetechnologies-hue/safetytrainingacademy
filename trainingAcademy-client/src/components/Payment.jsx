@@ -23,12 +23,41 @@ const bankSchema = Yup.object({
     paymentSlip: Yup.mixed().required("Payment slip is required"),
 })
 
+function luhnCheck(value) {
+    const digits = value.replace(/\D/g, "")
+    if (digits.length < 13 || digits.length > 19) return false
+    let sum = 0
+    let isEven = false
+    for (let i = digits.length - 1; i >= 0; i--) {
+        let d = parseInt(digits[i], 10)
+        if (isEven) { d *= 2; if (d > 9) d -= 9 }
+        sum += d
+        isEven = !isEven
+    }
+    return sum % 10 === 0
+}
+
 const cardSchema = Yup.object({
     cardName: Yup.string().trim().required("Name on card is required"),
-    cardNumber: Yup.string().trim().required("Card number is required"),
+    cardNumber: Yup.string()
+        .trim()
+        .required("Card number is required")
+        .test("card-length", "Card number must be 13–19 digits", v => !!v && /^\d[\d\s]{11,17}\d$/.test(v.trim()))
+        .test("luhn", "Invalid card number", v => !!v && luhnCheck(v)),
     expiryMonth: Yup.string().required("Expiry month is required"),
-    expiryYear: Yup.string().required("Expiry year is required"),
-    cvv: Yup.string().trim().required("CVV is required"),
+    expiryYear: Yup.string()
+        .required("Expiry year is required")
+        .test("not-expired", "Card has expired", function (year) {
+            const { expiryMonth } = this.parent
+            if (!year || !expiryMonth) return true
+            const now = new Date()
+            const exp = new Date(Number(year), Number(expiryMonth) - 1, 1)
+            return exp >= new Date(now.getFullYear(), now.getMonth(), 1)
+        }),
+    cvv: Yup.string()
+        .trim()
+        .required("CVV is required")
+        .matches(/^\d{3,4}$/, "CVV must be 3 or 4 digits"),
 })
 
 async function runSchema(schema, values) {
