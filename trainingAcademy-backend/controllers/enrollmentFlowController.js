@@ -534,8 +534,9 @@ exports.getAllPayments = async (req, res) => {
 
         payments.push({
           id: payment.paymentId,
-          enrollmentId: enroll._id,   // 🔥 ADD THIS
+          enrollmentId: enroll._id,
           itemId: item._id,
+          createdAt: payment.paidAt || enroll.createdAt, // ✅ Add this for time formatting
           date: payment.paidAt 
             ? new Date(payment.paidAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
             : new Date(enroll.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
@@ -548,14 +549,13 @@ exports.getAllPayments = async (req, res) => {
           course: item.course.courseName,
           code: item.course.courseId,
 
-          // 🔥 price fallback
           amount: payment.amount || item.course.price || 0,
 
           status: payment.status,
-          transId: payment.transactionId,  // ✅ paymentId இல்லை — transactionId
-          method: payment.method,           // ✅ payment method
-          type: enroll.enrollmentType || "Individual",  // ✅ Individual/Company
-          slipUrl: payment.slipUrl || null, // ✅ image URL
+          transId: payment.transactionId,
+          method: payment.method,
+          type: enroll.enrollmentType || "Individual",
+          slipUrl: payment.slipUrl || null,
         });
 
         if (payment.status === "pending" || payment.status === "unpaid") stats.pending++;

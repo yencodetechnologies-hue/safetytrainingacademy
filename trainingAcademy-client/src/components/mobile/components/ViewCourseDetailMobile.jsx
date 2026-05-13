@@ -184,7 +184,6 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
   // back to the existing single-button UI.
   const variants = getCourseVariants(course);
   const isVariantCourse = variants.length > 1;
-  const shouldBypassModal = false; // Always show modal options
 
   // Helper: build the deep link for one variant. Mirrors the convention
   // used everywhere else (`?type=with-experience` etc.).
@@ -203,9 +202,11 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
   const outcomeList   = outcomePoints.length  > 0 ? outcomePoints  : MOCK_OUTCOMES;
   const requireList   = requirements.length   > 0 ? requirements   : MOCK_REQUIREMENTS;
 
-  // ── Chunk into groups of 4 for swipe ─────────────────────────────────────
-  const outcomePages  = chunkArray(outcomeList, 4);
-  const reqPages      = chunkArray(requireList, 4);
+  // ── Bypass Modal Logic for specific courses ──────────────────────────────
+  const BYPASS_KEYWORDS = ["excavator", "haul truck", "skid steer"];
+  const shouldBypassModal = isVariantCourse || BYPASS_KEYWORDS.some(kw => 
+    course.title?.toLowerCase().includes(kw)
+  );
 
   // ── Session display ───────────────────────────────────────────────────────
   const sessionPages = chunkArray(sessions, PAGE_SIZE);

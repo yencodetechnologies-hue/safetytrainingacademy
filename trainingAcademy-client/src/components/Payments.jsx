@@ -38,7 +38,11 @@ const Payment = () => {
     try {
       setLoading(true);
       const res = await axios.get(`${API_URL}/api/flow/payments`);
-      setPayments(res.data.payments);
+      setPayments(res.data.payments.map(p => ({
+        ...p,
+        date: p.createdAt ? new Date(p.createdAt).toLocaleDateString("en-AU") : p.date,
+        time: p.createdAt ? new Date(p.createdAt).toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", hour12: true }).toLowerCase() : ""
+      })));
       setStats(res.data.stats);
       setCurrentPage(1);
     } catch (err) {
@@ -115,8 +119,13 @@ const Payment = () => {
     .filter(p => {
       const q = searchQuery.toLowerCase().trim();
       if (!q) return true;
+      
+      // Split name into words to check if any part starts with the query
+      const nameWords = (p.student || "").toLowerCase().split(" ");
+      const nameMatch = nameWords.some(word => word.startsWith(q));
+
       return (
-        p.student?.toLowerCase().includes(q) ||
+        nameMatch ||
         p.email?.toLowerCase().includes(q) ||
         p.course?.toLowerCase().includes(q) ||
         p.transId?.toLowerCase().includes(q)
@@ -211,7 +220,7 @@ const Payment = () => {
                 <th>Student</th>
                 <th>Course</th>
                 <th>Schedule Date</th>
-                <th>Individual/Company</th>
+                <th>Method</th>
                 <th>Transaction ID</th>
                 <th>Amount</th>
                 <th>Payment date</th>
@@ -229,23 +238,26 @@ const Payment = () => {
               ) : (
                 paginatedPayments.map((p, index) => (
                   <tr key={p.id || p.transId || index}>
-                    <td>{p.date}</td>
+                    <td className="date-cell">
+                      <div>{p.date}</div>
+                      <div className="time-muted">{p.time || "—"}</div>
+                    </td>
                     <td>
                       <div className="student-info">
                         <span className="name">{p.student}</span>
-                        <span className="email">{p.email}</span>
+                        <span className="email-muted">{p.email}</span>
                       </div>
                     </td>
                     <td>
                       <div className="course-info">
-                        <span className="course-name">{p.course}</span>
+                        <span className="course-name-bold">{p.course}</span>
                       </div>
                     </td>
-                    <td>{p.sessionDate || "—"}</td>
-                    <td>{p.type || "Individual"}</td>
-                    <td>{p.transId || "—"}</td>
+                    <td className="td-muted">{p.sessionDate || "—"}</td>
+                    <td className="td-muted">{p.method || "Individual"}</td>
+                    <td className="td-mono">{p.transId || "—"}</td>
                     <td className="amount">${p.amount}</td>
-                    <td>{p.date}</td>
+                    <td className="td-muted">{p.date}</td>
                     <td>
                       <span className={`status-badge ${formatStatus(p.status).toLowerCase()}`}>
                         {formatStatus(p.status)}
