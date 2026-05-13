@@ -176,7 +176,16 @@ exports.createPayment = async (req, res) => {
     const receiptUrl = req.file?.path || "";
 
     const isCard = paymentMethod === "Card";
-    const status = isCard ? "success" : "pending";
+    
+    // ── DEFENSIVE: Only mark as success if transactionReference (eWAY ID) is present ──
+    let status = isCard ? "success" : "pending";
+    let confirmed = isCard;
+
+    if (isCard && !transactionReference) {
+      console.warn(`[CompanyPayment] Card payment created without transactionReference! Setting to pending. Company: ${companyId}`);
+      status = "pending";
+      confirmed = false;
+    }
 
     const payment = await CompanyPayment.create({
       companyId,
@@ -192,7 +201,7 @@ exports.createPayment = async (req, res) => {
       transactionReference: transactionReference || "",
       notes: notes || "",
       status: status,
-      confirmed: isCard,
+      confirmed: confirmed,
     });
 
     // ── AUTOMATIC LINK GENERATION for successful payments ──────

@@ -539,13 +539,23 @@ exports.paySelected = async (req, res) => {
     const receiptUrl = req.file?.path || "";
     const ids = JSON.parse(flowIds || "[]");
 
+    const isCard = method === "Card Payment";
+    let status = isCard ? "success" : "pending";
+    let confirmed = isCard;
+
+    if (isCard && !transactionId) {
+      console.warn(`[paySelected] Card payment without transactionId! Company: ${companyId}`);
+      status = "pending";
+      confirmed = false;
+    }
+
     await Promise.all(ids.map(id =>
       EnrollmentFlow.findByIdAndUpdate(id, {
         $set: {
           "items.0.payment.method": method,
           "items.0.payment.transactionId": transactionId || "",
           "items.0.payment.slipUrl": receiptUrl,
-          "items.0.payment.status": method === "Card Payment" ? "success" : "pending",
+          "items.0.payment.status": status,
         }
       })
     ));
@@ -558,12 +568,12 @@ exports.paySelected = async (req, res) => {
         email: company?.email || "",
         mobile: company?.mobileNumber || "",
         amount: Number(amount),
-        paymentMethod: method === "Card Payment" ? "Card" : "Bank Transfer",
+        paymentMethod: isCard ? "Card" : "Bank Transfer",
         courseCount: ids.length,
         receiptUrl,
         transactionReference: transactionId || "",
-        status: method === "Card Payment" ? "success" : "pending",
-        confirmed: method === "Card Payment",
+        status: status,
+        confirmed: confirmed,
       });
     }
 

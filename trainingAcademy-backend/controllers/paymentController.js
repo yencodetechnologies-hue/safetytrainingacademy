@@ -1,10 +1,14 @@
 const axios = require('axios');
 const Payment = require('../models/Payment');
 
-const EWAY_BASE_URL =
-  (process.env.EWAY_ENVIRONMENT || '').trim() === 'Production'
-    ? 'https://api.ewaypayments.com'
-    : 'https://api.sandbox.ewaypayments.com';
+const EWAY_ENV = (process.env.EWAY_ENVIRONMENT || 'Sandbox').trim();
+const IS_PRODUCTION = EWAY_ENV.toLowerCase() === 'production';
+
+const EWAY_BASE_URL = IS_PRODUCTION
+  ? 'https://api.ewaypayments.com'
+  : 'https://api.sandbox.ewaypayments.com';
+
+console.log(`[eWAY] Initialize: Environment=${EWAY_ENV}, URL=${EWAY_BASE_URL}`);
 
 function getEwayAuthHeader() {
   const apiKey = (process.env.EWAY_API_KEY || '').trim();
@@ -12,6 +16,8 @@ function getEwayAuthHeader() {
   
   if (!apiKey || !apiPassword) {
     console.error('CRITICAL: eWAY API credentials missing in environment variables');
+  } else {
+    console.log(`[eWAY] Credentials loaded: Key(${apiKey.length} chars, starts with ${apiKey.slice(0, 5)}...), Pass(${apiPassword.length} chars)`);
   }
 
   const credentials = Buffer.from(`${apiKey}:${apiPassword}`).toString('base64');
@@ -70,6 +76,14 @@ exports.createPayment = async (req, res) => {
       currency = 'AUD', userId, description,
       courseName, // ADDED: for GTM tracking
     } = req.body;
+
+    // Log request (sanitize card)
+    console.log('[eWAY] createPayment called:', {
+      amount, email, name, phone, cardName, 
+      cardNumber: cardNumber ? 'XXXX...' : 'missing',
+      expiryMonth, expiryYear, cvv: cvv ? 'XXX' : 'missing',
+      userId, description
+    });
 
     const numericAmount = parseFloat(amount); // CHANGE 2: store as number
 
