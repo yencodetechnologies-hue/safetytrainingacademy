@@ -38,11 +38,14 @@ const vocSubmissionSchema = new mongoose.Schema(
 
         // Card path — only safe metadata. Never persist raw PAN / CVV.
         card: {
-            name:        { type: String, default: "" },
-            last4:       { type: String, default: "" },
-            expiryMonth: { type: String, default: "" },
-            expiryYear:  { type: String, default: "" },
+            name:          { type: String, default: "" },
+            last4:         { type: String, default: "" },
+            expiryMonth:   { type: String, default: "" },
+            expiryYear:    { type: String, default: "" },
+            transactionId: { type: String, default: "" },
         },
+
+        ewayTransactionId: { type: String, default: "" },
 
         // Bank path
         bank: {

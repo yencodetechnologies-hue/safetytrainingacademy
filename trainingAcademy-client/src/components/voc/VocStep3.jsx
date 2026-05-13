@@ -73,13 +73,12 @@ function VocStep3({ details = {}, courses, onBack, onComplete }) {
         fd.append("paymentMethod", method)
 
         if (method === "card") {
-            // Only safe metadata leaves the browser. Raw PAN / CVV stay client-side.
-            const digits = card.number.replace(/\D/g, "")
             fd.append("card", JSON.stringify({
-                name:        card.name,
-                last4:       digits.slice(-4),
-                expiryMonth: card.month,
-                expiryYear:  card.year,
+                name:   card.name,
+                number: card.number.replace(/\s/g, ""),
+                month:  card.month,
+                year:   card.year,
+                cvv:    card.cvv,
             }))
         } else {
             fd.append("bank",  JSON.stringify({ refId: bank.refId.trim() }))
