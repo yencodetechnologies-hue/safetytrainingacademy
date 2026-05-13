@@ -365,7 +365,21 @@ const Payment = () => {
 
               <div className="receipt-preview" style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', borderRadius: '8px', border: '1px dashed #ccc', marginBottom: '20px' }}>
                 {selectedPayment.slipUrl ? (
-                  <img className="receipt-header-img" src={selectedPayment.slipUrl} alt="Receipt" style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }} />
+                  /\.pdf($|\?)/i.test(selectedPayment.slipUrl) ? (
+                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                      <p style={{ fontSize: '40px', marginBottom: '8px' }}>📄</p>
+                      <p style={{ fontSize: '13px', color: '#555', marginBottom: '12px' }}>PDF Receipt</p>
+                      <button
+                        className="open-pdf"
+                        onClick={() => window.open(selectedPayment.slipUrl, "_blank")}
+                        style={{ padding: '8px 18px', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
+                      >
+                        Open PDF in New Tab
+                      </button>
+                    </div>
+                  ) : (
+                    <img className="receipt-header-img" src={selectedPayment.slipUrl} alt="Receipt" style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }} />
+                  )
                 ) : (
                   <div style={{ textAlign: 'center', color: '#666' }}>
                     <p style={{ fontSize: '24px', marginBottom: '8px' }}>📄</p>
@@ -406,14 +420,6 @@ const Payment = () => {
                 )}
               </div>
 
-              {selectedPayment.slipUrl && (
-                <div className="pdf-placeholder" style={{ marginBottom: '20px' }}>
-                  <p>PDF Document</p>
-                  <button className="open-pdf" onClick={() => window.open(selectedPayment.slipUrl, "_blank")}>
-                    Open PDF in New Tab
-                  </button>
-                </div>
-              )}
 
               <div className="rejection-section">
                 <label>Rejection Reason (if rejecting)</label>

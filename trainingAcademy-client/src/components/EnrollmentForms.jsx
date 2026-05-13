@@ -6,6 +6,26 @@ import { API_URL } from "../data/service";
 
 const ITEMS_PER_PAGE = 10;
 
+function DocViewer({ url, alt, className, style }) {
+  if (!url) return null;
+  if (/\.pdf($|\?)/i.test(url)) {
+    return (
+      <a href={url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', background: '#4f46e5', color: '#fff', borderRadius: 6, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+        📄 Open PDF
+      </a>
+    );
+  }
+  return (
+    <img
+      src={url}
+      alt={alt}
+      className={className}
+      style={style}
+      onError={e => { e.currentTarget.style.display = "none"; }}
+    />
+  );
+}
+
 function StatusBadge({ status }) {
   const map = {
     Approved: { className: "badge badge-approved", icon: "✓" },
@@ -283,7 +303,7 @@ function EnrollmentModal({ form, onClose, onStatusChange }) {
                         <i className="fa-regular fa-eye"></i> View full size
                       </a>
                     </div>
-                    <img src={raw.idDocumentUrl} alt="Primary ID" className="modal-photo-img" />
+                    <DocViewer url={raw.idDocumentUrl} alt="Primary ID" className="modal-photo-img" />
                   </div>
                 )}
                 {raw.photoDocumentUrl && (
@@ -294,7 +314,7 @@ function EnrollmentModal({ form, onClose, onStatusChange }) {
                         <i className="fa-regular fa-eye"></i> View full size
                       </a>
                     </div>
-                    <img src={raw.photoDocumentUrl} alt="Student Photo" className="modal-photo-img" />
+                    <DocViewer url={raw.photoDocumentUrl} alt="Student Photo" className="modal-photo-img" />
                   </div>
                 )}
                 {!raw.idDocumentUrl && !raw.photoDocumentUrl && (
@@ -352,7 +372,7 @@ function EnrollmentModal({ form, onClose, onStatusChange }) {
                         <i className="fa-regular fa-eye"></i> View full size
                       </a>
                     </div>
-                    <img src={usi.staIdFileUrl} alt="USI ID" className="modal-photo-img" />
+                    <DocViewer url={usi.staIdFileUrl} alt="USI ID" className="modal-photo-img" />
                   </div>
                 )}
               </div>
@@ -415,7 +435,7 @@ function EnrollmentModal({ form, onClose, onStatusChange }) {
                         <i className="fa-regular fa-eye"></i> View full size
                       </a>
                     </div>
-                    <img src={qualifications.evidenceUrl} alt="Qualification Evidence" className="modal-photo-img" />
+                    <DocViewer url={qualifications.evidenceUrl} alt="Qualification Evidence" className="modal-photo-img" />
                   </div>
                 )}
               </div>
