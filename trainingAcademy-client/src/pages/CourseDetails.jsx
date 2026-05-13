@@ -169,15 +169,15 @@ function CourseDetails() {
             {isSlbl && (
                 <>
                     <div className="cdp-pc-label">Course Fee</div>
-                    <div className="cdp-pc-slbl-row">
+                    <div className="cdp-price-row">
+                        <span className="cdp-price-now">${sellingPrice}</span>
                         {course.slblStrikePrice && (
                             <span className="cdp-price-old">${course.slblStrikePrice}</span>
                         )}
-                        <span className="cdp-price-now">${sellingPrice}</span>
+                        {savings > 0 && (
+                            <span className="cdp-save-badge">Save ${savings}</span>
+                        )}
                     </div>
-                    {savings > 0 && (
-                        <div className="cdp-save-badge">SAVE ${savings}!</div>
-                    )}
                     <p className="cdp-price-note">All inclusive — no hidden fees</p>
                     <button
                         className="cdp-btn-book"
@@ -192,15 +192,15 @@ function CourseDetails() {
             {isExperience && (
                 <>
                     <div className="cdp-pc-label">Course Fee</div>
-                    <div className="cdp-pc-exp-block">
-                        <div className="cdp-pc-exp-label">With experience</div>
-                        <div className="cdp-price-now">${course.withExperiencePrice}</div>
+                    <div className="cdp-price-row">
+                        <span className="cdp-price-now">${course.withExperiencePrice}</span>
+                        {course.withExperienceOriginal && (
+                            <span className="cdp-price-old">${course.withExperienceOriginal}</span>
+                        )}
+                        {course.withExperienceOriginal > course.withExperiencePrice && (
+                            <span className="cdp-save-badge">Save ${course.withExperienceOriginal - course.withExperiencePrice}</span>
+                        )}
                     </div>
-                    <div className="cdp-pc-divider" />
-                    {/* <div className="cdp-pc-exp-block">
-                        <div className="cdp-pc-exp-label">Without experience</div>
-                        <div className="cdp-price-now">${course.withoutExperiencePrice}</div>
-                    </div> */}
                     <p className="cdp-price-note">All inclusive — no hidden fees</p>
                     <button
                         className="cdp-btn-book cdp-btn-exp-with"
