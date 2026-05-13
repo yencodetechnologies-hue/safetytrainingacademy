@@ -395,7 +395,8 @@ export function PaymentsTable({ payments = [], company, onRefresh }) {
         paid: 0,
         balance: 0,
         isCoursePayment: row.student && row.student.includes('enrolled'),
-        payment: row.payment, // assume same for group
+        payment: row.payment,
+        gatewayTransactionId: row.gatewayTransactionId || "",
       };
     }
     groupedPayments[paymentId].rows.push(row);
@@ -456,6 +457,7 @@ export function PaymentsTable({ payments = [], company, onRefresh }) {
               <th className="py-col-check"></th>
               <th>Date</th>
               <th>Student / Course</th>
+              <th>Transaction ID</th>
               <th>Payment</th>
               <th className="right">Total</th>
               <th className="right">Paid</th>
@@ -465,15 +467,12 @@ export function PaymentsTable({ payments = [], company, onRefresh }) {
           <tbody>
             {groupedArray.length === 0 ? (
               <tr>
-                <td colSpan={7} style={{ textAlign: "center", padding: "2rem" }}>
+                <td colSpan={8} style={{ textAlign: "center", padding: "2rem" }}>
                   No payments found
                 </td>
               </tr>
             ) : groupedArray.map(group => {
               const subjectLabel = group.isCoursePayment ? "Course" : "Students";
-              const primaryInfo = group.isCoursePayment
-                ? (group.rows.length === 1 ? group.rows[0].course : `${group.rows.length} courses`)
-                : (group.rows.length === 1 ? group.rows[0].name : `${group.rows.length} students`);
               return (
                 <tr key={group.id} className={group.payment === "paid" ? "py-row-paid" : ""}>
                   <td className="py-col-check">
@@ -504,6 +503,9 @@ export function PaymentsTable({ payments = [], company, onRefresh }) {
                     {/* <div style={{ marginTop: 6 }}>
                       <div style={{ fontWeight: 600, fontSize: 13 }}>{primaryInfo}</div>
                     </div> */}
+                  </td>
+                  <td style={{ fontFamily: "monospace", fontSize: 11 }}>
+                    {group.gatewayTransactionId || "—"}
                   </td>
                   <td>
                     <span className={`py-badge ${group.payment === "paid" ? "py-badge-paid" : "py-badge-pending"}`}>

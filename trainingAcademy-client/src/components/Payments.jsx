@@ -255,7 +255,7 @@ const Payment = () => {
                     </td>
                     <td className="td-muted">{p.sessionDate || "—"}</td>
                     <td className="td-muted">{p.method || "Individual"}</td>
-                    <td className="td-mono">{p.transId || "—"}</td>
+                    <td className="td-mono">{p.gatewayTransactionId || p.transId || "—"}</td>
                     <td className="amount">${p.amount}</td>
                     <td className="td-muted">{p.date}</td>
                     <td>
@@ -359,7 +359,7 @@ const Payment = () => {
                 <h4>Transaction Details</h4>
                 <div className="detail-row">
                   <p><strong>Amount:</strong> <span className="text-green">${selectedPayment.amount}</span></p>
-                  <p><strong>Transaction ID:</strong> {selectedPayment.transId}</p>
+                  <p><strong>Transaction ID:</strong> {selectedPayment.gatewayTransactionId || selectedPayment.transId}</p>
                 </div>
               </div>
 

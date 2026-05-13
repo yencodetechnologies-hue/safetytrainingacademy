@@ -527,6 +527,7 @@ exports.getPaymentsByCompany = async (req, res) => {
             total,
             paid: isPaid ? total : 0,
             balance: isPaid ? 0 : total,
+            gatewayTransactionId: payment.card?.gatewayTransactionId || payment.gatewayTransactionId || "",
           });
         }
       } else {
@@ -540,6 +541,7 @@ exports.getPaymentsByCompany = async (req, res) => {
           total: payment.amount || 0,
           paid: isPaid ? payment.amount || 0 : 0,
           balance: isPaid ? 0 : payment.amount || 0,
+          gatewayTransactionId: payment.card?.gatewayTransactionId || payment.gatewayTransactionId || "",
         });
       }
     }

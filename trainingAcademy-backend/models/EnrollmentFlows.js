@@ -51,6 +51,7 @@ enrollmentType: {
         paidAt: Date,
         method: String,        // ✅ "Card Payment" or "Bank Transfer"
         transactionId: String,
+        gatewayTransactionId: String,
         slipUrl: String,
         rejectionReason: String
       },

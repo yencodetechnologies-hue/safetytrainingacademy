@@ -129,11 +129,12 @@ exports.createFlow = async (req, res) => {
           courseName,
         },
         payment: {
-          amount:        resolvedPrice,
-          method:        resolvedMethod,
-          transactionId: resolvedTransactionId,
-          slipUrl:       slipUrl || "",
-          status:        resolvedPaymentStatus,
+          amount:               resolvedPrice,
+          method:               resolvedMethod,
+          transactionId:        resolvedTransactionId,
+          gatewayTransactionId: paymentMethod === "Card Payment" ? (ewayTransactionId || "") : "",
+          slipUrl:              slipUrl || "",
+          status:               resolvedPaymentStatus,
         }
       }],
       meta: {
@@ -559,9 +560,10 @@ exports.getAllPayments = async (req, res) => {
 
           amount: payment.amount || item.course.price || 0,
 
-          status: payment.status,
-          transId: payment.transactionId,
-          method: payment.method,
+          status:              payment.status,
+          transId:             payment.transactionId,
+          gatewayTransactionId: payment.gatewayTransactionId || "",
+          method:              payment.method,
           type: enroll.enrollmentType || "Individual",
           slipUrl: payment.slipUrl || null,
         });
