@@ -3,17 +3,17 @@ import "../styles/EnrollmentForms.css";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 import { API_URL } from "../data/service";
+import { openPdf } from "../utils/openPdf";
 
 const ITEMS_PER_PAGE = 10;
 
 function DocViewer({ url, alt, className, style }) {
   if (!url) return null;
   if (/\.pdf($|\?)/i.test(url)) {
-    const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}`;
     return (
-      <a href={viewerUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', background: '#4f46e5', color: '#fff', borderRadius: 6, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+      <button onClick={() => openPdf(url)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', background: '#4f46e5', color: '#fff', borderRadius: 6, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer' }}>
         📄 Open PDF
-      </a>
+      </button>
     );
   }
   return (

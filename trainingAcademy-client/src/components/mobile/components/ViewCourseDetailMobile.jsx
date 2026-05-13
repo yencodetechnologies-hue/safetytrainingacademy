@@ -13,7 +13,7 @@ import {
 } from "../../../utils/coursePrice";
 import BookingModal from "../../course/BookingModal";
 import logo from "../../../assets/SafetyTrainingAcademylogo.png";
-import PdfViewer from "../../common/PdfViewer";
+import { openPdf } from "../../../utils/openPdf";
 
 // ── Mock data fallbacks (used when API fields are empty) ─────────────────────
 const MOCK_ABOUT =
@@ -217,7 +217,7 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
     if (!fixedUrl.startsWith("http")) {
       fixedUrl = pdfUrl.startsWith("/") ? `${window.location.origin}${pdfUrl}` : `${API_URL}/${pdfUrl}`;
     }
-    window.open(`https://docs.google.com/viewer?url=${encodeURIComponent(fixedUrl)}`, "_blank");
+    openPdf(fixedUrl);
   };
 
 

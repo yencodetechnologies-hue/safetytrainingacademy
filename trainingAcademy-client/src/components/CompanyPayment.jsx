@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/CompanyPayment.css';
 import { API_URL } from "../data/service";
+import { openPdf } from "../utils/openPdf";
 
 function StatusBadge({ status, confirmed }) {
   if (status === "success" && confirmed) return <span className="cp2-badge cp2-badge--confirmed">✓ Confirmed</span>;
@@ -87,7 +88,7 @@ function ReceiptModal({ row, onClose, onConfirm }) {
                 />
                 <button
                   className="cp2-open-btn"
-                  onClick={() => { const u = row.receiptUrl; window.open(/\.pdf($|\?)/i.test(u) ? `https://docs.google.com/viewer?url=${encodeURIComponent(u)}` : u, "_blank"); }}
+                  onClick={() => openPdf(row.receiptUrl)}
                 >
                   Open in New Tab ↗
                 </button>

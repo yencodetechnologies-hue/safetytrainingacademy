@@ -96,6 +96,7 @@ app.use("/api/categories", require("./routes/categoryRoutes")); // ✅ ADD
 app.use("/api/sliders", require("./routes/sliderRoutes"));
 app.use("/api/partners", require("./routes/partnerRoutes"));
 app.use("/api/voc", require("./routes/vocRoutes"));
+app.use("/api/files", require("./routes/filesRoutes"));
 
 app.get("/api/health", async (req, res) => {
   const mongoose = require("mongoose");

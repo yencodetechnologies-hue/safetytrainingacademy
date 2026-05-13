@@ -10,7 +10,7 @@ import { useNavigate, useLocation } from "react-router-dom"
 import { cdnImage } from "../utils/cdnImage"
 import BookingModal from "../components/course/BookingModal"
 import logo from "../assets/SafetyTrainingAcademylogo.png"
-import PdfViewer from '../components/common/PdfViewer';
+import { openPdf } from '../utils/openPdf';
 
 function chunkArray(arr, size) {
     if (!arr) return []
@@ -61,7 +61,7 @@ function CourseDetails() {
         if (!fixedUrl.startsWith("http")) {
             fixedUrl = pdfUrl.startsWith("/") ? `${window.location.origin}${pdfUrl}` : `${API_URL}/${pdfUrl}`;
         }
-        window.open(`https://docs.google.com/viewer?url=${encodeURIComponent(fixedUrl)}`, "_blank");
+        openPdf(fixedUrl);
     };
 
     useEffect(() => {
