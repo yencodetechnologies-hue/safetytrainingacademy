@@ -65,6 +65,36 @@ function randomInvoiceNumber() {
   return String(Math.floor(Math.random() * 90000000) + 10000000);
 }
 
+function translateEwayErrors(errors) {
+  if (!errors) return 'Payment processing error';
+  
+  const errorMap = {
+    'V6000': 'Validation error. Please check your information.',
+    'V6021': 'Invalid cardholder name. Please enter the name exactly as it appears on your card.',
+    'V6022': 'Invalid card number. Please check your 16-digit card number.',
+    'V6023': 'Invalid CVN (the 3 digits on the back of your card).',
+    'V6040': 'Invalid expiry month. Please check your card.',
+    'V6041': 'Invalid expiry year. Please check your card.',
+    'V6042': 'Invalid expiry month. Please check your card.',
+    'V6043': 'Invalid expiry year. Please check your card.',
+    'V6044': 'Your card has expired. Please use a different card.',
+    'V6045': 'Invalid CVN (the 3 digits on the back of your card).',
+    'V6153': 'Invalid CVN (the 3 digits on the back of your card). Please check and try again.',
+    'V6011': 'Invalid amount.',
+    'V6012': 'Invalid amount.',
+    'V6013': 'Invalid invoice number.',
+    'V6014': 'Invalid invoice reference.',
+    'V6081': 'Invalid CVN.',
+    'V6082': 'Invalid CVN.',
+  };
+
+  const codes = String(errors).split(',').map(c => c.trim());
+  const messages = codes.map(code => errorMap[code] || `Error ${code}: Please check your card details.`);
+  
+  // Return unique messages
+  return [...new Set(messages)].join(' ');
+}
+
 // ============================================
 // 1. CREATE PAYMENT (Direct Card)
 exports.createPayment = async (req, res) => {
@@ -145,7 +175,7 @@ exports.createPayment = async (req, res) => {
       await payment.save();
       return res.status(400).json({
         success: false,
-        message: `Gateway Error: ${ewayResponse.Errors}`,
+        message: translateEwayErrors(ewayResponse.Errors),
       });
     }
 
@@ -246,7 +276,7 @@ exports.createPaymentWithToken = async (req, res) => {
       return res.status(400).json({
         success: false,
         transactionId: payment.transactionId,
-        message: `Gateway Error: ${ewayResponse.Errors}`,
+        message: translateEwayErrors(ewayResponse.Errors),
       });
     }
 
@@ -310,7 +340,7 @@ exports.createPaymentToken = async (req, res) => {
     }, null, 2));
 
     if (ewayResponse.Errors) {
-      return res.status(400).json({ success: false, error: `Gateway Error: ${ewayResponse.Errors}` });
+      return res.status(400).json({ success: false, error: translateEwayErrors(ewayResponse.Errors) });
     }
 
     const isSuccess = ewayResponse.TransactionStatus === true || ewayResponse.ResponseCode === '00';
