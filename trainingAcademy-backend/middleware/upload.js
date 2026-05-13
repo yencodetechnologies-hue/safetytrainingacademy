@@ -17,11 +17,13 @@ const courseStorage = new CloudinaryStorage({
   params: async (_req, file) => {
     const cleanName = file.originalname.split(".")[0].replace(/[^a-zA-Z0-9]/g, "_")
     const isPdf = isPdfFile(file)
+    const extension = file.originalname.split(".").pop()
     return {
       folder: "courses",
-      resource_type: "auto",
-      // Keep .pdf extension in public_id so Cloudinary preserves the original file
-      public_id: isPdf ? `${cleanName}-${Date.now()}.pdf` : `${cleanName}-${Date.now()}`,
+      // PDFs must use "raw" — Cloudinary won't serve them via /image/upload/
+      resource_type: isPdf ? "raw" : "auto",
+      // For raw uploads, include the extension in public_id (Cloudinary won't add it automatically)
+      public_id: isPdf ? `${cleanName}-${Date.now()}.${extension}` : `${cleanName}-${Date.now()}`,
       ...(isPdf ? {} : { transformation: IMG_TRANSFORM }),
     }
   },
