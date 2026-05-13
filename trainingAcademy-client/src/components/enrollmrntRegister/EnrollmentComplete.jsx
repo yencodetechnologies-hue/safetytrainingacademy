@@ -12,6 +12,7 @@ function EnrollmentComplete() {
     const { setUser } = useContext(AuthContext)
     const [countdown, setCountdown] = useState(10)
     const [copiedToken, setCopiedToken] = useState("")
+    const [shouldRedirect, setShouldRedirect] = useState(false)
 
     const isCompany = enrollmentData.enrollmentType === "company"
     const generatedLinks = enrollmentData.generatedLinks || []
@@ -76,22 +77,26 @@ function EnrollmentComplete() {
     // END: Google Ads conversion tracking
     // ============================================
 
+    // Countdown tick — pure state update, no side effects inside updater
     useEffect(() => {
         if (isCompany) return
-
-        const interval = setInterval(() => {
+        const timer = setInterval(() => {
             setCountdown(prev => {
                 if (prev <= 1) {
-                    clearInterval(interval)
-                    handleGoToDashboard()
+                    clearInterval(timer)
+                    setShouldRedirect(true)
                     return 0
                 }
                 return prev - 1
             })
         }, 1000)
+        return () => clearInterval(timer)
+    }, [isCompany])
 
-        return () => clearInterval(interval)
-    }, [enrollmentData])
+    // Trigger navigation once countdown reaches 0
+    useEffect(() => {
+        if (shouldRedirect) handleGoToDashboard()
+    }, [shouldRedirect])
 
     // Copy link to clipboard
     const handleCopy = (token) => {
