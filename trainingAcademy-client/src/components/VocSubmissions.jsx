@@ -92,6 +92,12 @@ function ViewModal({ submission, onClose }) {
                 <div className="modal-section">
                     <h4 className="modal-section-title">💲 Payment</h4>
                     <div className="modal-detail-row"><span>Method</span><span>{paymentLabel(s.paymentMethod)}</span></div>
+                    {s.ewayTransactionId && (
+                        <div className="modal-detail-row">
+                            <span>Transaction ID</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 13 }}>{s.ewayTransactionId}</span>
+                        </div>
+                    )}
                     {s.paymentMethod === "card" && (
                         <>
                             <div className="modal-detail-row"><span>Cardholder</span><span>{s.card?.name || "—"}</span></div>
@@ -290,6 +296,7 @@ export default function VocSubmissions() {
                                     <th>Student ID</th>
                                     <th>Courses</th>
                                     <th>Amount</th>
+                                    <th>Transaction ID</th>
                                     <th>Payment</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -298,7 +305,7 @@ export default function VocSubmissions() {
                             <tbody>
                                 {paginated.length === 0 ? (
                                     <tr>
-                                        <td colSpan={10} style={{ textAlign: "center", padding: "2rem", color: "#888" }}>
+                                        <td colSpan={11} style={{ textAlign: "center", padding: "2rem", color: "#888" }}>
                                             No VOC submissions found.
                                         </td>
                                     </tr>
@@ -328,6 +335,7 @@ export default function VocSubmissions() {
                                                 )}
                                             </td>
                                             <td>{fmtCurrency(s.amount)}</td>
+                                            <td style={{ fontFamily: "monospace", fontSize: 11 }}>{s.ewayTransactionId || "—"}</td>
                                             <td>{paymentLabel(s.paymentMethod)}</td>
                                             <td><StatusBadge status={s.status} /></td>
                                             <td>
