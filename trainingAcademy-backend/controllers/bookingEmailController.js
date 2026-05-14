@@ -1,4 +1,4 @@
-﻿const sendEmail = require("../config/sendEmail");
+const sendEmail = require("../config/sendEmail");
 const adminBookingTemplate = require("../templates/adminBookingTemplate");
 
 const formatBookingId = (id) => {
@@ -601,19 +601,19 @@ const sendEnrollmentLinkConfirmation = async (req, res) => {
 </table></td></tr></table></body></html>`;
 
     const adminMailData = {
-        studentName: studentName,
-        studentEmail: toEmail,
-        studentMobile: req.body.phone || req.body.mobile || req.body.mobileNumber || req.body.mobilePhone || "â€”",
+        contactName: studentName,
+        contactEmail: toEmail,
+        contactPhone: req.body.phone || req.body.mobile || req.body.mobileNumber || req.body.mobilePhone || "-",
         courseName: courseName,
         courseDate: dateStr,
         courseTime: timeStr,
         courseLocation: "3/14-16 Marjorie Street, Sefton NSW 2162",
-        bookingId: bookingId ? `#${formatBookingId(bookingId)}` : "LINK-REG",
+        bookingId: bookingId ? formatBookingId(bookingId) : "LINK-REG",
         orderDate: new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" }),
         quantity: 1,
-        subtotal: "â€”",
-        paymentMethod: "Enrollment Link",
-        total: "â€”"
+
+        paymentMethod: req.body.paymentMethod || "Enrollment Link",
+        totalAmount: "-"
     };
 
     try {
