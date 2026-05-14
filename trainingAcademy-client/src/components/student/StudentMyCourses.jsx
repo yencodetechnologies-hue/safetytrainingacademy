@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "./StudentMyCourses.css";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import LLNDAssessment from "../llnd/LLNDAssessment";
 import Payment from "../../components/Payment";
 import CourseCard from "../course/CourseCard";
@@ -10,15 +10,22 @@ import { cdnImage } from "../../utils/cdnImage";
 export default function StudentMyCourses() {
   const location = useLocation();
 
-  // If navigated here with state.tab = "browse", start on browse tab
-  const [tab, setTab] = useState(location.state?.tab || "enrolled");
+  const [searchParams, setSearchParams] = useSearchParams();
   
-  // Sync tab with location state (e.g. when clicking sidebar links)
+  // Get tab from URL or state, default to "enrolled"
+  const tab = searchParams.get("tab") || location.state?.tab || "enrolled";
+
+  const setTab = (newTab) => {
+    setSearchParams(prev => {
+      prev.set("tab", newTab);
+      return prev;
+    });
+  };
+  
+  // Sync tab if location state changes (optional, but keeps existing behavior)
   useEffect(() => {
     if (location.state?.tab) {
       setTab(location.state.tab);
-    } else {
-      setTab("enrolled"); // Default to enrolled if no state (e.g. clicking 'My Courses')
     }
   }, [location.state]);
 

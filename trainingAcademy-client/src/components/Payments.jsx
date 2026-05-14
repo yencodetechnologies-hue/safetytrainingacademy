@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
+import { useSearchParams } from "react-router-dom";
 import '../styles/Payments.css';
 import { API_URL } from "../data/service";
 
 const ITEMS_PER_PAGE = 10;
 
 const Payment = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [showModal, setShowModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [stats, setStats] = useState([]);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [rejectionReason, setRejectionReason] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  
+  const currentPage = parseInt(searchParams.get("page") || "1");
+  const setCurrentPage = (page) => {
+    setSearchParams(prev => {
+      prev.set("page", page);
+      return prev;
+    });
+  };
   const [searchQuery, setSearchQuery] = useState("");
 
   const openReview = (payment) => {
@@ -44,7 +53,6 @@ const Payment = () => {
         time: p.createdAt ? new Date(p.createdAt).toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", hour12: true }).toLowerCase() : ""
       })));
       setStats(res.data.stats);
-      setCurrentPage(1);
     } catch (err) {
       console.error("Error:", err);
     } finally {

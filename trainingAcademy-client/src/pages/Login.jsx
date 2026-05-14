@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Layout.css";
 import "../styles/Login.css";
 import AuthCard from "../components/AuthCard";
@@ -9,6 +9,7 @@ import { AuthContext } from "../context/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, setUser } = useContext(AuthContext); // ✅ added setUser
 
   // ✅ Restore user from localStorage (AUTO LOGIN FIX 🔥)
@@ -25,13 +26,18 @@ function Login() {
     }
   }, [user, setUser]);
 
-  // ✅ Already logged in → redirect
+  // ✅ Already logged in → redirect to intended page or dashboard
   useEffect(() => {
     if (user) {
-      if (user.role === "Admin") navigate("/admin");
-      else if (user.role === "Student") navigate("/student");
-      else if (user.role === "Teacher") navigate("/teacher");
-      else if (user.role === "Company") navigate("/company");
+      const from = location.state?.from;
+      if (from) {
+        navigate(from, { replace: true });
+      } else {
+        if (user.role === "Admin") navigate("/admin");
+        else if (user.role === "Student") navigate("/student");
+        else if (user.role === "Teacher") navigate("/teacher");
+        else if (user.role === "Company") navigate("/company");
+      }
     }
   }, [user, navigate]);
 

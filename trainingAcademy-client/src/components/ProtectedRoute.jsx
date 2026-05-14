@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   if (loading) return null;
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: window.location.pathname + window.location.search }} replace />;
   }
 
   // ✅ Role check

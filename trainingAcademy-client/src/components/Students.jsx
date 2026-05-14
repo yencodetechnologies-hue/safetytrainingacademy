@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import "../styles/Student.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { API_URL } from "../data/service";
 
 
@@ -820,14 +820,25 @@ function AddStudentModal({ onClose, onSave }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
+
 export default function Students() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
-  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Get page from URL or default to 1
+  const currentPage = parseInt(searchParams.get("page") || "1");
+
+  const setCurrentPage = (page) => {
+    setSearchParams(prev => {
+      prev.set("page", page);
+      return prev;
+    });
+  };
 
   // Modal states
   const [viewStudent, setViewStudent] = useState(null);
