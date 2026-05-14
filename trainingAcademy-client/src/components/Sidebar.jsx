@@ -98,7 +98,7 @@ function Sidebar({ user }) {
       <div className={`sidebar ${isOpen ? "open" : ""}`}>
         {menu[user?.role]?.map((item) => (
           <button
-            key={item.path}
+            key={item.name}
             className={`menu-item ${active === item.name ? "active" : ""}`}
             onClick={() => handleNavigate(item)}
           >

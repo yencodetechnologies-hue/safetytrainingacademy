@@ -760,11 +760,15 @@ exports.updatePaymentStatus = async (req, res) => {
 </td></tr>
 </table></td></tr></table></body></html>`;
 
-      await sendEmail({
-        to: student.email,
-        subject: `Booking Confirmed — ${courseName} | Your Login Details`,
-        html: credentialsHtml,
-      });
+      try {
+        await sendEmail({
+          to: student.email,
+          subject: `Booking Confirmed — ${courseName} | Your Login Details`,
+          html: credentialsHtml,
+        });
+      } catch (emailErr) {
+        console.error("Failed to send verification email:", emailErr.message);
+      }
     }
 
     res.json({ message: "Payment updated successfully" });

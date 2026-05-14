@@ -79,24 +79,36 @@ const buildStudentHtml = (data) => {
       </div>
     </div>
     <div class="sb-footer">
+      2 Wellington St, Sefton NSW 2162 &nbsp;·&nbsp; RTO #45234<br/>
+      &copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>`;
+};
+
+
+const buildLLNNotificationHtml = (data) => {
+  const { bookingId, studentName, studentEmail, studentPhone, score, status } = data;
+  const orderNumber = formatBookingId(bookingId);
+  const statusColor = status === "Passed" ? "#16a34a" : "#ca8a04";
+
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LLN Assessment Notification â€“ Safety Training Academy</title>
+  <title>LLN Assessment Notification – Safety Training Academy</title>
   <style>
     body { margin: 0; padding: 24px; background: #f0f2f5; font-family: Arial, sans-serif; }
     .eb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
-
-    /* â”€â”€ Header â”€â”€ */
     .eb-hdr { background: #0d2240; padding: 16px 24px; }
     .eb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
     .eb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
     .eb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
     .eb-divider { height: 3px; background: #29b6e8; }
-
-    /* â”€â”€ Content â”€â”€ */
     .eb-content { padding: 18px 24px; }
-
-    /* â”€â”€ Sections â”€â”€ */
     .eb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
     .eb-section-head { background: #0d2240; padding: 7px 14px; }
     .eb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
@@ -105,23 +117,18 @@ const buildStudentHtml = (data) => {
     .eb-table td { padding: 5px 0; vertical-align: top; }
     .eb-table .lbl { color: #666666; width: 40%; font-weight: 500; }
     .eb-table .val { color: #1a1a1a; font-weight: 700; }
-
-    /* â”€â”€ Footer â”€â”€ */
     .eb-footer { background: #f5f7fa; border-top: 1px solid #e0e0e0; padding: 12px 24px; font-size: 10px; color: #999; text-align: center; line-height: 1.6; }
     .eb-footer a { color: #29b6e8; text-decoration: none; }
-    .eb-footer strong { color: #555; }
   </style>
 </head>
 <body>
   <div class="eb-body">
-
-    <!-- â”€â”€ Header â”€â”€ -->
     <div class="eb-hdr">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td>
             <p class="eb-hdr-title">Safety Training Academy</p>
-            <p class="eb-hdr-sub">RTO #45234 &nbsp;Â·&nbsp; LLN Notification</p>
+            <p class="eb-hdr-sub">RTO #45234 &nbsp;·&nbsp; LLN Notification</p>
           </td>
           <td align="right" valign="top">
             <span class="eb-badge">Assessment Done</span>
@@ -133,65 +140,32 @@ const buildStudentHtml = (data) => {
       </table>
     </div>
     <div class="eb-divider"></div>
-
     <div class="eb-content">
-
-      <!-- â”€â”€ Student Details â”€â”€ -->
       <div class="eb-section">
         <div class="eb-section-head"><span>Student Details</span></div>
         <div class="eb-section-body">
           <table class="eb-table">
-            <tr>
-              <td class="lbl">Name</td>
-              <td class="val">${studentName || 'â€”'}</td>
-            </tr>
-            <tr>
-              <td class="lbl">Email</td>
-              <td class="val">${studentEmail || 'â€”'}</td>
-            </tr>
-            <tr>
-              <td class="lbl">Phone Number</td>
-              <td class="val">${studentPhone || 'â€”'}</td>
-            </tr>
+            <tr><td class="lbl">Name</td><td class="val">${studentName || '—'}</td></tr>
+            <tr><td class="lbl">Email</td><td class="val">${studentEmail || '—'}</td></tr>
+            <tr><td class="lbl">Phone Number</td><td class="val">${studentPhone || '—'}</td></tr>
           </table>
         </div>
       </div>
-
-      <!-- â”€â”€ Assessment Result â”€â”€ -->
       <div class="eb-section">
         <div class="eb-section-head"><span>Assessment Result</span></div>
         <div class="eb-section-body">
           <table class="eb-table">
-            <tr>
-              <td class="lbl">Booking ID</td>
-              <td class="val">${orderNumber}</td>
-            </tr>
-            <tr>
-              <td class="lbl">Score</td>
-              <td class="val" style="font-size: 16px;">${Number(score).toFixed(1)}%</td>
-            </tr>
-            <tr>
-              <td class="lbl">Status</td>
-              <td class="val" style="color: ${statusColor};">${status || 'â€”'}</td>
-            </tr>
+            <tr><td class="lbl">Booking ID</td><td class="val">${orderNumber}</td></tr>
+            <tr><td class="lbl">Score</td><td class="val" style="font-size: 16px;">${Number(score).toFixed(1)}%</td></tr>
+            <tr><td class="lbl">Status</td><td class="val" style="color: ${statusColor};">${status || '—'}</td></tr>
           </table>
         </div>
       </div>
-
-    </div><!-- /eb-content -->
-
-    <!-- â”€â”€ Footer â”€â”€ -->
+    </div>
     <div class="eb-footer">
       This is an automated notification from <strong>Safety Training Academy</strong> (RTO #45234).<br />
       Do not reply directly to this email. &nbsp;|&nbsp;
       <a href="mailto:admin@safetytrainingacademy.com.au">admin@safetytrainingacademy.com.au</a><br />
-      &copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.
-    </div>
-
-  </div>
-</body>
-</html>
-      2 Wellington St, Sefton NSW 2162 &nbsp;·&nbsp; RTO #45234<br/>
       &copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.
     </div>
   </div>

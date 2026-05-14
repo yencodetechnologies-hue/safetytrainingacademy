@@ -27,7 +27,7 @@ export default function Gallery() {
   const fetchImages = async () => {
     setLoading(true);
     try {
-      const res  = await fetch(`${API_URL}/gallery`);
+      const res  = await fetch(`${API_URL}/api/gallery`);
       const data = await res.json();
       if (data.success) setImages(data.data);
     } catch (err) {
@@ -94,7 +94,7 @@ export default function Gallery() {
 
   const handleDeactivate = async (id) => {
     try {
-      const res  = await fetch(`${API_URL}/gallery/${id}/toggle-active`, { method: "PATCH" });
+      const res  = await fetch(`${API_URL}/api/gallery/${id}/toggle-active`, { method: "PATCH" });
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
       setImages((prev) => prev.map((img) => img._id === id ? data.data : img));
@@ -103,7 +103,7 @@ export default function Gallery() {
 
   const handleDelete = async (id) => {
     try {
-      const res  = await fetch(`${API_URL}/gallery/${id}`, { method: "DELETE" });
+      const res  = await fetch(`${API_URL}/api/gallery/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
       setImages((prev) => prev.filter((img) => img._id !== id));
@@ -137,7 +137,7 @@ export default function Gallery() {
         body.append("imageUrl", formData.imageUrl.trim());
       }
 
-      const url    = editItem ? `${API_URL}/gallery/${editItem._id}` : `${API_URL}/gallery`;
+      const url    = editItem ? `${API_URL}/api/gallery/${editItem._id}` : `${API_URL}/api/gallery`;
       const method = editItem ? "PUT" : "POST";
 
       const res  = await fetch(url, { method, body });
