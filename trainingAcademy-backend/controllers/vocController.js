@@ -41,7 +41,7 @@ const sendVocConfirmationEmail = async ({ toEmail, firstName, lastName, submissi
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:#ffffff;padding:24px 30px;text-align:center;">
+<tr><td style="background:#0d2240;color:#ffffff;padding:24px 30px;text-align:center;">
     <h1 style="margin:0;font-size:22px;font-weight:700;">VOC Submission Received</h1>
 </td></tr>
 <tr><td style="padding:30px;">
@@ -62,7 +62,7 @@ const sendVocConfirmationEmail = async ({ toEmail, firstName, lastName, submissi
     const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;text-align:center;">
+<tr><td style="background:#0d2240;color:#fff;padding:24px 30px;text-align:center;">
     <h1 style="margin:0;font-size:20px;">NEW VOC SUBMISSION</h1>
 </td></tr>
 <tr><td style="padding:30px;">

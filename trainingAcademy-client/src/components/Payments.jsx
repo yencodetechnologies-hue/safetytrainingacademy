@@ -339,106 +339,173 @@ const Payment = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3>Payment Receipt Review</h3>
+              <div>
+                <h3>Payment Receipt Review</h3>
+                <p>Verify payment receipt for {selectedPayment.student}</p>
+              </div>
               <button onClick={() => setShowModal(false)} className="close-x">×</button>
             </div>
 
             <div className="modal-body modal-body-payments">
-              <div className="info-grid">
-                <div className="info-box">
+              {/* Top Info Cards */}
+              <div className="info-grid-v2">
+                <div className="info-card-v2 student">
                   <h4>Student Information</h4>
-                  <p><strong>Name:</strong> {selectedPayment.student}</p>
+                  <p><strong>Name: {selectedPayment.student}</strong></p>
                   <p><strong>Email:</strong> {selectedPayment.email}</p>
                 </div>
-                <div className="info-box">
+                <div className="info-card-v2 course">
                   <h4>Course Information</h4>
-                  <p><strong>Course:</strong> {selectedPayment.course}</p>
-                  <p><strong>Price:</strong> ${selectedPayment.amount}</p>
+                  <p><strong>Course: {selectedPayment.course}</strong></p>
+                  <p><strong>Code:</strong> {selectedPayment.code || "—"}</p>
+                  <p><strong>Course Price:</strong> ${selectedPayment.amount}</p>
                 </div>
               </div>
 
-              <div className="transaction-details">
+              {/* Transaction Details */}
+              <div className="transaction-section-v2">
                 <h4>Transaction Details</h4>
-                <div className="detail-row">
-                  <p><strong>Amount:</strong> <span className="text-green">${selectedPayment.amount}</span></p>
-                  <p><strong>Transaction ID:</strong> {selectedPayment.transId}</p>
-                  <p><strong>Gateway Trans ID:</strong> <span style={{ color: '#4f46e5', fontWeight: '700' }}>{selectedPayment.gatewayTransId || "—"}</span></p>
+                <div className="details-grid">
+                  <div className="detail-item">
+                    <div className="label">
+                      {selectedPayment.method === "Card Payment" ? "Gateway Transaction ID:" : 
+                       selectedPayment.method === "Bank Transfer" ? "Bank Transfer ID:" : "Transaction ID:"}
+                    </div>
+                    <div className="value mono-box">
+                      {selectedPayment.method === "Bank Transfer" 
+                        ? (selectedPayment.transId && selectedPayment.transId !== "—" ? selectedPayment.transId : selectedPayment.gatewayTransId || "—")
+                        : (selectedPayment.gatewayTransId && selectedPayment.gatewayTransId !== "—" ? selectedPayment.gatewayTransId : selectedPayment.transId || "—")
+                      }
+                    </div>
+                  </div>
+                  <div className="detail-item">
+                    <div className="label">Amount Paid:</div>
+                    <div className="value amount">${selectedPayment.amount}</div>
+                  </div>
+                  <div className="detail-item">
+                    <div className="label">
+                      {selectedPayment.method === "Pay Later" ? "Booking Date:" : "Payment Date:"}
+                    </div>
+                    <div className="value">{selectedPayment.date}</div>
+                  </div>
+                  <div className="detail-item">
+                    <div className="label">Upload Date:</div>
+                    <div className="value">{selectedPayment.date}, {selectedPayment.time || "—"}</div>
+                  </div>
+                  <div className="detail-item">
+                    <div className="label">Payment Method:</div>
+                    <div className="value bold">{selectedPayment.method || "Card Payment"}</div>
+                  </div>
+                  {selectedPayment.method === "Bank Transfer" && (
+                    <div className="detail-item">
+                      <div className="label">Bank:</div>
+                      <div className="value">{selectedPayment.bankName || "Bank Transfer"}</div>
+                    </div>
+                  )}
+                  {selectedPayment.method === "Bank Transfer" && (
+                    <div className="detail-item">
+                      <div className="label">Reference:</div>
+                      <div className="value bold">{selectedPayment.transId}</div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="receipt-preview" style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', borderRadius: '8px', border: '1px dashed #ccc', marginBottom: '20px' }}>
-                {selectedPayment.slipUrl ? (
-                  /\.pdf($|\?)/i.test(selectedPayment.slipUrl) ? (
-                    <div style={{ textAlign: 'center', padding: '20px' }}>
-                      <p style={{ fontSize: '40px', marginBottom: '8px' }}>📄</p>
-                      <p style={{ fontSize: '13px', color: '#555', marginBottom: '12px' }}>PDF Receipt</p>
-                      <button
-                        className="open-pdf"
-                        onClick={() => window.open(selectedPayment.slipUrl, "_blank")}
-                        style={{ padding: '8px 18px', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
-                      >
-                        Open PDF in New Tab
-                      </button>
-                    </div>
-                  ) : (
-                    <img className="receipt-header-img" src={selectedPayment.slipUrl} alt="Receipt" style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }} />
-                  )
-                ) : (
-                  <div style={{ textAlign: 'center', color: '#666' }}>
-                    <p style={{ fontSize: '24px', marginBottom: '8px' }}>📄</p>
-                    <p>No payment receipt uploaded yet.</p>
-                    
-                    <div style={{ marginTop: '15px', padding: '12px', border: '1px dashed #4f46e5', borderRadius: '8px', background: '#f5f3ff' }}>
-                      <p style={{ fontSize: '12px', color: '#4f46e5', fontWeight: '600', marginBottom: '8px' }}>Upload Receipt Now:</p>
-                      <input 
-                        type="file" 
-                        accept="image/*,application/pdf"
-                        onChange={(e) => setReceiptFile(e.target.files[0])} 
-                        style={{ fontSize: '11px', display: 'block', margin: '0 auto' }}
+              {/* Receipt Preview */}
+              <div className="receipt-section-v2">
+                <div className="receipt-header">
+                  <span>Payment Receipt</span>
+                  {selectedPayment.slipUrl && (
+                    <button 
+                      className="download-btn"
+                      onClick={() => window.open(selectedPayment.slipUrl, "_blank")}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
+                      Download Receipt
+                    </button>
+                  )}
+                </div>
+                
+                <p style={{ fontSize: '13px', color: '#6b7280', margin: '0 0 12px' }}>
+                  File: {selectedPayment.slipUrl ? selectedPayment.slipUrl.split('/').pop() : "No receipt uploaded"}
+                </p>
+
+                <div className="receipt-preview-v2">
+                  {selectedPayment.slipUrl ? (
+                    /\.pdf($|\?)/i.test(selectedPayment.slipUrl) ? (
+                      <div style={{ textAlign: 'center' }}>
+                        <span style={{ fontSize: '48px' }}>📄</span>
+                        <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '10px' }}>PDF Document</p>
+                      </div>
+                    ) : (
+                      <img 
+                        src={selectedPayment.slipUrl} 
+                        alt="Receipt" 
+                        style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain', borderRadius: '8px' }} 
                       />
-                      {receiptFile && (
-                        <button 
-                          onClick={handleUploadReceipt}
-                          disabled={uploading}
-                          style={{ 
-                            marginTop: '12px', 
-                            padding: '6px 12px', 
-                            fontSize: '12px', 
-                            background: '#4f46e5', 
-                            color: '#fff', 
-                            border: 'none', 
-                            borderRadius: '6px', 
-                            cursor: 'pointer',
-                            fontWeight: '600',
-                            transition: 'all 0.2s'
-                          }}
-                        >
-                          {uploading ? "Uploading..." : "🚀 Upload & Save Receipt"}
-                        </button>
-                      )}
+                    )
+                  ) : (
+                    <div style={{ textAlign: 'center', color: '#9ca3af' }}>
+                      <p style={{ fontSize: '24px' }}>📄</p>
+                      <p>No receipt preview available</p>
                     </div>
+                  )}
+                </div>
+              </div>
 
-                    {selectedPayment.method === "Pay Later" && <p style={{ fontSize: '12px', marginTop: '10px' }}>(Payment Method: Pay Later)</p>}
+              {/* Status Bar */}
+              {selectedPayment.status === "success" || selectedPayment.status === "completed" ? (
+                <div className="status-bar-v2 verified">
+                  <div className="icon">✓</div>
+                  <div className="text">
+                    <h5>Verified</h5>
+                    <p>on {selectedPayment.date}, {selectedPayment.time || "—"}</p>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : selectedPayment.status === "failed" ? (
+                <div className="status-bar-v2 rejected">
+                  <div className="icon">×</div>
+                  <div className="text">
+                    <h5>Rejected</h5>
+                    <p>{selectedPayment.reason || "No reason provided"}</p>
+                  </div>
+                </div>
+              ) : null}
 
-
-              <div className="rejection-section">
-                <label>Rejection Reason (if rejecting)</label>
-                <input
-                  type="text"
-                  placeholder="Enter reason for rejection..."
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
-                />
-              </div>
+              {/* Rejection Input (only show if not verified) */}
+              {(selectedPayment.status !== "success" && selectedPayment.status !== "completed") && (
+                <div style={{ marginTop: '20px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', marginBottom: '8px', display: 'block' }}>REJECTION REASON (IF REJECTING)</label>
+                  <input
+                    type="text"
+                    placeholder="Enter reason for rejection..."
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      borderRadius: '10px',
+                      border: '1px solid #e5e7eb',
+                      fontSize: '14px',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
-            <div className="modal-footer">
-              <button className="btn-secondary" onClick={() => setShowModal(false)}>Close</button>
-              <button className="btn-reject" onClick={() => { handleReject(); setShowModal(false); }}>Reject</button>
-              <button className="btn-verify" onClick={() => { handleVerify(); setShowModal(false); }}>Confirm Payment</button>
+            <div className="modal-footer-v2">
+              <button className="btn-base btn-close" onClick={() => setShowModal(false)}>Close</button>
+              {(selectedPayment.status !== "success" && selectedPayment.status !== "completed") && (
+                <>
+                  <button className="btn-base btn-reject" onClick={() => { handleReject(); setShowModal(false); }}>Reject</button>
+                  <button className="btn-base btn-confirm" onClick={() => { handleVerify(); setShowModal(false); }}>Confirm Payment</button>
+                </>
+              )}
             </div>
           </div>
         </div>

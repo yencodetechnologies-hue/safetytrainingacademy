@@ -1371,6 +1371,12 @@ grid-template-columns:1fr;
   background: #fef2f2;
 }
 
+.cdp-s-spots--medium {
+  color: #d97706;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
 .cdp-s-btn {
   background: #02afef;
   color: #fff;

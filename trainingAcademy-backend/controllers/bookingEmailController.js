@@ -124,6 +124,7 @@ const sendBookingConfirmation = async (req, res) => {
     <!-- Banner -->
     <div class="sb-banner">
       <p class="sb-banner-text">&#10003; &nbsp;Booking Confirmed &nbsp;<span class="sb-banner-id">#${orderId}</span></p>
+      <p style="margin: 8px 0 0; font-size: 13px; color: #ff4d4d; font-weight: 700;">IMPORTANT: Please finish your LLN & Enrolment in the Student portal before attending the course</p>
     </div>
 
     <div class="sb-content">
@@ -298,18 +299,19 @@ const sendBookingConfirmation = async (req, res) => {
         console.log("Student Recipient:", email);
         console.log("Order ID:", orderId);
 
-        // 1. Send Academy Notification
-        try {
-            await sendEmail({
-                to: process.env.BOOKINGS_EMAIL,
-                subject: `New Booking #${orderId} - ${name} - ${courseName}`,
-                html: adminBookingTemplate(adminMailData)
-            });
-            console.log(`✅ Academy notification sent to ${process.env.BOOKINGS_EMAIL}`);
-        } catch (academyErr) {
-            console.error(`❌ Academy notification failed for ${process.env.BOOKINGS_EMAIL}:`, academyErr.message);
-            // We continue so the student still gets their email even if internal notification fails
-        }
+        // 1. Send Academy Notification (Delayed by 10 seconds)
+        setTimeout(async () => {
+            try {
+                await sendEmail({
+                    to: process.env.BOOKINGS_EMAIL,
+                    subject: `New Booking #${orderId} - ${name} - ${courseName}`,
+                    html: adminBookingTemplate(adminMailData)
+                });
+                console.log(`✅ Academy notification sent to ${process.env.BOOKINGS_EMAIL} (after 10s delay)`);
+            } catch (academyErr) {
+                console.error(`❌ Academy notification failed for ${process.env.BOOKINGS_EMAIL}:`, academyErr.message);
+            }
+        }, 10000);
 
         // 2. Send Student Confirmation
         try {
@@ -400,7 +402,7 @@ const sendCompanyOrderConfirmation = async (req, res) => {
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:#f43f5e;color:#ffffff;padding:24px 30px;text-align:center;">
+<tr><td style="background:#0d2240;color:#ffffff;padding:24px 30px;text-align:center;">
     <h1 style="margin:0;font-size:22px;font-weight:700;">NEW COMPANY BOOKING #${orderId}</h1>
 </td></tr>
 <tr><td style="padding:30px;">
@@ -618,7 +620,7 @@ const sendVOCConfirmation = async (req, res) => {
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:#ffffff;padding:24px 30px;text-align:center;">
+<tr><td style="background:#0d2240;color:#ffffff;padding:24px 30px;text-align:center;">
     <h1 style="margin:0;font-size:22px;font-weight:700;">VOC Submission Received</h1>
 </td></tr>
 <tr><td style="padding:30px;">
@@ -639,7 +641,7 @@ const sendVOCConfirmation = async (req, res) => {
     const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;">
+<tr><td style="background:#0d2240;color:#fff;padding:24px 30px;">
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
             <td><h1 style="margin:0;font-size:20px;">NEW VOC SUBMISSION</h1></td>
@@ -735,7 +737,7 @@ const sendCompanyBankTransfer = async (req, res) => {
     const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;text-align:center;">
+<tr><td style="background:#0d2240;color:#fff;padding:24px 30px;text-align:center;">
     <h1 style="margin:0;font-size:20px;">Company Bank Transfer Submitted</h1>
 </td></tr>
 <tr><td style="padding:30px;">
@@ -775,7 +777,7 @@ const sendLLNCompletionNotification = async (req, res) => {
     const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:24px 30px;text-align:center;">
+<tr><td style="background:#0d2240;color:#fff;padding:24px 30px;text-align:center;">
     <h1 style="margin:0;font-size:22px;">Assessment Completed</h1>
 </td></tr>
 <tr><td style="padding:30px;">
@@ -795,30 +797,72 @@ const sendLLNCompletionNotification = async (req, res) => {
 </td></tr>
 </table></body></html>`;
 
-    const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    const academyHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: Arial, sans-serif; }
+    .eb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
+    .eb-hdr { background: #0d2240; padding: 16px 24px; }
+    .eb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
+    .eb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
+    .eb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
+    .eb-divider { height: 3px; background: #29b6e8; }
+    .eb-content { padding: 18px 24px; }
+    .eb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+    .eb-section-head { background: #0d2240; padding: 7px 14px; }
+    .eb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
+    .eb-section-body { padding: 11px 14px; }
+    .eb-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .eb-table td { padding: 4px 0; vertical-align: top; }
+    .eb-table .lbl { color: #666666; width: 40%; font-weight: 500; }
+    .eb-table .val { color: #1a1a1a; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="eb-body">
+    <div class="eb-hdr">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-            <td><h1 style="margin:0;font-size:20px;">LLN ASSESSMENT COMPLETED</h1></td>
-            <td align="right"><span style="font-size:12px;font-weight:700;background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">ID: ${bookingId || "—"}</span></td>
+          <td>
+            <p class="eb-hdr-title">Safety Training Academy</p>
+            <p class="eb-hdr-sub">RTO #45234 &nbsp;·&nbsp; LLN Notification</p>
+          </td>
+          <td align="right" valign="top">
+            <span class="eb-badge">Assessment Done</span>
+            <p style="margin: 4px 0 0; font-size: 25px; font-weight: 700; color: #ffffff; text-align: right;">Booking ID: ${bookingId || "—"}</p>
+          </td>
         </tr>
-    </table>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p>A student has completed their LLN Assessment.</p>
-    <table width="100%" cellpadding="10" cellspacing="0" style="background-color:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
-        <tr><td style="color:#64748b;width:130px;">Student Name</td><td><strong>${studentName}</strong></td></tr>
-        <tr><td style="color:#64748b;">Email</td><td>${studentEmail}</td></tr>
-        <tr><td style="color:#64748b;">Phone Number</td><td><strong>${studentPhone || "—"}</strong></td></tr>
-        <tr><td style="color:#64748b;">Booking ID</td><td><strong>${bookingId || "—"}</strong></td></tr>
-        <tr><td style="color:#64748b;">Score</td><td><strong>${Number(score).toFixed(1)}%</strong></td></tr>
-        <tr><td style="color:#64748b;">Status</td><td><span style="color:${statusColor};font-weight:700;">${status}</span></td></tr>
-    </table>
-    <p style="margin-top:20px;">Please log in to the admin portal to review the results.</p>
-</td></tr>
-</table></body></html>`;
+      </table>
+    </div>
+    <div class="eb-divider"></div>
+    <div class="eb-content">
+      <div class="eb-section">
+        <div class="eb-section-head"><span>Student Details</span></div>
+        <div class="eb-section-body">
+          <table class="eb-table">
+            <tr><td class="lbl">Name</td><td class="val">${studentName}</td></tr>
+            <tr><td class="lbl">Email</td><td class="val">${studentEmail}</td></tr>
+            <tr><td class="lbl">Phone Number</td><td class="val">${studentPhone || "—"}</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="eb-section">
+        <div class="eb-section-head"><span>Assessment Result</span></div>
+        <div class="eb-section-body">
+          <table class="eb-table">
+            <tr><td class="lbl">Booking ID</td><td class="val">#${bookingId || "—"}</td></tr>
+            <tr><td class="lbl">Score</td><td class="val" style="font-size: 16px;">${Number(score).toFixed(1)}%</td></tr>
+            <tr><td class="lbl">Status</td><td class="val" style="color: ${statusColor};">${status}</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
 
     try {
         await sendEmail({ to: studentEmail, subject: "Pre-Enrollment Assessment Completed", html: studentHtml });
@@ -858,7 +902,7 @@ const sendEnrollmentFormCompletionNotification = async (req, res) => {
     const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;">
+<tr><td style="background:#0d2240;color:#fff;padding:24px 30px;">
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
             <td><h1 style="margin:0;font-size:20px;">ENROLLMENT FORM SUBMITTED</h1></td>
@@ -915,7 +959,7 @@ const sendCompanyCardPayment = async (req, res) => {
     const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:#f43f5e;color:#fff;padding:24px 30px;text-align:center;">
+<tr><td style="background:#0d2240;color:#fff;padding:24px 30px;text-align:center;">
     <h1 style="margin:0;font-size:20px;">Company Card Payment Applied</h1>
 </td></tr>
 <tr><td style="padding:30px;">

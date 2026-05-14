@@ -430,32 +430,47 @@ function CourseDetails() {
                             <>
                                 {!showAllSessions ? (
                                     <div className="cdp-sessions-list">
-                                        {sessions.slice(0, 4).map((s, i) => {
-                                            const d = new Date(s.date)
-                                            const day = d.getDate()
-                                            const mon = d.toLocaleString("en-AU", { month: "short" }).toUpperCase()
-                                            const weekday = d.toLocaleString("en-AU", { weekday: "long" })
-                                            const isLow = s.availableSlots <= 3
-                                            const cleanLoc = (s.location || "").replace(/Face to Face/gi, "").replace(/·\s*$/g, "").trim()
+                                            {sessions.slice(0, 4).map((s, i) => {
+                                                const d = new Date(s.date)
+                                                const day = d.getDate()
+                                                const mon = d.toLocaleString("en-AU", { month: "short" }).toUpperCase()
+                                                const weekday = d.toLocaleString("en-AU", { weekday: "long" })
+                                                const cleanLoc = (s.location || "").replace(/Face to Face/gi, "").replace(/·\s*$/g, "").trim()
 
-                                            return (
-                                                <div className="cdp-session-row" key={i}>
-                                                    <div className="cdp-s-date">
-                                                        <div className="cdp-s-day">{day}</div>
-                                                        <div className="cdp-s-mon">{mon}</div>
-                                                    </div>
-                                                    <div className="cdp-s-info">
-                                                        <div className="cdp-s-title">{weekday}</div>
-                                                        <div className="cdp-s-meta">
-                                                            {s.startTime} – {s.endTime}
+                                                // Urgency Logic
+                                                const today = new Date();
+                                                const diffTime = d - today;
+                                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                                let spotLabel = `${s.availableSlots} left`;
+                                                let spotClass = "";
+
+                                                if (s.availableSlots <= 3) {
+                                                    spotLabel = `Only ${s.availableSlots} left`;
+                                                    spotClass = "cdp-s-spots--low";
+                                                } else if (s.availableSlots < 20 || diffDays < 20) {
+                                                    spotLabel = "Limited Seats";
+                                                    spotClass = "cdp-s-spots--medium";
+                                                }
+
+                                                return (
+                                                    <div className="cdp-session-row" key={i}>
+                                                        <div className="cdp-s-date">
+                                                            <div className="cdp-s-day">{day}</div>
+                                                            <div className="cdp-s-mon">{mon}</div>
                                                         </div>
-                                                    </div>
-                                                    <div className="cdp-s-meta-desktop">
-                                                        {cleanLoc}
-                                                    </div>
-                                                    <div className={`cdp-s-spots ${isLow ? "cdp-s-spots--low" : ""}`}>
-                                                        {s.availableSlots} left
-                                                    </div>
+                                                        <div className="cdp-s-info">
+                                                            <div className="cdp-s-title">{weekday}</div>
+                                                            <div className="cdp-s-meta">
+                                                                {s.startTime} – {s.endTime}
+                                                            </div>
+                                                        </div>
+                                                        <div className="cdp-s-meta-desktop">
+                                                            {cleanLoc}
+                                                        </div>
+                                                        <div className={`cdp-s-spots ${spotClass}`}>
+                                                            {spotLabel}
+                                                        </div>
                                                     <button
                                                         className="cdp-s-btn"
                                                         onClick={() => navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${fromPortal ? "&fromPortal=true" : ""}`)}
@@ -475,9 +490,24 @@ function CourseDetails() {
                                                     const day = d.getDate()
                                                     const mon = d.toLocaleString("en-AU", { month: "short" }).toUpperCase()
                                                     const weekday = d.toLocaleString("en-AU", { weekday: "long" })
-                                                    const isLow = s.availableSlots <= 3
                                                     const cleanLoc = (s.location || "").replace(/Face to Face/gi, "").replace(/·\s*$/g, "").trim()
                                                     const cleanTime = (s.startTime || "").replace(/Face to Face/gi, "").trim()
+
+                                                    // Urgency Logic
+                                                    const today = new Date();
+                                                    const diffTime = d - today;
+                                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                                    let spotLabel = `${s.availableSlots} left`;
+                                                    let spotClass = "";
+
+                                                    if (s.availableSlots <= 3) {
+                                                        spotLabel = `Only ${s.availableSlots} left`;
+                                                        spotClass = "cdp-s-spots--low";
+                                                    } else if (s.availableSlots < 20 || diffDays < 20) {
+                                                        spotLabel = "Limited Seats";
+                                                        spotClass = "cdp-s-spots--medium";
+                                                    }
 
                                                     return (
                                                         <div className="cdp-session-row expanded" key={i}>
@@ -491,8 +521,8 @@ function CourseDetails() {
                                                                     {cleanTime} – {s.endTime} &nbsp;·&nbsp; {cleanLoc}
                                                                 </div>
                                                             </div>
-                                                            <div className={`cdp-s-spots ${isLow ? "cdp-s-spots--low" : ""}`}>
-                                                                {s.availableSlots} left
+                                                            <div className={`cdp-s-spots ${spotClass}`}>
+                                                                {spotLabel}
                                                             </div>
                                                             <button
                                                                 className="cdp-s-btn"
