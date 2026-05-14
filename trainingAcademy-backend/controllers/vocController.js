@@ -30,34 +30,208 @@ const safeJson = (str) => {
     try { return JSON.parse(str) } catch { return {} }
 }
 
+// ─────────────────────────────────────────────────────────────
+// Email Templates
+// ─────────────────────────────────────────────────────────────
+const buildVocStudentHtml = (data) => {
+  const {
+    firstName,
+    lastName,
+    email,
+    phone,
+    dob,
+    usi,
+    referenceId,
+    submittedAt,
+    unitOfCompetency,
+    unitCode,
+    previousTraining,
+    evidenceProvided,
+  } = data;
+
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VOC Submission Received – Safety Training Academy</title>
+  <style>
+    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.5; color: #333; }
+
+    /* ── Wrapper ── */
+    .eb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
+
+    /* ── Header ── */
+    .eb-hdr { background: #0d2240; padding: 24px 30px; text-align: center; }
+    .eb-hdr h1 { margin: 0; font-size: 22px; font-weight: 700; color: #ffffff; }
+    .eb-hdr-sub { margin: 6px 0 0; font-size: 11px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; }
+    .eb-divider { height: 3px; background: #29b6e8; }
+
+    /* ── Body ── */
+    .eb-content { padding: 28px 30px; }
+    .eb-greeting { margin: 0 0 16px; font-size: 14px; color: #555; }
+    .eb-intro { margin: 0 0 24px; font-size: 14px; color: #555; }
+
+    /* ── Sections ── */
+    .eb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 16px; }
+    .eb-section-head { background: #0d2240; padding: 7px 14px; }
+    .eb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
+    .eb-row { display: flex; border-bottom: 1px solid #f0f0f0; }
+    .eb-row:last-child { border-bottom: none; }
+    .eb-label { width: 40%; padding: 9px 14px; font-size: 12px; font-weight: 700; color: #666; background: #fafafa; border-right: 1px solid #f0f0f0; flex-shrink: 0; display: flex; align-items: center; }
+    .eb-value { padding: 9px 14px; font-size: 12px; color: #1a1a1a; flex: 1; display: flex; align-items: center; word-break: break-word; }
+
+    /* ── Status badge ── */
+    .eb-status { display: inline-block; background: #fff8e1; color: #b8860b; font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── Info box ── */
+    .eb-info-box { background: #e8f4fb; border: 1px solid #b3d9f0; border-radius: 4px; padding: 12px 14px; font-size: 13px; color: #0d2240; line-height: 1.6; margin-bottom: 16px; }
+    .eb-info-box strong { display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #0a5a8a; }
+
+    /* ── Next Steps ── */
+    .eb-steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+    .eb-steps li { counter-increment: step; padding: 9px 14px; border-bottom: 1px solid #f0f0f0; font-size: 12px; display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; color: #333; }
+    .eb-steps li:last-child { border-bottom: none; }
+    .eb-steps li::before { content: counter(step); background: #0d2240; color: #fff; font-size: 9px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Footer ── */
+    .eb-footer { background: #f5f7fa; border-top: 1px solid #e0e0e0; padding: 14px 30px; font-size: 10px; color: #999; text-align: center; line-height: 1.7; }
+    .eb-footer a { color: #29b6e8; text-decoration: none; }
+    .eb-footer strong { color: #555; }
+  </style>
+</head>
+<body>
+  <div class="eb-body">
+
+    <!-- ── Header ── -->
+    <div class="eb-hdr">
+      <h1>VOC Submission Received</h1>
+      <p class="eb-hdr-sub">Safety Training Academy &nbsp;·&nbsp; RTO #45234</p>
+    </div>
+    <div class="eb-divider"></div>
+
+    <div class="eb-content">
+
+      <p class="eb-greeting">Dear <strong>${firstName} ${lastName}</strong>,</p>
+      <p class="eb-intro">Thank you for your VOC submission to Safety Training Academy. We have received your request and our team will review it shortly.</p>
+
+      <!-- ── Submission Details ── -->
+      <div class="eb-section">
+        <div class="eb-section-head"><span>Submission Details</span></div>
+        <div class="eb-row">
+          <div class="eb-label">Reference #</div>
+          <div class="eb-value"><strong>#${referenceId || '—'}</strong></div>
+        </div>
+        <div class="eb-row">
+          <div class="eb-label">Submitted</div>
+          <div class="eb-value">${submittedAt || new Date().toLocaleString('en-AU', { timeZone: 'Australia/Sydney' })}</div>
+        </div>
+        <div class="eb-row">
+          <div class="eb-label">Status</div>
+          <div class="eb-value"><span class="eb-status">Under Review</span></div>
+        </div>
+      </div>
+
+      <!-- ── Applicant Details ── -->
+      <div class="eb-section">
+        <div class="eb-section-head"><span>Applicant Details</span></div>
+        <div class="eb-row">
+          <div class="eb-label">Full Name</div>
+          <div class="eb-value">${firstName} ${lastName}</div>
+        </div>
+        <div class="eb-row">
+          <div class="eb-label">Email</div>
+          <div class="eb-value">${email || '—'}</div>
+        </div>
+        <div class="eb-row">
+          <div class="eb-label">Phone</div>
+          <div class="eb-value">${phone || '—'}</div>
+        </div>
+        <div class="eb-row">
+          <div class="eb-label">USI</div>
+          <div class="eb-value">${usi || '—'}</div>
+        </div>
+        <div class="eb-row">
+          <div class="eb-label">Date of Birth</div>
+          <div class="eb-value">${dob || '—'}</div>
+        </div>
+      </div>
+
+      <!-- ── Competency Details ── -->
+      <div class="eb-section">
+        <div class="eb-section-head"><span>Competency Details</span></div>
+        <div class="eb-row">
+          <div class="eb-label">Unit of Competency</div>
+          <div class="eb-value"><strong>${unitCode ? `${unitCode} – ` : ''}${unitOfCompetency || '—'}</strong></div>
+        </div>
+        <div class="eb-row">
+          <div class="eb-label">Previous Training</div>
+          <div class="eb-value">${previousTraining || '—'}</div>
+        </div>
+        <div class="eb-row">
+          <div class="eb-label">Evidence Provided</div>
+          <div class="eb-value">${evidenceProvided || '—'}</div>
+        </div>
+      </div>
+
+      <!-- ── What Happens Next — "soon" only ── -->
+      <div class="eb-info-box">
+        <strong>What happens next?</strong>
+        Our assessors will review your submitted evidence soon. You will be contacted via email with the outcome or if additional information is required.
+      </div>
+
+      <!-- ── Next Steps ── -->
+      <div class="eb-section">
+        <div class="eb-section-head"><span>Next Steps</span></div>
+        <ol class="eb-steps">
+          <li>Our team will review your evidence and qualifications.</li>
+          <li>You may be contacted if additional documents or a practical assessment is required.</li>
+          <li>Once approved, your Statement of Attainment will be issued.</li>
+        </ol>
+      </div>
+
+    </div><!-- /eb-content -->
+
+    <!-- ── Footer ── -->
+    <div class="eb-footer">
+      Questions? Contact us at
+      <a href="mailto:admin@safetytrainingacademy.com.au">admin@safetytrainingacademy.com.au</a>
+      or call <a href="tel:1300976097">1300 976 097</a>.<br />
+      <strong>Safety Training Academy</strong> &nbsp;|&nbsp; RTO #45234<br /><br />
+      &copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.<br />
+      <span style="font-size:9px;">This is an automated confirmation. Please do not reply directly to this email.</span>
+    </div>
+
+  </div>
+</body>
+</html>
+`;
+};
+
 // Reuses the VOC confirmation HTML body from bookingEmailController so we have
 // one source of truth for the brand template.
-const sendVocConfirmationEmail = async ({ toEmail, firstName, lastName, submissionId, amountPaid, paymentMethod }) => {
+const sendVocConfirmationEmail = async ({ toEmail, firstName, lastName, submissionId, amountPaid, paymentMethod, courses }) => {
     const shortId = String(submissionId).slice(-8).toUpperCase()
     const priceStr = `$${Number(amountPaid).toFixed(2)}`
+    
+    // Format courses for the template
+    const unitOfCompetency = courses && courses.length > 0 ? courses.map(c => c.name).join(", ") : "—"
 
-    const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:#0d2240;color:#ffffff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:22px;font-weight:700;">VOC Submission Received</h1>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p style="margin:0 0 16px;font-size:15px;color:#555;">Dear <strong>${firstName} ${lastName}</strong>,</p>
-    <p style="margin:0 0 24px;font-size:15px;color:#555;">Thank you for your VOC submission to Safety Training Academy. We have received your request.</p>
-    <table width="100%" cellpadding="12" cellspacing="0" border="0" style="background-color:#f8fafc;border-radius:6px;margin-bottom:24px;border:1px solid #e2e8f0;">
-        <tr><td style="font-size:13px;color:#64748b;width:140px;">Submission ID</td><td style="font-size:14px;font-weight:600;color:#334155;">${shortId}</td></tr>
-        <tr><td style="font-size:13px;color:#64748b;">Amount Paid</td><td style="font-size:14px;font-weight:600;color:#334155;">${priceStr}</td></tr>
-        <tr><td style="font-size:13px;color:#64748b;">Payment Method</td><td style="font-size:14px;font-weight:600;color:#334155;">${paymentMethod}</td></tr>
-    </table>
-    <p style="font-size:14px;color:#334155;">Our team will review your application and get back to you soon.</p>
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0;font-size:13px;color:#64748b;">Best regards,<br/><strong>Safety Training Academy</strong></p>
-</td></tr>
-</table></td></tr></table></body></html>`
+    const studentHtml = buildVocStudentHtml({
+        firstName,
+        lastName,
+        email: toEmail,
+        phone: "", // Will be populated if needed, or fetched from DB
+        usi: "—",
+        dob: "—",
+        referenceId: shortId,
+        submittedAt: new Date().toLocaleString('en-AU', { timeZone: 'Australia/Sydney' }),
+        unitOfCompetency,
+        unitCode: "", 
+        previousTraining: "Yes",
+        evidenceProvided: paymentMethod === "Bank Transfer" ? "Bank Receipt Uploaded" : "Credit Card Payment"
+    });
 
     const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
@@ -172,6 +346,7 @@ exports.createSubmission = async (req, res) => {
             submissionId: submission._id.toString(),
             amountPaid: submission.amount,
             paymentMethod: paymentMethod === "card" ? "Credit / Debit Card" : "Bank Transfer",
+            courses: submission.courses
         })
 
         res.status(201).json(submission)

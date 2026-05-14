@@ -217,12 +217,12 @@ const Payment = () => {
             <thead>
               <tr>
                 <th>Booking date</th>
+                <th>Booking ID</th>
                 <th>Student</th>
                 <th>Course</th>
                 <th>Schedule Date</th>
                 <th>Method</th>
-                <th>Transaction ID</th>
-                <th>Gateway Trans ID</th>
+                <th>Gateway Transaction ID</th>
                 <th>Amount</th>
                 <th>Payment date</th>
                 <th>Status</th>
@@ -243,6 +243,9 @@ const Payment = () => {
                       <div>{p.date}</div>
                       <div className="time-muted">{p.time || "—"}</div>
                     </td>
+                    <td className="td-mono">
+                      {p.transId ? String(p.transId).replace(/\D/g, "").slice(-8).padStart(8, "0") : "—"}
+                    </td>
                     <td>
                       <div className="student-info">
                         <span className="name">{p.student}</span>
@@ -256,7 +259,6 @@ const Payment = () => {
                     </td>
                     <td className="td-muted">{p.sessionDate || "—"}</td>
                     <td className="td-muted">{p.method || "Individual"}</td>
-                    <td className="td-mono">{p.transId || "—"}</td>
                     <td className="td-mono" style={{ color: '#6366f1', fontWeight: '600' }}>{p.gatewayTransId || "—"}</td>
                     <td className="amount">${p.amount}</td>
                     <td className="td-muted">{p.date}</td>
@@ -368,13 +370,12 @@ const Payment = () => {
                 <div className="details-grid">
                   <div className="detail-item">
                     <div className="label">
-                      {selectedPayment.method === "Card Payment" ? "Gateway Transaction ID:" : 
-                       selectedPayment.method === "Bank Transfer" ? "Bank Transfer ID:" : "Transaction ID:"}
+                      {selectedPayment.method === "Bank Transfer" ? "Bank Transfer ID:" : "Gateway Transaction ID:"}
                     </div>
-                    <div className="value mono-box">
+                    <div className="value mono-box" style={{ color: (selectedPayment.method === "Pay Later" || !selectedPayment.gatewayTransId) ? '#000' : 'inherit' }}>
                       {selectedPayment.method === "Bank Transfer" 
                         ? (selectedPayment.transId && selectedPayment.transId !== "—" ? selectedPayment.transId : selectedPayment.gatewayTransId || "—")
-                        : (selectedPayment.gatewayTransId && selectedPayment.gatewayTransId !== "—" ? selectedPayment.gatewayTransId : selectedPayment.transId || "—")
+                        : (selectedPayment.method === "Pay Later" ? "—" : (selectedPayment.gatewayTransId && selectedPayment.gatewayTransId !== "—" ? selectedPayment.gatewayTransId : selectedPayment.transId || "—"))
                       }
                     </div>
                   </div>

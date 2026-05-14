@@ -63,8 +63,10 @@ function ReceiptModal({ row, onClose, onConfirm }) {
               <div className="cp2-info-val cp2-amount">${Number(row.amount || 0).toFixed(2)}</div>
             </div>
             <div className="cp2-info-box">
-              <div className="cp2-info-label">Transaction ID</div>
-              <div className="cp2-info-val" style={{ fontFamily: "monospace", fontSize: 13 }}>{row.transactionId}</div>
+              <div className="cp2-info-label">Gateway Transaction ID</div>
+              <div className="cp2-info-val" style={{ fontFamily: "monospace", fontSize: 13, color: (!row.transactionId || row.transactionId === "—") ? "#000" : "inherit" }}>
+                {(!row.transactionId || row.transactionId === "—") ? "—" : row.transactionId}
+              </div>
             </div>
             <div className="cp2-info-box">
               <div className="cp2-info-label">Payment Method</div>
@@ -481,14 +483,14 @@ const CompanyPayment = () => {
               <table className="cp2-table">
                 <thead>
                   <tr>
-                    <th>Date &amp; Time</th>
-                    <th>Order ID</th>
+                    <th>Booking date</th>
+                    <th>Booking ID</th>
                     <th>Company</th>
                     <th>Email</th>
                     <th>Mobile</th>
                     <th>Courses / Students</th>
                     <th>Amount</th>
-                    <th>Transaction ID</th>
+                    <th>Gateway Transaction ID</th>
                     <th>Method</th>
                     <th>Status</th>
                     <th>Action</th>
@@ -503,13 +505,17 @@ const CompanyPayment = () => {
                         <div>{r.date}</div>
                         <div style={{ fontSize: 11 }}>{r.time}</div>
                       </td>
-                      <td className="cp2-td-mono">{r.orderId}</td>
+                      <td className="cp2-td-mono">
+                        {r.orderId ? String(r.orderId).replace(/\D/g, "").slice(-8).padStart(8, "0") : "—"}
+                      </td>
                       <td className="cp2-td-bold">{r.company}</td>
                       <td className="cp2-td-muted">{r.email}</td>
                       <td className="cp2-td-muted">{r.mobile}</td>
                       <td className="cp2-td-center">{renderCoursesCell(r)}</td>
                       <td className="cp2-td-amount">${Number(r.amount).toFixed(2)}</td>
-                      <td className="cp2-td-mono" style={{ fontSize: 11 }}>{r.transactionId}</td>
+                      <td className="cp2-td-mono" style={{ fontSize: 11, color: (!r.transactionId || r.transactionId === "—") ? "#000" : "inherit" }}>
+                        {(!r.transactionId || r.transactionId === "—") ? "—" : r.transactionId}
+                      </td>
                       <td className="cp2-td-method">{r.paymentMethod}</td>
                       <td><StatusBadge status={r.status} confirmed={r.confirmed} /></td>
                       <td>

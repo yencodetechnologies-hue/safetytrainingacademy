@@ -10,6 +10,350 @@ const formatBookingId = (id) => {
 };
 
 // ─────────────────────────────────────────────────────────────
+// Email Templates
+// ─────────────────────────────────────────────────────────────
+const buildStudentHtml = (data) => {
+  const { orderId, student, course, payment, portal } = data;
+
+  // Extract number only e.g. "BK-10042" → "10042"
+  const orderNumber = String(orderId).replace(/[^0-9]/g, '');
+
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Booking Confirmation – Safety Training Academy</title>
+  <style>
+    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: 'Helvetica Neue', Arial, sans-serif; }
+    .sb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
+
+    /* ── Header ── */
+    .sb-hdr { background: #0d2240; padding: 16px 24px; }
+    .sb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
+    .sb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
+    .sb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
+    .sb-divider { height: 3px; background: #29b6e8; }
+
+    /* ── Banner ── */
+    .sb-banner { background: #0a1c33; padding: 13px 24px; text-align: center; }
+    .sb-banner-text { margin: 0; font-size: 15px; font-weight: 700; color: #ffffff; }
+
+    /* ── Content ── */
+    .sb-content { padding: 18px 24px; }
+    .sb-greeting { font-size: 12px; color: #1a1a1a; margin: 0 0 14px; line-height: 1.6; }
+
+    /* ── Sections ── */
+    .sb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+    .sb-section-head { background: #0d2240; padding: 7px 14px; }
+    .sb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
+    .sb-row { display: flex; border-bottom: 1px solid #f0f0f0; }
+    .sb-row:last-child { border-bottom: none; }
+    .sb-label { width: 38%; padding: 8px 14px; font-size: 11px; font-weight: 600; color: #666; background: #fafafa; border-right: 1px solid #f0f0f0; flex-shrink: 0; display: flex; align-items: center; }
+    .sb-value { padding: 8px 14px; font-size: 12px; color: #1a1a1a; flex: 1; display: flex; align-items: center; word-break: break-word; }
+    .sb-value a { color: #29b6e8; text-decoration: none; }
+
+    /* ── Payment total ── */
+    .sb-total-row .sb-label { background: #f0f6ff; font-size: 13px; font-weight: 700; color: #0d2240; border-top: 2px solid #29b6e8; }
+    .sb-total-row .sb-value { font-size: 14px; font-weight: 700; color: #0d2240; background: #f0f6ff; border-top: 2px solid #29b6e8; }
+
+    /* ── LLN Alert ── */
+    .sb-lln-alert { background: #fff3f3; border: 1px solid #ffb3b3; border-radius: 4px; padding: 10px 14px; font-size: 11px; color: #c0392b; line-height: 1.6; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 9px; }
+    .sb-lln-alert strong { color: #a00; display: block; margin-bottom: 2px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── What to Bring ── */
+    .sb-checklist { margin: 0; padding: 0; list-style: none; }
+    .sb-checklist li { padding: 7px 14px; font-size: 12px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; gap: 8px; }
+    .sb-checklist li:last-child { border-bottom: none; }
+    .sb-checklist li::before { content: '✓'; color: #29b6e8; font-weight: 700; flex-shrink: 0; }
+
+    /* ── Next Steps ── */
+    .sb-steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+    .sb-steps li { counter-increment: step; padding: 9px 14px; border-bottom: 1px solid #f0f0f0; font-size: 12px; display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
+    .sb-steps li:last-child { border-bottom: none; }
+    .sb-steps li::before { content: counter(step); background: #0d2240; color: #fff; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .sb-steps li a { color: #29b6e8; text-decoration: none; font-weight: 600; }
+
+    /* ── Footer ── */
+    .sb-footer { background: #f5f7fa; border-top: 1px solid #e0e0e0; padding: 14px 24px; font-size: 10px; color: #999; text-align: center; line-height: 1.7; }
+    .sb-footer a { color: #29b6e8; text-decoration: none; }
+    .sb-footer strong { color: #555; }
+  </style>
+</head>
+<body>
+  <div class="sb-body">
+
+    <!-- ── Header ── -->
+    <div class="sb-hdr">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td>
+            <p class="sb-hdr-title">Safety Training Academy</p>
+            <p class="sb-hdr-sub">RTO #45234 &nbsp;·&nbsp; Booking Confirmation</p>
+          </td>
+          <td align="right" valign="top">
+            <span class="sb-badge">Confirmed</span>
+            <p style="margin: 4px 0 0; font-size: 25px; font-weight: 700; color: #ffffff; text-align: right;">
+              Booking ID: ${orderNumber}
+            </p>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="sb-divider"></div>
+
+    <!-- ── Banner ── -->
+    <div class="sb-banner">
+      <p class="sb-banner-text">&#10003; &nbsp;Booking Confirmed</p>
+    </div>
+
+    <div class="sb-content">
+
+      <!-- ── Greeting ── -->
+      <p class="sb-greeting">
+        Hi <strong>${student?.firstName || 'there'}</strong>,<br /><br />
+        Thank you for booking with Safety Training Academy. Your booking is confirmed — please review the details below and make sure all pre-course steps are completed before your training date.
+      </p>
+
+      <!-- ── Course Details — no Trainer ── -->
+      <div class="sb-section">
+        <div class="sb-section-head"><span>Course Details</span></div>
+        <div class="sb-row">
+          <div class="sb-label">Booking ID</div>
+          <div class="sb-value"><strong>${orderNumber}</strong></div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label">Course</div>
+          <div class="sb-value"><strong>${course?.name || '—'}</strong></div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label">Course Code</div>
+          <div class="sb-value">${course?.code || '—'}</div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label">Delivery Mode</div>
+          <div class="sb-value">${course?.deliveryMode || '—'}</div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label">Date</div>
+          <div class="sb-value">${course?.date || '—'}</div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label">Time</div>
+          <div class="sb-value">${course?.time || '—'}</div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label">Location</div>
+          <div class="sb-value">${course?.venue || '—'}</div>
+        </div>
+      </div>
+
+      <!-- ── Payment Summary — no Invoice # ── -->
+      <div class="sb-section">
+        <div class="sb-section-head"><span>Payment Summary</span></div>
+        ${payment?.items?.length ? payment.items.map(item => `
+        <div class="sb-row">
+          <div class="sb-label">${item.label}</div>
+          <div class="sb-value">$${item.amount}</div>
+        </div>`).join('') : ''}
+        ${payment?.discount ? `
+        <div class="sb-row">
+          <div class="sb-label">Discount</div>
+          <div class="sb-value" style="color:#1e7e34;">- $${payment.discount}</div>
+        </div>` : ''}
+        <div class="sb-row sb-total-row">
+          <div class="sb-label">Total Paid</div>
+          <div class="sb-value">$${payment?.total || '0.00'}</div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label">Method</div>
+          <div class="sb-value">${payment?.method || '—'}</div>
+        </div>
+      </div>
+
+      <!-- ── LLN Alert ── -->
+      <div class="sb-lln-alert">
+        <span style="font-size:15px; flex-shrink:0; margin-top:1px;">&#9888;</span>
+        <div>
+          <strong>Important — Action Required</strong>
+          Please finish your LLN &amp; Enrolment in the Student Portal before attending the course. Your spot will not be confirmed until this is completed.
+        </div>
+      </div>
+
+      <!-- ── Next Steps ── -->
+      <div class="sb-section">
+        <div class="sb-section-head"><span>Next Steps</span></div>
+        <ol class="sb-steps">
+          <li>Log in to the <a href="${portal?.url || '#'}">Student Portal</a> and complete your <strong>LLN Assessment</strong> and <strong>Enrolment Form</strong>.</li>
+          <li>Ensure you have a valid <strong>USI</strong>. Visit <a href="https://www.usi.gov.au">usi.gov.au</a> if needed.</li>
+          <li>Arrive at the venue at least <strong>15 minutes early</strong> with photo ID.</li>
+          <li>Check your email for any updates regarding your session.</li>
+        </ol>
+      </div>
+
+      <!-- ── What to Bring ── -->
+      <div class="sb-section">
+        <div class="sb-section-head"><span>What to Bring</span></div>
+        <ul class="sb-checklist">
+          <li>Photo ID (driver's licence or passport)</li>
+          <li>Confirmation of your USI</li>
+          <li>Appropriate PPE for the course (if advised)</li>
+          <li>Sturdy, enclosed footwear — no thongs or open-toed shoes</li>
+          <li>Water bottle and snacks — a break will be provided</li>
+          ${course?.additionalItems ? course.additionalItems.map(item => `<li>${item}</li>`).join('') : ''}
+        </ul>
+      </div>
+
+    </div><!-- /eb-content -->
+
+    <!-- ── Footer ── -->
+    <div class="sb-footer">
+      Questions? Contact us at
+      <a href="mailto:admin@safetytrainingacademy.com.au">admin@safetytrainingacademy.com.au</a>
+      or call <a href="tel:1300976097">1300 976 097</a>.<br />
+      <strong>Safety Training Academy</strong> &nbsp;|&nbsp; RTO #45234 &nbsp;|&nbsp;
+      <a href="${portal?.url || '#'}">Student Portal</a><br /><br />
+      &copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.<br />
+      <span style="font-size:9px;">This is an automated confirmation. Please do not reply directly to this email.</span>
+    </div>
+
+  </div>
+</body>
+</html>
+`;
+};
+
+const buildLLNNotificationHtml = (data) => {
+  const { bookingId, studentName, studentEmail, studentPhone, score, status } = data;
+
+  // Extract number only e.g. "BK-10042" → "10042"
+  const orderNumber = String(bookingId).replace(/[^0-9]/g, '');
+
+  const statusColor =
+    status === 'Passed'   ? '#1e7e34' :
+    status === 'Failed'   ? '#c0392b' : '#b8860b';
+
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLN Assessment Notification – Safety Training Academy</title>
+  <style>
+    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: Arial, sans-serif; }
+    .eb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
+
+    /* ── Header ── */
+    .eb-hdr { background: #0d2240; padding: 16px 24px; }
+    .eb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
+    .eb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
+    .eb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
+    .eb-divider { height: 3px; background: #29b6e8; }
+
+    /* ── Content ── */
+    .eb-content { padding: 18px 24px; }
+
+    /* ── Sections ── */
+    .eb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+    .eb-section-head { background: #0d2240; padding: 7px 14px; }
+    .eb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
+    .eb-section-body { padding: 11px 14px; }
+    .eb-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .eb-table td { padding: 5px 0; vertical-align: top; }
+    .eb-table .lbl { color: #666666; width: 40%; font-weight: 500; }
+    .eb-table .val { color: #1a1a1a; font-weight: 700; }
+
+    /* ── Footer ── */
+    .eb-footer { background: #f5f7fa; border-top: 1px solid #e0e0e0; padding: 12px 24px; font-size: 10px; color: #999; text-align: center; line-height: 1.6; }
+    .eb-footer a { color: #29b6e8; text-decoration: none; }
+    .eb-footer strong { color: #555; }
+  </style>
+</head>
+<body>
+  <div class="eb-body">
+
+    <!-- ── Header ── -->
+    <div class="eb-hdr">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td>
+            <p class="eb-hdr-title">Safety Training Academy</p>
+            <p class="eb-hdr-sub">RTO #45234 &nbsp;·&nbsp; LLN Notification</p>
+          </td>
+          <td align="right" valign="top">
+            <span class="eb-badge">Assessment Done</span>
+            <p style="margin: 4px 0 0; font-size: 25px; font-weight: 700; color: #ffffff; text-align: right;">
+              Booking ID: ${orderNumber}
+            </p>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="eb-divider"></div>
+
+    <div class="eb-content">
+
+      <!-- ── Student Details ── -->
+      <div class="eb-section">
+        <div class="eb-section-head"><span>Student Details</span></div>
+        <div class="eb-section-body">
+          <table class="eb-table">
+            <tr>
+              <td class="lbl">Name</td>
+              <td class="val">${studentName || '—'}</td>
+            </tr>
+            <tr>
+              <td class="lbl">Email</td>
+              <td class="val">${studentEmail || '—'}</td>
+            </tr>
+            <tr>
+              <td class="lbl">Phone Number</td>
+              <td class="val">${studentPhone || '—'}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── Assessment Result ── -->
+      <div class="eb-section">
+        <div class="eb-section-head"><span>Assessment Result</span></div>
+        <div class="eb-section-body">
+          <table class="eb-table">
+            <tr>
+              <td class="lbl">Booking ID</td>
+              <td class="val">${orderNumber}</td>
+            </tr>
+            <tr>
+              <td class="lbl">Score</td>
+              <td class="val" style="font-size: 16px;">${Number(score).toFixed(1)}%</td>
+            </tr>
+            <tr>
+              <td class="lbl">Status</td>
+              <td class="val" style="color: ${statusColor};">${status || '—'}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /eb-content -->
+
+    <!-- ── Footer ── -->
+    <div class="eb-footer">
+      This is an automated notification from <strong>Safety Training Academy</strong> (RTO #45234).<br />
+      Do not reply directly to this email. &nbsp;|&nbsp;
+      <a href="mailto:admin@safetytrainingacademy.com.au">admin@safetytrainingacademy.com.au</a><br />
+      &copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.
+    </div>
+
+  </div>
+</body>
+</html>
+`;
+};
+
+// ─────────────────────────────────────────────────────────────
 // 1. Individual Student Booking Confirmation
 // POST /api/booking-email/send-confirmation
 // ─────────────────────────────────────────────────────────────
@@ -20,254 +364,31 @@ const sendBookingConfirmation = async (req, res) => {
     const orderId = formatBookingId(Date.now().toString());
     const priceStr = `$${Number(coursePrice).toFixed(2)}`;
     const orderDateStr = new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" });
-    const billingAddressHtml = `${name}<br/>${email}<br/>${finalPhone}`;
 
-    // ✅ Default password — booking pannumbothu user-ku assign aagum
+    // ✅ Default password assigned to new students
     const defaultPassword = "123456";
 
-    const bankDetailsHtml = paymentMethod === "Bank Transfer" ? `
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;background-color:#fffbeb;border-radius:8px;border:1px solid #fcd34d;">
-        <tr><td style="padding:20px;">
-            <p style="margin:0 0 12px;font-size:12px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:1px;">Bank Transfer Details</p>
-            <table width="100%" cellpadding="4" cellspacing="0" border="0" style="font-size:14px;color:#92400e;">
-                <tr><td style="width:140px;">Bank</td><td><strong>Commonwealth Bank</strong></td></tr>
-                <tr><td>Account Name</td><td><strong>AIET College</strong></td></tr>
-                <tr><td>BSB</td><td><strong>062 141</strong></td></tr>
-                <tr><td>Account No</td><td><strong>10490235</strong></td></tr>
-            </table>
-            <p style="margin:12px 0 0;font-size:13px;color:#b45309;">Please use order number <strong>#${orderId}</strong> or your full name as payment reference.</p>
-        </td></tr></table>` : "";
+    // 1. Build Student Confirmation HTML
+    const studentHtml = buildStudentHtml({
+        orderId,
+        student: { firstName: name.split(" ")[0] },
+        course: {
+            name: courseName,
+            code: courseCode,
+            deliveryMode: "Face to Face",
+            date: new Date(courseDate).toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Sydney" }),
+            time: `${startTime} - ${endTime}`,
+            venue: "3/14-16 Marjorie Street, Sefton NSW 2162"
+        },
+        payment: {
+            items: [{ label: courseName, amount: Number(coursePrice).toFixed(2) }],
+            total: Number(coursePrice).toFixed(2),
+            method: paymentMethod
+        },
+        portal: { url: "https://portal.safetytrainingacademy.edu.au" }
+    });
 
-    // ✅ Login credentials block — student email-la mattum varum
-    const loginCredentialsHtml = `
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;background-color:#eff6ff;border-radius:8px;border:1px solid #bfdbfe;">
-        <tr><td style="padding:20px;">
-            <p style="margin:0 0 12px;font-size:12px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:1px;">🔐 Your Student Portal Login</p>
-            <p style="margin:0 0 12px;font-size:14px;color:#1e3a8a;">An account has been created for you. Use the credentials below to access your student portal:</p>
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:14px;color:#1e3a8a;background-color:#ffffff;border-radius:6px;border:1px solid #dbeafe;">
-                <tr><td style="padding:12px 16px;width:120px;border-bottom:1px solid #dbeafe;">Email</td><td style="padding:12px 16px;border-bottom:1px solid #dbeafe;"><strong>${email}</strong></td></tr>
-                <tr><td style="padding:12px 16px;">Password</td><td style="padding:12px 16px;"><strong style="font-family:monospace;font-size:15px;background-color:#fef3c7;padding:4px 10px;border-radius:4px;">${defaultPassword}</strong></td></tr>
-            </table>
-        </td></tr></table>`;
-
-    const studentHtml = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>STA Booking Confirmation</title>
-  <style>
-    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: 'Helvetica Neue', Arial, sans-serif; }
-    .sb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
-    .sb-hdr { background: #0d2240; padding: 16px 24px; }
-    .sb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
-    .sb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
-    .sb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
-    .sb-divider { height: 3px; background: #29b6e8; }
-    .sb-banner { background: #0a1c33; padding: 13px 24px; text-align: center; }
-    .sb-banner-text { font-size: 14px; font-weight: 700; color: #ffffff; margin: 0; }
-    .sb-banner-id { color: #29b6e8; }
-    .sb-content { padding: 18px 24px; }
-    .sb-greeting { font-size: 14px; color: #1a1a1a; margin: 0 0 8px; }
-    .sb-intro { font-size: 13px; color: #555555; line-height: 1.7; margin: 0 0 14px; }
-    .sb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
-    .sb-section-head { background: #0d2240; padding: 7px 14px; }
-    .sb-section-head span { font-size: 10px; font-weight: 700; color: #29b6e8; letter-spacing: 1px; text-transform: uppercase; }
-    .sb-section-body { padding: 11px 14px; }
-    .sb-course-title { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px; }
-    .sb-course-meta { font-size: 11px; color: #555555; margin: 0 0 10px; }
-    .sb-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-    .sb-table td { padding: 4px 0; vertical-align: top; }
-    .sb-table .lbl { color: #666666; width: 40%; font-weight: 500; }
-    .sb-table .val { color: #1a1a1a; font-weight: 700; }
-    .sb-table .val-reg { color: #1a1a1a; font-weight: 400; }
-    .sb-table .val-blue { color: #1a7fbf; font-weight: 600; }
-    .sb-pw-box { background: #fff8e6; border: 1px solid #f0d080; border-radius: 3px; padding: 3px 9px; font-size: 12.5px; font-weight: 700; color: #7a5500; display: inline-block; letter-spacing: 1px; }
-    .sb-portal-note { font-size: 12px; color: #555555; margin: 0 0 10px; line-height: 1.6; }
-    .sb-total-row td { border-top: 2px solid #e0e0e0; padding-top: 8px; font-weight: 700; }
-    .sb-total-val { text-align: right; font-size: 15px; font-weight: 700; color: #0d2240; }
-    .sb-checklist { border: 2px solid #d4940a; border-radius: 4px; padding: 11px 14px; margin-bottom: 12px; background: #fffbf0; }
-    .sb-checklist-title { font-size: 11px; font-weight: 700; color: #7a5500; margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .sb-checklist-addr { font-size: 12px; color: #7a5500; margin: 0 0 8px; }
-    .sb-checklist ul { margin: 0 0 8px; padding-left: 18px; font-size: 12px; color: #7a5500; line-height: 1.8; }
-    .sb-checklist-provide { font-size: 12px; font-weight: 700; color: #7a5500; margin: 0 0 4px; }
-    .sb-bank { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
-    .sb-bank-head { background: #0d2240; padding: 7px 14px; }
-    .sb-bank-head span { font-size: 10px; font-weight: 700; color: #29b6e8; letter-spacing: 1px; text-transform: uppercase; }
-    .sb-bank-body { padding: 11px 14px; }
-    .sb-bank-note { font-size: 11px; color: #c07000; margin: 8px 0 0; }
-    .sb-bank-note strong { color: #0d2240; }
-    .sb-footer { background: #0d2240; padding: 13px 24px; text-align: center; }
-    .sb-footer-brand { font-size: 12px; font-weight: 700; color: #ffffff; margin-bottom: 3px; }
-    .sb-footer-info { font-size: 11px; color: #6fa8c8; line-height: 1.9; margin: 0; }
-  </style>
-</head>
-<body>
-  <div class="sb-body">
-    <!-- Header -->
-    <div class="sb-hdr">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td>
-            <p class="sb-hdr-title">Safety Training Academy</p>
-            <p class="sb-hdr-sub">RTO #45234 &nbsp;·&nbsp; Booking Confirmation</p>
-          </td>
-          <td align="right" valign="top">
-            <span class="sb-badge">Confirmed</span>
-          </td>
-        </tr>
-      </table>
-    </div>
-    <div class="sb-divider"></div>
-
-    <!-- Banner -->
-    <div class="sb-banner">
-      <p class="sb-banner-text">&#10003; &nbsp;Booking Confirmed &nbsp;<span class="sb-banner-id">#${orderId}</span></p>
-      <p style="margin: 8px 0 0; font-size: 13px; color: #ff4d4d; font-weight: 700;">IMPORTANT: Please finish your LLN & Enrolment in the Student portal before attending the course</p>
-    </div>
-
-    <div class="sb-content">
-      <p class="sb-greeting">Dear <strong>${name}</strong>,</p>
-      <p class="sb-intro">Thank you for booking with <strong>Safety Training Academy</strong>. Your booking has been successfully received!</p>
-
-      <!-- Course / Product -->
-      <div class="sb-section">
-        <div class="sb-section-head"><span>Product</span></div>
-        <div class="sb-section-body">
-          <p class="sb-course-title">${courseName}</p>
-          <p class="sb-course-meta">Booking ID: #${orderId} &nbsp;|&nbsp; ${new Date(courseDate).toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Sydney" })} &nbsp;|&nbsp; ${startTime} - ${endTime}</p>
-          <table class="sb-table">
-            <tr>
-              <td class="lbl">Quantity</td>
-              <td style="text-align:right; color: #1a1a1a; font-weight:400;">1</td>
-            </tr>
-            <tr>
-              <td class="lbl">Price</td>
-              <td style="text-align:right; color: #1a1a1a; font-weight:700;">${priceStr}</td>
-            </tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- Student Portal Login -->
-      <div class="sb-section">
-        <div class="sb-section-head"><span>&#128274; Your student portal login</span></div>
-        <div class="sb-section-body">
-          <p class="sb-portal-note">An account has been created for you. Use the credentials below to access your student portal:</p>
-          <table class="sb-table">
-            <tr>
-              <td class="lbl">Email</td>
-              <td class="val-blue">${email}</td>
-            </tr>
-            <tr>
-              <td class="lbl">Password</td>
-              <td><span class="sb-pw-box">${defaultPassword}</span></td>
-            </tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- Course Preparation Checklist -->
-      <div class="sb-checklist">
-        <p class="sb-checklist-title">&#9888; Important: Course preparation checklist</p>
-        <p class="sb-checklist-addr">Course Address: <strong>3/14-16 Marjorie Street, Sefton NSW 2162</strong></p>
-        <ul>
-          <li>ID reflecting your name and address.</li>
-          <li>PPE — high visibility vest and steel cap boots.</li>
-          <li>USI: <a href="https://www.usi.gov.au/students/get-a-usi" style="color:#c07000;">Create USI</a></li>
-        </ul>
-        <p class="sb-checklist-provide">We provide:</p>
-        <ul>
-          <li>Beverages, Lunchroom, Toilets, and easy council parking.</li>
-        </ul>
-      </div>
-
-      <!-- Bank Transfer Details (Conditional) -->
-      ${paymentMethod === "Bank Transfer" ? `
-      <div class="sb-bank">
-        <div class="sb-bank-head"><span>Bank transfer details</span></div>
-        <div class="sb-bank-body">
-          <table class="sb-table">
-            <tr>
-              <td class="lbl">Bank</td>
-              <td class="val">Commonwealth Bank</td>
-            </tr>
-            <tr>
-              <td class="lbl">Account name</td>
-              <td class="val">AIET College</td>
-            </tr>
-            <tr>
-              <td class="lbl">BSB</td>
-              <td class="val">062 141</td>
-            </tr>
-            <tr>
-              <td class="lbl">Account no</td>
-              <td class="val">10490235</td>
-            </tr>
-          </table>
-          <p class="sb-bank-note">Please use order number <strong>#${orderId}</strong> or your full name as payment reference.</p>
-        </div>
-      </div>
-      ` : ""}
-
-      <!-- Order Details -->
-      <div class="sb-section">
-        <div class="sb-section-head"><span>Order details (#${orderId})</span></div>
-        <div class="sb-section-body">
-          <p style="font-size:12px; color: #555555; margin: 0 0 8px;">Order Date: <strong style="color: #1a1a1a;">${orderDateStr}</strong></p>
-          <table class="sb-table">
-            <tr>
-              <td class="lbl">Subtotal</td>
-              <td style="text-align:right; color: #1a1a1a; font-weight:400;">${priceStr}</td>
-            </tr>
-            <tr>
-              <td class="lbl">Payment method</td>
-              <td style="text-align:right; color: #1a1a1a; font-weight:400;">${paymentMethod}</td>
-            </tr>
-            <tr class="sb-total-row">
-              <td class="lbl" style="font-weight:700; color: #1a1a1a;">Total</td>
-              <td class="sb-total-val">${priceStr}</td>
-            </tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- Billing Address -->
-      <div class="sb-section">
-        <div class="sb-section-head"><span>Billing address</span></div>
-        <div class="sb-section-body">
-          <table class="sb-table">
-            <tr>
-              <td class="lbl">Name</td>
-              <td class="val">${name}</td>
-            </tr>
-            <tr>
-              <td class="lbl">Email</td>
-              <td class="val-blue">${email}</td>
-            </tr>
-            <tr>
-              <td class="lbl">Mobile</td>
-              <td class="val">${finalPhone}</td>
-            </tr>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="sb-footer">
-      <div class="sb-footer-brand">Safety Training Academy</div>
-      <p class="sb-footer-info">
-        2 Wellington St, Sefton NSW 2162 &nbsp;·&nbsp; RTO #45234<br>
-        1300 976 097 &nbsp;·&nbsp; info@safetytrainingacademy.edu.au
-      </p>
-    </div>
-  </div>
-</body>
-</html>`;
-
-    const courseDateStr = courseDate ? new Date(courseDate).toLocaleDateString("en-AU", {
+    const courseDateStrFormatted = courseDate ? new Date(courseDate).toLocaleDateString("en-AU", {
         weekday: "long",
         day: "numeric",
         month: "long",
@@ -276,21 +397,24 @@ const sendBookingConfirmation = async (req, res) => {
     }) : "To be confirmed";
 
     const adminMailData = {
-        studentName: name,
-        studentEmail: email,
-        studentMobile: finalPhone || "—",
-        courseName: courseName,
-        courseDate: courseDateStr,
-        courseTime: `${startTime} - ${endTime}`,
-        courseLocation: "3/14-16 Marjorie Street, Sefton NSW 2162",
-        bookingId: `#${orderId}`,
-        orderDate: orderDateStr,
-        quantity: 1,
-        subtotal: priceStr,
+        bookingId: orderId,
         paymentMethod: paymentMethod,
-        total: priceStr,
-        gatewayTransactionId: gatewayTransactionId || "—",
-        bankTransferId: bankTransferId || "—"
+        bankTransferId: bankTransferId || "—",
+        gatewayId: gatewayTransactionId || null,
+        contactName: name,
+        contactEmail: email,
+        contactPhone: finalPhone || "—",
+        totalAmount: Number(coursePrice).toFixed(2),
+        submittedAt: orderDateStr,
+        courseName: courseName,
+        courseCode: courseCode,
+        deliveryMode: "Face to Face",
+        courseDate: courseDateStrFormatted,
+        courseTime: `${startTime} - ${endTime}`,
+        venue: "3/14-16 Marjorie Street, Sefton NSW 2162",
+        notes: null, // Add if available in req.body
+        studentPortalUrl: "https://portal.safetytrainingacademy.edu.au/login",
+        adminUrl: "https://admin.safetytrainingacademy.edu.au"
     };
 
     try {
@@ -307,24 +431,19 @@ const sendBookingConfirmation = async (req, res) => {
                     subject: `New Booking #${orderId} - ${name} - ${courseName}`,
                     html: adminBookingTemplate(adminMailData)
                 });
-                console.log(`✅ Academy notification sent to ${process.env.BOOKINGS_EMAIL} (after 10s delay)`);
+                console.log(`✅ Academy notification sent to ${process.env.BOOKINGS_EMAIL}`);
             } catch (academyErr) {
                 console.error(`❌ Academy notification failed for ${process.env.BOOKINGS_EMAIL}:`, academyErr.message);
             }
         }, 10000);
 
         // 2. Send Student Confirmation
-        try {
-            await sendEmail({
-                to: email,
-                subject: `Booking Confirmed - ${courseName} (Order #${orderId})`,
-                html: studentHtml
-            });
-            console.log(`✅ Student confirmation sent to ${email}`);
-        } catch (studentErr) {
-            console.error(`❌ Student confirmation failed for ${email}:`, studentErr.message);
-            throw studentErr; // Re-throw for final response if student email fails
-        }
+        await sendEmail({
+            to: email,
+            subject: `Booking Confirmed - ${courseName} (Order #${orderId})`,
+            html: studentHtml
+        });
+        console.log(`✅ Student confirmation sent to ${email}`);
 
         res.status(200).json({ success: true });
     } catch (err) {
@@ -761,10 +880,6 @@ const sendCompanyBankTransfer = async (req, res) => {
 };
 
 // ─────────────────────────────────────────────────────────────
-// 8. Company Billing — Card Payment
-// POST /api/booking-email/company-card-payment
-// ─────────────────────────────────────────────────────────────
-// ─────────────────────────────────────────────────────────────
 // 9. LLN Completion Notification
 // ─────────────────────────────────────────────────────────────
 const sendLLNCompletionNotification = async (req, res) => {
@@ -774,6 +889,7 @@ const sendLLNCompletionNotification = async (req, res) => {
     const statusColor = isPassed ? "#16a34a" : "#ca8a04";
     const statusBg = isPassed ? "#f0fdf4" : "#fefce8";
 
+    // 1. Student Email (Basic Template)
     const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
 <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
@@ -797,72 +913,15 @@ const sendLLNCompletionNotification = async (req, res) => {
 </td></tr>
 </table></body></html>`;
 
-    const academyHtml = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <style>
-    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: Arial, sans-serif; }
-    .eb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
-    .eb-hdr { background: #0d2240; padding: 16px 24px; }
-    .eb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
-    .eb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
-    .eb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
-    .eb-divider { height: 3px; background: #29b6e8; }
-    .eb-content { padding: 18px 24px; }
-    .eb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
-    .eb-section-head { background: #0d2240; padding: 7px 14px; }
-    .eb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
-    .eb-section-body { padding: 11px 14px; }
-    .eb-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-    .eb-table td { padding: 4px 0; vertical-align: top; }
-    .eb-table .lbl { color: #666666; width: 40%; font-weight: 500; }
-    .eb-table .val { color: #1a1a1a; font-weight: 700; }
-  </style>
-</head>
-<body>
-  <div class="eb-body">
-    <div class="eb-hdr">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td>
-            <p class="eb-hdr-title">Safety Training Academy</p>
-            <p class="eb-hdr-sub">RTO #45234 &nbsp;·&nbsp; LLN Notification</p>
-          </td>
-          <td align="right" valign="top">
-            <span class="eb-badge">Assessment Done</span>
-            <p style="margin: 4px 0 0; font-size: 25px; font-weight: 700; color: #ffffff; text-align: right;">Booking ID: ${bookingId || "—"}</p>
-          </td>
-        </tr>
-      </table>
-    </div>
-    <div class="eb-divider"></div>
-    <div class="eb-content">
-      <div class="eb-section">
-        <div class="eb-section-head"><span>Student Details</span></div>
-        <div class="eb-section-body">
-          <table class="eb-table">
-            <tr><td class="lbl">Name</td><td class="val">${studentName}</td></tr>
-            <tr><td class="lbl">Email</td><td class="val">${studentEmail}</td></tr>
-            <tr><td class="lbl">Phone Number</td><td class="val">${studentPhone || "—"}</td></tr>
-          </table>
-        </div>
-      </div>
-      <div class="eb-section">
-        <div class="eb-section-head"><span>Assessment Result</span></div>
-        <div class="eb-section-body">
-          <table class="eb-table">
-            <tr><td class="lbl">Booking ID</td><td class="val">#${bookingId || "—"}</td></tr>
-            <tr><td class="lbl">Score</td><td class="val" style="font-size: 16px;">${Number(score).toFixed(1)}%</td></tr>
-            <tr><td class="lbl">Status</td><td class="val" style="color: ${statusColor};">${status}</td></tr>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</body>
-</html>`;
+    // 2. Academy Notification (New High-Fidelity Template)
+    const academyHtml = buildLLNNotificationHtml({
+        bookingId,
+        studentName,
+        studentEmail,
+        studentPhone,
+        score,
+        status
+    });
 
     try {
         await sendEmail({ to: studentEmail, subject: "Pre-Enrollment Assessment Completed", html: studentHtml });
