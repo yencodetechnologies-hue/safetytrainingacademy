@@ -305,35 +305,28 @@ const sendBookingConfirmation = async (req, res) => {
         bookingId: orderId,
         paymentMethod: paymentMethod,
         bankTransferId: bankTransferId || "â€”",
+        bankTransferId: bankTransferId || "—",
         gatewayId: gatewayTransactionId || null,
         contactName: name,
         contactEmail: email,
-        contactPhone: finalPhone || "â€”",
+        contactPhone: finalPhone || "—",
         totalAmount: Number(coursePrice).toFixed(2),
-        submittedAt: orderDateStr,
+        submittedAt: new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" }),
         courseName: courseName,
         courseCode: courseCode,
         deliveryMode: "Face to Face",
-        courseDate: courseDateStrFormatted,
+        courseDate: courseDate ? new Date(courseDate).toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Sydney" }) : "To be confirmed",
         courseTime: `${startTime} - ${endTime}`,
         venue: "3/14-16 Marjorie Street, Sefton NSW 2162",
-        notes: null, // Add if available in req.body
+        notes: null,
         studentPortalUrl: "https://www.safetytrainingacademy.edu.au/login",
         adminUrl: "https://admin.safetytrainingacademy.edu.au"
     };
 
     try {
-        console.log("--- Email Sending Diagnostics ---");
-        console.log("Academy Recipient (BOOKINGS_EMAIL):", process.env.BOOKINGS_EMAIL);
         console.log("Student Recipient:", email);
         console.log("Order ID:", orderId);
 
-        // 1. Send Academy Notification (Delayed by 10 seconds)
-        setTimeout(async () => {
-            try {
-                await sendEmail({
-                    to: process.env.BOOKINGS_EMAIL,
-                    subject: `New Booking #${orderId} - ${name} - ${courseName}`,
                     html: adminBookingTemplate(adminMailData)
                 });
                 console.log(`âœ… Academy notification sent to ${process.env.BOOKINGS_EMAIL}`);
