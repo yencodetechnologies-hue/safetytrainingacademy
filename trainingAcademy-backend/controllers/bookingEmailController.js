@@ -11,8 +11,7 @@ const formatBookingId = (id) => {
 
 const buildStudentHtml = (data) => {
   const { orderId, student, course, payment, portal } = data;
-
-  const orderNumber = String(orderId).replace(/[^0-9]/g, '');
+  const digits = formatBookingId(orderId);
 
   return `
 <!DOCTYPE html>
@@ -22,208 +21,64 @@ const buildStudentHtml = (data) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Booking Confirmation – Safety Training Academy</title>
   <style>
-    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: 'Helvetica Neue', Arial, sans-serif; }
-    .sb-body { max-width: 640px; margin: 0 auto; background: #ffffff; border: 1px solid #d0d0d0; font-size: 13px; color: #1a1a1a; }
-
-    /* Header */
-    .sb-hdr { background: #0d2240; padding: 18px 24px; }
-    .sb-hdr-title { font-size: 15px; font-weight: 700; color: #ffffff; margin: 0 0 4px; }
-    .sb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; margin: 0; }
-    .sb-badge { background: #29b6e8; color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; display: inline-block; margin-bottom: 6px; }
-    .sb-booking-id { font-size: 22px; font-weight: 700; color: #ffffff; margin: 0; }
-
-    /* Confirmed Bar */
-    .sb-confirmed-bar { background: #0a1c33; padding: 11px 24px; text-align: center; font-size: 13px; color: #ffffff; font-weight: 600; }
-
-    /* Content */
-    .sb-content { padding: 24px; }
-    .sb-greeting { font-size: 14px; color: #1a1a1a; margin: 0 0 10px; }
-    .sb-intro { font-size: 13px; color: #444; line-height: 1.6; margin: 0 0 24px; }
-
-    /* Alert */
-    .sb-alert { background: #fff5f5; border: 1.5px solid #f5c0c0; border-radius: 4px; padding: 12px 16px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px; }
-    .sb-alert-title { color: #c0392b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-    .sb-alert-text { color: #7b2222; font-size: 12px; line-height: 1.5; }
-
-    /* Sections */
-    .sb-section { border: 1px solid #d8d8d8; border-radius: 4px; overflow: hidden; margin-bottom: 24px; }
-    .sb-section-head { background: #0d2240; padding: 8px 16px; }
-    .sb-section-head span { font-size: 10px; font-weight: 700; color: #fff; letter-spacing: 1.5px; text-transform: uppercase; }
-
-    /* Rows */
-    .sb-row { display: flex; border-bottom: 1px solid #efefef; }
-    .sb-row:last-child { border-bottom: none; }
-    .sb-label { width: 36%; padding: 9px 16px; font-size: 11px; font-weight: 600; color: #666; background: #f9f9f9; border-right: 1px solid #efefef; flex-shrink: 0; }
-    .sb-label-bold { width: 36%; padding: 9px 16px; font-size: 11px; font-weight: 700; color: #333; background: #f9f9f9; border-right: 1px solid #efefef; flex-shrink: 0; }
-    .sb-value { padding: 9px 16px; font-size: 12px; color: #1a1a1a; flex: 1; line-height: 1.4; }
-
-    /* Steps */
-    .sb-step-row { padding: 12px 16px; border-bottom: 1px solid #efefef; display: flex; align-items: flex-start; gap: 14px; }
-    .sb-step-row:last-child { border-bottom: none; }
-    .sb-step-num { min-width: 26px; height: 26px; border-radius: 50%; background: #0d2240; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .sb-step-num span { color: #fff; font-size: 12px; font-weight: 700; }
-    .sb-step-text { font-size: 12px; color: #333; line-height: 1.6; }
-
-    /* Checklist */
-    .sb-check-row { padding: 9px 16px; border-bottom: 1px solid #efefef; font-size: 12px; color: #333; display: flex; align-items: center; gap: 12px; }
-    .sb-check-row:last-child { border-bottom: none; }
-    .sb-check-icon { color: #29b6e8; font-weight: 700; font-size: 13px; }
-
-    /* CTA */
-    .sb-actions { text-align: center; margin-bottom: 8px; }
-    .sb-btn { display: inline-block; background: #29b6e8; color: #fff; font-size: 13px; font-weight: 700; padding: 12px 36px; border-radius: 4px; text-decoration: none; }
-
-    /* Footer */
-    .sb-footer { background: #0d2240; padding: 16px 24px; text-align: center; }
-    .sb-footer-name { font-size: 13px; font-weight: 700; color: #ffffff; margin: 0 0 5px; }
-    .sb-footer-addr { font-size: 11px; color: #89c8e8; margin: 0 0 3px; }
-    .sb-footer-contact { font-size: 11px; color: #89c8e8; margin: 0; }
-    .sb-footer-contact a { color: #29b6e8; text-decoration: none; }
+    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: Arial, sans-serif; }
+    .sb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
+    .sb-hdr { background: #0d2240; padding: 16px 24px; }
+    .sb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
+    .sb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
+    .sb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
+    .sb-divider { height: 3px; background: #29b6e8; }
+    .sb-content { padding: 18px 24px; }
+    .sb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+    .sb-section-head { background: #0d2240; padding: 7px 14px; }
+    .sb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
+    .sb-row { display: flex; border-bottom: 1px solid #f0f0f0; }
+    .sb-label { width: 38%; padding: 8px 14px; font-size: 11px; font-weight: 600; color: #666; background: #fafafa; border-right: 1px solid #f0f0f0; }
+    .sb-value { padding: 8px 14px; font-size: 12px; color: #1a1a1a; flex: 1; }
+    .sb-btn { display: inline-block; background: #29b6e8; color: #ffffff; padding: 10px 24px; border-radius: 4px; text-decoration: none; font-weight: 700; font-size: 14px; margin-top: 12px; }
+    .sb-footer { background: #f5f7fa; border-top: 1px solid #e0e0e0; padding: 12px 24px; font-size: 10px; color: #999; text-align: center; }
   </style>
 </head>
 <body>
   <div class="sb-body">
-
-    <!-- Header -->
     <div class="sb-hdr">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td valign="top">
+          <td>
             <p class="sb-hdr-title">Safety Training Academy</p>
             <p class="sb-hdr-sub">RTO #45234 &nbsp;·&nbsp; Booking Confirmation</p>
           </td>
           <td align="right" valign="top">
-            <span class="sb-badge">Confirmed</span><br/>
-            <span class="sb-booking-id">Booking ID: ${orderNumber}</span>
+            <span class="sb-badge">Confirmed</span>
+            <p style="margin: 4px 0 0; font-size: 25px; font-weight: 700; color: #ffffff; text-align: right;">
+              Booking ID: ${digits}
+            </p>
           </td>
         </tr>
       </table>
     </div>
-
-    <!-- Confirmed Bar -->
-    <div class="sb-confirmed-bar">&#10003;&nbsp; Booking Confirmed</div>
-
-    <!-- Content -->
+    <div class="sb-divider"></div>
     <div class="sb-content">
-
-      <!-- Greeting -->
-      <p class="sb-greeting">Hi <strong>${student.firstName}</strong>,</p>
-      <p class="sb-intro">
-        Thank you for booking with Safety Training Academy. Your booking is confirmed — please review the details below and make sure all pre-course steps are completed before your training date.
-      </p>
-
-      <!-- Alert with SVG triangle + ! -->
-      <div class="sb-alert">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;margin-top:1px;">
-          <polygon points="11,2 21,20 1,20" fill="#fff0f0" stroke="#e53e3e" stroke-width="1.5" stroke-linejoin="round"/>
-          <text x="11" y="17" text-anchor="middle" font-size="11" font-weight="700" fill="#c0392b" font-family="Arial,sans-serif">!</text>
-        </svg>
-        <div>
-          <div class="sb-alert-title">Important — Action Required</div>
-          <div class="sb-alert-text">
-            Please finish your LLN &amp; Enrolment in the Student Portal before attending the course. Your spot will not be confirmed until this is completed.
-          </div>
-        </div>
-      </div>
-
-      <!-- Section 1: Course Details -->
+      <p style="margin: 0 0 16px; color: #444;">Dear <strong>${student.firstName}</strong>, thank you for booking with us!</p>
+      
       <div class="sb-section">
         <div class="sb-section-head"><span>Course Details</span></div>
-        <div class="sb-row">
-          <div class="sb-label">Course</div>
-          <div class="sb-value"><strong>${course.name}</strong></div>
-        </div>
-        <div class="sb-row">
-          <div class="sb-label">Date &amp; Time</div>
-          <div class="sb-value">${course.date} @ ${course.time}</div>
-        </div>
-        <div class="sb-row">
-          <div class="sb-label">Location</div>
-          <div class="sb-value">${course.location || '3/14-16 Marjorie Street, Sefton NSW 2162'}</div>
-        </div>
+        <div class="sb-row"><div class="sb-label">Course</div><div class="sb-value"><strong>${course.name}</strong></div></div>
+        <div class="sb-row"><div class="sb-label">Date</div><div class="sb-value">${course.date} @ ${course.time}</div></div>
+        <div class="sb-row"><div class="sb-label">Location</div><div class="sb-value">${course.location || '3/14-16 Marjorie Street, Sefton NSW 2162'}</div></div>
       </div>
 
-      <!-- Section 2: Payment Summary -->
       <div class="sb-section">
-        <div class="sb-section-head"><span>Payment Summary</span></div>
-        <div class="sb-row">
-          <div class="sb-label">Method</div>
-          <div class="sb-value">${payment.method}</div>
-        </div>
-        <div class="sb-row">
-          <div class="sb-label-bold">Total Amount</div>
-          <div class="sb-value"><strong>${payment.total}</strong></div>
-        </div>
+        <div class="sb-section-head"><span>Payment Details</span></div>
+        <div class="sb-row"><div class="sb-label">Method</div><div class="sb-value">${payment.method}</div></div>
+        <div class="sb-row"><div class="sb-label">Total</div><div class="sb-value"><strong>${payment.total}</strong></div></div>
       </div>
 
-      <!-- Section 3: Next Steps -->
-      <div class="sb-section">
-        <div class="sb-section-head"><span>Next Steps</span></div>
-        <div class="sb-step-row">
-          <div class="sb-step-num"><span>1</span></div>
-          <span class="sb-step-text">Log in to the <a href="${portal?.url || 'https://www.safetytrainingacademy.edu.au/login'}" style="color:#29b6e8;text-decoration:none;font-weight:600;">Student Portal</a> and complete your <strong>LLN Assessment</strong> and <strong>Enrolment Form</strong> for each participant.</span>
-        </div>
-        <div class="sb-step-row">
-          <div class="sb-step-num"><span>2</span></div>
-          <span class="sb-step-text">Ensure all participants have a valid <strong>USI</strong>. Visit <a href="https://www.usi.gov.au" target="_blank" style="color:#29b6e8;text-decoration:none;">usi.gov.au</a> if needed.</span>
-        </div>
-        <div class="sb-step-row">
-          <div class="sb-step-num"><span>3</span></div>
-          <span class="sb-step-text">Arrive at the venue at least <strong>15 minutes early</strong> with photo ID.</span>
-        </div>
-        <div class="sb-step-row">
-          <div class="sb-step-num"><span>4</span></div>
-          <span class="sb-step-text">Check your email for any updates regarding your session.</span>
-        </div>
-      </div>
-
-      <!-- Section 4: What to Bring -->
-      <div class="sb-section">
-        <div class="sb-section-head"><span>What to Bring</span></div>
-        <div class="sb-check-row"><span class="sb-check-icon">&#10003;</span> Photo ID (driver's licence or passport)</div>
-        <div class="sb-check-row"><span class="sb-check-icon">&#10003;</span> Confirmation of your USI</div>
-        <div class="sb-check-row"><span class="sb-check-icon">&#10003;</span> Appropriate PPE for the course (if advised)</div>
-        <div class="sb-check-row"><span class="sb-check-icon">&#10003;</span> Sturdy, enclosed footwear — no thongs or open-toed shoes</div>
-        <div class="sb-check-row"><span class="sb-check-icon">&#10003;</span> Water bottle and snacks — a break will be provided</div>
-      </div>
-
-      <!-- CTA Button -->
-      <div class="sb-actions">
+      <div style="text-align:center;">
         <a href="${portal?.url || 'https://www.safetytrainingacademy.edu.au/login'}" class="sb-btn">Login to Student Portal</a>
       </div>
-
     </div>
-
-    <!-- Footer -->
     <div class="sb-footer">
-      <p class="sb-footer-name">Safety Training Academy</p>
-      <p class="sb-footer-addr">2 Wellington St, Sefton NSW 2162 &nbsp;·&nbsp; RTO #45234</p>
-      <p class="sb-footer-contact">
-        1300 978 097 &nbsp;·&nbsp;
-        <a href="mailto:info@safetytrainingacademy.edu.au">info@safetytrainingacademy.edu.au</a>
-      </p>
-    </div>
-
-  </div>
-</body>
-</html>
-  `;
-};
-
-const buildLLNNotificationHtml = (data) => {
-  const { bookingId, studentName, studentEmail, studentPhone, score, status } = data;
-
-  // Extract number only e.g. "BK-10042" â†’ "10042"
-  const orderNumber = String(bookingId).replace(/[^0-9]/g, '');
-
-  const statusColor =
-    status === 'Passed'   ? '#1e7e34' :
-    status === 'Failed'   ? '#c0392b' : '#b8860b';
-
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LLN Assessment Notification â€“ Safety Training Academy</title>
@@ -336,7 +191,97 @@ const buildLLNNotificationHtml = (data) => {
   </div>
 </body>
 </html>
-`;
+      2 Wellington St, Sefton NSW 2162 &nbsp;·&nbsp; RTO #45234<br/>
+      &copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>`;
+};
+
+const buildEnrollmentNotificationHtml = (data) => {
+  const { bookingId, studentName, studentEmail, studentPhone, gatewayTransactionId } = data;
+  const orderNumber = String(bookingId).replace(/[^0-9]/g, '');
+
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enrollment Notification – Safety Training Academy</title>
+  <style>
+    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: Arial, sans-serif; }
+    .eb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
+    .eb-hdr { background: #0d2240; padding: 16px 24px; }
+    .eb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
+    .eb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
+    .eb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
+    .eb-divider { height: 3px; background: #29b6e8; }
+    .eb-content { padding: 18px 24px; }
+    .eb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+    .eb-section-head { background: #0d2240; padding: 7px 14px; }
+    .eb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
+    .eb-section-body { padding: 11px 14px; }
+    .eb-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .eb-table td { padding: 5px 0; vertical-align: top; }
+    .eb-table .lbl { color: #666666; width: 40%; font-weight: 500; }
+    .eb-table .val { color: #1a1a1a; font-weight: 700; }
+    .eb-footer { background: #f5f7fa; border-top: 1px solid #e0e0e0; padding: 12px 24px; font-size: 10px; color: #999; text-align: center; line-height: 1.6; }
+    .eb-footer a { color: #29b6e8; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="eb-body">
+    <div class="eb-hdr">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td>
+            <p class="eb-hdr-title">Safety Training Academy</p>
+            <p class="eb-hdr-sub">RTO #45234 &nbsp;·&nbsp; Enrollment Notification</p>
+          </td>
+          <td align="right" valign="top">
+            <span class="eb-badge">ENROLLMENT SUBMITTED</span>
+            <p style="margin: 4px 0 0; font-size: 25px; font-weight: 700; color: #ffffff; text-align: right;">
+              Booking ID: ${orderNumber}
+            </p>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="eb-divider"></div>
+    <div class="eb-content">
+      <p style="margin: 0 0 16px; color: #444;">A student has submitted their enrollment form and is awaiting review.</p>
+      <div class="eb-section">
+        <div class="eb-section-head"><span>Student Details</span></div>
+        <div class="eb-section-body">
+          <table class="eb-table">
+            <tr><td class="lbl">Name</td><td class="val">${studentName || 'â€”'}</td></tr>
+            <tr><td class="lbl">Email</td><td class="val">${studentEmail || 'â€”'}</td></tr>
+            <tr><td class="lbl">Phone Number</td><td class="val">${studentPhone || 'â€”'}</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="eb-section">
+        <div class="eb-section-head"><span>Booking Details</span></div>
+        <div class="eb-section-body">
+          <table class="eb-table">
+            <tr><td class="lbl">Booking ID</td><td class="val">#${orderNumber}</td></tr>
+            <tr><td class="lbl">Transaction ID</td><td class="val">${gatewayTransactionId || 'â€”'}</td></tr>
+          </table>
+        </div>
+      </div>
+      <p style="margin-top: 16px; color: #444;">Please log in to the admin portal to review the form and documents.</p>
+    </div>
+    <div class="eb-footer">
+      This is an automated notification from <strong>Safety Training Academy</strong> (RTO #45234).<br />
+      Do not reply directly to this email. &nbsp;|Â·&nbsp;
+      <a href="mailto:admin@safetytrainingacademy.com.au">admin@safetytrainingacademy.com.au</a><br />
+      &copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>`;
 };
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -945,29 +890,36 @@ const sendEnrollmentFormCompletionNotification = async (req, res) => {
 </td></tr>
 </table></body></html>`;
 
-    const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:#0d2240;color:#fff;padding:24px 30px;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-            <td><h1 style="margin:0;font-size:20px;">ENROLLMENT FORM SUBMITTED</h1></td>
-            <td align="right"><span style="font-size:12px;font-weight:700;background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">ID: ${bookingId || "â€”"}</span></td>
-        </tr>
-    </table>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p>A student has submitted their enrollment form and is awaiting review.</p>
-    <table width="100%" cellpadding="10" cellspacing="0" style="background-color:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
-        <tr><td style="color:#64748b;width:130px;">Student Name</td><td><strong>${studentName}</strong></td></tr>
-        <tr><td style="color:#64748b;">Email</td><td>${studentEmail}</td></tr>
-        <tr><td style="color:#64748b;">Phone Number</td><td><strong>${studentPhone || "â€”"}</strong></td></tr>
-        <tr><td style="color:#64748b;">Booking ID</td><td><strong>${bookingId || "â€”"}</strong></td></tr>
-        <tr><td style="color:#64748b;">Transaction ID</td><td><strong>${gatewayTransactionId || "â€”"}</strong></td></tr>
-    </table>
-    <p style="margin-top:20px;">Please log in to the admin portal to review the form and documents.</p>
-</td></tr>
-</table></body></html>`;
+    const academyHtml = buildEnrollmentNotificationHtml({
+        bookingId,
+        studentName,
+        studentEmail,
+        studentPhone,
+        gatewayTransactionId
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     try {
         await sendEmail({ to: studentEmail, subject: "Enrollment Form Received", html: studentHtml });

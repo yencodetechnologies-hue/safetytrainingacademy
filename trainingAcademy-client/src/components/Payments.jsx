@@ -53,11 +53,27 @@ const Payment = () => {
   };
 
   const handleVerify = async () => {
-    await axios.put(
-      `${API_URL}/api/flow/payment/${selectedPayment.enrollmentId}/${selectedPayment.itemId}`,
-      { status: "success" }
-    );
-    fetchPayments();
+    try {
+      // Optimistic Update
+      setPayments(prev => prev.map(p => 
+        (p.enrollmentId === selectedPayment.enrollmentId && p.itemId === selectedPayment.itemId)
+          ? { ...p, status: "success" }
+          : p
+      ));
+      
+      await axios.put(
+        `${API_URL}/api/flow/payment/${selectedPayment.enrollmentId}/${selectedPayment.itemId}`,
+        { status: "success" }
+      );
+      
+      // Refresh background data to stay in sync
+      fetchPayments();
+      setShowModal(false);
+    } catch (err) {
+      console.error("Verify Error:", err);
+      alert("Failed to verify payment. Please try again.");
+      fetchPayments(); // Rollback on error
+    }
   };
 
   const handleReject = async () => {
@@ -70,13 +86,26 @@ const Payment = () => {
         alert("Enter rejection reason");
         return;
       }
+
+      // Optimistic Update
+      setPayments(prev => prev.map(p => 
+        (p.enrollmentId === selectedPayment.enrollmentId && p.itemId === selectedPayment.itemId)
+          ? { ...p, status: "failed" }
+          : p
+      ));
+
       await axios.put(
         `${API_URL}/api/flow/payment/${selectedPayment.enrollmentId}/${selectedPayment.itemId}`,
         { status: "failed", reason: rejectionReason }
       );
+      
       fetchPayments();
+      setShowModal(false);
+      setRejectionReason(""); // Clear reason
     } catch (err) {
       console.error("Reject Error:", err);
+      alert("Failed to reject payment. Please try again.");
+      fetchPayments(); // Rollback on error
     }
   };
 
@@ -503,8 +532,8 @@ const Payment = () => {
               <button className="btn-base btn-close" onClick={() => setShowModal(false)}>Close</button>
               {(selectedPayment.status !== "success" && selectedPayment.status !== "completed") && (
                 <>
-                  <button className="btn-base btn-reject" onClick={() => { handleReject(); setShowModal(false); }}>Reject</button>
-                  <button className="btn-base btn-confirm" onClick={() => { handleVerify(); setShowModal(false); }}>Confirm Payment</button>
+                  <button className="btn-base btn-reject" onClick={handleReject}>Reject</button>
+                  <button className="btn-base btn-confirm" onClick={handleVerify}>Confirm Payment</button>
                 </>
               )}
             </div>
