@@ -30,8 +30,8 @@ const allowedOrigins = [
   "https://safetytrainingacademy.vercel.app",
   "https://www.safetytrainingacademy.edu.au",
   "https://safetytrainingacademy.edu.au",
+  "https://booking.safetytrainingacademy.edu.au",
   "http://72.61.236.154:8000",
-
 ];
 
 // Combine with origins from .env
@@ -46,22 +46,7 @@ if (process.env.CLIENT_ORIGIN) {
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-
-      // Check if origin matches exactly or with a trailing slash
-      const isAllowed = allowedOrigins.some(allowed => {
-        return origin === allowed || origin === allowed + "/";
-      });
-
-      if (isAllowed) {
-        callback(null, true);
-      } else {
-        console.error(`CORS blocked for origin: ${origin}`);
-        callback(null, false);
-      }
-    },
+    origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
