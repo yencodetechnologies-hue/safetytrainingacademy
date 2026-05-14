@@ -448,9 +448,12 @@ function CourseDetails() {
                                                 if (s.availableSlots <= 3) {
                                                     spotLabel = `Only ${s.availableSlots} left`;
                                                     spotClass = "cdp-s-spots--low";
-                                                } else if (s.availableSlots < 20 || diffDays < 20) {
-                                                    spotLabel = "Limited Seats";
+                                                } else if (diffDays < 20 || s.availableSlots <= 10) {
+                                                    spotLabel = `Limited Seats - ${s.availableSlots} left`;
                                                     spotClass = "cdp-s-spots--medium";
+                                                } else {
+                                                    spotLabel = `${s.availableSlots} left`;
+                                                    spotClass = ""; // Green by default
                                                 }
 
                                                 return (
@@ -504,9 +507,12 @@ function CourseDetails() {
                                                     if (s.availableSlots <= 3) {
                                                         spotLabel = `Only ${s.availableSlots} left`;
                                                         spotClass = "cdp-s-spots--low";
-                                                    } else if (s.availableSlots < 20 || diffDays < 20) {
-                                                        spotLabel = "Limited Seats";
+                                                    } else if (diffDays < 20 || s.availableSlots <= 10) {
+                                                        spotLabel = `Limited Seats - ${s.availableSlots} left`;
                                                         spotClass = "cdp-s-spots--medium";
+                                                    } else {
+                                                        spotLabel = `${s.availableSlots} left`;
+                                                        spotClass = ""; // Green by default
                                                     }
 
                                                     return (
