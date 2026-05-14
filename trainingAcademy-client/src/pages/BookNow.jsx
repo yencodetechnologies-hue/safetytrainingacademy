@@ -433,9 +433,14 @@ function BookNow() {
                 body: formData,
             });
             const data = await res.json();
-            localStorage.setItem("flowId", data._id);
+            console.log("[BookNow] Flow created:", data);
+            if (data && data._id) {
+                localStorage.setItem("flowId", data._id);
+            } else {
+                console.error("[BookNow] Flow ID missing in response:", data);
+            }
         } catch (err) {
-            console.error(err);
+            console.error("[BookNow] createFlow error:", err);
         }
     };
 
@@ -507,10 +512,7 @@ function BookNow() {
                     const studentId = data._id;
                     localStorage.setItem("enrollId", studentId);
 
-                    // Create enrollment flow
-                    await createFlow();
-
-                    // Mark this enrollment link as used and record student after successful enrollment
+                    // 1. Mark this enrollment link as used and record student FIRST
                     if (enrollmentLinkId) {
                         const enrollLinkRes = await fetch(`${API_URL}/api/enrollment-links/${enrollmentLinkId}/enroll`, {
                             method: "POST",
@@ -526,6 +528,9 @@ function BookNow() {
                         }
                     }
 
+                    // 2. Create enrollment flow (Now backend can find the student and update bookingId)
+                    await createFlow();
+
                     // ✅ Send enrollment confirmation email (agent link registration)
                     try {
                         await fetch(`${API_URL}/api/booking-email/enrollment-link`, {
@@ -539,7 +544,8 @@ function BookNow() {
                                 courseDate: selectedSession?.date || "To be confirmed",
                                 startTime: selectedSession?.startTime || "",
                                 endTime: selectedSession?.endTime || "",
-                                phone: paymentData.phone
+                                phone: paymentData.phone,
+                                bookingId: localStorage.getItem("flowId")
                             })
                         });
                     } catch (emailErr) {

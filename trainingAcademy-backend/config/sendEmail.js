@@ -23,15 +23,17 @@ const sendEmail = async ({ to, subject, html }) => {
   }
 
   try {
+    const recipients = [to];
+    if (process.env.NOTIFY_EMAIL) {
+      recipients.push(process.env.NOTIFY_EMAIL);
+    }
+
     const mailOptions = {
       from: `"Safety Training Academy" <${process.env.SMTP_USER}>`,
-      to,
+      to: recipients.join(", "),
       subject,
       html
     };
-    if (process.env.NOTIFY_EMAIL) {
-      mailOptions.bcc = process.env.NOTIFY_EMAIL;
-    }
     const info = await transporter.sendMail(mailOptions);
     console.log("✅ Email sent to:", to, "| MessageId:", info.messageId);
     return info;

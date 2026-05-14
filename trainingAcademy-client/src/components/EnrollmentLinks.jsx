@@ -256,12 +256,13 @@ function ViewModal({ link, onClose }) {
             </div>
           ) : (
             <table className="el-table">
-              <thead><tr><th>Name</th><th>Email</th><th>Date</th></tr></thead>
+              <thead><tr><th>Name</th><th>Email</th><th>Booking ID</th><th>Date</th></tr></thead>
               <tbody>
                 {link.students.map((s, i) => (
                   <tr key={i}>
                     <td>{s.name}</td>
                     <td style={{ color: "var(--gray-500)" }}>{s.email}</td>
+                    <td style={{ color: "#29b6e8", fontWeight: 600 }}>{s.bookingId ? s.bookingId.slice(-8).toUpperCase() : "—"}</td>
                     <td style={{ color: "var(--gray-500)" }}>{s.date}</td>
                   </tr>
                 ))}
@@ -298,12 +299,13 @@ function StudentsModal({ link, onClose }) {
             </div>
           ) : (
             <table className="el-table">
-              <thead><tr><th>Name</th><th>Email</th><th>Enrolled</th></tr></thead>
+              <thead><tr><th>Name</th><th>Email</th><th>Booking ID</th><th>Enrolled</th></tr></thead>
               <tbody>
                 {link.students.map((s, i) => (
                   <tr key={i}>
                     <td style={{ fontWeight: 600 }}>{s.name}</td>
                     <td style={{ color: "var(--gray-500)" }}>{s.email}</td>
+                    <td style={{ color: "#29b6e8", fontWeight: 600 }}>{s.bookingId ? s.bookingId.slice(-8).toUpperCase() : "—"}</td>
                     <td style={{ color: "var(--gray-500)" }}>{s.date}</td>
                   </tr>
                 ))}

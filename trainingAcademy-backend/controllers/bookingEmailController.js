@@ -1,4 +1,4 @@
-const sendEmail = require("../config/sendEmail");
+﻿const sendEmail = require("../config/sendEmail");
 const adminBookingTemplate = require("../templates/adminBookingTemplate");
 
 const formatBookingId = (id) => {
@@ -9,13 +9,9 @@ const formatBookingId = (id) => {
     return String(id).slice(0, 8).toUpperCase().padStart(8, "0");
 };
 
-// ─────────────────────────────────────────────────────────────
-// Email Templates
-// ─────────────────────────────────────────────────────────────
 const buildStudentHtml = (data) => {
   const { orderId, student, course, payment, portal } = data;
 
-  // Extract number only e.g. "BK-10042" → "10042"
   const orderNumber = String(orderId).replace(/[^0-9]/g, '');
 
   return `
@@ -27,207 +23,197 @@ const buildStudentHtml = (data) => {
   <title>Booking Confirmation – Safety Training Academy</title>
   <style>
     body { margin: 0; padding: 24px; background: #f0f2f5; font-family: 'Helvetica Neue', Arial, sans-serif; }
-    .sb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
+    .sb-body { max-width: 640px; margin: 0 auto; background: #ffffff; border: 1px solid #d0d0d0; font-size: 13px; color: #1a1a1a; }
 
-    /* ── Header ── */
-    .sb-hdr { background: #0d2240; padding: 16px 24px; }
-    .sb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
-    .sb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
-    .sb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
-    .sb-divider { height: 3px; background: #29b6e8; }
+    /* Header */
+    .sb-hdr { background: #0d2240; padding: 18px 24px; }
+    .sb-hdr-title { font-size: 15px; font-weight: 700; color: #ffffff; margin: 0 0 4px; }
+    .sb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; margin: 0; }
+    .sb-badge { background: #29b6e8; color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; display: inline-block; margin-bottom: 6px; }
+    .sb-booking-id { font-size: 22px; font-weight: 700; color: #ffffff; margin: 0; }
 
-    /* ── Banner ── */
-    .sb-banner { background: #0a1c33; padding: 13px 24px; text-align: center; }
-    .sb-banner-text { margin: 0; font-size: 15px; font-weight: 700; color: #ffffff; }
+    /* Confirmed Bar */
+    .sb-confirmed-bar { background: #0a1c33; padding: 11px 24px; text-align: center; font-size: 13px; color: #ffffff; font-weight: 600; }
 
-    /* ── Content ── */
-    .sb-content { padding: 18px 24px; }
-    .sb-greeting { font-size: 12px; color: #1a1a1a; margin: 0 0 14px; line-height: 1.6; }
+    /* Content */
+    .sb-content { padding: 24px; }
+    .sb-greeting { font-size: 14px; color: #1a1a1a; margin: 0 0 10px; }
+    .sb-intro { font-size: 13px; color: #444; line-height: 1.6; margin: 0 0 24px; }
 
-    /* ── Sections ── */
-    .sb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
-    .sb-section-head { background: #0d2240; padding: 7px 14px; }
-    .sb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
-    .sb-row { display: flex; border-bottom: 1px solid #f0f0f0; }
+    /* Alert */
+    .sb-alert { background: #fff5f5; border: 1.5px solid #f5c0c0; border-radius: 4px; padding: 12px 16px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px; }
+    .sb-alert-title { color: #c0392b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .sb-alert-text { color: #7b2222; font-size: 12px; line-height: 1.5; }
+
+    /* Sections */
+    .sb-section { border: 1px solid #d8d8d8; border-radius: 4px; overflow: hidden; margin-bottom: 24px; }
+    .sb-section-head { background: #0d2240; padding: 8px 16px; }
+    .sb-section-head span { font-size: 10px; font-weight: 700; color: #fff; letter-spacing: 1.5px; text-transform: uppercase; }
+
+    /* Rows */
+    .sb-row { display: flex; border-bottom: 1px solid #efefef; }
     .sb-row:last-child { border-bottom: none; }
-    .sb-label { width: 38%; padding: 8px 14px; font-size: 11px; font-weight: 600; color: #666; background: #fafafa; border-right: 1px solid #f0f0f0; flex-shrink: 0; display: flex; align-items: center; }
-    .sb-value { padding: 8px 14px; font-size: 12px; color: #1a1a1a; flex: 1; display: flex; align-items: center; word-break: break-word; }
-    .sb-value a { color: #29b6e8; text-decoration: none; }
+    .sb-label { width: 36%; padding: 9px 16px; font-size: 11px; font-weight: 600; color: #666; background: #f9f9f9; border-right: 1px solid #efefef; flex-shrink: 0; }
+    .sb-label-bold { width: 36%; padding: 9px 16px; font-size: 11px; font-weight: 700; color: #333; background: #f9f9f9; border-right: 1px solid #efefef; flex-shrink: 0; }
+    .sb-value { padding: 9px 16px; font-size: 12px; color: #1a1a1a; flex: 1; line-height: 1.4; }
 
-    /* ── Payment total ── */
-    .sb-total-row .sb-label { background: #f0f6ff; font-size: 13px; font-weight: 700; color: #0d2240; border-top: 2px solid #29b6e8; }
-    .sb-total-row .sb-value { font-size: 14px; font-weight: 700; color: #0d2240; background: #f0f6ff; border-top: 2px solid #29b6e8; }
+    /* Steps */
+    .sb-step-row { padding: 12px 16px; border-bottom: 1px solid #efefef; display: flex; align-items: flex-start; gap: 14px; }
+    .sb-step-row:last-child { border-bottom: none; }
+    .sb-step-num { min-width: 26px; height: 26px; border-radius: 50%; background: #0d2240; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sb-step-num span { color: #fff; font-size: 12px; font-weight: 700; }
+    .sb-step-text { font-size: 12px; color: #333; line-height: 1.6; }
 
-    /* ── LLN Alert ── */
-    .sb-lln-alert { background: #fff3f3; border: 1px solid #ffb3b3; border-radius: 4px; padding: 10px 14px; font-size: 11px; color: #c0392b; line-height: 1.6; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 9px; }
-    .sb-lln-alert strong { color: #a00; display: block; margin-bottom: 2px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    /* Checklist */
+    .sb-check-row { padding: 9px 16px; border-bottom: 1px solid #efefef; font-size: 12px; color: #333; display: flex; align-items: center; gap: 12px; }
+    .sb-check-row:last-child { border-bottom: none; }
+    .sb-check-icon { color: #29b6e8; font-weight: 700; font-size: 13px; }
 
-    /* ── What to Bring ── */
-    .sb-checklist { margin: 0; padding: 0; list-style: none; }
-    .sb-checklist li { padding: 7px 14px; font-size: 12px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; gap: 8px; }
-    .sb-checklist li:last-child { border-bottom: none; }
-    .sb-checklist li::before { content: '✓'; color: #29b6e8; font-weight: 700; flex-shrink: 0; }
+    /* CTA */
+    .sb-actions { text-align: center; margin-bottom: 8px; }
+    .sb-btn { display: inline-block; background: #29b6e8; color: #fff; font-size: 13px; font-weight: 700; padding: 12px 36px; border-radius: 4px; text-decoration: none; }
 
-    /* ── Next Steps ── */
-    .sb-steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
-    .sb-steps li { counter-increment: step; padding: 9px 14px; border-bottom: 1px solid #f0f0f0; font-size: 12px; display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
-    .sb-steps li:last-child { border-bottom: none; }
-    .sb-steps li::before { content: counter(step); background: #0d2240; color: #fff; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-    .sb-steps li a { color: #29b6e8; text-decoration: none; font-weight: 600; }
-
-    /* ── Footer ── */
-    .sb-footer { background: #f5f7fa; border-top: 1px solid #e0e0e0; padding: 14px 24px; font-size: 10px; color: #999; text-align: center; line-height: 1.7; }
-    .sb-footer a { color: #29b6e8; text-decoration: none; }
-    .sb-footer strong { color: #555; }
+    /* Footer */
+    .sb-footer { background: #0d2240; padding: 16px 24px; text-align: center; }
+    .sb-footer-name { font-size: 13px; font-weight: 700; color: #ffffff; margin: 0 0 5px; }
+    .sb-footer-addr { font-size: 11px; color: #89c8e8; margin: 0 0 3px; }
+    .sb-footer-contact { font-size: 11px; color: #89c8e8; margin: 0; }
+    .sb-footer-contact a { color: #29b6e8; text-decoration: none; }
   </style>
 </head>
 <body>
   <div class="sb-body">
 
-    <!-- ── Header ── -->
+    <!-- Header -->
     <div class="sb-hdr">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td>
+          <td valign="top">
             <p class="sb-hdr-title">Safety Training Academy</p>
             <p class="sb-hdr-sub">RTO #45234 &nbsp;·&nbsp; Booking Confirmation</p>
           </td>
           <td align="right" valign="top">
-            <span class="sb-badge">Confirmed</span>
-            <p style="margin: 4px 0 0; font-size: 25px; font-weight: 700; color: #ffffff; text-align: right;">
-              Booking ID: ${orderNumber}
-            </p>
+            <span class="sb-badge">Confirmed</span><br/>
+            <span class="sb-booking-id">Booking ID: ${orderNumber}</span>
           </td>
         </tr>
       </table>
     </div>
-    <div class="sb-divider"></div>
 
-    <!-- ── Banner ── -->
-    <div class="sb-banner">
-      <p class="sb-banner-text">&#10003; &nbsp;Booking Confirmed</p>
-    </div>
+    <!-- Confirmed Bar -->
+    <div class="sb-confirmed-bar">&#10003;&nbsp; Booking Confirmed</div>
 
+    <!-- Content -->
     <div class="sb-content">
 
-      <!-- ── Greeting ── -->
-      <p class="sb-greeting">
-        Hi <strong>${student?.firstName || 'there'}</strong>,<br /><br />
+      <!-- Greeting -->
+      <p class="sb-greeting">Hi <strong>${student.firstName}</strong>,</p>
+      <p class="sb-intro">
         Thank you for booking with Safety Training Academy. Your booking is confirmed — please review the details below and make sure all pre-course steps are completed before your training date.
       </p>
 
-      <!-- ── Course Details — no Trainer ── -->
+      <!-- Alert with SVG triangle + ! -->
+      <div class="sb-alert">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;margin-top:1px;">
+          <polygon points="11,2 21,20 1,20" fill="#fff0f0" stroke="#e53e3e" stroke-width="1.5" stroke-linejoin="round"/>
+          <text x="11" y="17" text-anchor="middle" font-size="11" font-weight="700" fill="#c0392b" font-family="Arial,sans-serif">!</text>
+        </svg>
+        <div>
+          <div class="sb-alert-title">Important — Action Required</div>
+          <div class="sb-alert-text">
+            Please finish your LLN &amp; Enrolment in the Student Portal before attending the course. Your spot will not be confirmed until this is completed.
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 1: Course Details -->
       <div class="sb-section">
         <div class="sb-section-head"><span>Course Details</span></div>
         <div class="sb-row">
-          <div class="sb-label">Booking ID</div>
-          <div class="sb-value"><strong>${orderNumber}</strong></div>
-        </div>
-        <div class="sb-row">
           <div class="sb-label">Course</div>
-          <div class="sb-value"><strong>${course?.name || '—'}</strong></div>
+          <div class="sb-value"><strong>${course.name}</strong></div>
         </div>
         <div class="sb-row">
-          <div class="sb-label">Course Code</div>
-          <div class="sb-value">${course?.code || '—'}</div>
-        </div>
-        <div class="sb-row">
-          <div class="sb-label">Delivery Mode</div>
-          <div class="sb-value">${course?.deliveryMode || '—'}</div>
-        </div>
-        <div class="sb-row">
-          <div class="sb-label">Date</div>
-          <div class="sb-value">${course?.date || '—'}</div>
-        </div>
-        <div class="sb-row">
-          <div class="sb-label">Time</div>
-          <div class="sb-value">${course?.time || '—'}</div>
+          <div class="sb-label">Date &amp; Time</div>
+          <div class="sb-value">${course.date} @ ${course.time}</div>
         </div>
         <div class="sb-row">
           <div class="sb-label">Location</div>
-          <div class="sb-value">${course?.venue || '—'}</div>
+          <div class="sb-value">${course.location || '3/14-16 Marjorie Street, Sefton NSW 2162'}</div>
         </div>
       </div>
 
-      <!-- ── Payment Summary — no Invoice # ── -->
+      <!-- Section 2: Payment Summary -->
       <div class="sb-section">
         <div class="sb-section-head"><span>Payment Summary</span></div>
-        ${payment?.items?.length ? payment.items.map(item => `
-        <div class="sb-row">
-          <div class="sb-label">${item.label}</div>
-          <div class="sb-value">$${item.amount}</div>
-        </div>`).join('') : ''}
-        ${payment?.discount ? `
-        <div class="sb-row">
-          <div class="sb-label">Discount</div>
-          <div class="sb-value" style="color:#1e7e34;">- $${payment.discount}</div>
-        </div>` : ''}
-        <div class="sb-row sb-total-row">
-          <div class="sb-label">Total Paid</div>
-          <div class="sb-value">$${payment?.total || '0.00'}</div>
-        </div>
         <div class="sb-row">
           <div class="sb-label">Method</div>
-          <div class="sb-value">${payment?.method || '—'}</div>
+          <div class="sb-value">${payment.method}</div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label-bold">Total Amount</div>
+          <div class="sb-value"><strong>${payment.total}</strong></div>
         </div>
       </div>
 
-      <!-- ── LLN Alert ── -->
-      <div class="sb-lln-alert">
-        <span style="font-size:15px; flex-shrink:0; margin-top:1px;">&#9888;</span>
-        <div>
-          <strong>Important — Action Required</strong>
-          Please finish your LLN &amp; Enrolment in the Student Portal before attending the course. Your spot will not be confirmed until this is completed.
-        </div>
-      </div>
-
-      <!-- ── Next Steps ── -->
+      <!-- Section 3: Next Steps -->
       <div class="sb-section">
         <div class="sb-section-head"><span>Next Steps</span></div>
-        <ol class="sb-steps">
-          <li>Log in to the <a href="${portal?.url || '#'}">Student Portal</a> and complete your <strong>LLN Assessment</strong> and <strong>Enrolment Form</strong>.</li>
-          <li>Ensure you have a valid <strong>USI</strong>. Visit <a href="https://www.usi.gov.au">usi.gov.au</a> if needed.</li>
-          <li>Arrive at the venue at least <strong>15 minutes early</strong> with photo ID.</li>
-          <li>Check your email for any updates regarding your session.</li>
-        </ol>
+        <div class="sb-step-row">
+          <div class="sb-step-num"><span>1</span></div>
+          <span class="sb-step-text">Log in to the <a href="${portal?.url || 'https://www.safetytrainingacademy.edu.au/login'}" style="color:#29b6e8;text-decoration:none;font-weight:600;">Student Portal</a> and complete your <strong>LLN Assessment</strong> and <strong>Enrolment Form</strong> for each participant.</span>
+        </div>
+        <div class="sb-step-row">
+          <div class="sb-step-num"><span>2</span></div>
+          <span class="sb-step-text">Ensure all participants have a valid <strong>USI</strong>. Visit <a href="https://www.usi.gov.au" target="_blank" style="color:#29b6e8;text-decoration:none;">usi.gov.au</a> if needed.</span>
+        </div>
+        <div class="sb-step-row">
+          <div class="sb-step-num"><span>3</span></div>
+          <span class="sb-step-text">Arrive at the venue at least <strong>15 minutes early</strong> with photo ID.</span>
+        </div>
+        <div class="sb-step-row">
+          <div class="sb-step-num"><span>4</span></div>
+          <span class="sb-step-text">Check your email for any updates regarding your session.</span>
+        </div>
       </div>
 
-      <!-- ── What to Bring ── -->
+      <!-- Section 4: What to Bring -->
       <div class="sb-section">
         <div class="sb-section-head"><span>What to Bring</span></div>
-        <ul class="sb-checklist">
-          <li>Photo ID (driver's licence or passport)</li>
-          <li>Confirmation of your USI</li>
-          <li>Appropriate PPE for the course (if advised)</li>
-          <li>Sturdy, enclosed footwear — no thongs or open-toed shoes</li>
-          <li>Water bottle and snacks — a break will be provided</li>
-          ${course?.additionalItems ? course.additionalItems.map(item => `<li>${item}</li>`).join('') : ''}
-        </ul>
+        <div class="sb-check-row"><span class="sb-check-icon">&#10003;</span> Photo ID (driver's licence or passport)</div>
+        <div class="sb-check-row"><span class="sb-check-icon">&#10003;</span> Confirmation of your USI</div>
+        <div class="sb-check-row"><span class="sb-check-icon">&#10003;</span> Appropriate PPE for the course (if advised)</div>
+        <div class="sb-check-row"><span class="sb-check-icon">&#10003;</span> Sturdy, enclosed footwear — no thongs or open-toed shoes</div>
+        <div class="sb-check-row"><span class="sb-check-icon">&#10003;</span> Water bottle and snacks — a break will be provided</div>
       </div>
 
-    </div><!-- /eb-content -->
+      <!-- CTA Button -->
+      <div class="sb-actions">
+        <a href="${portal?.url || 'https://www.safetytrainingacademy.edu.au/login'}" class="sb-btn">Login to Student Portal</a>
+      </div>
 
-    <!-- ── Footer ── -->
+    </div>
+
+    <!-- Footer -->
     <div class="sb-footer">
-      Questions? Contact us at
-      <a href="mailto:admin@safetytrainingacademy.com.au">admin@safetytrainingacademy.com.au</a>
-      or call <a href="tel:1300976097">1300 976 097</a>.<br />
-      <strong>Safety Training Academy</strong> &nbsp;|&nbsp; RTO #45234 &nbsp;|&nbsp;
-      <a href="${portal?.url || '#'}">Student Portal</a><br /><br />
-      &copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.<br />
-      <span style="font-size:9px;">This is an automated confirmation. Please do not reply directly to this email.</span>
+      <p class="sb-footer-name">Safety Training Academy</p>
+      <p class="sb-footer-addr">2 Wellington St, Sefton NSW 2162 &nbsp;·&nbsp; RTO #45234</p>
+      <p class="sb-footer-contact">
+        1300 978 097 &nbsp;·&nbsp;
+        <a href="mailto:info@safetytrainingacademy.edu.au">info@safetytrainingacademy.edu.au</a>
+      </p>
     </div>
 
   </div>
 </body>
 </html>
-`;
+  `;
 };
 
 const buildLLNNotificationHtml = (data) => {
   const { bookingId, studentName, studentEmail, studentPhone, score, status } = data;
 
-  // Extract number only e.g. "BK-10042" → "10042"
+  // Extract number only e.g. "BK-10042" â†’ "10042"
   const orderNumber = String(bookingId).replace(/[^0-9]/g, '');
 
   const statusColor =
@@ -240,22 +226,22 @@ const buildLLNNotificationHtml = (data) => {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LLN Assessment Notification – Safety Training Academy</title>
+  <title>LLN Assessment Notification â€“ Safety Training Academy</title>
   <style>
     body { margin: 0; padding: 24px; background: #f0f2f5; font-family: Arial, sans-serif; }
     .eb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
 
-    /* ── Header ── */
+    /* â”€â”€ Header â”€â”€ */
     .eb-hdr { background: #0d2240; padding: 16px 24px; }
     .eb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
     .eb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
     .eb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
     .eb-divider { height: 3px; background: #29b6e8; }
 
-    /* ── Content ── */
+    /* â”€â”€ Content â”€â”€ */
     .eb-content { padding: 18px 24px; }
 
-    /* ── Sections ── */
+    /* â”€â”€ Sections â”€â”€ */
     .eb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
     .eb-section-head { background: #0d2240; padding: 7px 14px; }
     .eb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
@@ -265,7 +251,7 @@ const buildLLNNotificationHtml = (data) => {
     .eb-table .lbl { color: #666666; width: 40%; font-weight: 500; }
     .eb-table .val { color: #1a1a1a; font-weight: 700; }
 
-    /* ── Footer ── */
+    /* â”€â”€ Footer â”€â”€ */
     .eb-footer { background: #f5f7fa; border-top: 1px solid #e0e0e0; padding: 12px 24px; font-size: 10px; color: #999; text-align: center; line-height: 1.6; }
     .eb-footer a { color: #29b6e8; text-decoration: none; }
     .eb-footer strong { color: #555; }
@@ -274,13 +260,13 @@ const buildLLNNotificationHtml = (data) => {
 <body>
   <div class="eb-body">
 
-    <!-- ── Header ── -->
+    <!-- â”€â”€ Header â”€â”€ -->
     <div class="eb-hdr">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td>
             <p class="eb-hdr-title">Safety Training Academy</p>
-            <p class="eb-hdr-sub">RTO #45234 &nbsp;·&nbsp; LLN Notification</p>
+            <p class="eb-hdr-sub">RTO #45234 &nbsp;Â·&nbsp; LLN Notification</p>
           </td>
           <td align="right" valign="top">
             <span class="eb-badge">Assessment Done</span>
@@ -295,28 +281,28 @@ const buildLLNNotificationHtml = (data) => {
 
     <div class="eb-content">
 
-      <!-- ── Student Details ── -->
+      <!-- â”€â”€ Student Details â”€â”€ -->
       <div class="eb-section">
         <div class="eb-section-head"><span>Student Details</span></div>
         <div class="eb-section-body">
           <table class="eb-table">
             <tr>
               <td class="lbl">Name</td>
-              <td class="val">${studentName || '—'}</td>
+              <td class="val">${studentName || 'â€”'}</td>
             </tr>
             <tr>
               <td class="lbl">Email</td>
-              <td class="val">${studentEmail || '—'}</td>
+              <td class="val">${studentEmail || 'â€”'}</td>
             </tr>
             <tr>
               <td class="lbl">Phone Number</td>
-              <td class="val">${studentPhone || '—'}</td>
+              <td class="val">${studentPhone || 'â€”'}</td>
             </tr>
           </table>
         </div>
       </div>
 
-      <!-- ── Assessment Result ── -->
+      <!-- â”€â”€ Assessment Result â”€â”€ -->
       <div class="eb-section">
         <div class="eb-section-head"><span>Assessment Result</span></div>
         <div class="eb-section-body">
@@ -331,7 +317,7 @@ const buildLLNNotificationHtml = (data) => {
             </tr>
             <tr>
               <td class="lbl">Status</td>
-              <td class="val" style="color: ${statusColor};">${status || '—'}</td>
+              <td class="val" style="color: ${statusColor};">${status || 'â€”'}</td>
             </tr>
           </table>
         </div>
@@ -339,7 +325,7 @@ const buildLLNNotificationHtml = (data) => {
 
     </div><!-- /eb-content -->
 
-    <!-- ── Footer ── -->
+    <!-- â”€â”€ Footer â”€â”€ -->
     <div class="eb-footer">
       This is an automated notification from <strong>Safety Training Academy</strong> (RTO #45234).<br />
       Do not reply directly to this email. &nbsp;|&nbsp;
@@ -353,10 +339,10 @@ const buildLLNNotificationHtml = (data) => {
 `;
 };
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 1. Individual Student Booking Confirmation
 // POST /api/booking-email/send-confirmation
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const sendBookingConfirmation = async (req, res) => {
     const { name, email, phone, mobile, mobileNumber, mobilePhone, courseName, courseCode, courseDate, startTime, endTime, coursePrice, paymentMethod, gatewayTransactionId, bankTransferId } = req.body;
 
@@ -365,7 +351,7 @@ const sendBookingConfirmation = async (req, res) => {
     const priceStr = `$${Number(coursePrice).toFixed(2)}`;
     const orderDateStr = new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" });
 
-    // ✅ Default password assigned to new students
+    // âœ… Default password assigned to new students
     const defaultPassword = "123456";
 
     // 1. Build Student Confirmation HTML
@@ -385,7 +371,7 @@ const sendBookingConfirmation = async (req, res) => {
             total: Number(coursePrice).toFixed(2),
             method: paymentMethod
         },
-        portal: { url: "https://portal.safetytrainingacademy.edu.au" }
+        portal: { url: "https://www.safetytrainingacademy.edu.au/login" }
     });
 
     const courseDateStrFormatted = courseDate ? new Date(courseDate).toLocaleDateString("en-AU", {
@@ -399,11 +385,11 @@ const sendBookingConfirmation = async (req, res) => {
     const adminMailData = {
         bookingId: orderId,
         paymentMethod: paymentMethod,
-        bankTransferId: bankTransferId || "—",
+        bankTransferId: bankTransferId || "â€”",
         gatewayId: gatewayTransactionId || null,
         contactName: name,
         contactEmail: email,
-        contactPhone: finalPhone || "—",
+        contactPhone: finalPhone || "â€”",
         totalAmount: Number(coursePrice).toFixed(2),
         submittedAt: orderDateStr,
         courseName: courseName,
@@ -413,7 +399,7 @@ const sendBookingConfirmation = async (req, res) => {
         courseTime: `${startTime} - ${endTime}`,
         venue: "3/14-16 Marjorie Street, Sefton NSW 2162",
         notes: null, // Add if available in req.body
-        studentPortalUrl: "https://portal.safetytrainingacademy.edu.au/login",
+        studentPortalUrl: "https://www.safetytrainingacademy.edu.au/login",
         adminUrl: "https://admin.safetytrainingacademy.edu.au"
     };
 
@@ -431,9 +417,9 @@ const sendBookingConfirmation = async (req, res) => {
                     subject: `New Booking #${orderId} - ${name} - ${courseName}`,
                     html: adminBookingTemplate(adminMailData)
                 });
-                console.log(`✅ Academy notification sent to ${process.env.BOOKINGS_EMAIL}`);
+                console.log(`âœ… Academy notification sent to ${process.env.BOOKINGS_EMAIL}`);
             } catch (academyErr) {
-                console.error(`❌ Academy notification failed for ${process.env.BOOKINGS_EMAIL}:`, academyErr.message);
+                console.error(`âŒ Academy notification failed for ${process.env.BOOKINGS_EMAIL}:`, academyErr.message);
             }
         }, 10000);
 
@@ -443,19 +429,19 @@ const sendBookingConfirmation = async (req, res) => {
             subject: `Booking Confirmed - ${courseName} (Order #${orderId})`,
             html: studentHtml
         });
-        console.log(`✅ Student confirmation sent to ${email}`);
+        console.log(`âœ… Student confirmation sent to ${email}`);
 
         res.status(200).json({ success: true });
     } catch (err) {
-        console.error("❌ Booking email process error:", err.message);
+        console.error("âŒ Booking email process error:", err.message);
         res.status(500).json({ success: false, message: "Booking email process encountered an error" });
     }
 };
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 2. Company Order Confirmation
 // POST /api/booking-email/company-order
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const sendCompanyOrderConfirmation = async (req, res) => {
     const { toEmail, companyName, orderId: rawOrderId, totalAmount, links = [] } = req.body;
 
@@ -494,7 +480,7 @@ const sendCompanyOrderConfirmation = async (req, res) => {
 </td></tr>
 <tr><td style="height:3px; background:#29b6e8;"></td></tr>
 <tr><td style="background:#0a1c33; padding:10px 30px; font-size:12px; color:#89c8e8; font-weight:500;">
-    &#10003; Thank you for your booking – Order #${orderId}
+    &#10003; Thank you for your booking â€“ Order #${orderId}
 </td></tr>
 <tr><td style="padding:30px;">
     <p style="margin:0 0 16px;font-size:15px;color:#555;">Dear <strong>${companyName}</strong>,</p>
@@ -544,20 +530,20 @@ const sendCompanyOrderConfirmation = async (req, res) => {
         if (process.env.BOOKINGS_EMAIL) {
             await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `New Company Booking #${orderId} - ${companyName}`, html: academyHtml });
         }
-        await sendEmail({ to: toEmail, subject: `Thank you for your booking – Order #${orderId}`, html: companyHtml });
+        await sendEmail({ to: toEmail, subject: `Thank you for your booking â€“ Order #${orderId}`, html: companyHtml });
         res.status(200).json({ success: true });
     } catch (err) {
-        console.error("❌ Company order email error:", err.message);
+        console.error("âŒ Company order email error:", err.message);
         res.status(500).json({ success: false });
     }
 };
 
-// ─────────────────────────────────────────────────────────────
-// 3. Enrollment Link Registration (Company link வழியா student)
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 3. Enrollment Link Registration (Company link à®µà®´à®¿à®¯à®¾ student)
 // POST /api/booking-email/enrollment-link
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const sendEnrollmentLinkConfirmation = async (req, res) => {
-    const { toEmail, studentName, courseName, courseCode, courseDate, startTime, endTime } = req.body;
+    const { toEmail, studentName, courseName, courseCode, courseDate, startTime, endTime, bookingId } = req.body;
 
     const dateStr = courseDate ? new Date(courseDate).toLocaleDateString("en-AU", {
         weekday: "long",
@@ -593,13 +579,14 @@ const sendEnrollmentLinkConfirmation = async (req, res) => {
 </td></tr>
 <tr><td style="height:3px; background:#29b6e8;"></td></tr>
 <tr><td style="background:#0a1c33; padding:10px 30px; font-size:12px; color:#89c8e8; font-weight:500;">
-    &#10003; Registration complete – ${courseName}
+    &#10003; Registration complete â€“ ${courseName}
 </td></tr>
 <tr><td style="padding:30px;">
     <p style="margin:0 0 16px;font-size:15px;color:#555;">Dear <strong>${studentName}</strong>,</p>
     <p style="margin:0 0 24px;font-size:15px;color:#555;">You have successfully completed your registration via the enrollment link.</p>
     <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#334155;">Your course details:</p>
     <table width="100%" cellpadding="12" cellspacing="0" border="0" style="background-color:#f8fafc;border-radius:6px;margin-bottom:24px;border:1px solid #e2e8f0;">
+        ${bookingId ? `<tr><td style="font-size:13px;color:#64748b;width:120px;">Booking ID</td><td style="font-size:14px;font-weight:700;color:#0d2240;">#${formatBookingId(bookingId)}</td></tr>` : ""}
         <tr><td style="font-size:13px;color:#64748b;width:120px;">Course</td><td style="font-size:14px;font-weight:600;color:#334155;">${courseName}</td></tr>
         ${courseCode ? `<tr><td style="font-size:13px;color:#64748b;">Course Code</td><td style="font-size:14px;font-weight:600;color:#334155;">${courseCode}</td></tr>` : ""}
         <tr><td style="font-size:13px;color:#64748b;">Date</td><td style="font-size:14px;font-weight:600;color:#334155;">${dateStr}</td></tr>
@@ -616,17 +603,17 @@ const sendEnrollmentLinkConfirmation = async (req, res) => {
     const adminMailData = {
         studentName: studentName,
         studentEmail: toEmail,
-        studentMobile: req.body.phone || req.body.mobile || req.body.mobileNumber || req.body.mobilePhone || "—",
+        studentMobile: req.body.phone || req.body.mobile || req.body.mobileNumber || req.body.mobilePhone || "â€”",
         courseName: courseName,
         courseDate: dateStr,
         courseTime: timeStr,
         courseLocation: "3/14-16 Marjorie Street, Sefton NSW 2162",
-        bookingId: "LINK-REG",
+        bookingId: bookingId ? `#${formatBookingId(bookingId)}` : "LINK-REG",
         orderDate: new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" }),
         quantity: 1,
-        subtotal: "—",
+        subtotal: "â€”",
         paymentMethod: "Enrollment Link",
-        total: "—"
+        total: "â€”"
     };
 
     try {
@@ -637,25 +624,25 @@ const sendEnrollmentLinkConfirmation = async (req, res) => {
                 html: adminBookingTemplate(adminMailData) 
             });
         }
-        await sendEmail({ to: toEmail, subject: `Registration complete – ${courseName}`, html: studentHtml });
+        await sendEmail({ to: toEmail, subject: `Registration complete â€“ ${courseName}`, html: studentHtml });
         res.status(200).json({ success: true });
     } catch (err) {
-        console.error("❌ Enrollment link email error:", err.message);
+        console.error("âŒ Enrollment link email error:", err.message);
         res.status(500).json({ success: false });
     }
 };
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 4. Company Portal Welcome
 // POST /api/booking-email/company-welcome
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const sendCompanyPortalWelcome = async (req, res) => {
     const { toEmail, companyName, portalEnrollmentUrl, loginBaseUrl, initialPassword } = req.body;
 
     const hasPassword = !!initialPassword;
     const subject = hasPassword
-        ? "Welcome — your company portal sign-in & employee enrolment link"
-        : "Your company account — employee enrolment link";
+        ? "Welcome â€” your company portal sign-in & employee enrolment link"
+        : "Your company account â€” employee enrolment link";
 
     const credentialsHtml = hasPassword ? `
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;background-color:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
@@ -719,15 +706,15 @@ const sendCompanyPortalWelcome = async (req, res) => {
         await sendEmail({ to: toEmail, subject, html });
         res.status(200).json({ success: true });
     } catch (err) {
-        console.error("❌ Company welcome email error:", err.message);
+        console.error("âŒ Company welcome email error:", err.message);
         res.status(500).json({ success: false });
     }
 };
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 5. VOC Submission Confirmation
 // POST /api/booking-email/voc-confirmation
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const sendVOCConfirmation = async (req, res) => {
     const { toEmail, firstName, lastName, submissionId, amountPaid, paymentMethod } = req.body;
 
@@ -788,15 +775,15 @@ const sendVOCConfirmation = async (req, res) => {
         }
         res.status(200).json({ success: true });
     } catch (err) {
-        console.error("❌ VOC email error:", err.message);
+        console.error("âŒ VOC email error:", err.message);
         res.status(500).json({ success: false });
     }
 };
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 6. Email OTP
 // POST /api/booking-email/send-otp
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const sendEmailOTP = async (req, res) => {
     const { toEmail, otp } = req.body;
 
@@ -822,15 +809,15 @@ const sendEmailOTP = async (req, res) => {
         await sendEmail({ to: toEmail, subject: `${otp} is your verification code`, html });
         res.status(200).json({ success: true });
     } catch (err) {
-        console.error("❌ OTP email error:", err.message);
+        console.error("âŒ OTP email error:", err.message);
         res.status(500).json({ success: false });
     }
 };
 
-// ─────────────────────────────────────────────────────────────
-// 7. Company Billing — Bank Transfer Notice
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 7. Company Billing â€” Bank Transfer Notice
 // POST /api/booking-email/company-bank-transfer
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const sendCompanyBankTransfer = async (req, res) => {
     const { companyEmail, companyName, amount, submissionId, linesSummary } = req.body;
     const amountStr = `$${Number(amount).toFixed(2)}`;
@@ -868,20 +855,20 @@ const sendCompanyBankTransfer = async (req, res) => {
 </table></body></html>`;
 
     try {
-        await sendEmail({ to: companyEmail, subject: `We received your bank transfer notice — ${amountStr}`, html: companyHtml });
+        await sendEmail({ to: companyEmail, subject: `We received your bank transfer notice â€” ${amountStr}`, html: companyHtml });
         if (process.env.BOOKINGS_EMAIL) {
-            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `Company bank transfer notice — ${companyName} — ${amountStr}`, html: academyHtml });
+            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `Company bank transfer notice â€” ${companyName} â€” ${amountStr}`, html: academyHtml });
         }
         res.status(200).json({ success: true });
     } catch (err) {
-        console.error("❌ Bank transfer email error:", err.message);
+        console.error("âŒ Bank transfer email error:", err.message);
         res.status(500).json({ success: false });
     }
 };
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 9. LLN Completion Notification
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const sendLLNCompletionNotification = async (req, res) => {
     const { studentEmail, studentName, score, isPassed, bookingId, studentPhone } = req.body;
 
@@ -930,14 +917,14 @@ const sendLLNCompletionNotification = async (req, res) => {
         }
         if (res) res.status(200).json({ success: true });
     } catch (err) {
-        console.error("❌ LLN email error:", err.message);
+        console.error("âŒ LLN email error:", err.message);
         if (res) res.status(500).json({ success: false });
     }
 };
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 10. Enrollment Form Completion Notification
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const sendEnrollmentFormCompletionNotification = async (req, res) => {
     const { studentEmail, studentName, bookingId, studentPhone, gatewayTransactionId } = req.body;
 
@@ -965,7 +952,7 @@ const sendEnrollmentFormCompletionNotification = async (req, res) => {
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
             <td><h1 style="margin:0;font-size:20px;">ENROLLMENT FORM SUBMITTED</h1></td>
-            <td align="right"><span style="font-size:12px;font-weight:700;background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">ID: ${bookingId || "—"}</span></td>
+            <td align="right"><span style="font-size:12px;font-weight:700;background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">ID: ${bookingId || "â€”"}</span></td>
         </tr>
     </table>
 </td></tr>
@@ -974,9 +961,9 @@ const sendEnrollmentFormCompletionNotification = async (req, res) => {
     <table width="100%" cellpadding="10" cellspacing="0" style="background-color:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
         <tr><td style="color:#64748b;width:130px;">Student Name</td><td><strong>${studentName}</strong></td></tr>
         <tr><td style="color:#64748b;">Email</td><td>${studentEmail}</td></tr>
-        <tr><td style="color:#64748b;">Phone Number</td><td><strong>${studentPhone || "—"}</strong></td></tr>
-        <tr><td style="color:#64748b;">Booking ID</td><td><strong>${bookingId || "—"}</strong></td></tr>
-        <tr><td style="color:#64748b;">Transaction ID</td><td><strong>${gatewayTransactionId || "—"}</strong></td></tr>
+        <tr><td style="color:#64748b;">Phone Number</td><td><strong>${studentPhone || "â€”"}</strong></td></tr>
+        <tr><td style="color:#64748b;">Booking ID</td><td><strong>${bookingId || "â€”"}</strong></td></tr>
+        <tr><td style="color:#64748b;">Transaction ID</td><td><strong>${gatewayTransactionId || "â€”"}</strong></td></tr>
     </table>
     <p style="margin-top:20px;">Please log in to the admin portal to review the form and documents.</p>
 </td></tr>
@@ -989,7 +976,7 @@ const sendEnrollmentFormCompletionNotification = async (req, res) => {
         }
         if (res) res.status(200).json({ success: true });
     } catch (err) {
-        console.error("❌ Enrollment form email error:", err.message);
+        console.error("âŒ Enrollment form email error:", err.message);
         if (res) res.status(500).json({ success: false });
     }
 };
@@ -1030,13 +1017,13 @@ const sendCompanyCardPayment = async (req, res) => {
 </table></body></html>`;
 
     try {
-        await sendEmail({ to: companyEmail, subject: `Payment received — ${amountStr}`, html: companyHtml });
+        await sendEmail({ to: companyEmail, subject: `Payment received â€” ${amountStr}`, html: companyHtml });
         if (process.env.BOOKINGS_EMAIL) {
-            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `Company card payment — ${companyName} — ${amountStr}`, html: academyHtml });
+            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `Company card payment â€” ${companyName} â€” ${amountStr}`, html: academyHtml });
         }
         res.status(200).json({ success: true });
     } catch (err) {
-        console.error("❌ Card payment email error:", err.message);
+        console.error("âŒ Card payment email error:", err.message);
         res.status(500).json({ success: false });
     }
 };
@@ -1054,3 +1041,4 @@ module.exports = {
     sendEnrollmentFormCompletionNotification,
     formatBookingId,
 };
+

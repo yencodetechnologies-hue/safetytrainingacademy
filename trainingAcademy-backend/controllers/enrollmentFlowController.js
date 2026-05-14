@@ -7,6 +7,8 @@ const mongoose = require("mongoose");
 const sendEmail = require("../config/sendEmail");
 const { sendLLNCompletionNotification, sendEnrollmentFormCompletionNotification, formatBookingId } = require("./bookingEmailController");
 const Company = require("../models/Company");
+const EnrollmentLink = require("../models/EnrollmentLink");
+const StudentMain = require("../models/student_main");
 
 // ✅ Create new flow
 exports.createFlow = async (req, res) => {
@@ -155,6 +157,29 @@ exports.createFlow = async (req, res) => {
 
     if (courseId && mongoose.Types.ObjectId.isValid(courseId)) {
       await Course.findByIdAndUpdate(courseId, { $inc: { studentsEnrolled: 1 } });
+    }
+
+    // ✅ If source is Enrollment Link, update the Link's student record with this Booking ID
+    if (source === "Enrollment Link" && sourceToken && mongoose.Types.ObjectId.isValid(sourceToken)) {
+      try {
+        const student = await StudentMain.findById(studentId).lean();
+        if (student) {
+          console.log(`[EnrollmentFlow] Attempting to update EnrollmentLink ${sourceToken} for student ${student.email}`);
+          const updateResult = await EnrollmentLink.updateOne(
+            { _id: sourceToken, "students.email": student.email },
+            { $set: { "students.$.bookingId": flow._id } }
+          );
+          console.log("[EnrollmentFlow] Update Result:", updateResult);
+          
+          if (updateResult.matchedCount === 0) {
+            console.warn(`[EnrollmentFlow] No matching student found in EnrollmentLink ${sourceToken} for email ${student.email}`);
+          }
+        } else {
+          console.error(`[EnrollmentFlow] Student not found with ID: ${studentId}`);
+        }
+      } catch (linkErr) {
+        console.error("[EnrollmentFlow] Error updating EnrollmentLink student bookingId:", linkErr);
+      }
     }
 
     res.json(flow);
