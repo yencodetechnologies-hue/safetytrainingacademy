@@ -1248,8 +1248,7 @@ function BookNow() {
                 )}
 
                 {step === 3 && (
-                    <CourseSelectionSuccess 
-                        onNext={() => setStep(4)}
+                    <CourseSelectionSuccess
                         enrollmentData={{
                         selectedCourse,
                         courseDate: selectedSession?.date,
