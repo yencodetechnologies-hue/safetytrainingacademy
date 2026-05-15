@@ -259,6 +259,7 @@ const Payment = () => {
                 <th>Course</th>
                 <th>Schedule Date</th>
                 <th>Method</th>
+                <th>Bank Transfer ID</th>
                 <th>Gateway Transaction ID</th>
                 <th>Amount</th>
                 <th>Payment date</th>
@@ -296,6 +297,9 @@ const Payment = () => {
                     </td>
                     <td className="td-muted">{p.sessionDate || "—"}</td>
                     <td className="td-muted">{p.method || "Individual"}</td>
+                    <td className="td-mono" style={{ fontWeight: '600' }}>
+                      {p.method === "Bank Transfer" ? (p.transId || "—") : "—"}
+                    </td>
                     <td className="td-mono" style={{ color: '#6366f1', fontWeight: '600' }}>{p.gatewayTransId || "—"}</td>
                     <td className="amount">${p.amount}</td>
                     <td className="td-muted">{p.date}</td>

@@ -81,8 +81,24 @@ const studentBookingTemplate = (data) => {
     <div class="eb-content">
       <p class="eb-welcome">Hi <strong>${data.name.split(' ')[0]}</strong>,</p>
       <p style="color: #475569; font-size: 13px; margin: 0 0 20px; line-height: 1.6;">
-        Thank you for booking with Safety Training Academy. Your spot is secured. Please review your course details below and complete the required pre-course assessments.
+        Thank you for booking with Safety Training Academy. Your spot is secured. Please review your details below and complete the required pre-course assessments.
       </p>
+
+      <div class="eb-section">
+        <div class="eb-section-head"><span>Student Details</span></div>
+        <div class="eb-row">
+          <div class="eb-label">Name</div>
+          <div class="eb-value">${data.name || '—'}</div>
+        </div>
+        <div class="eb-row">
+          <div class="eb-label">Email</div>
+          <div class="eb-value">${data.email || '—'}</div>
+        </div>
+        <div class="eb-row">
+          <div class="eb-label">Phone</div>
+          <div class="eb-value">${data.phone || '—'}</div>
+        </div>
+      </div>
 
       <div class="eb-section">
         <div class="eb-section-head"><span>Course Details</span></div>
