@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../../styles/LlnResults.css";
+import "../../styles/LlndResults.css";
 import { useSearchParams } from "react-router-dom";
 import { API_URL } from "../../data/service";
 
@@ -62,7 +62,7 @@ function AssessmentModal({ record, onClose, onRefresh }) {
   const handleSaveDate = async () => {
     try {
       setSaving(true);
-      const res = await fetch(`${API_URL}/api/flow/LLN-date`, {
+      const res = await fetch(`${API_URL}/api/flow/llnd-date`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ flowId: record.id, newDate })
@@ -105,26 +105,26 @@ function AssessmentModal({ record, onClose, onRefresh }) {
             <span className="lln-info-value">{record.email}</span>
             <span className="lln-info-label">Phone:</span>
             <span className="lln-info-value">{record.phone || "+61400000000"}</span>
-
+            
             <span className="lln-info-label">Completed Date:</span>
             <div className="lln-info-value" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               {isEditing ? (
                 <>
-                  <input
-                    type="datetime-local"
-                    value={newDate}
+                  <input 
+                    type="datetime-local" 
+                    value={newDate} 
                     onChange={(e) => setNewDate(e.target.value)}
                     className="lln-date-input"
                   />
-                  <button
-                    className="lln-btn lln-btn-sm"
+                  <button 
+                    className="lln-btn lln-btn-sm" 
                     onClick={handleSaveDate}
                     disabled={saving}
                   >
                     {saving ? "..." : "Save"}
                   </button>
-                  <button
-                    className="lln-btn lln-btn-outline lln-btn-sm"
+                  <button 
+                    className="lln-btn lln-btn-outline lln-btn-sm" 
                     onClick={() => setIsEditing(false)}
                   >
                     Cancel
@@ -133,8 +133,8 @@ function AssessmentModal({ record, onClose, onRefresh }) {
               ) : (
                 <>
                   <span>{record.completedDate || `${record.date}, 2:05:36 AM`}</span>
-                  <button
-                    className="lln-edit-link"
+                  <button 
+                    className="lln-edit-link" 
                     onClick={() => setIsEditing(true)}
                     style={{ background: "none", border: "none", color: "#7c3aed", cursor: "pointer", fontSize: "12px", textDecoration: "underline" }}
                   >
@@ -180,7 +180,7 @@ function AssessmentModal({ record, onClose, onRefresh }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function LLNResults() {
+export default function LlndResults() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [page, setPage] = useState(1);
@@ -198,7 +198,7 @@ export default function LLNResults() {
   });
 
   useEffect(() => {
-    fetch(`${API_URL}/api/flow/LLN-results`)
+    fetch(`${API_URL}/api/flow/llnd-results`)
       .then(res => res.json())
       .then(res => {
         // ✅ Sort by rawDate descending - Latest first
@@ -263,16 +263,16 @@ export default function LLNResults() {
   }, [search, statusFilter, data]);
 
   useEffect(() => {
-    const studentId = searchParams.get("studentId");
-    const openModal = searchParams.get("openModal");
+  const studentId = searchParams.get("studentId");
+  const openModal = searchParams.get("openModal");
 
-    if (!studentId || !openModal || data.length === 0) return;
+  if (!studentId || !openModal || data.length === 0) return;
 
-    const record = data.find(r => r.id === studentId || String(r.id) === studentId);
-    if (record) {
-      setSelectedRecord(record);
-    }
-  }, [data, searchParams]);
+  const record = data.find(r => r.id === studentId || String(r.id) === studentId);
+  if (record) {
+    setSelectedRecord(record);
+  }
+}, [data, searchParams]);
 
   const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
   const pageData = filteredData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -438,12 +438,12 @@ export default function LLNResults() {
 
       {/* Modal */}
       {selectedRecord && (
-        <AssessmentModal
-          record={selectedRecord}
-          onClose={() => setSelectedRecord(null)}
+        <AssessmentModal 
+          record={selectedRecord} 
+          onClose={() => setSelectedRecord(null)} 
           onRefresh={() => {
             // Re-fetch data to reflect date change
-            fetch(`${API_URL}/api/flow/LLN-results`)
+            fetch(`${API_URL}/api/flow/llnd-results`)
               .then(res => res.json())
               .then(res => {
                 const sorted = [...res].sort((a, b) => {

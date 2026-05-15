@@ -22,25 +22,6 @@ const resultRoutes = require("./routes/resultRoutes");
 connectDB();
 
 const app = express();
-
-// ✅ 1. ULTIMATE CORS FIX (Highest Priority - Absolute Top)
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    
-    // We explicitly set the origin to the incoming origin to satisfy 'credentials: true'
-    // but if no origin is provided (like a direct server call), we use '*'
-    res.header("Access-Control-Allow-Origin", origin || "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
-    res.header("Access-Control-Allow-Credentials", "true");
-
-    // Handle preflight immediately
-    if (req.method === "OPTIONS") {
-        return res.status(200).end();
-    }
-    next();
-});
-
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
@@ -63,17 +44,12 @@ if (process.env.CLIENT_ORIGIN) {
   });
 }
 
-// ✅ Trust proxy for headers
-app.set('trust proxy', 1);
-
-// ✅ 2. Standard CORS middleware (as secondary backup)
 app.use(
   cors({
-    origin: (origin, callback) => {
-      callback(null, true); // Allow all origins through middleware for now
-    },
+    origin: allowedOrigins,
     credentials: true,
-    optionsSuccessStatus: 200,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
   })
 );
 
@@ -90,7 +66,7 @@ app.use("/api/enrollment-form", require("./routes/enrollmentFormRoutes"));
 app.use("/api/companies", companyRoutes);
 app.use("/api/book-now", companyEnrollRoutes);
 app.use("/api/enroll", studentRoutes);
-app.use("/api/LLN", require("./routes/llnRoutes"));
+app.use("/api/llnd", require("./routes/llndRoutes"));
 app.use("/api/payment", paymentRouter);
 app.use("/api/flow", enrollmentRoutes);
 app.use("/api/students", studentRoutes);
@@ -121,7 +97,7 @@ app.get("/api/health", async (req, res) => {
 // GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
   console.error("GLOBAL ERROR:", err.stack);
-
+  
   // Ensure CORS headers are present on error responses
   const origin = req.headers.origin;
   const isAllowed = origin && allowedOrigins.some(allowed => {

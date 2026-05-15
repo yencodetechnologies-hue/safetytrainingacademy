@@ -1,8 +1,7 @@
 import "../styles/Sidebar.css"
-import { useState, useContext, useEffect } from "react"
+import { useState, useContext } from "react"
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom"
-import { API_URL } from "../data/service";
 
 const menu = {
   Student: [
@@ -30,7 +29,7 @@ const menu = {
     { name: "Companies", path: "/admin/companies", icon: "fa-solid fa-users" },
     { name: "Schedule", path: "/admin/schedule", icon: "fa-solid fa-calendar" },
     { name: "Teachers", path: "/admin/teachers", icon: "fa-solid fa-chalkboard-user" },
-    { name: "LLN Results", path: "/admin/LLN-results", icon: "fa-solid fa-clipboard-check" },
+    { name: "LLND Results", path: "/admin/llnd-results", icon: "fa-solid fa-clipboard-check" },
     { name: "Enrollment Forms", path: "/admin/enrollment-forms", icon: "fa-solid fa-file-pen" },
     { name: "Enrollment Links", path: "/admin/enrollment-links", icon: "fa-solid fa-link" },
     { name: "Exams", path: "/admin/exams", icon: "fa-solid fa-file-lines" },
@@ -58,30 +57,10 @@ function Sidebar({ user }) {
   const navigate = useNavigate()
   const location = useLocation()
   const { logout } = useContext(AuthContext);
-  const [studentStatus, setStudentStatus] = useState({ 
-    assessmentPassed: false, 
-    enrollmentFormSubmitted: false,
-    enrollmentFormRejected: false 
-  });
-
-  useEffect(() => {
-    if (user?.role === "Student") {
-      fetch(`${API_URL}/api/student/dashboard/${user.id}`)
-        .then(res => res.json())
-        .then(data => {
-          setStudentStatus({
-            assessmentPassed: data.assessmentPassed,
-            enrollmentFormSubmitted: data.enrollmentFormSubmitted,
-            enrollmentFormRejected: data.enrollmentFormRejected
-          });
-        })
-        .catch(err => console.error("Sidebar status fetch error:", err));
-    }
-  }, [user]);
 
   const getActiveFromPath = () => {
     const currentMenu = menu[user?.role] || []
-
+    
     // Special case for Student My Courses vs Buy New Course
     if (user?.role === "Student" && location.pathname === "/student/my-courses") {
       const searchParams = new URLSearchParams(location.search);
@@ -98,18 +77,6 @@ function Sidebar({ user }) {
   const active = getActiveFromPath()
 
   const handleNavigate = (item) => {
-    // Restricted paths for students who passed LLN but haven't submitted the form
-    const restrictedPaths = ["/student/my-courses", "/student/schedule", "/student/results", "/student/certificates"];
-    if (user?.role === "Student" && 
-        studentStatus.assessmentPassed && 
-        (studentStatus.enrollmentFormRejected || !studentStatus.enrollmentFormSubmitted) && 
-        restrictedPaths.includes(item.path)) {
-      alert("Please complete or update your enrollment form before continuing.");
-      navigate("/student/enrollment-form");
-      setIsOpen(false);
-      return;
-    }
-
     navigate(item.path, { state: item.state })
     setIsOpen(false)
   }

@@ -13,7 +13,7 @@ import CompanyDashboard from "./components/company/CompanyDashboard"
 import Students from "./components/Students"
 import Schedule from "./components/Schedule"
 import Teachers from "./components/Teachers"
-import LlnResults from "./components/lln/LlnResults"
+import LlndResults from "./components/llnd/LlndResults"
 import EnrollmentForms from "./components/EnrollmentForms"
 import EnrollmentLinks from "./components/EnrollmentLinks"
 import Exams from "./components/Exams"
@@ -24,8 +24,8 @@ import Gallery from "./components/landingPage/Gallery"
 import LandingPage from "./pages/LandingPage"
 import CourseDetails from "./pages/CourseDetails"
 import BookNow from "./pages/BookNow"
-import CourseResult from "./components/lln/CourseResult"
-import LLNAssessmentComplete from "./components/lln/LLNAssessmentComplete"
+import CourseResult from "./components/llnd/CourseResult"
+import LLNDAssessmentComplete from "./components/llnd/LLNDAssessmentComplete"
 import EnrollmentComplete from "./components/enrollmrntRegister/EnrollmentComplete"
 import VocMain from "./components/voc/VocMain"
 import Contact from "./components/Contact"
@@ -83,7 +83,7 @@ function App() {
                 <Route path="/book-now/company/:id" element={<BookNow />} />
                 <Route path="/book-now" element={<BookNow />} />
                 <Route path="/course-result" element={<CourseResult />} />
-                <Route path="/LLN-assesment-complete" element={<LLNAssessmentComplete />} />
+                <Route path="/llnd-assesment-complete" element={<LLNDAssessmentComplete />} />
                 <Route path="/booking-success" element={<EnrollmentComplete />} />
                 <Route path="/voc" element={<VocMain />} />
                 <Route path="/contact" element={<Contact />} />
@@ -156,7 +156,7 @@ function App() {
                     <Route path="students" element={<Students />} />
                     <Route path="schedule" element={<Schedule />} />
                     <Route path="teachers" element={<Teachers />} />
-                    <Route path="LLN-results" element={<LlnResults />} />
+                    <Route path="llnd-results" element={<LlndResults />} />
                     <Route path="enrollment-forms" element={<EnrollmentForms />} />
                     <Route path="enrollment-links" element={<EnrollmentLinks />} />
                     <Route path="exams" element={<Exams />} />

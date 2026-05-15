@@ -51,16 +51,16 @@ function PayModal({ selected, payments, grouped = [], company, onClose, onSucces
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            amount: total,
-            email: company?.email || user.email || "",
-            name: company?.companyName || user.name || "",
-            phone: company?.mobileNumber || "",
+            amount:      total,
+            email:       company?.email       || user.email || "",
+            name:        company?.companyName || user.name  || "",
+            phone:       company?.mobileNumber || "",
             cardName,
             cardNumber,
             expiryMonth: mm,
-            expiryYear: yy,
+            expiryYear:  yy,
             cvv,
-            userId: user.id || "",
+            userId:      user.id || "",
             description: `Company payment - ${company?.companyName || user.name || ""}`,
           }),
         });
@@ -101,11 +101,11 @@ function PayModal({ selected, payments, grouped = [], company, onClose, onSucces
         // For student groups, update flows
         if (studentGroups.length > 0) {
           const fd = new FormData();
-          fd.append("flowIds", JSON.stringify(studentGroups.flatMap(g => g.rows.map(r => r.id))));
-          fd.append("amount", studentGroups.reduce((sum, g) => sum + g.total, 0));
-          fd.append("method", "Card Payment");
-          fd.append("companyId", user.id);
-          fd.append("transactionId", ewayData.transactionId);
+          fd.append("flowIds",              JSON.stringify(studentGroups.flatMap(g => g.rows.map(r => r.id))));
+          fd.append("amount",               studentGroups.reduce((sum, g) => sum + g.total, 0));
+          fd.append("method",               "Card Payment");
+          fd.append("companyId",            user.id);
+          fd.append("transactionId",        ewayData.transactionId);
           fd.append("gatewayTransactionId", ewayData.gatewayTransactionId || "");
 
           await fetch(`${API_URL}/api/students/company/pay-selected`, {
@@ -123,10 +123,10 @@ function PayModal({ selected, payments, grouped = [], company, onClose, onSucces
       // For student groups
       if (studentGroups.length > 0) {
         const fd = new FormData();
-        fd.append("flowIds", JSON.stringify(studentGroups.flatMap(g => g.rows.map(r => r.id))));
-        fd.append("amount", studentGroups.reduce((sum, g) => sum + g.total, 0));
-        fd.append("method", "Bank Transfer");
-        fd.append("companyId", user.id);
+        fd.append("flowIds",       JSON.stringify(studentGroups.flatMap(g => g.rows.map(r => r.id))));
+        fd.append("amount",        studentGroups.reduce((sum, g) => sum + g.total, 0));
+        fd.append("method",        "Bank Transfer");
+        fd.append("companyId",     user.id);
         fd.append("transactionId", txnRef);
         if (receiptFile) fd.append("receipt", receiptFile);
 
@@ -549,16 +549,16 @@ export function PaymentsTable({ payments = [], company, onRefresh }) {
 
 // ── Source label helper ───────────────────────────────────────────────────────
 function sourceLabel(source) {
-  if (source === "Booking Link") return { text: "Booking Link", color: "#6366f1" };
-  if (source === "Company Link") return { text: "Company Link", color: "#0891b2" };
-  return { text: source || "—", color: "#6b7280" };
+  if (source === "Booking Link")  return { text: "Booking Link",  color: "#6366f1" };
+  if (source === "Company Link")  return { text: "Company Link",  color: "#0891b2" };
+  return                                 { text: source || "—",   color: "#6b7280" };
 }
 
 function payStatusBadge(status) {
-  if (status === "paid") return { text: "Paid", cls: "py-badge-paid" };
-  if (status === "pending") return { text: "Pending", cls: "py-badge-pending" };
-  if (status === "failed") return { text: "Failed", cls: "py-badge-failed" };
-  return { text: "Not Paid", cls: "py-badge-notpaid" };
+  if (status === "paid")     return { text: "Paid",     cls: "py-badge-paid" };
+  if (status === "pending")  return { text: "Pending",  cls: "py-badge-pending" };
+  if (status === "failed")   return { text: "Failed",   cls: "py-badge-failed" };
+  return                            { text: "Not Paid", cls: "py-badge-notpaid" };
 }
 
 // ── Students Table ────────────────────────────────────────────────────────────
@@ -645,7 +645,7 @@ function StudentsTable({ students, company, loading, onRefresh }) {
                 <th>Amount</th>
                 <th>Status</th>
                 <th>Source</th>
-                <th>LLN</th>
+                <th>LLND</th>
                 <th>Form</th>
                 <th>Enrolled</th>
               </tr>
@@ -690,8 +690,8 @@ function StudentsTable({ students, company, loading, onRefresh }) {
                       }}>{src.text}</span>
                     </td>
                     <td>
-                      <span className={`py-badge ${s.LLN === "Completed" ? "py-badge-paid" : "py-badge-pending"}`}>
-                        {s.LLN}
+                      <span className={`py-badge ${s.llnd === "Completed" ? "py-badge-paid" : "py-badge-pending"}`}>
+                        {s.llnd}
                       </span>
                     </td>
                     <td>
@@ -771,13 +771,13 @@ export default function CompanyPayments() {
     })
       .then(res => res.json())
       .then(res => setCompany({
-        companyName: res.data?.companyName || user.name || "—",
-        email: res.data?.email || user.email || "—",
+        companyName:  res.data?.companyName  || user.name  || "—",
+        email:        res.data?.email        || user.email || "—",
         mobileNumber: res.data?.mobileNumber || "—",
       }))
       .catch(() => setCompany({
-        companyName: user.name || "—",
-        email: user.email || "—",
+        companyName:  user.name  || "—",
+        email:        user.email || "—",
         mobileNumber: "—",
       }));
 

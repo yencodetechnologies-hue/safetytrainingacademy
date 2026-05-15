@@ -223,18 +223,14 @@ const sendBookingConfirmation = async (req, res) => {
         // Admin Notifications (Send to both Academy and Tech Team)
         const adminRecipients = [process.env.BOOKINGS_EMAIL, process.env.NOTIFY_EMAIL].filter(Boolean);
         for (const recipient of adminRecipients) {
-            try { 
-                await sendEmail({ to: recipient, subject: `NEW BOOKING: ${name} - ${courseName} (#${orderId})`, html: adminHtml }); 
-            } catch (e) {
-                console.error(`❌ Admin email to ${recipient} failed:`, e.message);
-            }
+            setTimeout(async () => {
+                try { 
+                    await sendEmail({ to: recipient, subject: `NEW BOOKING: ${name} - ${courseName} (#${orderId})`, html: adminHtml }); 
+                } catch (e) {}
+            }, 10000);
         }
-
-        res.status(200).json({ success: true }); 
-    } catch (err) { 
-        console.error("❌ sendBookingConfirmation Error:", err.message);
-        if (res) res.status(500).json({ success: false }); 
-    }
+        if (res) res.status(200).json({ success: true });
+    } catch (err) { if (res) res.status(500).json({ success: false }); }
 };
 
 const buildCommonHeader = (title, subTitle, badgeText, bookingId, isAdmin = false) => {
@@ -302,35 +298,9 @@ const sendEnrollmentLinkConfirmation = async (req, res) => {
     });
 
     try { 
-        // Send to student
-        await sendEmail({ to: toEmail, subject: `Registration Confirmed - ${courseName}`, html: studentHtml }); 
-
-        // Send to admin separately (Academy and Tech Team)
-        const adminHtml = adminBookingTemplate({
-            bookingId: orderId,
-            contactName: studentName,
-            contactEmail: toEmail,
-            contactPhone: phone || "—",
-            courseName,
-            courseCode: courseCode || "—",
-            courseDate: dateStr,
-            courseTime: timeStr,
-            totalAmount: totalAmount || 0,
-            paymentMethod: paymentMethod || "Pay Later"
-        });
-
-        const adminRecipients = [process.env.BOOKINGS_EMAIL, process.env.NOTIFY_EMAIL].filter(Boolean);
-        for (const recipient of adminRecipients) {
-            try { 
-                await sendEmail({ to: recipient, subject: `NEW BOOKING (Agent Link): ${studentName} - ${courseName} (#${orderId})`, html: adminHtml }); 
-            } catch (e) {
-                console.error(`❌ Admin email (link) to ${recipient} failed:`, e.message);
-            }
-        }
-
+        await sendEmail({ to: toEmail, subject: `Registration Confirmed - ${courseName}`, html: studentHtml, bcc: process.env.BOOKINGS_EMAIL }); 
         res.status(200).json({ success: true }); 
     } catch (err) { 
-        console.error("❌ sendEnrollmentLinkConfirmation Error:", err.message);
         res.status(500).json({ success: false }); 
     }
 };
@@ -349,27 +319,7 @@ const sendCompanyOrderConfirmation = async (req, res) => {
     const html = `
 <!DOCTYPE html><html><head><style>body{margin:0;padding:24px;background:#f0f2f5;font-family:sans-serif;}.card{max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e0e0e0;}.hdr{background:#0d2240;padding:20px 30px;color:#fff;}.hdr h2{margin:0;font-size:18px;text-transform:uppercase;letter-spacing:1px;}.content{padding:30px;}.footer{background:#f8fafc;padding:20px;text-align:center;font-size:11px;color:#999;border-top:1px solid #e0e0e0;}</style></head><body>
 <div class="card"><div class="hdr"><h2>Company Booking Confirmed</h2><p style="margin:4px 0 0; font-size:10px; color:#29b6e8;">Booking ID: ${orderId}</p></div><div class="content"><p style="font-size:15px; color:#1e293b;">Dear <strong>${companyName}</strong>,</p><p style="font-size:14px; color:#475569; line-height:1.6;">Thank you for your booking. Below are the registration links for your employees. Each link allows for the specific quantity purchased.</p><table width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0; border:1px solid #e0e0e0; border-radius:4px; overflow:hidden;">${linksHtml}</table><div style="background:#f0f9ff; padding:15px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:13px; font-weight:700; color:#0d2240;">Total Amount Paid</span><span style="font-size:16px; font-weight:700; color:#0d2240;">${priceStr}</span></div></div><div class="footer">&copy; ${new Date().getFullYear()} Safety Training Academy | RTO #45234</div></div></body></html>`;
-    try { 
-        // Send to company
-        await sendEmail({ to: toEmail, subject: `Company Booking Confirmed - Order #${orderId}`, html }); 
-
-        // Send a simple notice to admin too
-        const adminRecipients = [process.env.BOOKINGS_EMAIL, process.env.NOTIFY_EMAIL].filter(Boolean);
-        for (const recipient of adminRecipients) {
-            try { 
-                await sendEmail({ 
-                    to: recipient, 
-                    subject: `NEW COMPANY ORDER: ${companyName} (#${orderId})`, 
-                    html: `<h3>New Company Booking</h3><p>Company: ${companyName}</p><p>Total Amount: ${priceStr}</p><p>Order ID: ${orderId}</p>` 
-                }); 
-            } catch (e) {}
-        }
-
-        res.status(200).json({ success: true }); 
-    } catch (err) { 
-        console.error("❌ sendCompanyOrderConfirmation Error:", err.message);
-        res.status(500).json({ success: false }); 
-    }
+    try { await sendEmail({ to: toEmail, subject: `Company Booking Confirmed - Order #${orderId}`, html, bcc: process.env.BOOKINGS_EMAIL }); res.status(200).json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
 };
 
 const sendCompanyPortalWelcome = async (req, res) => {

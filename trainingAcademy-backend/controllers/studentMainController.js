@@ -8,7 +8,7 @@ const CourseLink = require("../models/CourseLink");
 const Course = require("../models/Course");
 const EnrollmentLink = require("../models/EnrollmentLink");
 const Schedule = require("../models/schedule");
-const LLNAssessment = require("../models/LLNAssessment");
+const LLNDAssessment = require("../models/LLNDAssessment");
 const EnrollmentForm = require("../models/EnrollmentForm");
 const Payment = require("../models/Payment");
 const sendEmail = require("../config/sendEmail");
@@ -146,31 +146,31 @@ exports.createStudent = async (req, res) => {
         }
       }
 
-      // ✅ Create EnrollmentFlow so the student shows up in the Admin table
-      const newFlow = new EnrollmentFlow({
-        studentId: student._id,
-        enrollmentType: data.enrollmentType || "individual",
-        companyId: data.companyId || null,
-        source: "Manual Admin Add",
-        ...sessionData,
-        items: [{
-          course: {
-            courseId: course?._id,
-            courseName: course?.title,
-            courseCategory: course?.courseCategory,
-            price: course?.sellingPrice || 0
-          },
-          payment: {
-            method: data.paymentMethod || "Bank Transfer",
-            status: data.paymentMethod === "Pay Later" ? "unpaid" : "pending",
-            transactionId: data.transactionId || `MANUAL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-            slipUrl: paymentSlipUrl || "",
-            amount: course?.sellingPrice || 0
-          }
-        }],
-        status: "active",
-        currentStep: 2 // ✅ Start at LLN Assessment (Step 2) for manual admin adds
-      });
+    // ✅ Create EnrollmentFlow so the student shows up in the Admin table
+    const newFlow = new EnrollmentFlow({
+      studentId: student._id,
+      enrollmentType: data.enrollmentType || "individual",
+      companyId: data.companyId || null,
+      source: "Manual Admin Add",
+      ...sessionData,
+      items: [{
+        course: {
+          courseId: course?._id,
+          courseName: course?.title,
+          courseCategory: course?.courseCategory,
+          price: course?.sellingPrice || 0
+        },
+        payment: {
+          method: data.paymentMethod || "Bank Transfer",
+          status: data.paymentMethod === "Pay Later" ? "unpaid" : "pending",
+          transactionId: data.transactionId || `MANUAL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          slipUrl: paymentSlipUrl || "",
+          amount: course?.sellingPrice || 0
+        }
+      }],
+      status: "active",
+      currentStep: 2 // ✅ Start at LLND Assessment (Step 2) for manual admin adds
+    });
 
       await newFlow.save();
 
@@ -188,7 +188,7 @@ exports.createStudent = async (req, res) => {
           bookingId: formatBookingId(newFlow._id),
           submittedAt: new Date().toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Sydney" }),
           paymentMethod: data.paymentMethod || "Manual",
-          transactionId: data.transactionId || "",
+          transactionId: data.transactionId || "", 
           totalAmount: course?.sellingPrice ? Number(course.sellingPrice).toFixed(2) : "0.00"
         };
 
@@ -306,7 +306,7 @@ exports.getAllStudents = async (req, res) => {
         try {
           const company = await Company.findById(resolvedCompanyId).lean();
           companyName = company?.name || company?.companyName || "";
-        } catch (e) { }
+        } catch (e) {}
       }
 
       let agentName = "";
@@ -319,7 +319,7 @@ exports.getAllStudents = async (req, res) => {
           } else {
             linkName = link?.name || "";
           }
-        } catch (e) { }
+        } catch (e) {}
       }
 
       return {
@@ -329,12 +329,12 @@ exports.getAllStudents = async (req, res) => {
           ? new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
           : "—",
         registerTime: flow.createdAt
-          ? new Date(flow.createdAt).toLocaleTimeString("en-AU", {
-            timeZone: "Australia/Sydney",
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-          })
+          ? new Date(flow.createdAt).toLocaleTimeString("en-AU", { 
+              timeZone: "Australia/Sydney", 
+              hour: '2-digit', 
+              minute: '2-digit', 
+              hour12: true 
+            })
           : "",
         name: student.name || "",
         email: student.email || "",
@@ -353,10 +353,10 @@ exports.getAllStudents = async (req, res) => {
         slipUrl: item.payment?.slipUrl || "—",
         courseBookingDate: flow.sessionDate
           ? `${new Date(flow.sessionDate).toLocaleDateString("en-AU", {
-            day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Sydney"
-          })} | ${flow.startTime} - ${flow.endTime}`
+              day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Sydney"
+            })} | ${flow.startTime} - ${flow.endTime}`
           : "-",
-        LLNStatus: flow.LLN?.status === "completed" ? "Completed" : "Not Completed",
+        llndStatus: flow.llnd?.status === "completed" ? "Completed" : "Not Completed",
         enrollmentForm: flow.enrollmentFormId ? "Completed" : "Not Completed",
         paymentStatus: item.payment?.method === "Card Payment"
           ? (item.payment?.status === "success" || item.payment?.status === "completed") ? "Paid" : "Unpaid"
@@ -390,7 +390,7 @@ exports.deleteStudent = async (req, res) => {
 
     await Promise.all([
       EnrollmentFlow.findByIdAndDelete(req.params.id),
-      studentId && LLNAssessment.deleteMany({ student: studentId }),
+      studentId && LLNDAssessment.deleteMany({ student: studentId }),
       studentId && EnrollmentForm.deleteMany({ studentId: studentId.toString() }),
       studentId && Payment.deleteMany({ userId: studentId.toString() }),
     ]);
@@ -486,7 +486,7 @@ exports.getStudentsByCompany = async (req, res) => {
         paymentMethod,
         paymentStatus,
         source,
-        LLN: flow.LLN?.status === "completed" ? "Completed" : "Not Completed",
+        llnd: flow.llnd?.status === "completed" ? "Completed" : "Not Completed",
         form: flow.enrollmentFormId ? "Submitted" : "Not Submitted",
         training: flow.status === "active" ? "Active" : "Inactive",
         enrolled: new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
@@ -668,7 +668,7 @@ exports.getStudentsByLink = async (req, res) => {
         course: item.course?.courseName || "—",
         amount: `$${price}`,
         paymentStatus,
-        LLN: flow.LLN?.status === "completed" ? "Completed" : "Not Completed",
+        llnd: flow.llnd?.status === "completed" ? "Completed" : "Not Completed",
         enrolled: new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
       };
     });

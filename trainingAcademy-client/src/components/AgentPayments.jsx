@@ -28,7 +28,7 @@ export default function AgentPayments() {
       setLoading(true);
       const res = await fetch(`${API_URL}/api/students`);
       const data = await res.json();
-
+      
       // Filter for agent type students
       const agents = data.filter(s => s.type === "Agent");
       setAgentUsers(agents);
@@ -143,7 +143,7 @@ export default function AgentPayments() {
                   <th style={{ padding: "12px", textAlign: "left", fontWeight: 600 }}>Phone</th>
                   <th style={{ padding: "12px", textAlign: "left", fontWeight: 600 }}>Agent Link</th>
                   <th style={{ padding: "12px", textAlign: "left", fontWeight: 600 }}>Course</th>
-                  <th style={{ padding: "12px", textAlign: "left", fontWeight: 600 }}>LLN Status</th>
+                  <th style={{ padding: "12px", textAlign: "left", fontWeight: 600 }}>LLND Status</th>
                   <th style={{ padding: "12px", textAlign: "left", fontWeight: 600 }}>Enrollment Status</th>
                 </tr>
               </thead>
@@ -172,10 +172,10 @@ export default function AgentPayments() {
                         borderRadius: "4px",
                         fontSize: "12px",
                         fontWeight: 500,
-                        backgroundColor: user.LLNStatus === "Completed" ? "#dcfce7" : "#fef3c7",
-                        color: user.LLNStatus === "Completed" ? "#16a34a" : "#b45309"
+                        backgroundColor: user.llndStatus === "Completed" ? "#dcfce7" : "#fef3c7",
+                        color: user.llndStatus === "Completed" ? "#16a34a" : "#b45309"
                       }}>
-                        {user.LLNStatus}
+                        {user.llndStatus}
                       </span>
                     </td>
                     <td style={{ padding: "12px" }}>
@@ -285,7 +285,7 @@ export default function AgentPayments() {
                 <strong>Course:</strong> {viewedUser.course || "—"}
               </div>
               <div>
-                <strong>LLN Status:</strong> {viewedUser.LLNStatus}
+                <strong>LLND Status:</strong> {viewedUser.llndStatus}
               </div>
               <div>
                 <strong>Enrollment Status:</strong> {viewedUser.enrollmentForm || "Pending"}

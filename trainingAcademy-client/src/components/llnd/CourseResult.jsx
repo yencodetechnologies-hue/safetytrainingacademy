@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import "../../styles/CourseResult.css"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { API_URL } from "../../data/service"
 import * as Yup from "yup"
 
@@ -15,12 +15,12 @@ const declarationSchema = Yup.object().shape({
 })
 
 function CourseResult({ onRetry, onContinue, data, flowId: flowIdProp }) {
-
-    const navigate = useNavigate()
     const [agree1, setAgree1] = useState(false)
     const [agree2, setAgree2] = useState(false)
     const [errors, setErrors] = useState({})
     const [isSaving, setIsSaving] = useState(false)
+    const [countdown, setCountdown] = useState(3)
+    const [autoStarted, setAutoStarted] = useState(false)
 
     const validate = async () => {
         try {
@@ -36,6 +36,58 @@ function CourseResult({ onRetry, onContinue, data, flowId: flowIdProp }) {
             return false
         }
     }
+
+    const handleSaveAndContinue = async () => {
+        setErrors({})
+        setAgree1(true)
+        setAgree2(true)
+        setIsSaving(true)
+        try {
+            const flowId = flowIdProp || localStorage.getItem("flowId")
+            if (!flowId || flowId === "null" || flowId === "undefined") {
+                alert("Session expired or missing. Please refresh the dashboard and try again.")
+                setIsSaving(false)
+                return
+            }
+            const payload = {
+                flowId,
+                ...data,
+                answers: data.answers || []
+            }
+            const res = await fetch(`${API_URL}/api/flow/llnd`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}))
+                throw new Error(errData.error || "Failed to save assessment")
+            }
+            onContinue()
+        } catch (err) {
+            console.error(err)
+            alert(err.message || "Failed to save assessment")
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
+    useEffect(() => {
+        if (!isSaving && !autoStarted) {
+            const timer = setInterval(() => {
+                setCountdown((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(timer)
+                        setAutoStarted(true)
+                        handleSaveAndContinue()
+                        return 0
+                    }
+                    return prev - 1
+                })
+            }, 1000)
+            return () => clearInterval(timer)
+        }
+    }, [isSaving, autoStarted])
 
     return (
         <div className="result-overlay">
@@ -71,8 +123,8 @@ function CourseResult({ onRetry, onContinue, data, flowId: flowIdProp }) {
                             checked={agree1}
                             onChange={(e) => {
                                 setAgree1(e.target.checked)
-                                // Clear error on change
                                 setErrors((prev) => ({ ...prev, agree1: "" }))
+                                setAutoStarted(true) // Stop countdown if manually interacting
                             }}
                         />
                         I completed this quiz honestly and did not cheat in any way.
@@ -85,8 +137,8 @@ function CourseResult({ onRetry, onContinue, data, flowId: flowIdProp }) {
                             checked={agree2}
                             onChange={(e) => {
                                 setAgree2(e.target.checked)
-                                // Clear error on change
                                 setErrors((prev) => ({ ...prev, agree2: "" }))
+                                setAutoStarted(true) // Stop countdown if manually interacting
                             }}
                         />
                         I understand that my score will be recorded under my name.
@@ -103,56 +155,21 @@ function CourseResult({ onRetry, onContinue, data, flowId: flowIdProp }) {
                     </div>
                 </div>
 
+                <div className="auto-redirect-info" style={{ textAlign: "center", marginBottom: "15px", color: "#6366f1", fontWeight: "600" }}>
+                    {countdown > 0 && !autoStarted && `Auto-continuing to Enrollment Form in ${countdown}s...`}
+                </div>
+
                 <button
                     className="continue-btn"
                     disabled={isSaving}
                     onClick={async () => {
+                        setAutoStarted(true)
                         const isValid = await validate()
                         if (!isValid) return
-
-                        setIsSaving(true)
-                        try {
-                            const flowId = flowIdProp || localStorage.getItem("flowId")
-
-                            if (!flowId || flowId === "null" || flowId === "undefined") {
-                                alert("Session expired or missing. Please refresh the dashboard and try again.")
-                                setIsSaving(false)
-                                return
-                            }
-
-                            const payload = {
-                                flowId,
-                                course: data.courseId, // Use courseId as the 'course' ref
-                                courseName: data.courseName,
-                                ...data,
-                                answers: data.answers || []
-                            }
-
-                            const res = await fetch(`${API_URL}/api/flow/LLN`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify(payload)
-                            })
-
-                            if (!res.ok) {
-                                const errData = await res.json().catch(() => ({}))
-                                throw new Error(errData.error || "Failed to save assessment")
-                            }
-
-                            if (onContinue) {
-                                onContinue()
-                            } else {
-                                navigate("/student")
-                            }
-                        } catch (err) {
-                            console.error(err)
-                            alert(err.message || "Failed to save assessment")
-                        } finally {
-                            setIsSaving(false)
-                        }
+                        handleSaveAndContinue()
                     }}
                 >
-                    {isSaving ? "Saving..." : "Continue to Enrollment Form"}
+                    {isSaving ? "Saving..." : "Continue to Enrollment Form →"}
                 </button>
             </div>
         </div>

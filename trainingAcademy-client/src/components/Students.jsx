@@ -73,8 +73,8 @@ function ViewModal({ student, onClose }) {
             <p className="modal-phone-line">📞 {student.phone}</p>
             <div className="modal-badges">
               <ActiveBadge status={student.status} />
-              <span className={`status-badge ${student.LLNStatus === "Completed" ? "badge-completed" : "badge-not-completed"}`}>
-                LLN: {student.LLNStatus}
+              <span className={`status-badge ${student.llndStatus === "Completed" ? "badge-completed" : "badge-not-completed"}`}>
+                LLND: {student.llndStatus}
               </span>
               <span className={`status-badge ${student.enrollmentForm === "Completed" ? "badge-completed" : "badge-not-completed"}`}>
                 Form: {student.enrollmentForm}
@@ -373,7 +373,7 @@ function AddStudentModal({ onClose, onSave }) {
         const res = await fetch(`${API_URL}/api/schedules/course/${courseId}`);
         if (res.ok) {
           const data = await res.json();
-          const allSessions = data.flatMap(slot =>
+          const allSessions = data.flatMap(slot => 
             slot.sessions.map(s => ({ ...s, date: slot.date }))
           );
           setSessions(allSessions);
@@ -401,7 +401,7 @@ function AddStudentModal({ onClose, onSave }) {
           if (res.ok) {
             const data = await res.json();
             // Flatten sessions from slots
-            const allSessions = data.flatMap(slot =>
+            const allSessions = data.flatMap(slot => 
               slot.sessions.map(s => ({ ...s, date: slot.date }))
             );
             setSessions(allSessions);
@@ -564,17 +564,17 @@ function AddStudentModal({ onClose, onSave }) {
                 .custom-dropdown-placeholder { color: #94a3b8; }
               `}
             </style>
-
+            
             <div className="custom-dropdown">
               <div className="custom-dropdown-trigger" onClick={() => setCourseOpen(!courseOpen)}>
                 <span className={form.courseId ? "" : "custom-dropdown-placeholder"}>
-                  {form.courseId
+                  {form.courseId 
                     ? (courses.find(c => c._id === form.courseId)?.title + " - $" + (courses.find(c => c._id === form.courseId)?.sellingPrice || 0))
                     : "Select a course"}
                 </span>
                 <span style={{ fontSize: '10px', color: '#64748b' }}>{courseOpen ? "▲" : "▼"}</span>
               </div>
-
+              
               {courseOpen && (
                 <div className="custom-dropdown-menu">
                   {Object.entries(
@@ -591,8 +591,8 @@ function AddStudentModal({ onClose, onSave }) {
                       {catCourses.flatMap((c) => {
                         const variants = getCourseVariants(c);
                         return variants.map((v) => (
-                          <div
-                            key={`${c._id}-${v.variant}`}
+                          <div 
+                            key={`${c._id}-${v.variant}`} 
                             className="custom-dropdown-option"
                             onClick={() => handleCourseSelect(c._id)}
                           >
@@ -712,8 +712,8 @@ function AddStudentModal({ onClose, onSave }) {
                     const d = new Date(date);
                     const isActive = selectedDate === date;
                     return (
-                      <div
-                        key={date}
+                      <div 
+                        key={date} 
                         className={`date-chip ${isActive ? "date-chip--active" : ""}`}
                         onClick={() => setSelectedDate(date)}
                       >
@@ -724,7 +724,7 @@ function AddStudentModal({ onClose, onSave }) {
                     );
                   })
                 ) : (
-                  <p style={{ fontSize: '13px', color: '#ef4444' }}>❌ No upcoming sessions available.</p>
+                   <p style={{ fontSize: '13px', color: '#ef4444' }}>❌ No upcoming sessions available.</p>
                 )}
               </div>
 
@@ -739,8 +739,8 @@ function AddStudentModal({ onClose, onSave }) {
                       .map(s => {
                         const isActive = form.sessionId === s._id;
                         return (
-                          <div
-                            key={s._id}
+                          <div 
+                            key={s._id} 
                             className={`session-card ${isActive ? "session-card--active" : ""}`}
                             onClick={() => setForm(prev => ({ ...prev, sessionId: s._id }))}
                           >
@@ -787,16 +787,16 @@ function AddStudentModal({ onClose, onSave }) {
 
           <div style={{ marginTop: '15px' }}>
             <label className="modal-label">Payment Receipt (Optional)</label>
-            <div style={{
-              marginTop: '8px',
-              border: '2px dashed #cbd5e1',
-              borderRadius: '8px',
+            <div style={{ 
+              marginTop: '8px', 
+              border: '2px dashed #cbd5e1', 
+              borderRadius: '8px', 
               padding: '10px',
               textAlign: 'center',
               background: '#f8fafc'
             }}>
-              <input
-                type="file"
+              <input 
+                type="file" 
                 accept="image/*,application/pdf"
                 onChange={handleFileChange}
                 style={{ fontSize: '12px' }}
@@ -830,7 +830,7 @@ export default function Students() {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
-
+  
   // Get page from URL or default to 1
   const currentPage = parseInt(searchParams.get("page") || "1") || 1;
 
@@ -892,7 +892,7 @@ export default function Students() {
       const sSearch = search.toLowerCase();
       const aName = a.name?.toLowerCase() || "";
       const bName = b.name?.toLowerCase() || "";
-
+      
       const aStarts = aName.startsWith(sSearch);
       const bStarts = bName.startsWith(sSearch);
 
@@ -909,52 +909,52 @@ export default function Students() {
   );
 
   // ── CRUD Handlers ──────────────────────────────────────────────────────────
-  const fetchStudents = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/students`);
-      const data = await res.json();
-      setStudents(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+const fetchStudents = async () => {
+  try {
+    const res = await fetch(`${API_URL}/api/students`);
+    const data = await res.json();
+    setStudents(data);
+  } catch (err) {
+    console.error(err);
+  }
+};
   // Edit: update student in list after save
   const handleEditSave = (updated) => {
     setStudents((prev) =>
-      prev.map((s) => (s.flowId === updated.flowId ? { ...s, ...updated } : s))
+      prev.map((s) => (s.flowId === updated.flowId ? { ...s, ...updated } : s)  )
     );
     setEditStudent(null);
     fetchStudents();
   };
 
   // Deactivate / Activate toggle
-  const handleToggleStatus = async (student) => {
-    const newStatus = student.status === "Active" ? "Inactive" : "Active";
+const handleToggleStatus = async (student) => {
+  const newStatus = student.status === "Active" ? "Inactive" : "Active";
 
-    try {
-      const res = await fetch(`${API_URL}/api/students/${student.flowId}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
+  try {
+    const res = await fetch(`${API_URL}/api/students/${student.flowId}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    });
 
-      if (!res.ok) throw new Error("Failed to update status");
+    if (!res.ok) throw new Error("Failed to update status");
 
-      const updated = await res.json();
+    const updated = await res.json();
 
-      setStudents((prev) =>
-        prev.map((s) =>
-          s.flowId === student.flowId
-            ? { ...s, status: updated.status } // ⚡ no fallback needed
-            : s
-        )
-      );
-      fetchStudents();
+    setStudents((prev) =>
+      prev.map((s) =>
+        s.flowId === student.flowId
+          ? { ...s, status: updated.status } // ⚡ no fallback needed
+          : s
+      )
+    );
+    fetchStudents();
 
-    } catch (err) {
-      alert("Error: " + err.message);
-    }
-  };
+  } catch (err) {
+    alert("Error: " + err.message);
+  }
+};
 
   // Delete
   const handleDeleteConfirm = async (flowId) => {
@@ -975,7 +975,7 @@ export default function Students() {
     setShowAddModal(false);
   };
 
-
+  
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="sm-page">
@@ -1044,7 +1044,7 @@ export default function Students() {
                   <th>Phone</th>
                   <th>Course</th>
                   <th>Course schedule date</th>
-                  <th>LLN Status</th>
+                  <th>LLND Status</th>
                   <th>Enrollment Form</th>
                   <th>Payment Method</th>
                   <th>Bank Transfer ID</th>
@@ -1090,7 +1090,7 @@ export default function Students() {
                         <div>{s.type}</div>
                         {s.type === "Company" && s.companyName && (
                           <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "#0066cc" }}>
-                            {s.companyName}
+                           {s.companyName}
                           </div>
                         )}
                         {s.type === "Agent" && (
@@ -1113,11 +1113,11 @@ export default function Students() {
                       <td>{s.courseBookingDate}</td>
                       <td>
                         <div className="sm-status-cell">
-                          <StatusBadge status={s.LLNStatus} />
+                          <StatusBadge status={s.llndStatus} />
                           <button
                             className="sm-icon-btn"
-                            title="View LLN"
-                            onClick={() => navigate(`/admin/LLN-results?studentId=${s.flowId}&openModal=true`)}
+                            title="View LLND"
+                            onClick={() => navigate(`/admin/llnd-results?studentId=${s.flowId}&openModal=true`)}
                           >
                             👁
                           </button>
@@ -1135,7 +1135,7 @@ export default function Students() {
                           </button>
                         </div>
                       </td>
-                      <td>
+                       <td>
                         <PaymentBadge status={s.paymentMethod} />
                       </td>
                       <td>

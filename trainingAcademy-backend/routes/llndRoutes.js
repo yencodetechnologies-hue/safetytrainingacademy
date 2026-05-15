@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const { saveLLN, getAllLLN } = require("../controllers/LLNController");
+const { saveLLND ,getAllLLND} = require("../controllers/llndController");
 
-router.post("/:studentId/:courseId", saveLLN);
-router.get("/", getAllLLN);
+router.post("/:studentId/:courseId", saveLLND);
+router.get("/", getAllLLND);
 
 module.exports = router;

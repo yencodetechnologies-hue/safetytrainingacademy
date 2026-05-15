@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "./StudentMyCourses.css";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
-
+import LLNDAssessment from "../llnd/LLNDAssessment";
 import Payment from "../../components/Payment";
 import CourseCard from "../course/CourseCard";
 import { API_URL } from "../../data/service";
@@ -11,7 +11,7 @@ export default function StudentMyCourses() {
   const location = useLocation();
 
   const [searchParams, setSearchParams] = useSearchParams();
-
+  
   // Get tab from URL or state, default to "enrolled"
   const tab = searchParams.get("tab") || location.state?.tab || "enrolled";
 
@@ -21,7 +21,7 @@ export default function StudentMyCourses() {
       return prev;
     });
   };
-
+  
   // Sync tab if location state changes (optional, but keeps existing behavior)
   useEffect(() => {
     if (location.state?.tab) {
@@ -110,20 +110,20 @@ export default function StudentMyCourses() {
       const sSearch = search.toLowerCase();
       const aTitle = a.title?.toLowerCase() || "";
       const bTitle = b.title?.toLowerCase() || "";
-
+      
       const aStarts = aTitle.startsWith(sSearch);
       const bStarts = bTitle.startsWith(sSearch);
-
+      
       if (aStarts && !bStarts) return -1;
       if (!aStarts && bStarts) return 1;
-
+      
       return 0;
     });
 
   // Only show categories that actually have courses, but keep the Admin's 'order'
   const usedCategoryNames = new Set(browseCourses.map(c => c.category).filter(Boolean));
   const sortedCategories = [
-    "All",
+    "All", 
     ...categoryList
       .map(cat => cat.name)
       .filter(name => usedCategoryNames.has(name))
@@ -131,7 +131,7 @@ export default function StudentMyCourses() {
 
   if (showAssessment) {
     return (
-      <LLNAssessment
+      <LLNDAssessment
         onComplete={handleAssessmentComplete}
         userDetails={{
           name: user?.name || "",
@@ -158,8 +158,8 @@ export default function StudentMyCourses() {
           coursePrice={selectedCourse?.sellingPrice || selectedCourse?.price}
           isCompanyEnroll={false}
           triggerValidation={false}
-          setIsValid={() => { }}
-          onCardPayment={() => { }}
+          setIsValid={() => {}}
+          onCardPayment={() => {}}
         />
         <div style={{ marginTop: 24, textAlign: "right" }}>
           <button
@@ -194,8 +194,8 @@ export default function StudentMyCourses() {
           {tab === "enrolled" ? "My Enrolled Courses" : "Browse New Courses"}
         </h1>
         <p className="mc-subtitle">
-          {tab === "enrolled"
-            ? "Manage your enrolled courses and certifications"
+          {tab === "enrolled" 
+            ? "Manage your enrolled courses and certifications" 
             : "Discover new certifications and advance your career"}
         </p>
       </div>
@@ -205,7 +205,7 @@ export default function StudentMyCourses() {
           <span className="mc-banner__icon">✓</span>
           <div>
             <strong>Pre-Enrollment Assessment Passed</strong>
-            <p>Score: {scoreDisplay}% – You can now enroll in courses. You can also retake LLN anytime if you want to improve your result.</p>
+            <p>Score: {scoreDisplay}% – You can now enroll in courses. You can also retake LLND anytime if you want to improve your result.</p>
           </div>
         </div>
       )}
@@ -215,7 +215,7 @@ export default function StudentMyCourses() {
           <div className="mc-banner__left">
             <span className="mc-optional-badge">Optional</span>
             <div>
-              <strong className="mc-banner__title--purple">LLN LLN Available</strong>
+              <strong className="mc-banner__title--purple">LLND Assessment Retake Available</strong>
               <p>You have already passed. Retake anytime if you want to improve your score.</p>
             </div>
           </div>

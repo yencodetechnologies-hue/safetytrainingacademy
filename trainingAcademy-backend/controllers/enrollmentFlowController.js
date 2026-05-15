@@ -9,7 +9,6 @@ const { sendLLNCompletionNotification, sendEnrollmentFormCompletionNotification,
 const Company = require("../models/Company");
 const EnrollmentLink = require("../models/EnrollmentLink");
 const StudentMain = require("../models/student_main");
-const LLNModel = require("../models/LLNAssessment"); // ✅ Added standalone LLN model
 
 // ✅ Create new flow
 exports.createFlow = async (req, res) => {
@@ -119,31 +118,31 @@ exports.createFlow = async (req, res) => {
 
     const flowData = {
       enrollmentType: enrollmentType || "Individual",
-      companyId: resolvedCompanyId,
-      source: source || "individual",
-      sourceToken: sourceToken || "",
+      companyId:      resolvedCompanyId,
+      source:         source || "individual",
+      sourceToken:    sourceToken || "",
       sessionDate,
       startTime,
       endTime,
       items: [{
         course: {
           courseId,
-          price: resolvedPrice,
+          price:        resolvedPrice,
           courseCategory,
           courseName,
         },
         payment: {
-          amount: resolvedPrice,
-          method: resolvedMethod,
-          transactionId: resolvedTransactionId,
+          amount:               resolvedPrice,
+          method:               resolvedMethod,
+          transactionId:        resolvedTransactionId,
           gatewayTransactionId: paymentMethod === "Card Payment" ? (ewayTransactionId || "") : "",
-          slipUrl: slipUrl || "",
-          status: resolvedPaymentStatus,
+          slipUrl:              slipUrl || "",
+          status:               resolvedPaymentStatus,
         }
       }],
       meta: {
         createdFromIP: req.ip,
-        userAgent: req.headers["user-agent"]
+        userAgent:     req.headers["user-agent"]
       }
     };
 
@@ -171,7 +170,7 @@ exports.createFlow = async (req, res) => {
             { $set: { "students.$.bookingId": flow._id } }
           );
           console.log("[EnrollmentFlow] Update Result:", updateResult);
-
+          
           if (updateResult.matchedCount === 0) {
             console.warn(`[EnrollmentFlow] No matching student found in EnrollmentLink ${sourceToken} for email ${student.email}`);
           }
@@ -248,27 +247,27 @@ exports.updatePayment = async (req, res) => {
 };
 
 
-// ✅ Save LLN
-exports.saveLLN = async (req, res) => {
+// ✅ Save LLND
+exports.saveLLND = async (req, res) => {
   try {
-    const { flowId, ...rest } = req.body;
+    const { flowId, ...rest } = req.body; 
 
-    console.log(`[saveLLN] Attempting to save LLN for flowId: ${flowId}`);
+    console.log(`[saveLLND] Attempting to save LLND for flowId: ${flowId}`);
 
     if (!flowId) {
-      console.warn("[saveLLN] Flow ID missing in request body");
+      console.warn("[saveLLND] Flow ID missing in request body");
       return res.status(400).json({ error: "Flow ID missing" });
     }
 
     if (!mongoose.Types.ObjectId.isValid(flowId)) {
-      console.warn(`[saveLLN] Invalid flowId format: ${flowId}`);
+      console.warn(`[saveLLND] Invalid flowId format: ${flowId}`);
       return res.status(400).json({ error: "Invalid flowId" });
     }
 
     const existing = await EnrollmentFlow.findById(flowId);
 
     if (!existing) {
-      console.warn(`[saveLLN] No flow found with id: ${flowId}`);
+      console.warn(`[saveLLND] No flow found with id: ${flowId}`);
       return res.status(404).json({ error: "Flow not found for id: " + flowId });
     }
 
@@ -284,42 +283,19 @@ exports.saveLLN = async (req, res) => {
       flowId,
       {
         $set: {
-          "LLN.answers": formattedAnswers,
-          "LLN.score": Number(rest.percentage) || 0,
-          "LLN.status": "completed",
-          "LLN.summary.total": rest.total,
-          "LLN.summary.correct": rest.correct,
-          "LLN.summary.percentage": Number(rest.percentage),
-          "LLN.summary.sections": rest.sections || [],
-          LLNRaw: rest,
+          "llnd.answers": formattedAnswers,
+          "llnd.score": Number(rest.percentage) || 0,
+          "llnd.status": "completed",
+          "llnd.summary.total": rest.total,
+          "llnd.summary.correct": rest.correct,
+          "llnd.summary.percentage": Number(rest.percentage),
+          "llnd.summary.sections": rest.sections || [],
+          llndRaw: rest,
           currentStep: 3
         }
       },
       { returnDocument: "after" }
     );
-
-    // 🔥 ALSO SAVE TO STANDALONE LLN COLLECTION
-    try {
-      const flow = existing;
-      await LLNModel.create({
-        student: flow.studentId,
-        course: rest.courseId || flow.items?.[0]?.course?.courseId,
-        courseName: rest.courseName || flow.items?.[0]?.course?.courseName,
-        bookingDate: rest.bookingDate || new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
-        name: rest.name || flow.studentId?.name,
-        email: rest.email || flow.studentId?.email,
-        phone: rest.phone || flow.studentId?.phone,
-        total: rest.total,
-        correct: rest.correct,
-        percentage: Number(rest.percentage),
-        status: rest.status === "Passed" ? "Passed" : "Failed",
-        sections: rest.sections || [],
-        approved: rest.status === "Passed"
-      });
-      console.log(`[saveLLN] Mirror record created in llndassessments for flow: ${flowId}`);
-    } catch (saveErr) {
-      console.error("❌ Failed to mirror LLN to standalone collection:", saveErr.message);
-    }
 
 
 
@@ -330,8 +306,8 @@ exports.saveLLN = async (req, res) => {
       const populated = await EnrollmentFlow.findById(flowId).populate("studentId");
       if (populated && populated.studentId) {
         const student = populated.studentId;
-        const score = updated.LLN?.score || 0;
-        const isPassed = score >= 66;
+        const score = updated.llnd?.score || 0;
+        const isPassed = score >= 66; 
         const bookingId = formatBookingId(populated._id);
 
         const firstItem = populated.items?.[0] || {};
@@ -344,11 +320,11 @@ exports.saveLLN = async (req, res) => {
             studentName: student.name,
             score: score,
             isPassed: isPassed,
-            bookingId: populated._id,
+            bookingId: bookingId,
             studentPhone: student.phone || student.mobileNumber || student.mobile || "—",
             gatewayTransactionId: finalTxId
           }
-        }, null);
+        }, null); 
         console.log(`[EnrollmentFlow] LLN email trigger sent successfully.`);
       } else {
         console.warn("[EnrollmentFlow] Notification skipped: studentId or flow data missing for flow:", flowId);
@@ -358,12 +334,12 @@ exports.saveLLN = async (req, res) => {
     }
 
   } catch (err) {
-    console.error("saveLLN error:", err);
+    console.error("saveLLND error:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
-exports.updateLLNDate = async (req, res) => {
+exports.updateLLNDDate = async (req, res) => {
   try {
     const { flowId, newDate } = req.body;
     if (!flowId || !newDate) {
@@ -372,7 +348,7 @@ exports.updateLLNDate = async (req, res) => {
 
     const updated = await EnrollmentFlow.findByIdAndUpdate(
       flowId,
-      { $set: { "LLN.completedAt": new Date(newDate) } },
+      { $set: { "llnd.completedAt": new Date(newDate) } },
       { new: true }
     );
 
@@ -413,7 +389,7 @@ exports.completeEnrollment = async (req, res) => {
       if (populated && populated.studentId) {
         const student = populated.studentId;
         const bookingId = formatBookingId(populated._id);
-
+        
         const firstItem = populated.items?.[0] || {};
         const finalTxId = firstItem.payment?.gatewayTransactionId || firstItem.payment?.transactionId || "—";
 
@@ -518,14 +494,14 @@ exports.getWeeklyBookings = async (req, res) => {
 
 // controllers/enrollmentFlowController.js
 
-exports.getLLNResults = async (req, res) => {
+exports.getLLNDResults = async (req, res) => {
   try {
     const data = await EnrollmentFlow.find({
       status: "active",
-      "LLN.status": "completed"
+      "llnd.status": "completed"
     })
       .populate("studentId")
-      .sort({ "LLN.completedAt": -1, createdAt: -1 })
+      .sort({ "llnd.completedAt": -1, createdAt: -1 })
       .lean();
 
     const formatted = data.map((flow) => {
@@ -535,22 +511,22 @@ exports.getLLNResults = async (req, res) => {
       return {
         id: flow._id,
 
-        date: flow.LLN?.completedAt
-          ? new Date(flow.LLN.completedAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
+        date: flow.llnd?.completedAt 
+          ? new Date(flow.llnd.completedAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }) 
           : new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
 
-        rawDate: flow.LLN?.completedAt || flow.createdAt,
+        rawDate: flow.llnd?.completedAt || flow.createdAt,
 
-        completedDate: flow.LLN?.completedAt
-          ? new Date(flow.LLN.completedAt).toLocaleString("en-AU", {
-            timeZone: "Australia/Sydney",
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-          })
+        completedDate: flow.llnd?.completedAt 
+          ? new Date(flow.llnd.completedAt).toLocaleString("en-AU", { 
+              timeZone: "Australia/Sydney",
+              year: 'numeric', 
+              month: '2-digit', 
+              day: '2-digit', 
+              hour: '2-digit', 
+              minute: '2-digit', 
+              second: '2-digit' 
+            }) 
           : null,
 
         student: student?.name,
@@ -565,14 +541,14 @@ exports.getLLNResults = async (req, res) => {
           student?.enrollmentType === "company"
             ? "Company"
             : student?.enrollmentType === "agent"
-              ? "Agent"
-              : "Individual",
+            ? "Agent"
+            : "Individual",
 
-        score: flow.LLN?.score || 0,
-        result: flow.LLN?.status === "completed" ? "Passed" : "Failed",
-        status: flow.LLN?.status === "completed" ? "Approved" : "Pending",
+        score: flow.llnd?.score || 0,
+        result: flow.llnd?.status === "completed" ? "Passed" : "Failed",
+        status: flow.llnd?.status === "completed" ? "Approved" : "Pending",
 
-        sections: (flow.LLN?.summary?.sections || []).map(s => ({
+        sections: (flow.llnd?.summary?.sections || []).map(s => ({
           name: s.name,
           score: s.score,
           correct: s.correct || 0,   // ✅ ADD
@@ -604,7 +580,7 @@ exports.getAllPayments = async (req, res) => {
 
     gatewayPayments.forEach(p => {
       if (p.transactionId) gatewayMap[p.transactionId] = p.gatewayTransactionId;
-
+      
       // Fallback: match by normalized phone and amount
       if (p.userId && p.amount) {
         const cleanPhone = String(p.userId).replace(/\D/g, "");
@@ -658,7 +634,7 @@ exports.getAllPayments = async (req, res) => {
         if (!payment) return;
 
         const amount = payment.amount || item.course.price || 0;
-
+        
         // Find gateway ID: 1st by transactionId, 2nd by fuzzy match (normalized phone + amount)
         let gId = "—";
         if (payment.transactionId && gatewayMap[payment.transactionId]) {
@@ -697,7 +673,7 @@ exports.getAllPayments = async (req, res) => {
         });
 
         if (payment.status === "pending" || payment.status === "unpaid") stats.pending++;
-
+        
         if (payment.status === "success" || payment.status === "completed") {
           stats.success++;
           stats.totalAmount += amount;
@@ -784,7 +760,7 @@ exports.updatePaymentStatus = async (req, res) => {
             <tr><td style="width:130px;color:#64748b;">Email</td><td style="font-weight:600;">${student.email}</td></tr>
             <tr><td style="color:#64748b;">Password</td><td style="font-family:monospace;font-weight:600;font-size:15px;">123456</td></tr>
         </table>
-        <p style="margin:12px 0 0;font-size:13px;color:#92400e;">Please log in to your student dashboard and complete any pending steps (LLN assessment, enrollment form).</p>
+        <p style="margin:12px 0 0;font-size:13px;color:#92400e;">Please log in to your student dashboard and complete any pending steps (LLND assessment, enrollment form).</p>
     </td></tr></table>
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
     <tr><td style="padding:20px;">

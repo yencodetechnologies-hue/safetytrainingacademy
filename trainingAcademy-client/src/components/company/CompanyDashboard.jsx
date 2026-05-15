@@ -111,15 +111,15 @@ function ViewStudentsPanel({ companyId, token, onClose }) {
   }, [companyId, token])
 
   const statusStyle = (s) => {
-    if (s === "paid") return { background: "#1f2937", color: "#fff" }
-    if (s === "pending") return { background: "#f3f4f6", color: "#374151" }
-    if (s === "failed") return { background: "#fee2e2", color: "#dc2626" }
-    return { background: "#fff7ed", color: "#c2410c" }
+    if (s === "paid")     return { background: "#1f2937", color: "#fff" }
+    if (s === "pending")  return { background: "#f3f4f6", color: "#374151" }
+    if (s === "failed")   return { background: "#fee2e2", color: "#dc2626" }
+    return                       { background: "#fff7ed", color: "#c2410c" }
   }
   const statusText = (s) => {
-    if (s === "paid") return "Paid"
+    if (s === "paid")    return "Paid"
     if (s === "pending") return "Pending"
-    if (s === "failed") return "Failed"
+    if (s === "failed")  return "Failed"
     return "Not Paid"
   }
 
@@ -160,7 +160,7 @@ function ViewStudentsPanel({ companyId, token, onClose }) {
                 <th style={{ textAlign: "left", padding: "6px 8px", color: "#6b7280", fontWeight: 600 }}>Student</th>
                 <th style={{ textAlign: "left", padding: "6px 8px", color: "#6b7280", fontWeight: 600 }}>Amount</th>
                 <th style={{ textAlign: "left", padding: "6px 8px", color: "#6b7280", fontWeight: 600 }}>Payment</th>
-                <th style={{ textAlign: "left", padding: "6px 8px", color: "#6b7280", fontWeight: 600 }}>LLN</th>
+                <th style={{ textAlign: "left", padding: "6px 8px", color: "#6b7280", fontWeight: 600 }}>LLND</th>
                 <th style={{ textAlign: "left", padding: "6px 8px", color: "#6b7280", fontWeight: 600 }}>Enrolled</th>
               </tr>
             </thead>
@@ -183,11 +183,11 @@ function ViewStudentsPanel({ companyId, token, onClose }) {
                   </td>
                   <td style={{ padding: "7px 8px" }}>
                     <span style={{
-                      background: s.LLN === "Completed" ? "#dcfce7" : "#f3f4f6",
-                      color: s.LLN === "Completed" ? "#16a34a" : "#6b7280",
+                      background: s.llnd === "Completed" ? "#dcfce7" : "#f3f4f6",
+                      color: s.llnd === "Completed" ? "#16a34a" : "#6b7280",
                       padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 600,
                     }}>
-                      {s.LLN}
+                      {s.llnd}
                     </span>
                   </td>
                   <td style={{ padding: "7px 8px", color: "#6b7280", whiteSpace: "nowrap" }}>{s.enrolled}</td>
@@ -337,7 +337,7 @@ function QuickLinksCard({ username, email }) {
       <p className="cd-quick-desc">
         Use the sidebar to navigate to Courses, Payments, and Student Enrolled sections.
       </p>
-      <CourseLinkCards />
+      <CourseLinkCards/>
       <div className="cd-quick-divider">
         You are logged in as {username} ({email}).
       </div>

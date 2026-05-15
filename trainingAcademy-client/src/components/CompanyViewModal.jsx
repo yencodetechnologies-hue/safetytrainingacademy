@@ -73,7 +73,7 @@ function LinkCard({ link, students }) {
         if (p === "Failed") return { background: "#fef2f2", color: "#dc2626" };
         return { background: "#fef3c7", color: "#b45309" };
     };
-    const LLNBg = (l) => l === "Completed"
+    const llndBg = (l) => l === "Completed"
         ? { background: "#ecfdf5", color: "#059669" }
         : { background: "#f3f4f6", color: "#6b7280" };
     const formBg = (f) => f === "Submitted"
@@ -141,7 +141,7 @@ function LinkCard({ link, students }) {
                                         <th>STUDENT</th>
                                         <th>COURSE</th>
                                         <th>PAYMENT</th>
-                                        <th>LLN</th>
+                                        <th>LLND</th>
                                         <th>FORM</th>
                                         <th>ENROLLED</th>
                                     </tr>
@@ -162,8 +162,8 @@ function LinkCard({ link, students }) {
                                                 </span>
                                             </td>
                                             <td>
-                                                <span style={{ ...LLNBg(s.LLN), padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 600 }}>
-                                                    {s.LLN}
+                                                <span style={{ ...llndBg(s.llnd), padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 600 }}>
+                                                    {s.llnd}
                                                 </span>
                                             </td>
                                             <td>
@@ -336,8 +336,8 @@ export default function CompanyViewModal({ company, onClose }) {
                                         {enrolmentUrl}
                                     </div>
                                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                                        <button
-                                            className="cvm-link-btn-copy"
+                                        <button 
+                                            className="cvm-link-btn-copy" 
                                             onClick={handleCopyEnrolmentLink}
                                             style={{ width: "fit-content" }}
                                         >
@@ -392,7 +392,7 @@ export default function CompanyViewModal({ company, onClose }) {
                                                     <th>COURSE</th>
                                                     <th>AMOUNT</th>
                                                     <th>PAYMENT</th>
-                                                    <th>LLN</th>
+                                                    <th>LLND</th>
                                                     <th>FORM</th>
                                                     <th>TRAINING</th>
                                                     <th>ENROLLED</th>
@@ -410,7 +410,7 @@ export default function CompanyViewModal({ company, onClose }) {
                                                         <td>{s.course}</td>
                                                         <td>{s.amount}</td>
                                                         <td><span className={`cvm-tag cvm-tag-${s.payment?.toLowerCase()}`}>{s.payment}</span></td>
-                                                        <td><span className={`cvm-tag cvm-tag-${s.LLN?.toLowerCase().replace(/ /g, "-")}`}>{s.LLN}</span></td>
+                                                        <td><span className={`cvm-tag cvm-tag-${s.llnd?.toLowerCase().replace(/ /g, "-")}`}>{s.llnd}</span></td>
                                                         <td><span className={`cvm-tag cvm-tag-${s.form?.toLowerCase().replace(/ /g, "-")}`}>{s.form}</span></td>
                                                         <td><span className={`cvm-tag cvm-tag-${s.training?.toLowerCase().replace(/ /g, "-")}`}>{s.training}</span></td>
                                                         <td><div className="cvm-stu-date">{s.enrolled}</div></td>

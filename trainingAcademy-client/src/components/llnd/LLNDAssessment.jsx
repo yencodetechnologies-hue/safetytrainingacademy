@@ -1,16 +1,16 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import Numeracy from "../lln/Numeracy"
-import Literacy from "../lln/Literacy"
-import Language from "../lln/Language"
-import Digital from "../lln/Digital"
+import Numeracy from "./Numeracy"
+import Literacy from "./Literacy"
+import Language from "./Language"
+import Digital from "./Digital"
 import CourseResult from "./CourseResult"
-import LLNAssessmentComplete from "../lln/LLNAssessmentComplete"
+import LLNDAssessmentComplete from "../llnd/LLNDAssessmentComplete"
 
 const topics = ["Numeracy", "Literacy", "Language", "Digital"]
 
-function LLNAssessment(props) {
-    const { onComplete, userDetails, courseId, courseName } = props
+function LLNDAssessment(props) {
+    const { onComplete, userDetails } = props
     const [attempt, setAttempt] = useState(1)
     const [topicIndex, setTopicIndex] = useState(0)
     const navigate = useNavigate()
@@ -128,7 +128,7 @@ function LLNAssessment(props) {
             "2-4": "First Aid",
             "3-0": "Hard hats, steel-capped boots, high-visibility vests",
             "4-0": "The site supervisor",
-            "5-0": "Follow all safety signs and instructions",
+            "5-0": "Follow all safety signs and instructions", 
         }
 
         let litCorrect = 0
@@ -228,9 +228,8 @@ function LLNAssessment(props) {
                 name: userDetails?.name || "Student",
                 email: userDetails?.email || "",
                 phone: userDetails?.phone || "",
-                answers: answers,
-                courseId,
-                courseName
+                date: new Date().toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
+                answers: answers
             }
 
             setResultData(forcedResult)
@@ -250,9 +249,8 @@ function LLNAssessment(props) {
             name: userDetails?.name || "Student",
             email: userDetails?.email || "",
             phone: userDetails?.phone || "",
-            answers: answers,
-            courseId,
-            courseName
+            date: new Date().toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
+            answers: answers
         }
 
         setResultData(result)
@@ -261,17 +259,17 @@ function LLNAssessment(props) {
 
     return (
 
-        <div className="LLN-card" style={{ margin: "0% 10%" }}>
+        <div className="llnd-card" style={{ margin: "0% 10%" }}>
 
-            <h3 className="LLN-h3"> LLN Assessment</h3>
+            <h3 className="llnd-h3"> LLND Assessment</h3>
 
             <p>
                 Section {topicIndex + 1} of 4 : {topics[topicIndex]}
             </p>
 
-            <div className="LLN-progress">
+            <div className="llnd-progress">
                 <div
-                    className="LLN-fill"
+                    className="llnd-fill"
                     style={{ width: `${progress}%` }}
                 ></div>
             </div>
@@ -295,7 +293,7 @@ function LLNAssessment(props) {
                         onContinue={onComplete}
                     />
                 ) : (
-                    <LLNAssessmentComplete
+                    <LLNDAssessmentComplete
                         attempt={attempt}
                         data={resultData}
                         flowId={props.flowId}
@@ -315,4 +313,4 @@ function LLNAssessment(props) {
     )
 }
 
-export default LLNAssessment
+export default LLNDAssessment

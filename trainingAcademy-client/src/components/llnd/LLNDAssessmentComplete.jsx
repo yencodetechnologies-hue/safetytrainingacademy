@@ -1,27 +1,74 @@
-import "../../styles/LLNComplete.css"
+import "../../styles/LLNDComplete.css"
 import { FaCheckCircle } from "react-icons/fa"
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react"
 import { API_URL } from "../../data/service"
 
 function LLNDAssessmentComplete({ data, onRetry, attempt, onContinue, flowId: flowIdProp }) {
-    const navigate = useNavigate()
     const [isSaving, setIsSaving] = useState(false)
+    const [countdown, setCountdown] = useState(3)
+    const [autoStarted, setAutoStarted] = useState(false)
 
-   const safeData = data || {
-    total: 0,
-    correct: 0,
-    percentage: 0,
-    sections: []
-  }
+    const safeData = data || {
+        total: 0,
+        correct: 0,
+        percentage: 0,
+        sections: []
+    }
 
-const isOverallPass = safeData.percentage >= 67;
+    const isOverallPass = safeData.percentage >= 67;
+    const isAllSectionsPass = safeData.sections.every(
+        (s) => s.status === "Passed"
+    );
+    const isPassed = isOverallPass && isAllSectionsPass;
 
-const isAllSectionsPass = safeData.sections.every(
-  (s) => s.status === "Passed"
-);
+    const handleSaveAndContinue = async () => {
+        setIsSaving(true)
+        try {
+            const flowId = flowIdProp || localStorage.getItem("flowId")
+            if (!flowId || flowId === "null" || flowId === "undefined") {
+                alert("Session expired or missing. Please refresh the dashboard and try again.")
+                setIsSaving(false)
+                return
+            }
+            const payload = {
+                flowId,
+                ...data,
+                answers: data.answers || []
+            }
+            const res = await fetch(`${API_URL}/api/flow/llnd`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}))
+                throw new Error(errData.error || "Failed to save assessment")
+            }
+            onContinue()
+        } catch (err) {
+            console.error(err)
+            alert(err.message || "Failed to save assessment")
+        } finally {
+            setIsSaving(false)
+        }
+    }
 
-const isPassed = isOverallPass && isAllSectionsPass;
+    useEffect(() => {
+        if (isPassed && !isSaving && !autoStarted) {
+            const timer = setInterval(() => {
+                setCountdown((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(timer)
+                        setAutoStarted(true)
+                        handleSaveAndContinue()
+                        return 0
+                    }
+                    return prev - 1
+                })
+            }, 1000)
+            return () => clearInterval(timer)
+        }
+    }, [isPassed, isSaving, autoStarted])
 
   return (
     <div className="llnd-complete-card">
@@ -73,48 +120,15 @@ const isPassed = isOverallPass && isAllSectionsPass;
 
       {isPassed && (
         <div className="continue-wrapper">
+          <div className="auto-redirect-info" style={{ textAlign: "center", marginBottom: "15px", color: "#6366f1", fontWeight: "600" }}>
+              {countdown > 0 && !autoStarted && `Auto-continuing to Enrollment Form in ${countdown}s...`}
+          </div>
           <button
             className="continue-btn"
             disabled={isSaving}
-            onClick={async () => {
-              setIsSaving(true)
-              try {
-                const flowId = flowIdProp || localStorage.getItem("flowId")
-
-                if (!flowId || flowId === "null" || flowId === "undefined") {
-                  alert("Session expired or missing. Please refresh the dashboard and try again.")
-                  setIsSaving(false)
-                  return
-                }
-
-                const payload = {
-                  flowId,
-                  ...data,
-                  answers: data.answers || []
-                }
-
-                const res = await fetch(`${API_URL}/api/flow/LLN`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(payload)
-                })
-
-                if (!res.ok) {
-                    const errData = await res.json().catch(() => ({}))
-                    throw new Error(errData.error || "Failed to save assessment")
-                }
-
-                if (onContinue) {
-                  onContinue()
-                } else {
-                  navigate("/student")
-                }
-              } catch (err) {
-                console.error(err)
-                alert(err.message || "Failed to save assessment")
-              } finally {
-                setIsSaving(false)
-              }
+            onClick={() => {
+                setAutoStarted(true)
+                handleSaveAndContinue()
             }}
           >
             {isSaving ? "Saving..." : "Continue to Enrollment Form →"}

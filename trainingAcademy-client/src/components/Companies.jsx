@@ -374,6 +374,57 @@ function AddCompanyModal({ onClose, onAdd, editData, onUpdate }) {
     );
 }
 
+/* ── Delete Company Modal ── */
+function DeleteCompanyModal({ company, onClose, onConfirm }) {
+    const [deleting, setDeleting] = useState(false);
+    const companyName = company.companyName || company.name || "this company";
+
+    const handleDelete = async () => {
+        setDeleting(true);
+        try {
+            await onConfirm(company._id);
+            onClose();
+        } catch (err) {
+            console.error(err);
+            alert(err?.response?.data?.message || "Delete failed");
+        } finally {
+            setDeleting(false);
+        }
+    };
+
+    return (
+        <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }} role="alertdialog">
+            <div className="modal-box modal-box-sm" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                    <div>
+                            <h2 className="modal-title">Delete Company?</h2>
+                            <p className="modal-subtitle">
+                                Are you sure you want to delete the company <strong>{companyName}</strong>? This action cannot be undone.
+                            </p>
+                        </div>
+                    <button className="modal-close-btn" onClick={onClose} type="button" aria-label="Close">
+                        <CloseIcon />
+                    </button>
+                </div>
+                <div className="modal-delete-body">
+                    <p><strong>Email:</strong> {company.email}</p>
+                    {company.contactPerson && (
+                        <p><strong>Contact:</strong> {company.contactPerson}</p>
+                    )}
+                </div>
+                <div className="modal-footer">
+                    <button className="btn-cancel" onClick={onClose} disabled={deleting} type="button">
+                        Cancel
+                    </button>
+                    <button className="btn-delete-company" onClick={handleDelete} disabled={deleting} type="button">
+                        {deleting ? "Deleting..." : "Delete Company"}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 /* ── Main Component ── */
 export default function Companies() {
     const [search, setSearch] = useState("");
@@ -384,6 +435,7 @@ export default function Companies() {
     const [editCompany, setEditCompany] = useState(null);
     const [viewCompany, setViewCompany] = useState(null);
     const [linksModalCompany, setLinksModalCompany] = useState(null);
+    const [deleteTarget, setDeleteTarget] = useState(null);
 
     useEffect(() => {
         const fetchCompanies = async () => {
@@ -448,17 +500,11 @@ export default function Companies() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure?")) return;
-        try {
-            const token = localStorage.getItem("token");
-            await axios.delete(`${API_URL}/api/companies/${id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setCompanies((prev) => prev.filter((c) => c._id !== id));
-        } catch (err) {
-            console.error(err);
-            alert("Delete failed");
-        }
+        const token = localStorage.getItem("token");
+        await axios.delete(`${API_URL}/api/companies/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        setCompanies((prev) => prev.filter((c) => c._id !== id));
     };
 
     const handleAddCompany = (company) => {
@@ -493,6 +539,15 @@ export default function Companies() {
                 <LinksModal
                     company={linksModalCompany}
                     onClose={() => setLinksModalCompany(null)}
+                />
+            )}
+
+            {/* ── Delete Confirm Modal ── */}
+            {deleteTarget && (
+                <DeleteCompanyModal
+                    company={deleteTarget}
+                    onClose={() => setDeleteTarget(null)}
+                    onConfirm={handleDelete}
                 />
             )}
 
@@ -651,7 +706,7 @@ export default function Companies() {
                                             <button
                                                 className="btn-icon btn-icon-delete"
                                                 title="Delete"
-                                                onClick={() => handleDelete(company._id)}
+                                                onClick={() => setDeleteTarget(company)}
                                             >
                                                 <TrashIcon />
                                             </button>

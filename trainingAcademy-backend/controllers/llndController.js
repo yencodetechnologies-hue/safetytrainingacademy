@@ -1,12 +1,12 @@
-const LLN = require("../models/LLNAssessment");
+const LLND = require("../models/LLNDAssessment");
 const StudentMain = require("../models/student_main");
 
-exports.saveLLN = async (req, res) => {
+exports.saveLLND = async (req, res) => {
   try {
     const { studentId, courseId } = req.params;
 
-    // 🔥 create LLN
-    const savedLLN = await LLN.create({
+    // 🔥 create LLND
+    const llnd = await LLND.create({
       student: studentId,
       course: courseId,
       answers: req.body.answers,
@@ -22,43 +22,26 @@ exports.saveLLN = async (req, res) => {
       },
       {
         $set: {
-          "courses.$.assessmentId": LLN._id,
+          "courses.$.assessmentId": llnd._id,
           "courses.$.step": 3
         }
       }
     );
 
-    res.json(savedLLN);
+    res.json(llnd);
 
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-exports.getAllLLN = async (req, res) => {
+exports.getAllLLND = async (req, res) => {
   try {
-    const data = await LLN.find()
-      .populate("student", "name email phone mobileNumber mobile enrollmentType")
-      .populate("course", "title courseName")
+    const data = await LLND.find()
+      .populate("student", "name email phone")
+      .populate("course", "title")
       .sort({ createdAt: -1 });
 
-    // Format data to match what the frontend expects
-    const formatted = data.map(item => ({
-      id: item._id,
-      date: item.createdAt,
-      rawDate: item.createdAt,
-      student: item.student?.name || item.name || "Unknown",
-      email: item.student?.email || item.email || "N/A",
-      phone: item.student?.phone || item.student?.mobileNumber || item.phone || "N/A",
-      course: item.course?.title || item.course?.courseName || item.courseName || item.courseTitle || (item.course ? `ID: ${item.course}` : "Unknown"),
-      bookingDate: item.bookingDate || "N/A",
-      score: item.percentage || item.score || 0,
-      result: item.status || "N/A",
-      status: item.approved ? "Approved" : "Pending",
-      sections: item.sections || [],
-      type: item.student?.enrollmentType || "Individual"
-    }));
-
-    res.json(formatted);
+    res.json(data);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
