@@ -16,6 +16,26 @@ import { API_URL } from "../data/service";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
+/** Card payments already create links in createPayment; pending payments need generate. */
+async function fetchOrGenerateCourseLinks(paymentId, companyId, coursesPayload, paymentStatus) {
+    if (paymentStatus === "success") {
+        const linksRes = await fetch(`${API_URL}/api/course-links/payment/${paymentId}`)
+        const linksData = await linksRes.json()
+        return linksData.data || []
+    }
+    const linksRes = await fetch(`${API_URL}/api/course-links/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            companyPaymentId: paymentId,
+            companyId,
+            courses: coursesPayload,
+        }),
+    })
+    const linksData = await linksRes.json()
+    return linksData.data || []
+}
+
 function BookNow() {
     const location = useLocation()
     const navigate = useNavigate();
@@ -684,18 +704,12 @@ function BookNow() {
                     const paymentResData = await paymentRes.json()
                     if (!paymentRes.ok) throw new Error(paymentResData.message || "Payment creation failed")
 
-                    // ✅ 5. Generate Course Links — one per course
-                    const linksRes = await fetch(`${API_URL}/api/course-links/generate`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            companyPaymentId: paymentResData.data._id,
-                            companyId,
-                            courses: coursesPayload,
-                        })
-                    })
-                    const linksData = await linksRes.json()
-                    const generatedLinks = linksData.data || []
+                    const generatedLinks = await fetchOrGenerateCourseLinks(
+                        paymentResData.data._id,
+                        companyId,
+                        coursesPayload,
+                        paymentResData.data.status,
+                    )
 
                     // ✅ 6. Create EnrollmentFlows for each course
                     await Promise.all(selectedCourses.map(sc =>
@@ -818,17 +832,12 @@ function BookNow() {
                     const paymentResData = await paymentRes.json()
                     if (!paymentRes.ok) throw new Error(paymentResData.message || "Payment creation failed")
 
-                    const linksRes = await fetch(`${API_URL}/api/course-links/generate`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            companyPaymentId: paymentResData.data._id,
-                            companyId,
-                            courses: coursesPayload,
-                        })
-                    })
-                    const linksData = await linksRes.json()
-                    const generatedLinks = linksData.data || []
+                    const generatedLinks = await fetchOrGenerateCourseLinks(
+                        paymentResData.data._id,
+                        companyId,
+                        coursesPayload,
+                        paymentResData.data.status,
+                    )
 
                     await Promise.all(selectedCourses.map(sc =>
                         fetch(`${API_URL}/api/flow/create`, {

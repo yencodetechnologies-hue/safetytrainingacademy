@@ -16,8 +16,14 @@ exports.generateLinks = async (req, res) => {
             return res.status(400).json({ message: "Missing required fields" })
         }
 
-        // ✅ Each course → one unique link
+        // Each course → one unique link; skip if already created (e.g. by createPayment)
         const links = await Promise.all(courses.map(async (course) => {
+            const existing = await CourseLink.findOne({
+                companyPaymentId,
+                courseId: course.courseId,
+            })
+            if (existing) return existing
+
             const token = crypto.randomBytes(20).toString("hex")
 
             return CourseLink.create({

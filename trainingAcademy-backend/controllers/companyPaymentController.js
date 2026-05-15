@@ -208,6 +208,12 @@ exports.createPayment = async (req, res) => {
     // ── AUTOMATIC LINK GENERATION for successful payments ──────
     if (status === "success" && Array.isArray(courses) && courses.length > 0) {
       await Promise.all(courses.map(async (course) => {
+        const existing = await CourseLink.findOne({
+          companyPaymentId: payment._id,
+          courseId: course.courseId,
+        });
+        if (existing) return existing;
+
         const token = crypto.randomBytes(20).toString("hex");
         return CourseLink.create({
           companyPaymentId: payment._id,
