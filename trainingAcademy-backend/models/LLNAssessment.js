@@ -39,4 +39,4 @@ const LLNSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-module.exports = mongoose.model("LLNAssessment", LLNSchema);
+module.exports = mongoose.model("LLNDAssessment", LLNSchema, "llndassessments");

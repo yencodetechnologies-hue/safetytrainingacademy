@@ -6,7 +6,7 @@ exports.saveLLN = async (req, res) => {
     const { studentId, courseId } = req.params;
 
     // 🔥 create LLN
-    const LLN = await LLN.create({
+    const savedLLN = await LLN.create({
       student: studentId,
       course: courseId,
       answers: req.body.answers,
@@ -28,7 +28,7 @@ exports.saveLLN = async (req, res) => {
       }
     );
 
-    res.json(LLN);
+    res.json(savedLLN);
 
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -37,11 +37,27 @@ exports.saveLLN = async (req, res) => {
 exports.getAllLLN = async (req, res) => {
   try {
     const data = await LLN.find()
-      .populate("student", "name email phone")
-      .populate("course", "title")
+      .populate("student", "name email phone mobileNumber mobile enrollmentType")
+      .populate("course", "title courseName")
       .sort({ createdAt: -1 });
 
-    res.json(data);
+    // Format data to match what the frontend expects
+    const formatted = data.map(item => ({
+      id: item._id,
+      date: item.createdAt,
+      rawDate: item.createdAt,
+      student: item.student?.name || item.name || "Unknown",
+      email: item.student?.email || item.email || "N/A",
+      phone: item.student?.phone || item.student?.mobileNumber || item.phone || "N/A",
+      course: item.course?.title || item.course?.courseName || "Unknown",
+      score: item.percentage || item.score || 0,
+      result: item.status || "N/A",
+      status: item.approved ? "Approved" : "Pending",
+      sections: item.sections || [],
+      type: item.student?.enrollmentType || "Individual"
+    }));
+
+    res.json(formatted);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

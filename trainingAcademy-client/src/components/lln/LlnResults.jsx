@@ -198,7 +198,7 @@ export default function LLNResults() {
   });
 
   useEffect(() => {
-    fetch(`${API_URL}/api/flow/LLN-results`)
+    fetch(`${API_URL}/api/LLN`)
       .then(res => res.json())
       .then(res => {
         // ✅ Sort by rawDate descending - Latest first
@@ -443,7 +443,7 @@ export default function LLNResults() {
           onClose={() => setSelectedRecord(null)}
           onRefresh={() => {
             // Re-fetch data to reflect date change
-            fetch(`${API_URL}/api/flow/LLN-results`)
+            fetch(`${API_URL}/api/LLN`)
               .then(res => res.json())
               .then(res => {
                 const sorted = [...res].sort((a, b) => {
