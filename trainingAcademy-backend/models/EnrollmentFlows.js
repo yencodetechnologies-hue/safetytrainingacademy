@@ -98,7 +98,7 @@ enrollmentType: {
 
   enrollmentFormId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "EnrollmentForm"
+    ref: "enrollmenforms"
   },
 
   // ✅ Enrollment Status tracking
