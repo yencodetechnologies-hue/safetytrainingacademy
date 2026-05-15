@@ -83,7 +83,7 @@ function Sidebar({ user }) {
 
   const handleLogout = () => {
     logout()
-    navigate("/")
+    navigate("/login")
   }
 
   return (

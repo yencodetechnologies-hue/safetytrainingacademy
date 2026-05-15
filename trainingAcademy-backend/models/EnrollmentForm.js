@@ -199,4 +199,4 @@ const EnrollmentFormSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-module.exports = mongoose.model("EnrollmenForm", EnrollmentFormSchema);
+module.exports = mongoose.model("EnrollmentForm", EnrollmentFormSchema);

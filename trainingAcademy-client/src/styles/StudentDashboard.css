@@ -94,6 +94,35 @@
   text-decoration: underline;
 }
 
+/* Warning alert (Awaiting Review) */
+.alert-warning {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+}
+
+.alert-warning .alert-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1a202c;
+  margin: 0;
+}
+
+.alert-warning .alert-desc {
+  font-size: 0.85rem;
+  color: #4a5568;
+  margin: 0;
+}
+
+.alert-warning .alert-icon {
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
 /* Danger alert */
 .alert-danger {
   background: #fff5f5;

@@ -1,6 +1,5 @@
 import React, { useContext, useState } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import "../styles/LoginForm.css";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -11,6 +10,7 @@ import { API_URL } from "../data/service";
 function LoginForm() {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPw, setShowPw] = useState(false);
 
   const formik = useFormik({
@@ -31,11 +31,21 @@ function LoginForm() {
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("user", JSON.stringify(res.data.user));
         login(res.data.user);
+
         const role = res.data.user.role;
-        if (role === "Student") navigate("/student");
-        if (role === "Teacher") navigate("/teacher");
-        if (role === "Admin") navigate("/admin");
-        if (role === "Company") navigate("/company");
+        const from = location.state?.from;
+
+        if (from) {
+          navigate(from, { replace: true });
+        } else {
+          const dashboardRoutes = {
+            Admin: "/admin",
+            Student: "/student",
+            Teacher: "/teacher",
+            Company: "/company"
+          };
+          navigate(dashboardRoutes[role] || "/");
+        }
       } catch (err) {
         alert(err.response?.data?.message || "Login failed");
       }

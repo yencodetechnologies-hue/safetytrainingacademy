@@ -84,17 +84,15 @@ exports.getStudentDashboard = async (req, res) => {
       }
     }
 
-    // ✅ Check if enrollment form is actually APPROVED (not just submitted)
-    let enrollmentFormApproved = false;
-    if (latestFlow.enrollmentFormId) {
-      try {
-        const EnrollmentForm = require("../models/EnrollmentForm");
-        const form = await EnrollmentForm.findById(latestFlow.enrollmentFormId).lean();
-        enrollmentFormApproved = (form?.status === "Approved");
-      } catch (e) {
-        console.error("Error checking form status:", e);
-      }
-    }
+    // ✅ Check for enrollment form directly by studentId for more robust status tracking
+    const EnrollmentForm = require("../models/EnrollmentForm");
+    console.log("[Dashboard] Checking form for studentId:", studentId);
+    const existingForm = await EnrollmentForm.findOne({ studentId }).lean();
+    console.log("[Dashboard] Form found:", existingForm ? "YES" : "NO", existingForm?._id);
+    
+    // ✅ If flow status is 'completed', it means they finished the form submission flow
+    const enrollmentFormSubmitted = !!existingForm || latestFlow.enrollmentStatus === "completed";
+    const enrollmentFormApproved = existingForm?.status === "Approved";
 
     const response = {
       latestFlowId: latestFlow._id,
@@ -102,7 +100,7 @@ exports.getStudentDashboard = async (req, res) => {
       assessmentScore: llndScore,
       paymentVerified,
       assessmentPassed,
-      enrollmentFormSubmitted: !!latestFlow.enrollmentFormId,
+      enrollmentFormSubmitted,
       enrollmentFormApproved,
       paymentMethod,
       enrollmentType,
