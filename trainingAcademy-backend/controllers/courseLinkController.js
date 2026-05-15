@@ -3,6 +3,7 @@
 const CourseLink = require("../models/CourseLink")
 const Company = require("../models/Company")
 const crypto = require("crypto")
+const { dedupeCourseLinks } = require("../utils/dedupeCourseLinks")
 
 // ─────────────────────────────────────────────────────────────
 // 1. Generate links for a payment (called after payment create)
@@ -149,11 +150,11 @@ exports.useLink = async (req, res) => {
 // ─────────────────────────────────────────────────────────────
 exports.getLinksByPayment = async (req, res) => {
     try {
-        const links = await CourseLink.find({ 
-            companyPaymentId: req.params.paymentId 
+        const links = await CourseLink.find({
+            companyPaymentId: req.params.paymentId,
         }).lean()
 
-        res.json({ success: true, data: links })
+        res.json({ success: true, data: dedupeCourseLinks(links) })
     } catch (err) {
         res.status(500).json({ success: false, message: err.message })
     }
@@ -165,7 +166,8 @@ exports.getLinksByCompany = async (req, res) => {
         const { companyId } = req.params
         const links = await CourseLink.find({ companyId })
             .sort({ createdAt: -1 })
-        res.json(links)
+            .lean()
+        res.json(dedupeCourseLinks(links))
     } catch (err) {
         res.status(500).json({ message: err.message })
     }
