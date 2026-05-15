@@ -12,6 +12,7 @@ const LLNDAssessment = require("../models/LLNDAssessment");
 const EnrollmentForm = require("../models/EnrollmentForm");
 const Payment = require("../models/Payment");
 const sendEmail = require("../config/sendEmail");
+const { formatBookingId } = require("./bookingEmailController");
 const adminBookingTemplate = require("../templates/adminBookingTemplate");
 
 exports.createStudent = async (req, res) => {
@@ -176,7 +177,7 @@ exports.createStudent = async (req, res) => {
           courseDate: sessionData.sessionDate ? new Date(sessionData.sessionDate).toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Sydney" }) : "—",
           courseTime: (sessionData.startTime && sessionData.endTime) ? `${sessionData.startTime} - ${sessionData.endTime}` : "—",
           courseLocation: "3/14-16 Marjorie Street, Sefton NSW 2162",
-          bookingId: `ADM-${Date.now().toString().slice(-6)}`,
+          bookingId: formatBookingId(Date.now().toString()),
           orderDate: new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" }),
           quantity: 1,
           subtotal: course?.sellingPrice ? `$${Number(course.sellingPrice).toFixed(2)}` : "—",

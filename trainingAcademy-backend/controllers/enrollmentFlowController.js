@@ -301,27 +301,32 @@ exports.saveLLND = async (req, res) => {
 
     res.json(updated);
 
-    // ✅ Send Notifications (Non-blocking)
+    // ✅ Send Notifications
     try {
-      const populated = await EnrollmentFlow.findById(flowId).populate("studentId");
+      const populated = await EnrollmentFlow.findById(flowId).populate("studentId").populate("bookingId");
       if (populated && populated.studentId) {
-        // We call the controller function with a mock req/res or just manually
-        // But since we want it to be clean, we'll just call the logic
         const student = populated.studentId;
         const score = updated.llnd?.score || 0;
-        const isPassed = score >= 70; // Assuming 70 is pass mark as per system logic
+        const isPassed = score >= 66; 
+        const bookingId = formatBookingId(populated._id);
 
-        // Call the email function (we pass a mock object that mimics req.body)
-        sendLLNCompletionNotification({
+        const firstItem = populated.items?.[0] || {};
+        const fromItem = firstItem.payment?.transactionId || firstItem.payment?.gatewayTransactionId;
+        const fromBooking = populated.bookingId?.gatewayTransactionId || populated.bookingId?.bankTransferId;
+        const finalTxId = fromItem || fromBooking || "—";
+
+        // Important: Await the notification to ensure it's sent
+        await sendLLNCompletionNotification({
           body: {
             studentEmail: student.email,
             studentName: student.name,
             score: score,
             isPassed: isPassed,
-            bookingId: `#${formatBookingId(populated._id)}`,
-            studentPhone: student.phone || student.mobileNumber || student.mobile || "—"
+            bookingId: bookingId,
+            studentPhone: student.phone || student.mobileNumber || student.mobile || "—",
+            gatewayTransactionId: finalTxId
           }
-        }, null); // pass null for res since we already sent response
+        }, null); 
       }
     } catch (emailErr) {
       console.error("Failed to trigger LLN emails:", emailErr.message);
@@ -377,22 +382,26 @@ exports.completeEnrollment = async (req, res) => {
 
     res.json({ message: "Enrollment completed 🎉" });
 
-    // ✅ Send Notifications (Non-blocking)
+    // ✅ Send Notifications
     try {
-      const populated = await EnrollmentFlow.findById(flowId).populate("studentId");
+      const populated = await EnrollmentFlow.findById(flowId).populate("studentId").populate("bookingId");
       if (populated && populated.studentId) {
         const student = populated.studentId;
         const bookingId = formatBookingId(populated._id);
+        
+        // Try to find transaction ID from various places
         const firstItem = populated.items?.[0] || {};
-        const gatewayTransactionId = firstItem.payment?.transactionId || "—";
+        const fromItem = firstItem.payment?.transactionId || firstItem.payment?.gatewayTransactionId;
+        const fromBooking = populated.bookingId?.gatewayTransactionId || populated.bookingId?.bankTransferId;
+        const finalTxId = fromItem || fromBooking || "—";
 
-        sendEnrollmentFormCompletionNotification({
+        await sendEnrollmentFormCompletionNotification({
           body: {
             studentEmail: student.email,
             studentName: student.name,
-            bookingId: `#${bookingId}`,
+            bookingId: bookingId,
             studentPhone: student.phone || student.mobileNumber || student.mobile || "—",
-            gatewayTransactionId: gatewayTransactionId
+            gatewayTransactionId: finalTxId
           }
         }, null);
       }

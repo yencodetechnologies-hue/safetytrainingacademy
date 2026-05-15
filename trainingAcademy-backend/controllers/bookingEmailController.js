@@ -1,898 +1,298 @@
 const sendEmail = require("../config/sendEmail");
 const adminBookingTemplate = require("../templates/adminBookingTemplate");
+const studentBookingTemplate = require("../templates/studentBookingTemplate");
 
 const formatBookingId = (id) => {
     if (!id) return "00000000";
     const digits = String(id).replace(/\D/g, "");
-    if (digits.length >= 8) return digits.slice(0, 8);
+    if (digits.length >= 8) return digits.slice(-8);
     if (digits.length > 0) return digits.padStart(8, "0");
-    return String(id).slice(0, 8).toUpperCase().padStart(8, "0");
+    return String(id).slice(-8).toUpperCase().padStart(8, "0");
 };
 
-const buildStudentHtml = (data) => {
-  const { orderId, student, course, payment, portal } = data;
-  const digits = formatBookingId(orderId);
-
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Booking Confirmation – Safety Training Academy</title>
-  <style>
-    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: Arial, sans-serif; }
-    .sb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
-    .sb-hdr { background: #0d2240; padding: 16px 24px; }
-    .sb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
-    .sb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
-    .sb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
-    .sb-divider { height: 3px; background: #29b6e8; }
-    .sb-content { padding: 18px 24px; }
-    .sb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
-    .sb-section-head { background: #0d2240; padding: 7px 14px; }
-    .sb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
-    .sb-row { display: flex; border-bottom: 1px solid #f0f0f0; }
-    .sb-label { width: 38%; padding: 8px 14px; font-size: 11px; font-weight: 600; color: #666; background: #fafafa; border-right: 1px solid #f0f0f0; }
-    .sb-value { padding: 8px 14px; font-size: 12px; color: #1a1a1a; flex: 1; }
-    .sb-btn { display: inline-block; background: #29b6e8; color: #ffffff; padding: 10px 24px; border-radius: 4px; text-decoration: none; font-weight: 700; font-size: 14px; margin-top: 12px; }
-    .sb-footer { background: #f5f7fa; border-top: 1px solid #e0e0e0; padding: 12px 24px; font-size: 10px; color: #999; text-align: center; }
-  </style>
-</head>
-<body>
-  <div class="sb-body">
-    <div class="sb-hdr">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td>
-            <p class="sb-hdr-title">Safety Training Academy</p>
-            <p class="sb-hdr-sub">RTO #45234 &nbsp;·&nbsp; Booking Confirmation</p>
-          </td>
-          <td align="right" valign="top">
-            <span class="sb-badge">Confirmed</span>
-            <p style="margin: 4px 0 0; font-size: 25px; font-weight: 700; color: #ffffff; text-align: right;">
-              Booking ID: ${digits}
-            </p>
-          </td>
-        </tr>
-      </table>
-    </div>
-    <div class="sb-divider"></div>
-    <div class="sb-content">
-      <p style="margin: 0 0 16px; color: #444;">Dear <strong>${student.firstName}</strong>, thank you for booking with us!</p>
-      
-      <div class="sb-section">
-        <div class="sb-section-head"><span>Course Details</span></div>
-        <div class="sb-row"><div class="sb-label">Course</div><div class="sb-value"><strong>${course.name}</strong></div></div>
-        <div class="sb-row"><div class="sb-label">Date</div><div class="sb-value">${course.date} @ ${course.time}</div></div>
-        <div class="sb-row"><div class="sb-label">Location</div><div class="sb-value">${course.location || '3/14-16 Marjorie Street, Sefton NSW 2162'}</div></div>
-      </div>
-
-      <div class="sb-section">
-        <div class="sb-section-head"><span>Payment Details</span></div>
-        <div class="sb-row"><div class="sb-label">Method</div><div class="sb-value">${payment.method}</div></div>
-        <div class="sb-row"><div class="sb-label">Total</div><div class="sb-value"><strong>${payment.total}</strong></div></div>
-      </div>
-
-      <div style="text-align:center;">
-        <a href="${portal?.url || 'https://www.safetytrainingacademy.edu.au/login'}" class="sb-btn">Login to Student Portal</a>
-      </div>
-    </div>
-    <div class="sb-footer">
-      2 Wellington St, Sefton NSW 2162 &nbsp;·&nbsp; RTO #45234<br/>
-      &copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.
-    </div>
-  </div>
-</body>
-</html>`;
-};
-
-
-const buildLLNNotificationHtml = (data) => {
-  const { bookingId, studentName, studentEmail, studentPhone, score, status } = data;
-  const orderNumber = formatBookingId(bookingId);
-  const statusColor = status === "Passed" ? "#16a34a" : "#ca8a04";
-
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LLN Assessment Notification – Safety Training Academy</title>
-  <style>
-    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: Arial, sans-serif; }
+const commonStyles = `
+    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: 'Helvetica Neue', Arial, sans-serif; }
     .eb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
     .eb-hdr { background: #0d2240; padding: 16px 24px; }
-    .eb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
+    .eb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0; }
     .eb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
-    .eb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
-    .eb-divider { height: 3px; background: #29b6e8; }
-    .eb-content { padding: 18px 24px; }
-    .eb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+    .eb-badge-sky { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; display: inline-block; line-height: 1; }
+    .eb-booking-id-text { margin: 4px 0 0; font-size: 20px; font-weight: 700; color: #ffffff; text-align: right; }
+    .eb-confirm-banner { background: #0d2240; border-top: 1px solid rgba(255,255,255,0.1); padding: 10px 24px; font-size: 12px; color: #ffffff; font-weight: 700; text-align: center; }
+    .eb-content { padding: 20px 24px; }
+    .eb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 15px; }
     .eb-section-head { background: #0d2240; padding: 7px 14px; }
     .eb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
-    .eb-section-body { padding: 11px 14px; }
-    .eb-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-    .eb-table td { padding: 5px 0; vertical-align: top; }
-    .eb-table .lbl { color: #666666; width: 40%; font-weight: 500; }
-    .eb-table .val { color: #1a1a1a; font-weight: 700; }
-    .eb-footer { background: #f5f7fa; border-top: 1px solid #e0e0e0; padding: 12px 24px; font-size: 10px; color: #999; text-align: center; line-height: 1.6; }
-    .eb-footer a { color: #29b6e8; text-decoration: none; }
-  </style>
-</head>
-<body>
-  <div class="eb-body">
+    .eb-table { width: 100%; border-collapse: collapse; }
+    .eb-table td { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; font-size: 12px; color: #1a1a1a; vertical-align: middle; }
+    .eb-table td.lbl { width: 35%; background: #fafafa; border-right: 1px solid #f0f0f0; color: #666; font-size: 11px; font-weight: 600; }
+    .eb-table td.val-bold { font-weight: 700; color: #0d2240; }
+    .eb-footer { background: #f5f7fa; border-top: 1px solid #e0e0e0; padding: 15px 24px; font-size: 10px; color: #999; text-align: center; line-height: 1.6; }
+    .status-badge { padding: 2px 9px; border-radius: 2px; font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; display: inline-block; }
+    .status-verify { background: #fee2e2; color: #c0392b; }
+    .status-confirmed { background: #dcfce7; color: #1e7e34; }
+    .status-pending { background: #fef9c3; color: #ca8a04; }
+`;
+
+const buildAdminBookingHtml = (data) => {
+    const { orderId, name, email, phone, courseName, courseCode, courseDate, courseTime, paymentMethod, paymentStatus, gatewayId, bankRefId, totalAmount, submittedDate } = data;
+    let statusClass = paymentStatus === "PLZ VERIFY" ? "status-verify" : (paymentStatus === "PENDING" ? "status-pending" : "status-confirmed");
+    const finalGatewayId = (paymentMethod === "Bank Transfer" || paymentMethod === "Pay Later" || !gatewayId) ? "-" : gatewayId;
+    const finalBankRefId = (paymentMethod === "Card Payments" || paymentMethod === "Pay Later" || !bankRefId) ? "-" : bankRefId;
+
+    return `
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><style>${commonStyles}</style></head><body><div class="eb-body">
+    <div class="eb-hdr">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+                <td><p class="eb-hdr-title">Safety Training Academy</p><p class="eb-hdr-sub">RTO #45234 &nbsp;·&nbsp; ADMIN NOTIFICATION</p></td>
+                <td align="right"><div class="eb-badge-sky">NEW BOOKING</div></td>
+            </tr>
+        </table>
+        <p class="eb-booking-id-text">Booking ID: ${orderId}</p>
+    </div>
+    <div class="eb-confirm-banner" style="background:#162c4b;">⚠ ACTION REQUIRED: Confirm payment before scheduling student.</div>
+    <div class="eb-content">
+        <div class="eb-section"><div class="eb-section-head"><span>STUDENT DETAILS</span></div><table class="eb-table">
+            <tr><td class="lbl">Name</td><td class="val-bold">${name}</td></tr>
+            <tr><td class="lbl">Email</td><td class="val" style="color:#2563eb;">${email}</td></tr>
+            <tr><td class="lbl">Phone</td><td class="val">${phone}</td></tr>
+        </table></div>
+        <div class="eb-section"><div class="eb-section-head"><span>BOOKING SUMMARY</span></div><table class="eb-table">
+            <tr><td class="lbl">Booking ID</td><td class="val-bold">${orderId}</td></tr>
+            <tr><td class="lbl">Submitted</td><td class="val">${submittedDate}</td></tr>
+            <tr><td class="lbl">Payment Method</td><td class="val">${paymentMethod}</td></tr>
+            <tr><td class="lbl">Payment Status</td><td class="val"><span class="status-badge ${statusClass}">${paymentStatus}</span></td></tr>
+            <tr><td class="lbl">Gateway Transaction ID</td><td class="val">${finalGatewayId}</td></tr>
+            <tr><td class="lbl">Transaction ID</td><td class="val-bold">${finalBankRefId}</td></tr>
+            <tr style="background:#f0f9ff;"><td class="lbl" style="background:#f0f9ff; color:#0d2240; font-weight:700;">Total Amount</td><td class="val-bold" style="color:#0d2240; font-size:16px;">$${Number(totalAmount).toFixed(2)}</td></tr>
+        </table></div>
+        <div class="eb-section"><div class="eb-section-head"><span>COURSE DETAILS</span></div><table class="eb-table">
+            <tr><td class="lbl">Course Name</td><td class="val-bold">${courseName}</td></tr>
+            <tr><td class="lbl">Course Code</td><td class="val">${courseCode}</td></tr>
+            <tr><td class="lbl">Date & Time</td><td class="val">${courseDate} @ ${courseTime}</td></tr>
+            <tr><td class="lbl">Location</td><td class="val">3/14-16 Marjorie Street, Sefton NSW 2162</td></tr>
+        </table></div>
+        <div class="eb-important-box" style="background:#fffbeb; border-color:#fef3c7;"><span class="eb-important-title" style="color:#92400e;">⚠ ACTION REQUIRED</span><p class="eb-important-text" style="color:#b45309;">Please confirm payment before scheduling this student into the course.</p></div>
+    </div>
+    <div class="eb-footer">This is an automated admin notification from <strong>Safety Training Academy</strong> (RTO #45234).<br/>2 Marjorie St, Sefton NSW 2162 &nbsp;·&nbsp; 1300 976 097 &nbsp;·&nbsp; info@safetytrainingacademy.edu.au</div>
+</div></body></html>`;
+};
+
+const buildStudentBookingHtml = (data) => {
+    const { orderId, name, courseName, courseCode, courseDate, courseTime, paymentMethod, paymentStatus, totalAmount } = data;
+    return `
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><style>${commonStyles}</style></head><body><div class="eb-body">
+    <div class="eb-hdr">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+                <td><p class="eb-hdr-title">Safety Training Academy</p><p class="eb-hdr-sub">RTO #45234 &nbsp;·&nbsp; BOOKING CONFIRMATION</p></td>
+                <td align="right"><div class="eb-badge-sky">CONFIRMED</div></td>
+            </tr>
+        </table>
+        <p class="eb-booking-id-text">Booking ID: ${orderId}</p>
+    </div>
+    <div class="eb-confirm-banner">✓ Booking Confirmed</div>
+    <div class="eb-content">
+        <p style="color: #1e293b; font-size: 15px; margin: 0 0 20px;">Hi <strong>${name.split(" ")[0]}</strong>,</p>
+        <p style="color: #475569; font-size: 14px; margin: 0 0 24px; line-height: 1.5;">Thank you for booking with Safety Training Academy. Your booking is confirmed — please review the details below and make sure all pre-course steps are completed before your training date.</p>
+        
+        <div class="eb-section"><div class="eb-section-head"><span>COURSE DETAILS</span></div><table class="eb-table">
+            <tr><td class="lbl">Booking ID</td><td class="val-bold">${orderId}</td></tr>
+            <tr><td class="lbl">Course</td><td class="val-bold">${courseName}</td></tr>
+            <tr><td class="lbl">Course Code</td><td class="val">${courseCode}</td></tr>
+            <tr><td class="lbl">Delivery Mode</td><td class="val">Face-to-Face</td></tr>
+            <tr><td class="lbl">Date</td><td class="val">${courseDate}</td></tr>
+            <tr><td class="lbl">Time</td><td class="val">${courseTime}</td></tr>
+            <tr><td class="lbl">Location</td><td class="val">3/14-16 Marjorie Street, Sefton NSW 2162</td></tr>
+            <tr><td class="lbl">Trainer</td><td class="val">To be assigned</td></tr>
+        </table></div>
+
+        <div class="eb-section"><div class="eb-section-head"><span>PAYMENT DETAILS</span></div><table class="eb-table">
+            <tr><td class="lbl">Total Paid</td><td class="val-bold">$${Number(totalAmount).toFixed(2)}</td></tr>
+            <tr><td class="lbl">Method</td><td class="val">${paymentMethod}</td></tr>
+            <tr><td class="lbl">Status</td><td class="val-bold">${paymentStatus}</td></tr>
+        </table></div>
+
+        <div class="eb-important-box">
+            <span class="eb-important-title">⚠ IMPORTANT — ACTION REQUIRED</span>
+            <p class="eb-important-text">Please finish your LLN & Enrolment in the Student Portal before attending the course. Your spot will not be confirmed until this is completed.</p>
+        </div>
+
+        <div class="eb-section"><div class="eb-section-head"><span>NEXT STEPS</span></div><div style="padding:20px;">
+            <div class="eb-step"><div class="eb-step-num">1</div><div class="eb-step-text">Log in to the <a href="https://www.safetytrainingacademy.edu.au/login" style="color:#29b6e8; font-weight:700; text-decoration:none;">Student Portal</a> and complete your <strong>LLN Assessment</strong> and <strong>Enrolment Form</strong>.</div></div>
+            <div class="eb-step"><div class="eb-step-num">2</div><div class="eb-step-text">Ensure you have a valid <strong>USI</strong>. Visit <a href="https://www.usi.gov.au" style="color:#29b6e8; text-decoration:none;">usi.gov.au</a> if needed.</div></div>
+            <div class="eb-step"><div class="eb-step-num">3</div><div class="eb-step-text">Arrive at the venue at least <strong>15 minutes early</strong> with photo ID.</div></div>
+            <div class="eb-step"><div class="eb-step-num">4</div><div class="eb-step-text">Check your email for any updates regarding your session.</div></div>
+        </div></div>
+
+        <div class="eb-section"><div class="eb-section-head"><span>WHAT TO BRING</span></div><div style="padding:15px 20px;">
+            <div class="eb-check-item"><span class="eb-check-icon">✓</span> Photo ID (driver's licence or passport)</div>
+            <div class="eb-check-item"><span class="eb-check-icon">✓</span> Confirmation of your USI</div>
+            <div class="eb-check-item"><span class="eb-check-icon">✓</span> Appropriate PPE for the course (if advised)</div>
+            <div class="eb-check-item"><span class="eb-check-icon">✓</span> Sturdy, enclosed footwear — no thongs or open-toed shoes</div>
+            <div class="eb-check-item"><span class="eb-check-icon">✓</span> Water bottle and snacks — a break will be provided</div>
+        </div></div>
+    </div>
+    <div class="eb-footer">
+        Questions? <a href="mailto:admin@safetytrainingacademy.com.au" style="color:#29b6e8; text-decoration:none;">admin@safetytrainingacademy.com.au</a> | 1300 976 097<br/>
+        <strong>Safety Training Academy</strong> | RTO #45234 | <a href="https://www.safetytrainingacademy.edu.au" style="color:#29b6e8; text-decoration:none;">Student Portal</a><br/><br/>
+        &copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.<br/>
+        This is an automated confirmation. Please do not reply directly to this email.
+    </div>
+</div></body></html>`;
+};
+
+const sendBookingConfirmation = async (req, res) => {
+    const { name, email, phone, courseName, courseCode, courseDate, startTime, endTime, coursePrice, paymentMethod, gatewayTransactionId, bankTransferId, bookingId } = req.body;
+    const orderId = formatBookingId(bookingId || Date.now().toString());
+    const submittedDate = new Date().toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    const formattedDate = courseDate ? new Date(courseDate).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" }) : "TBC";
+    const timeRange = `${startTime} - ${endTime}`;
+
+    let adminStatus = "PAID";
+    let studentStatus = "Paid";
+    if (paymentMethod === "Bank Transfer") { adminStatus = "PLZ VERIFY"; studentStatus = "Awaiting Verification"; }
+    else if (paymentMethod === "Pay Later") { adminStatus = "PENDING"; studentStatus = "Pending"; }
+    else if (paymentMethod === "Card Payments" && !gatewayTransactionId) { adminStatus = "PLZ VERIFY"; studentStatus = "Awaiting Verification"; }
+
+    const adminHtml = adminBookingTemplate({ 
+        bookingId: orderId, 
+        contactName: name, 
+        contactEmail: email, 
+        contactPhone: phone, 
+        courseName, 
+        courseCode, 
+        courseDate: formattedDate, 
+        courseTime: timeRange, 
+        paymentMethod, 
+        totalAmount: Number(coursePrice).toFixed(2), 
+        submittedAt: submittedDate,
+        gatewayId: gatewayTransactionId,
+        bankTransferId: bankTransferId,
+        venue: "3/14-16 Marjorie Street, Sefton NSW 2162"
+    });
+    
+    const studentHtml = studentBookingTemplate({ 
+        bookingId: orderId, 
+        name, 
+        courseName, 
+        courseCode, 
+        courseDate: formattedDate, 
+        courseTime: timeRange, 
+        paymentMethod, 
+        paymentStatus: studentStatus, 
+        totalAmount: coursePrice 
+    });
+
+    try {
+        await sendEmail({ to: email, subject: `Booking Confirmed - ${courseName} (Order #${orderId})`, html: studentHtml });
+        setTimeout(async () => {
+            try { await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `NEW BOOKING: ${name} - ${courseName} (#${orderId})`, html: adminHtml }); } catch (e) {}
+        }, 15000);
+        if (res) res.status(200).json({ success: true });
+    } catch (err) { if (res) res.status(500).json({ success: false }); }
+};
+
+const buildCommonHeader = (title, subTitle, badgeText, bookingId) => {
+  const digits = formatBookingId(bookingId);
+  return `
     <div class="eb-hdr">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td>
-            <p class="eb-hdr-title">Safety Training Academy</p>
-            <p class="eb-hdr-sub">RTO #45234 &nbsp;·&nbsp; LLN Notification</p>
-          </td>
-          <td align="right" valign="top">
-            <span class="eb-badge">Assessment Done</span>
-            <p style="margin: 4px 0 0; font-size: 25px; font-weight: 700; color: #ffffff; text-align: right;">
-              Booking ID: ${orderNumber}
-            </p>
-          </td>
+          <td><p class="eb-hdr-title" style="font-size:16px; font-weight:700; color:#ffffff; margin:0;">Safety Training Academy</p><p class="eb-hdr-sub" style="font-size:10px; color:#29b6e8; letter-spacing:0.8px; text-transform:uppercase; font-weight:600; margin:0;">RTO #45234 &nbsp;·&nbsp; ${subTitle}</p></td>
+          <td align="right" valign="top"><div class="eb-badge-sky" style="background:#29b6e8; color:#ffffff; font-size:10px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; padding:3px 10px; border-radius:2px; display:inline-block; line-height:1;">${badgeText}</div></td>
         </tr>
       </table>
+      <p class="eb-booking-id-text" style="margin:4px 0 0; font-size:20px; font-weight:700; color:#ffffff; text-align:right;">ID: ${digits}</p>
     </div>
-    <div class="eb-divider"></div>
-    <div class="eb-content">
-      <div class="eb-section">
-        <div class="eb-section-head"><span>Student Details</span></div>
-        <div class="eb-section-body">
-          <table class="eb-table">
-            <tr><td class="lbl">Name</td><td class="val">${studentName || '—'}</td></tr>
-            <tr><td class="lbl">Email</td><td class="val">${studentEmail || '—'}</td></tr>
-            <tr><td class="lbl">Phone Number</td><td class="val">${studentPhone || '—'}</td></tr>
-          </table>
-        </div>
-      </div>
-      <div class="eb-section">
-        <div class="eb-section-head"><span>Assessment Result</span></div>
-        <div class="eb-section-body">
-          <table class="eb-table">
-            <tr><td class="lbl">Booking ID</td><td class="val">${orderNumber}</td></tr>
-            <tr><td class="lbl">Score</td><td class="val" style="font-size: 16px;">${Number(score).toFixed(1)}%</td></tr>
-            <tr><td class="lbl">Status</td><td class="val" style="color: ${statusColor};">${status || '—'}</td></tr>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div class="eb-footer">
-      This is an automated notification from <strong>Safety Training Academy</strong> (RTO #45234).<br />
-      Do not reply directly to this email. &nbsp;|&nbsp;
-      <a href="mailto:admin@safetytrainingacademy.com.au">admin@safetytrainingacademy.com.au</a><br />
-      &copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.
-    </div>
-  </div>
-</body>
-</html>`;
+    <div class="eb-confirm-banner" style="background:#0d2240; border-top:1px solid rgba(255,255,255,0.1); padding:10px 24px; font-size:12px; color:#ffffff; font-weight:700; text-align:center;">Action Required</div>
+  `;
+};
+
+const buildLLNNotificationHtml = (data) => {
+  const { bookingId, studentName, studentEmail, studentPhone, score, status, gatewayTransactionId } = data;
+  const statusColor = status === "Passed" ? "#16a34a" : "#ca8a04";
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><style>${commonStyles}</style></head><body><div class="eb-body">${buildCommonHeader("Safety Training Academy", "LLN NOTIFICATION", "LLN SUBMITTED", bookingId)}<div class="eb-content"><div class="eb-section"><div class="eb-section-head"><span>STUDENT DETAILS</span></div><table class="eb-table"><tr><td class="lbl">Name</td><td class="val-bold">${studentName}</td></tr><tr><td class="lbl">Email</td><td class="val">${studentEmail}</td></tr><tr><td class="lbl">Phone Number</td><td class="val">${studentPhone}</td></tr></table></div><div class="eb-section"><div class="eb-section-head"><span>ASSESSMENT RESULT</span></div><table class="eb-table"><tr><td class="lbl">Booking ID</td><td class="val-bold">${formatBookingId(bookingId)}</td></tr><tr><td class="lbl">Score</td><td class="val-bold" style="font-size:18px;">${Number(score).toFixed(1)}%</td></tr><tr><td class="lbl">Status</td><td class="val-bold" style="color:${statusColor};">${status}</td></tr>${gatewayTransactionId && gatewayTransactionId !== '—' ? `<tr><td class="lbl">Transaction ID</td><td class="val">${gatewayTransactionId}</td></tr>` : ''}</table></div></div><div class="eb-footer">&copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.</div></div></body></html>`;
 };
 
 const buildEnrollmentNotificationHtml = (data) => {
   const { bookingId, studentName, studentEmail, studentPhone, gatewayTransactionId } = data;
-  const orderNumber = String(bookingId).replace(/[^0-9]/g, '');
-
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Enrollment Notification – Safety Training Academy</title>
-  <style>
-    body { margin: 0; padding: 24px; background: #f0f2f5; font-family: Arial, sans-serif; }
-    .eb-body { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; font-size: 13px; color: #1a1a1a; }
-    .eb-hdr { background: #0d2240; padding: 16px 24px; }
-    .eb-hdr-title { font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 2px; }
-    .eb-hdr-sub { font-size: 10px; color: #29b6e8; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin: 0; }
-    .eb-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
-    .eb-divider { height: 3px; background: #29b6e8; }
-    .eb-content { padding: 18px 24px; }
-    .eb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
-    .eb-section-head { background: #0d2240; padding: 7px 14px; }
-    .eb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
-    .eb-section-body { padding: 11px 14px; }
-    .eb-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-    .eb-table td { padding: 5px 0; vertical-align: top; }
-    .eb-table .lbl { color: #666666; width: 40%; font-weight: 500; }
-    .eb-table .val { color: #1a1a1a; font-weight: 700; }
-    .eb-footer { background: #f5f7fa; border-top: 1px solid #e0e0e0; padding: 12px 24px; font-size: 10px; color: #999; text-align: center; line-height: 1.6; }
-    .eb-footer a { color: #29b6e8; text-decoration: none; }
-  </style>
-</head>
-<body>
-  <div class="eb-body">
-    <div class="eb-hdr">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td>
-            <p class="eb-hdr-title">Safety Training Academy</p>
-            <p class="eb-hdr-sub">RTO #45234 &nbsp;·&nbsp; Enrollment Notification</p>
-          </td>
-          <td align="right" valign="top">
-            <span class="eb-badge">ENROLLMENT SUBMITTED</span>
-            <p style="margin: 4px 0 0; font-size: 25px; font-weight: 700; color: #ffffff; text-align: right;">
-              Booking ID: ${orderNumber}
-            </p>
-          </td>
-        </tr>
-      </table>
-    </div>
-    <div class="eb-divider"></div>
-    <div class="eb-content">
-      <p style="margin: 0 0 16px; color: #444;">A student has submitted their enrollment form and is awaiting review.</p>
-      <div class="eb-section">
-        <div class="eb-section-head"><span>Student Details</span></div>
-        <div class="eb-section-body">
-          <table class="eb-table">
-            <tr><td class="lbl">Name</td><td class="val">${studentName || 'â€”'}</td></tr>
-            <tr><td class="lbl">Email</td><td class="val">${studentEmail || 'â€”'}</td></tr>
-            <tr><td class="lbl">Phone Number</td><td class="val">${studentPhone || 'â€”'}</td></tr>
-          </table>
-        </div>
-      </div>
-      <div class="eb-section">
-        <div class="eb-section-head"><span>Booking Details</span></div>
-        <div class="eb-section-body">
-          <table class="eb-table">
-            <tr><td class="lbl">Booking ID</td><td class="val">#${orderNumber}</td></tr>
-            <tr><td class="lbl">Transaction ID</td><td class="val">${gatewayTransactionId || 'â€”'}</td></tr>
-          </table>
-        </div>
-      </div>
-      <p style="margin-top: 16px; color: #444;">Please log in to the admin portal to review the form and documents.</p>
-    </div>
-    <div class="eb-footer">
-      This is an automated notification from <strong>Safety Training Academy</strong> (RTO #45234).<br />
-      Do not reply directly to this email. &nbsp;|Â·&nbsp;
-      <a href="mailto:admin@safetytrainingacademy.com.au">admin@safetytrainingacademy.com.au</a><br />
-      &copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.
-    </div>
-  </div>
-</body>
-</html>`;
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><style>${commonStyles}</style></head><body><div class="eb-body">${buildCommonHeader("Safety Training Academy", "ENROLLMENT NOTIFICATION", "ENROLLMENT SUBMITTED", bookingId)}<div class="eb-content"><p style="color: #475569; font-size: 14px; margin: 0 0 24px;">A student has submitted their enrollment form and is awaiting review.</p><div class="eb-section"><div class="eb-section-head"><span>STUDENT DETAILS</span></div><table class="eb-table"><tr><td class="lbl">Student Name</td><td class="val-bold">${studentName}</td></tr><tr><td class="lbl">Email</td><td class="val" style="color:#2563eb;">${studentEmail}</td></tr><tr><td class="lbl">Phone Number</td><td class="val">${studentPhone}</td></tr><tr><td class="lbl">Booking ID</td><td class="val-bold">${formatBookingId(bookingId)}</td></tr><tr><td class="lbl">Transaction ID</td><td class="val">${gatewayTransactionId || '—'}</td></tr></table></div><p style="margin-top:24px; color:#475569; font-size:14px;">Please log in to the admin portal to review the form and documents.</p></div><div class="eb-footer">&copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.</div></div></body></html>`;
 };
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// 1. Individual Student Booking Confirmation
-// POST /api/booking-email/send-confirmation
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const sendBookingConfirmation = async (req, res) => {
-    const { name, email, phone, mobile, mobileNumber, mobilePhone, courseName, courseCode, courseDate, startTime, endTime, coursePrice, paymentMethod, gatewayTransactionId, bankTransferId } = req.body;
-
-    const finalPhone = phone || mobile || mobileNumber || mobilePhone || "";
-    const orderId = formatBookingId(Date.now().toString());
-    const orderDateStr = new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" });
-
-    const studentHtml = buildStudentHtml({
-        orderId, student: { firstName: name.split(" ")[0] },
-        course: { name: courseName, code: courseCode, deliveryMode: "Face to Face", date: new Date(courseDate).toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Sydney" }), time: `${startTime} - ${endTime}`, venue: "3/14-16 Marjorie Street, Sefton NSW 2162" },
-        payment: { items: [{ label: courseName, amount: Number(coursePrice).toFixed(2) }], total: Number(coursePrice).toFixed(2), method: paymentMethod },
-        portal: { url: "https://www.safetytrainingacademy.edu.au/login" }
-    });
-
-    const adminMailData = { bookingId: orderId, paymentMethod, bankTransferId: bankTransferId || "—", gatewayId: gatewayTransactionId || null, contactName: name, contactEmail: email, contactPhone: finalPhone || "—", totalAmount: Number(coursePrice).toFixed(2), submittedAt: orderDateStr, courseName, courseCode, deliveryMode: "Face to Face", courseDate: courseDate ? new Date(courseDate).toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Sydney" }) : "To be confirmed", courseTime: `${startTime} - ${endTime}`, venue: "3/14-16 Marjorie Street, Sefton NSW 2162", notes: null, studentPortalUrl: "https://www.safetytrainingacademy.edu.au/login", adminUrl: "https://admin.safetytrainingacademy.edu.au" };
-
-    try {
-        try { 
-            await sendEmail({ 
-                to: process.env.BOOKINGS_EMAIL, 
-                subject: `New Booking #${orderId} - ${name} - ${courseName}`, 
-                html: adminBookingTemplate(adminMailData) 
-            }); 
-            console.log("✅ Admin email sent"); 
-        } catch (e) { 
-            console.error("❌ Admin email failed", e.message); 
-        }
-        await sendEmail({ 
-            to: email, 
-            subject: `Booking Confirmed - ${courseName} (Order #${orderId})`, 
-            html: studentHtml 
-        }); 
-        console.log("✅ Student email sent");
-        res.status(200).json({ success: true });
-    } catch (err) { 
-        console.error("❌ Process error", err.message); 
-        res.status(500).json({ success: false }); 
-    }
+const sendEnrollmentLinkConfirmation = async (req, res) => {
+    const { toEmail, studentName, courseName, courseDate, startTime, endTime, bookingId } = req.body;
+    const dateStr = courseDate ? new Date(courseDate).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" }) : "TBC";
+    const timeStr = (startTime && endTime) ? `${startTime} - ${endTime}` : "TBC";
+    const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><style>${commonStyles}</style></head><body><div class="eb-body">${buildCommonHeader("Safety Training Academy", "REGISTRATION NOTIFICATION", "REGISTRATION CONFIRMED", bookingId)}<div class="eb-content"><p style="color: #475569; font-size: 14px; margin: 0 0 24px;">Dear <strong>${studentName}</strong>, your registration is confirmed.</p><div class="eb-section"><div class="eb-section-head"><span>COURSE DETAILS</span></div><table class="eb-table"><tr><td class="lbl">Course</td><td class="val-bold">${courseName}</td></tr><tr><td class="lbl">Date</td><td class="val">${dateStr}</td></tr><tr><td class="lbl">Time</td><td class="val">${timeStr}</td></tr><tr><td class="lbl">Location</td><td class="val">3/14-16 Marjorie Street, Sefton NSW 2162</td></tr></table></div></div><div class="eb-footer">&copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.</div></div></body></html>`;
+    try { await sendEmail({ to: toEmail, subject: `Registration Confirmed - ${courseName}`, html, bcc: process.env.BOOKINGS_EMAIL }); res.status(200).json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
 };
 
 const sendCompanyOrderConfirmation = async (req, res) => {
     const { toEmail, companyName, orderId: rawOrderId, totalAmount, links = [] } = req.body;
-
     const orderId = formatBookingId(rawOrderId || Date.now().toString());
     const priceStr = `$${Number(totalAmount).toFixed(2)}`;
-    const orderDateStr = new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" });
-
     const linksHtml = links.map(l => `
-        <tr><td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;">
-            <p style="margin:0 0 4px;font-size:14px;font-weight:600;color:#334155;">${l.courseName}</p>
-            <p style="margin:0 0 4px;font-size:13px;color:#64748b;">Date: ${l.courseDateDisplay || (l.courseDate ? new Date(l.courseDate).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Sydney" }) : "TBC")}</p>
-            <p style="margin:0;font-size:13px;"><a href="${l.fullUrl}" style="color:#3b82f6;">${l.fullUrl}</a></p>
+        <tr><td style="padding:15px; border-bottom:1px solid #f1f5f9; background:#ffffff;">
+            <p style="margin:0; font-size:14px; font-weight:700; color:#0d2240;">${l.courseName}</p>
+            <p style="margin:6px 0 0; font-size:12px;"><a href="${l.fullUrl}" style="color:#29b6e8; text-decoration:none; font-weight:600;">Click to Register &rarr;</a></p>
+            <p style="margin:4px 0 0; font-size:10px; color:#94a3b8; word-break:break-all;">${l.fullUrl}</p>
         </td></tr>`).join("");
-
-    const companyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8">
-<style>
-    .co-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
-</style>
-</head>
-<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:#0d2240;color:#ffffff;padding:20px 30px;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td>
-            <p style="margin:0; font-size:16px; font-weight:700;">Safety Training Academy</p>
-            <p style="margin:2px 0 0; font-size:10px; color:#29b6e8; text-transform:uppercase; font-weight:600; letter-spacing:0.8px;">Company Booking</p>
-          </td>
-          <td align="right" valign="top">
-            <span class="co-badge">Confirmed</span>
-          </td>
-        </tr>
-    </table>
-</td></tr>
-<tr><td style="height:3px; background:#29b6e8;"></td></tr>
-<tr><td style="background:#0a1c33; padding:10px 30px; font-size:12px; color:#89c8e8; font-weight:500;">
-    &#10003; Thank you for your booking â€“ Order #${orderId}
-</td></tr>
-<tr><td style="padding:30px;">
-    <p style="margin:0 0 16px;font-size:15px;color:#555;">Dear <strong>${companyName}</strong>,</p>
-    <p style="margin:0 0 24px;font-size:15px;color:#555;">Thank you for your booking with Safety Training Academy.</p>
-    <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#334155;">Instructions:</p>
-    <p style="margin:0 0 16px;font-size:14px;color:#334155;">Please share the links with your employees to continue their LLN assessment and complete their Enrolment.</p>
-    <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#334155;">Employee links:</p>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">${linksHtml}</table>
-    <p style="margin:0 0 16px;font-size:14px;color:#334155;">Please ask them to complete the form and assessment before their course date.</p>
-    <table width="100%" cellpadding="12" cellspacing="0" border="0" style="background-color:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;margin-bottom:20px;">
-        <tr><td style="color:#64748b;width:120px;">Order #</td><td><strong>${orderId}</strong></td></tr>
-        <tr><td style="color:#64748b;">Order Date</td><td>${orderDateStr}</td></tr>
-        <tr><td style="color:#64748b;">Total</td><td><strong>${priceStr}</strong></td></tr>
-    </table>
-    <p style="font-size:14px;color:#334155;">If you need any assistance, please contact us.</p>
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0;font-size:13px;color:#64748b;">Kind regards,<br/><strong>Safety Training Academy</strong><br/>Training Team | 1300 976 097<br/><a href="mailto:info@safetytrainingacademy.edu.au" style="color:#3b82f6;">info@safetytrainingacademy.edu.au</a></p>
-</td></tr>
-</table></td></tr></table></body></html>`;
-
-    const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:#0d2240;color:#ffffff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:22px;font-weight:700;">NEW COMPANY BOOKING #${orderId}</h1>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p style="margin:0 0 20px;font-size:15px;color:#555;">New company booking from <strong>${companyName}</strong> (${toEmail})</p>
-    <table width="100%" cellpadding="12" cellspacing="0" border="0" style="background-color:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;margin-bottom:20px;">
-        <tr><td style="color:#64748b;width:120px;">Order #</td><td><strong>${orderId}</strong></td></tr>
-        <tr><td style="color:#64748b;">Date</td><td>${orderDateStr}</td></tr>
-        <tr><td style="color:#64748b;">Total</td><td><strong>${priceStr}</strong></td></tr>
-    </table>
-    <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#334155;">Courses / Employee links:</p>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">${linksHtml}</table>
-    <p style="margin:16px 0 0;font-size:14px;color:#334155;">Please follow up with the company for payment confirmation.</p>
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0;font-size:13px;color:#64748b;">Best regards,<br/><strong>Safety Training Academy System</strong></p>
-</td></tr>
-</table></td></tr></table></body></html>`;
-
-    try {
-        if (process.env.BOOKINGS_EMAIL) {
-            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `New Company Booking #${orderId} - ${companyName}`, html: academyHtml });
-        }
-        await sendEmail({ to: toEmail, subject: `Thank you for your booking â€“ Order #${orderId}`, html: companyHtml });
-        res.status(200).json({ success: true });
-    } catch (err) {
-        console.error("âŒ Company order email error:", err.message);
-        res.status(500).json({ success: false });
-    }
+    
+    const html = `
+<!DOCTYPE html><html><head><style>body{margin:0;padding:24px;background:#f0f2f5;font-family:sans-serif;}.card{max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e0e0e0;}.hdr{background:#0d2240;padding:20px 30px;color:#fff;}.hdr h2{margin:0;font-size:18px;text-transform:uppercase;letter-spacing:1px;}.content{padding:30px;}.footer{background:#f8fafc;padding:20px;text-align:center;font-size:11px;color:#999;border-top:1px solid #e0e0e0;}</style></head><body>
+<div class="card"><div class="hdr"><h2>Company Booking Confirmed</h2><p style="margin:4px 0 0; font-size:10px; color:#29b6e8;">ORDER #${orderId}</p></div><div class="content"><p style="font-size:15px; color:#1e293b;">Dear <strong>${companyName}</strong>,</p><p style="font-size:14px; color:#475569; line-height:1.6;">Thank you for your booking. Below are the registration links for your employees. Each link allows for the specific quantity purchased.</p><table width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0; border:1px solid #e0e0e0; border-radius:4px; overflow:hidden;">${linksHtml}</table><div style="background:#f0f9ff; padding:15px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:13px; font-weight:700; color:#0d2240;">Total Amount Paid</span><span style="font-size:16px; font-weight:700; color:#0d2240;">${priceStr}</span></div></div><div class="footer">&copy; ${new Date().getFullYear()} Safety Training Academy | RTO #45234</div></div></body></html>`;
+    try { await sendEmail({ to: toEmail, subject: `Company Booking Confirmed - Order #${orderId}`, html, bcc: process.env.BOOKINGS_EMAIL }); res.status(200).json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
 };
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// 3. Enrollment Link Registration (Company link à®µà®´à®¿à®¯à®¾ student)
-// POST /api/booking-email/enrollment-link
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const sendEnrollmentLinkConfirmation = async (req, res) => {
-    const { toEmail, studentName, courseName, courseCode, courseDate, startTime, endTime, bookingId } = req.body;
-
-    const dateStr = courseDate ? new Date(courseDate).toLocaleDateString("en-AU", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        timeZone: "Australia/Sydney"
-    }) : "To be confirmed";
-
-    const timeStr = (startTime && endTime) ? `${startTime} - ${endTime}` : "To be confirmed";
-
-    const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8">
-<style>
-    .er-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
-</style>
-</head>
-<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:#0d2240;color:#ffffff;padding:20px 30px;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td>
-            <p style="margin:0; font-size:16px; font-weight:700;">Safety Training Academy</p>
-            <p style="margin:2px 0 0; font-size:10px; color:#29b6e8; text-transform:uppercase; font-weight:600; letter-spacing:0.8px;">Enrollment Confirmation</p>
-          </td>
-          <td align="right" valign="top">
-            <span class="er-badge">Registered</span>
-          </td>
-        </tr>
-    </table>
-</td></tr>
-<tr><td style="height:3px; background:#29b6e8;"></td></tr>
-<tr><td style="background:#0a1c33; padding:10px 30px; font-size:12px; color:#89c8e8; font-weight:500;">
-    &#10003; Registration complete â€“ ${courseName}
-</td></tr>
-<tr><td style="padding:30px;">
-    <p style="margin:0 0 16px;font-size:15px;color:#555;">Dear <strong>${studentName}</strong>,</p>
-    <p style="margin:0 0 24px;font-size:15px;color:#555;">You have successfully completed your registration via the enrollment link.</p>
-    <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#334155;">Your course details:</p>
-    <table width="100%" cellpadding="12" cellspacing="0" border="0" style="background-color:#f8fafc;border-radius:6px;margin-bottom:24px;border:1px solid #e2e8f0;">
-        ${bookingId ? `<tr><td style="font-size:13px;color:#64748b;width:120px;">Booking ID</td><td style="font-size:14px;font-weight:700;color:#0d2240;">#${formatBookingId(bookingId)}</td></tr>` : ""}
-        <tr><td style="font-size:13px;color:#64748b;width:120px;">Course</td><td style="font-size:14px;font-weight:600;color:#334155;">${courseName}</td></tr>
-        ${courseCode ? `<tr><td style="font-size:13px;color:#64748b;">Course Code</td><td style="font-size:14px;font-weight:600;color:#334155;">${courseCode}</td></tr>` : ""}
-        <tr><td style="font-size:13px;color:#64748b;">Date</td><td style="font-size:14px;font-weight:600;color:#334155;">${dateStr}</td></tr>
-        <tr><td style="font-size:13px;color:#64748b;">Time</td><td style="font-size:14px;font-weight:600;color:#334155;">${timeStr}</td></tr>
-        <tr><td style="font-size:13px;color:#64748b;">Location</td><td style="font-size:14px;font-weight:600;color:#334155;">3/14-16 Marjorie Street, Sefton NSW 2162</td></tr>
-    </table>
-    <p style="margin:20px 0 0;font-size:14px;color:#334155;">If you need any assistance, please contact us.</p>
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0;font-size:13px;color:#64748b;">Kind regards,<br/><strong>Safety Training Academy</strong><br/>1300 976 097</p>
-</td></tr>
-</table></td></tr></table></body></html>`;
-
-    const adminMailData = {
-        contactName: studentName,
-        contactEmail: toEmail,
-        contactPhone: req.body.phone || req.body.mobile || req.body.mobileNumber || req.body.mobilePhone || "-",
-        courseName: courseName,
-        courseDate: dateStr,
-        courseTime: timeStr,
-        courseLocation: "3/14-16 Marjorie Street, Sefton NSW 2162",
-        bookingId: bookingId ? formatBookingId(bookingId) : "LINK-REG",
-        orderDate: new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" }),
-        quantity: 1,
-
-        paymentMethod: req.body.paymentMethod || "Enrollment Link",
-        totalAmount: "-"
-    };
-
-    try {
-        if (process.env.BOOKINGS_EMAIL) {
-            await sendEmail({ 
-                to: process.env.BOOKINGS_EMAIL, 
-                subject: `NEW REGISTRATION (LINK) - ${studentName} - ${courseName}`, 
-                html: adminBookingTemplate(adminMailData) 
-            });
-        }
-        await sendEmail({ to: toEmail, subject: `Registration complete â€“ ${courseName}`, html: studentHtml });
-        res.status(200).json({ success: true });
-    } catch (err) {
-        console.error("âŒ Enrollment link email error:", err.message);
-        res.status(500).json({ success: false });
-    }
-};
-
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// 4. Company Portal Welcome
-// POST /api/booking-email/company-welcome
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const sendCompanyPortalWelcome = async (req, res) => {
-    const { toEmail, companyName, portalEnrollmentUrl, loginBaseUrl, initialPassword } = req.body;
-
-    const hasPassword = !!initialPassword;
-    const subject = hasPassword
-        ? "Welcome â€” your company portal sign-in & employee enrolment link"
-        : "Your company account â€” employee enrolment link";
-
-    const credentialsHtml = hasPassword ? `
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;background-color:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
-        <tr><td style="padding:20px;">
-            <p style="margin:0 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Your sign-in details</p>
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:14px;color:#334155;">
-                <tr><td style="padding:6px 0;color:#64748b;width:140px;">Company name</td><td style="padding:6px 0;font-weight:600;">${companyName}</td></tr>
-                <tr><td style="padding:6px 0;color:#64748b;">Email (login)</td><td style="padding:6px 0;font-weight:600;">${toEmail}</td></tr>
-                <tr><td style="padding:6px 0;color:#64748b;">Password</td><td style="padding:6px 0;font-family:monospace;font-weight:600;">${initialPassword}</td></tr>
-            </table>
-            <p style="margin:12px 0 0;font-size:13px;color:#64748b;">Keep this email confidential. Do not share your password.</p>
-        </td></tr></table>` : "";
-
-    const loginBlockHtml = loginBaseUrl ? `
-        <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Company portal (for you)</p>
-        <p style="margin:0 0 24px;font-size:14px;color:#334155;"><a href="${loginBaseUrl}" style="color:#3b82f6;">${loginBaseUrl}</a></p>` : "";
-
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
-<style>
-    .cp-badge { background: #29b6e8; color: #ffffff; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; display: inline-block; line-height: 1; }
-  </style>
-</head>
-<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:#0d2240;color:#ffffff;padding:20px 30px;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td>
-            <p style="margin:0; font-size:16px; font-weight:700;">Safety Training Academy</p>
-            <p style="margin:2px 0 0; font-size:10px; color:#29b6e8; text-transform:uppercase; font-weight:600; letter-spacing:0.8px;">Company Portal Notification</p>
-          </td>
-          <td align="right" valign="top">
-            <span class="cp-badge">Welcome</span>
-          </td>
-        </tr>
-    </table>
-</td></tr>
-<tr><td style="height:3px; background:#29b6e8;"></td></tr>
-<tr><td style="background:#0a1c33; padding:10px 30px; font-size:12px; color:#89c8e8; font-weight:500;">
-    &#10003; Your company portal access has been successfully configured.
-</td></tr>
-<tr><td style="padding:30px;">
-    <h2 style="margin:0 0 20px;font-size:18px;font-weight:700;color:#1a1a1a;">Your company portal is ready</h2>
-    <p style="margin:0 0 20px;font-size:15px;color:#555;">Hello <strong>${companyName}</strong>,</p>
-    <p style="margin:0 0 20px;font-size:15px;color:#555;">Your company account is ready. Training booked through the employee link is billed to your company.</p>
-    ${credentialsHtml}
-    <p style="margin:0 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Employee enrolment link</p>
-    <p style="margin:0 0 24px;font-size:14px;color:#334155;">Share this with your team:</p>
-    <p style="margin:0 0 24px;font-size:14px;"><a href="${portalEnrollmentUrl}" style="color:#3b82f6;">${portalEnrollmentUrl}</a></p>
-    ${loginBlockHtml}
-    <p style="margin:0;font-size:14px;color:#64748b;">Questions? Reply to this email or contact the training team.</p>
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0;font-size:13px;color:#64748b;">Kind regards,<br/><strong>Safety Training Academy</strong></p>
-</td></tr>
-</table></td></tr></table></body></html>`;
-
-    try {
-        await sendEmail({ to: toEmail, subject, html });
-        res.status(200).json({ success: true });
-    } catch (err) {
-        console.error("âŒ Company welcome email error:", err.message);
-        res.status(500).json({ success: false });
-    }
+    const { toEmail, companyName, initialPassword, loginBaseUrl, portalEnrollmentUrl } = req.body;
+    const html = `
+<!DOCTYPE html><html><head><style>body{margin:0;padding:24px;background:#f0f2f5;font-family:sans-serif;}.card{max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e0e0e0;}.hdr{background:#0d2240;padding:20px 30px;color:#fff;}.content{padding:30px;}.footer{background:#f8fafc;padding:20px;text-align:center;font-size:11px;color:#999;border-top:1px solid #e0e0e0;}</style></head><body>
+<div class="card"><div class="hdr"><h2>Welcome to Safety Training Academy</h2><p style="margin:4px 0 0; font-size:10px; color:#29b6e8;">COMPANY PORTAL ACCESS</p></div><div class="content"><p style="font-size:15px; color:#1e293b;">Dear <strong>${companyName}</strong>,</p><p style="font-size:14px; color:#475569; line-height:1.6;">Your company portal has been activated. You can now manage your employees and track their progress through your dashboard.</p><div style="background:#f8fafc; border:1px solid #e0e0e0; border-radius:6px; padding:20px; margin:20px 0;"><table width="100%"><tr><td style="font-size:12px; color:#64748b; padding-bottom:8px;">Portal URL</td><td style="font-size:13px; font-weight:700; color:#0d2240; padding-bottom:8px;"><a href="${loginBaseUrl}" style="color:#29b6e8; text-decoration:none;">${loginBaseUrl}</a></td></tr><tr><td style="font-size:12px; color:#64748b;">Password</td><td style="font-size:13px; font-weight:700; color:#0d2240; font-family:monospace;">${initialPassword}</td></tr></table></div><div style="background:#f0f9ff; padding:15px; border-radius:6px;"><p style="margin:0 0 8px; font-size:11px; font-weight:700; color:#0d2240; text-transform:uppercase;">Quick Enrollment Link for Employees</p><p style="margin:0; font-size:12px; color:#29b6e8; word-break:break-all;">${portalEnrollmentUrl}</p></div></div><div class="footer">&copy; ${new Date().getFullYear()} Safety Training Academy | RTO #45234</div></div></body></html>`;
+    try { await sendEmail({ to: toEmail, subject: "Welcome to Safety Training Academy Company Portal", html, bcc: process.env.BOOKINGS_EMAIL }); res.status(200).json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
 };
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// 5. VOC Submission Confirmation
-// POST /api/booking-email/voc-confirmation
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const sendVOCConfirmation = async (req, res) => {
-    const { toEmail, firstName, lastName, submissionId, amountPaid, paymentMethod } = req.body;
-
-    const shortId = String(submissionId).slice(0, 8);
-    const priceStr = `$${Number(amountPaid).toFixed(2)}`;
-
-    const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#333;background-color:#f4f4f4;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:#0d2240;color:#ffffff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:22px;font-weight:700;">VOC Submission Received</h1>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p style="margin:0 0 16px;font-size:15px;color:#555;">Dear <strong>${firstName} ${lastName}</strong>,</p>
-    <p style="margin:0 0 24px;font-size:15px;color:#555;">Thank you for your VOC submission to Safety Training Academy. We have received your request.</p>
-    <table width="100%" cellpadding="12" cellspacing="0" border="0" style="background-color:#f8fafc;border-radius:6px;margin-bottom:24px;border:1px solid #e2e8f0;">
-        <tr><td style="font-size:13px;color:#64748b;width:140px;">Submission ID</td><td style="font-size:14px;font-weight:600;color:#334155;">${shortId}</td></tr>
-        <tr><td style="font-size:13px;color:#64748b;">Amount Paid</td><td style="font-size:14px;font-weight:600;color:#334155;">${priceStr}</td></tr>
-        <tr><td style="font-size:13px;color:#64748b;">Payment Method</td><td style="font-size:14px;font-weight:600;color:#334155;">${paymentMethod}</td></tr>
-    </table>
-    <p style="font-size:14px;color:#334155;">Our team will review your application and get back to you soon.</p>
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0;font-size:13px;color:#64748b;">Best regards,<br/><strong>Safety Training Academy</strong></p>
-</td></tr>
-</table></td></tr></table></body></html>`;
-
-    const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:#0d2240;color:#fff;padding:24px 30px;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-            <td><h1 style="margin:0;font-size:20px;">NEW VOC SUBMISSION</h1></td>
-            <td align="right"><span style="font-size:12px;font-weight:700;background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:4px;">ID: ${shortId}</span></td>
-        </tr>
-    </table>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p>A new VOC submission has been received.</p>
-    <table width="100%" cellpadding="10" cellspacing="0" style="background-color:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
-        <tr><td style="color:#64748b;width:130px;">Name</td><td><strong>${firstName} ${lastName}</strong></td></tr>
-        <tr><td style="color:#64748b;">Email</td><td>${toEmail}</td></tr>
-        <tr><td style="color:#64748b;">Amount</td><td><strong>${priceStr}</strong></td></tr>
-        <tr><td style="color:#64748b;">Payment</td><td>${paymentMethod}</td></tr>
-        <tr><td style="color:#64748b;">Submission ID</td><td><strong>#${shortId}</strong></td></tr>
-    </table>
-    <p style="margin-top:20px;">Please log in to the admin portal to review this submission.</p>
-</td></tr>
-</table></body></html>`;
-
-    try {
-        await sendEmail({ to: toEmail, subject: `VOC Submission Received - #${shortId}`, html: studentHtml });
-        if (process.env.BOOKINGS_EMAIL) {
-            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `ACTION REQUIRED: New VOC Submission - ${firstName} ${lastName}`, html: academyHtml });
-        }
-        res.status(200).json({ success: true });
-    } catch (err) {
-        console.error("âŒ VOC email error:", err.message);
-        res.status(500).json({ success: false });
-    }
+    const { toEmail, firstName, submissionId, amountPaid } = req.body;
+    const html = `
+<!DOCTYPE html><html><head><style>body{margin:0;padding:24px;background:#f0f2f5;font-family:sans-serif;}.card{max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e0e0e0;}.hdr{background:#0d2240;padding:20px 30px;color:#fff;}.content{padding:30px;}.footer{background:#f8fafc;padding:20px;text-align:center;font-size:11px;color:#999;border-top:1px solid #e0e0e0;}</style></head><body>
+<div class="card"><div class="hdr"><h2>VOC Submission Received</h2><p style="margin:4px 0 0; font-size:10px; color:#29b6e8;">SUBMISSION #${submissionId}</p></div><div class="content"><p style="font-size:15px; color:#1e293b;">Hi <strong>${firstName}</strong>,</p><p style="font-size:14px; color:#475569; line-height:1.6;">Thank you for your VOC submission. We have received your application and the payment of <strong>$${Number(amountPaid).toFixed(2)}</strong>. Our team will review the documents and get back to you shortly.</p></div><div class="footer">&copy; ${new Date().getFullYear()} Safety Training Academy | RTO #45234</div></div></body></html>`;
+    try { await sendEmail({ to: toEmail, subject: "VOC Submission Received", html, bcc: process.env.BOOKINGS_EMAIL }); res.status(200).json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
 };
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// 6. Email OTP
-// POST /api/booking-email/send-otp
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const sendEmailOTP = async (req, res) => {
     const { toEmail, otp } = req.body;
-
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background-color:#f4f4f4;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;padding:20px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:#ffffff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:22px;font-weight:700;">Verify your email</h1>
-</td></tr>
-<tr><td style="padding:30px;text-align:center;">
-    <p style="margin:0 0 24px;font-size:15px;color:#555;">Use the following code to verify your email address for VOC submission:</p>
-    <div style="background-color:#f3f4f6;padding:20px;border-radius:8px;font-size:32px;font-weight:700;letter-spacing:8px;color:#1f2937;margin-bottom:24px;">${otp}</div>
-    <p style="margin:0;font-size:13px;color:#6b7280;">This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0;font-size:13px;color:#64748b;">Best regards,<br/><strong>Safety Training Academy</strong></p>
-</td></tr>
-</table></td></tr></table></body></html>`;
-
-    try {
-        await sendEmail({ to: toEmail, subject: `${otp} is your verification code`, html });
-        res.status(200).json({ success: true });
-    } catch (err) {
-        console.error("âŒ OTP email error:", err.message);
-        res.status(500).json({ success: false });
-    }
+    const html = `
+<!DOCTYPE html><html><head><style>body{margin:0;padding:24px;background:#f0f2f5;font-family:sans-serif;}.card{max-width:400px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 12px rgba(0,0,0,0.05);}.hdr{background:#0d2240;padding:24px;color:#fff;text-align:center;}.hdr h2{margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;}.content{padding:40px 30px;text-align:center;}.otp-box{font-size:36px;font-weight:700;color:#0d2240;background:#f0f9ff;padding:20px;border-radius:8px;border:2px dashed #29b6e8;letter-spacing:8px;margin:20px 0;}.footer{background:#f8fafc;padding:15px;text-align:center;font-size:10px;color:#999;border-top:1px solid #e0e0e0;}</style></head><body>
+<div class="card"><div class="hdr"><h2>Verification Code</h2></div><div class="content"><p style="margin:0; font-size:14px; color:#475569;">Use the code below to complete your verification:</p><div class="otp-box">${otp}</div><p style="margin:0; font-size:12px; color:#94a3b8;">This code will expire in 10 minutes.</p></div><div class="footer">Safety Training Academy | RTO #45234</div></div></body></html>`;
+    try { await sendEmail({ to: toEmail, subject: `${otp} is your verification code`, html }); res.status(200).json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
 };
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// 7. Company Billing â€” Bank Transfer Notice
-// POST /api/booking-email/company-bank-transfer
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const sendCompanyBankTransfer = async (req, res) => {
-    const { companyEmail, companyName, amount, submissionId, linesSummary } = req.body;
-    const amountStr = `$${Number(amount).toFixed(2)}`;
-
-    const companyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:20px;">Bank Transfer Notice Received</h1>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p>Hello <strong>${companyName}</strong>,</p>
-    <p>We received your bank transfer payment notice for <strong>${amountStr}</strong>.</p>
-    <p>Reference: <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">${submissionId}</code></p>
-    <pre style="white-space:pre-wrap;font-size:13px;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0;">${linesSummary}</pre>
-    <p>Our accounts team will verify your transfer and update your balance. Questions? Call 1300 976 097.</p>
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0;font-size:13px;color:#64748b;">Thank you,<br/><strong>Safety Training Academy</strong></p>
-</td></tr>
-</table></body></html>`;
-
-    const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:#0d2240;color:#fff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:20px;">Company Bank Transfer Submitted</h1>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p><strong>Company:</strong> ${companyName} (${companyEmail})</p>
-    <p><strong>Amount:</strong> ${amountStr}</p>
-    <p><strong>Submission ID:</strong> ${submissionId}</p>
-    <pre style="white-space:pre-wrap;font-size:13px;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0;">${linesSummary}</pre>
-</td></tr>
-</table></body></html>`;
-
-    try {
-        await sendEmail({ to: companyEmail, subject: `We received your bank transfer notice â€” ${amountStr}`, html: companyHtml });
-        if (process.env.BOOKINGS_EMAIL) {
-            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `Company bank transfer notice â€” ${companyName} â€” ${amountStr}`, html: academyHtml });
-        }
-        res.status(200).json({ success: true });
-    } catch (err) {
-        console.error("âŒ Bank transfer email error:", err.message);
-        res.status(500).json({ success: false });
-    }
-};
-
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// 9. LLN Completion Notification
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const sendLLNCompletionNotification = async (req, res) => {
-    const { studentEmail, studentName, score, isPassed, bookingId, studentPhone } = req.body;
-
-    const status = isPassed ? "Passed" : "Under Review";
-    const statusColor = isPassed ? "#16a34a" : "#ca8a04";
-    const statusBg = isPassed ? "#f0fdf4" : "#fefce8";
-
-    // 1. Student Email (Basic Template)
-    const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:#0d2240;color:#fff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:22px;">Assessment Completed</h1>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p>Dear <strong>${studentName}</strong>,</p>
-    <p>Thank you for completing your Pre-Enrollment (LLN) Assessment.</p>
-    <div style="margin:24px 0;padding:20px;background-color:${statusBg};border-radius:8px;border:1px solid ${statusColor};text-align:center;">
-        <p style="margin:0 0 8px;font-size:12px;color:#64748b;text-transform:uppercase;">Your Result</p>
-        <p style="margin:0;font-size:24px;font-weight:700;color:${statusColor};">${status}</p>
-        <p style="margin:8px 0 0;font-size:16px;color:#334155;">Score: ${Number(score).toFixed(1)}%</p>
-    </div>
-    ${isPassed
-            ? "<p>Congratulations! You have passed the assessment. You can now proceed with your enrollment.</p>"
-            : "<p>Your assessment is currently under review by our administration team. We will notify you once the review is complete.</p>"}
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0;font-size:13px;color:#64748b;">Best regards,<br/><strong>Safety Training Academy</strong></p>
-</td></tr>
-</table></body></html>`;
-
-    // 2. Academy Notification (New High-Fidelity Template)
-    const academyHtml = buildLLNNotificationHtml({
-        bookingId,
-        studentName,
-        studentEmail,
-        studentPhone,
-        score,
-        status
-    });
-
-    try {
-        await sendEmail({ to: studentEmail, subject: "Pre-Enrollment Assessment Completed", html: studentHtml });
-        if (process.env.BOOKINGS_EMAIL) {
-            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `ACTION REQUIRED: LLN Assessment Completed - ${studentName}`, html: academyHtml });
-        }
-        if (res) res.status(200).json({ success: true });
-    } catch (err) {
-        console.error("âŒ LLN email error:", err.message);
-        if (res) res.status(500).json({ success: false });
-    }
-};
-
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// 10. Enrollment Form Completion Notification
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const sendEnrollmentFormCompletionNotification = async (req, res) => {
-    const { studentEmail, studentName, bookingId, studentPhone, gatewayTransactionId } = req.body;
-
-    const studentHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:22px;">Enrollment Form Submitted</h1>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p>Dear <strong>${studentName}</strong>,</p>
-    <p>We have successfully received your enrollment form.</p>
-    <p>Our administration team will now review your application and documents. This process typically takes 1-2 business days.</p>
-    <p>We will notify you via email as soon as your enrollment is approved.</p>
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0;font-size:13px;color:#64748b;">Best regards,<br/><strong>Safety Training Academy</strong></p>
-</td></tr>
-</table></body></html>`;
-
-    const academyHtml = buildEnrollmentNotificationHtml({
-        bookingId,
-        studentName,
-        studentEmail,
-        studentPhone,
-        gatewayTransactionId
-    });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    try {
-        await sendEmail({ to: studentEmail, subject: "Enrollment Form Received", html: studentHtml });
-        if (process.env.BOOKINGS_EMAIL) {
-            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `ACTION REQUIRED: Enrollment Form Submitted - ${studentName}`, html: academyHtml });
-        }
-        if (res) res.status(200).json({ success: true });
-    } catch (err) {
-        console.error("âŒ Enrollment form email error:", err.message);
-        if (res) res.status(500).json({ success: false });
-    }
+    const { companyEmail, amount, submissionId } = req.body;
+    const html = `<html><body><h2>Bank Transfer Notice</h2><p>Amount: $${amount}, Ref: ${submissionId}</p></body></html>`;
+    try { await sendEmail({ to: companyEmail, subject: "Bank Transfer Notice Received", html, bcc: process.env.BOOKINGS_EMAIL }); res.status(200).json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
 };
 
 const sendCompanyCardPayment = async (req, res) => {
-    const { companyEmail, companyName, amount, transactionReference, linesSummary } = req.body;
-    const amountStr = `$${Number(amount).toFixed(2)}`;
+    const { companyEmail, amount } = req.body;
+    const html = `<html><body><h2>Card Payment Received</h2><p>Amount: $${amount}</p></body></html>`;
+    try { await sendEmail({ to: companyEmail, subject: "Payment Received", html, bcc: process.env.BOOKINGS_EMAIL }); res.status(200).json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
+};
 
-    const companyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:20px;">Payment Received</h1>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p>Hello <strong>${companyName}</strong>,</p>
-    <p>Your card payment of <strong>${amountStr}</strong> has been applied to your company account.</p>
-    <p>Transaction: <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">${transactionReference}</code></p>
-    <pre style="white-space:pre-wrap;font-size:13px;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0;">${linesSummary}</pre>
-</td></tr>
-<tr><td style="padding:20px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;">
-    <p style="margin:0;font-size:13px;color:#64748b;">Thank you,<br/><strong>Safety Training Academy</strong></p>
-</td></tr>
-</table></body></html>`;
+const sendLLNCompletionNotification = async (req, res) => {
+    const { studentEmail, studentName, score, isPassed, bookingId, studentPhone, gatewayTransactionId } = req.body;
+    const status = isPassed ? "Passed" : "Under Review";
+    const html = buildLLNNotificationHtml({ bookingId, studentName, studentEmail, studentPhone, score, status, gatewayTransactionId });
+    try { await sendEmail({ to: studentEmail, subject: `LLN Assessment Completed - ${studentName}`, html, bcc: process.env.BOOKINGS_EMAIL }); if (res) res.status(200).json({ success: true }); } catch (err) { if (res) res.status(500).json({ success: false }); }
+};
 
-    const academyHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="font-family:Arial,sans-serif;font-size:14px;color:#333;background:#f4f4f4;padding:20px;">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:8px;overflow:hidden;margin:auto;">
-<tr><td style="background:#0d2240;color:#fff;padding:24px 30px;text-align:center;">
-    <h1 style="margin:0;font-size:20px;">Company Card Payment Applied</h1>
-</td></tr>
-<tr><td style="padding:30px;">
-    <p><strong>Company:</strong> ${companyName} (${companyEmail})</p>
-    <p><strong>Amount:</strong> ${amountStr}</p>
-    <p><strong>Transaction:</strong> ${transactionReference}</p>
-    <pre style="white-space:pre-wrap;font-size:13px;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0;">${linesSummary}</pre>
-</td></tr>
-</table></body></html>`;
-
-    try {
-        await sendEmail({ to: companyEmail, subject: `Payment received â€” ${amountStr}`, html: companyHtml });
-        if (process.env.BOOKINGS_EMAIL) {
-            await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `Company card payment â€” ${companyName} â€” ${amountStr}`, html: academyHtml });
-        }
-        res.status(200).json({ success: true });
-    } catch (err) {
-        console.error("âŒ Card payment email error:", err.message);
-        res.status(500).json({ success: false });
-    }
+const sendEnrollmentFormCompletionNotification = async (req, res) => {
+    const { studentEmail, studentName, bookingId, studentPhone, gatewayTransactionId } = req.body;
+    const html = buildEnrollmentNotificationHtml({ bookingId, studentName, studentEmail, studentPhone, gatewayTransactionId });
+    try { await sendEmail({ to: studentEmail, subject: `Enrollment Form Submitted - ${studentName}`, html, bcc: process.env.BOOKINGS_EMAIL }); if (res) res.status(200).json({ success: true }); } catch (err) { if (res) res.status(500).json({ success: false }); }
 };
 
 module.exports = {
@@ -908,4 +308,3 @@ module.exports = {
     sendEnrollmentFormCompletionNotification,
     formatBookingId,
 };
-

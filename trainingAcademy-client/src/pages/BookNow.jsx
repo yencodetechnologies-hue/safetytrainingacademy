@@ -461,7 +461,8 @@ function BookNow() {
                     paymentMethod: paymentData.paymentMethod,
                     phone: paymentData.phone,
                     gatewayTransactionId: paymentData.ewayTransactionId || paymentData.transactionId || "",
-                    bankTransferId: paymentData.transactionId || ""
+                    bankTransferId: paymentData.transactionId || "",
+                    bookingId: localStorage.getItem("flowId")
                 }),
             });
         } catch (err) {
