@@ -118,7 +118,7 @@ const createEnrollmentForm = async (req, res) => {
       },
       enrollmentFormCompleted: true,
       enrollmentFormSubmittedAt: new Date(),
-      status: "Approved"
+      status: "Pending"
     }
 
     const form = await EnrollmentForm.findOneAndUpdate(
@@ -131,7 +131,7 @@ const createEnrollmentForm = async (req, res) => {
     const flowUpdateData = { 
       enrollmentFormId: form._id, 
       currentStep: 5,
-      enrollmentStatus: "enrolled" // ✅ Auto-mark as enrolled since form is auto-approved
+      enrollmentStatus: "pending" // Mark as pending until approved by admin
     };
     
     let flow;

@@ -102,6 +102,7 @@ exports.getStudentDashboard = async (req, res) => {
       assessmentPassed,
       enrollmentFormSubmitted,
       enrollmentFormApproved,
+      enrollmentFormStatus: existingForm?.status || "Pending",
       paymentMethod,
       enrollmentType,
       enrolledCourses: allCourses

@@ -48,6 +48,7 @@ export default function StudentDashboard() {
 
   const paymentVerified = data?.paymentVerified ?? false;
   const assessmentPassed = data?.assessmentPassed ?? false;
+  const enrollmentFormStatus = data?.enrollmentFormStatus || "Pending";
   const enrollmentFormSubmitted = data?.enrollmentFormSubmitted ?? false;
   const enrollmentFormApproved = data?.enrollmentFormApproved ?? false;
   const assessmentScore = data?.assessmentScore ?? null;
@@ -159,6 +160,23 @@ export default function StudentDashboard() {
             >
               📝 Complete Form
             </button>
+          </div>
+        ) : enrollmentFormStatus === "Rejected" ? (
+          <div className="alert alert-danger">
+            <div className="alert-icon-wrap">❌</div>
+            <div className="alert-body">
+              <span className="alert-badge" style={{ background: "#fee2e2", color: "#dc2626" }}>Form Rejected</span>
+              <p className="alert-title">Enrollment Form Rejected</p>
+              <p className="alert-desc">
+                Your enrollment form was not approved. Please review and update your details.
+              </p>
+              <button
+                className="alert-action-btn"
+                onClick={() => navigate("/student/enrollment-form")}
+              >
+                📝 Update Form
+              </button>
+            </div>
           </div>
         ) : !enrollmentFormApproved ? (
           <div className="alert alert-warning">

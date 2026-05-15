@@ -115,6 +115,24 @@ function EnrollmentModal({ form, onClose, onStatusChange }) {
             </div>
           </div>
           <div className="modal-status-actions">
+            {form.status !== "Approved" && (
+              <button
+                className="modal-action-btn approve-btn"
+                onClick={() => handleStatus("Approved")}
+                disabled={updating}
+              >
+                <i className="fa-solid fa-check"></i> {updating ? "..." : "Approve"}
+              </button>
+            )}
+            {form.status !== "Rejected" && (
+              <button
+                className="modal-action-btn reject-btn"
+                onClick={() => handleStatus("Rejected")}
+                disabled={updating}
+              >
+                <i className="fa-solid fa-xmark"></i> {updating ? "..." : "Reject"}
+              </button>
+            )}
             <button
               className="modal-action-btn"
               onClick={() => window.open(`/print.html?id=${form.id}`, "_blank")}
