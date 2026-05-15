@@ -90,7 +90,7 @@ app.use("/api/enrollment-form", require("./routes/enrollmentFormRoutes"));
 app.use("/api/companies", companyRoutes);
 app.use("/api/book-now", companyEnrollRoutes);
 app.use("/api/enroll", studentRoutes);
-app.use("/api/LLN", require("./routes/LLNRoutes"));
+app.use("/api/LLN", require("./routes/llnRoutes"));
 app.use("/api/payment", paymentRouter);
 app.use("/api/flow", enrollmentRoutes);
 app.use("/api/students", studentRoutes);
