@@ -3,11 +3,14 @@ import { useNavigate } from "react-router-dom"
 import "./BookingModal.css"
 
 export function getBookingType(course) {
+    const pt = course?.pricingType || (course?.experienceBasedBooking ? "experience" : "standard")
+    if (pt === "experience") return "experience"
+    if (pt === "slbl" || course?.slblPrice) return "slbl"
+
     const bypassKeywords = ["excavator", "haul truck", "skid steer"]
     const isBypass = bypassKeywords.some(kw => course?.title?.toLowerCase().includes(kw))
+    if (isBypass) return "experience"
     
-    if (course?.experienceBasedBooking || isBypass)   return "experience"
-    if (course?.slblPrice)                return "slbl"
     return "standard"
 }
 
@@ -38,7 +41,7 @@ export function getBookingOptions(course) {
                 id: "voc",
                 label: "VOC ",
                 price: course.vocPrice || course.sellingPrice,
-                originalPrice: course.originalPrice,
+                originalPrice: course.withoutExperienceOriginal || course.originalPrice,
                 dur: "Half day",
                 description: "Recognition of prior learning",
                 isVoc: true,
@@ -60,8 +63,8 @@ export function getBookingOptions(course) {
             {
                 id: "sl",
                 label: "SL or BL",
-                price: course.sellingPrice,
-                originalPrice: course.originalPrice,
+                price: course.slSinglePrice || course.sellingPrice,
+                originalPrice: course.slSingleStrikePrice || course.originalPrice,
                 dur: course.duration || "1 day",
                 description: "Single licence — SL or BL",
                 isVoc: false,
@@ -70,7 +73,7 @@ export function getBookingOptions(course) {
                 id: "voc",
                 label: "VOC",
                 price: course.vocPrice || course.sellingPrice,
-                originalPrice: course.originalPrice,
+                originalPrice: course.slSingleStrikePrice || course.originalPrice,
                 dur: "Half day",
                 description: "Recognition of prior learning",
                 isVoc: true,
@@ -99,6 +102,7 @@ export function getBookingOptions(course) {
         },
     ]
 }
+
 
 export default function BookingModal({ course, onClose, initialSelection = null, extraQueryParams = "" }) {
     const navigate = useNavigate()

@@ -14,16 +14,20 @@ function CourseCard({ course, fromPortal }) {
     const options = getBookingOptions(course)
     const sellingPrice = course?.sellingPrice || null
     const originalPrice = course?.originalPrice || null
-    const savings = originalPrice > sellingPrice ? originalPrice - sellingPrice : null
 
     // Prioritize comboPrice if comboEnabled
     let displayPrice = course?.comboEnabled && course?.comboPrice 
         ? course.comboPrice 
-        : (course?.slblPrice ? course.slblPrice : (course?.withExperiencePrice || sellingPrice))
+        : (course?.pricingType === "slbl" || course?.slblPrice 
+            ? (course.slSinglePrice || course.slblPrice || sellingPrice)
+            : (course?.withExperiencePrice || sellingPrice))
 
-    let displayOriginal = course?.slblStrikePrice
-        ? course.slblStrikePrice
-        : course?.withExperienceOriginal || originalPrice
+    let displayOriginal = (course?.pricingType === "slbl" || course?.slblPrice)
+        ? (course.slSingleStrikePrice || course.slblStrikePrice || originalPrice)
+        : (course?.withExperienceOriginal || originalPrice)
+
+    const savings = displayOriginal > displayPrice ? displayOriginal - displayPrice : null
+
 
     return (
         <>

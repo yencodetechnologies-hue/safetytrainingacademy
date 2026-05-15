@@ -6,9 +6,20 @@ function CourseDetailHero({ course }) {
 
     const navigate = useNavigate()
 
-    const originalPrice = course?.originalPrice || 150
-    const sellingPrice = course?.sellingPrice || 100
-    const savings = originalPrice - sellingPrice
+    const sellingPrice = course?.pricingType === "slbl" || course?.slblPrice
+        ? (course.slSinglePrice || course.sellingPrice || 0)
+        : (course?.pricingType === "experience"
+            ? (course.withoutExperiencePrice || course.sellingPrice || 0)
+            : (course?.sellingPrice || 0))
+
+    const originalPrice = course?.pricingType === "slbl" || course?.slblPrice
+        ? (course.slSingleStrikePrice || course.originalPrice || 0)
+        : (course?.pricingType === "experience"
+            ? (course.withoutExperienceOriginal || course.originalPrice || 0)
+            : (course?.originalPrice || 0))
+
+    const savings = originalPrice > sellingPrice ? originalPrice - sellingPrice : 0
+
 
     return (
         <div className="course-detail-hero">
