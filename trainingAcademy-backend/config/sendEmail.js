@@ -42,7 +42,9 @@ const sendEmail = async ({ to, subject, html, bcc }) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log("✅ Email sent to:", to, (bcc ? "with BCC" : ""), "| MessageId:", info.messageId);
+    console.log("✅ Email sent to:", to);
+    if (mailOptions.bcc) console.log("   BCC list:", mailOptions.bcc);
+    console.log("   MessageId:", info.messageId);
     return info;
   } catch (err) {
     console.error("❌ SMTP Error for", to, ":", err.message);

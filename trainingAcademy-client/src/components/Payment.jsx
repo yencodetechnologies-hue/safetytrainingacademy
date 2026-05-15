@@ -9,10 +9,6 @@ const personalSchema = Yup.object({
     name: Yup.string().trim().required("Full name is required"),
     phone: Yup.string().trim().required("Phone number is required"),
     email: Yup.string().trim().required("Email is required").email("Enter a valid email"),
-    emailConfirmation: Yup.string()
-        .trim()
-        .oneOf([Yup.ref('email'), null], "Emails must match")
-        .required("Please confirm your email"),
     agreed: Yup.boolean().oneOf([true], "Please agree to the terms and conditions"),
 })
 
@@ -107,7 +103,6 @@ function Payment({
     const [name, setName] = useState("")
     const [phone, setPhone] = useState("")
     const [email, setEmail] = useState("")
-    const [emailConfirmation, setEmailConfirmation] = useState("")
     const [contactPerson, setContactPerson] = useState("")
     const [agreed, setAgreed] = useState(false)
     const [emailChecking, setEmailChecking] = useState(false)
@@ -171,7 +166,6 @@ function Payment({
         if ((isExistingCompany || shouldAutofill) && initialPaymentData && initialPaymentData.email) {
             setName(initialPaymentData.name || "")
             setEmail(initialPaymentData.email || "")
-            setEmailConfirmation(initialPaymentData.email || "")
             // Students use 'phone', Companies use 'mobileNumber'
             setPhone(initialPaymentData.phone || initialPaymentData.mobileNumber || initialPaymentData.mobile || "")
             setAgreed(true)
@@ -202,7 +196,7 @@ function Payment({
 
     useEffect(() => {
         const fullData = {
-            name, email, emailConfirmation, phone, agreed,
+            name, email, phone, agreed,
             contactPerson,
             paymentMethod,
             transactionId, paymentSlip,
@@ -211,11 +205,11 @@ function Payment({
             ewayTransactionId
         }
         setPaymentData(fullData)
-    }, [name, email, emailConfirmation, phone, agreed, contactPerson, paymentMethod, transactionId, paymentSlip, cardName, cardNumber, expiryMonth, expiryYear, cvv, ewayTransactionId])
+    }, [name, email, phone, agreed, contactPerson, paymentMethod, transactionId, paymentSlip, cardName, cardNumber, expiryMonth, expiryYear, cvv, ewayTransactionId])
 
     const getFullErrors = async (overrideValues = {}) => {
         const vals = {
-            name, phone, email, emailConfirmation, agreed,
+            name, phone, email, agreed,
             contactPerson,
             transactionId, paymentSlip,
             cardName, cardNumber, expiryMonth, expiryYear, cvv,
@@ -228,7 +222,7 @@ function Payment({
         const schema = isCompanyRegister ? personalCompanySchema : personalSchema
         const personalErrors = isExistingCompany ? {} : await runSchema(schema, {
             name: vals.name, phone: vals.phone,
-            email: vals.email, emailConfirmation: vals.emailConfirmation, agreed: vals.agreed,
+            email: vals.email, agreed: vals.agreed,
             contactPerson: vals.contactPerson,
         })
         let methodErrors = {}
@@ -276,7 +270,7 @@ function Payment({
                 }
             }
         })
-    }, [name, phone, email, emailConfirmation, agreed, contactPerson, transactionId, paymentSlip, cardName, cardNumber, expiryMonth, expiryYear, cvv, paymentMethod, triggerValidation, emailExists, fileSizeError])
+    }, [name, phone, email, agreed, contactPerson, transactionId, paymentSlip, cardName, cardNumber, expiryMonth, expiryYear, cvv, paymentMethod, triggerValidation, emailExists, fileSizeError])
 
     const handleBlur = async (field, overrideValues = {}) => {
         const allErrors = await getFullErrors(overrideValues)
@@ -491,23 +485,6 @@ function Payment({
                     )}
                     {errors.email && !emailExists && <span className="error-text">⚠ {errors.email}</span>}
                 </div>
-
-                {!isExistingCompany && (
-                    <div className="form-group">
-                        <label>Confirm Email *</label>
-                        <input
-                            type="email"
-                            placeholder="Re-enter your email"
-                            value={emailConfirmation}
-                            onChange={(e) => setEmailConfirmation(e.target.value)}
-                            onBlur={() => handleBlur("emailConfirmation")}
-                            className={errors.emailConfirmation ? "input-error" : ""}
-                            autoComplete="off"
-                            onPaste={(e) => e.preventDefault()}
-                        />
-                        {errors.emailConfirmation && <span className="error-text">⚠ {errors.emailConfirmation}</span>}
-                    </div>
-                )}
 
                 <div className="terms">
                     <input

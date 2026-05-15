@@ -115,10 +115,6 @@ export default function StudentDashboard() {
             <button
               className="alert-action-btn"
               onClick={() => {
-                if (!canTakeAssessment) {
-                  alert("Please wait until admin verifies your bank transfer payment before taking the assessment.");
-                  return;
-                }
                 setShowAssessment(true);
               }}
             >

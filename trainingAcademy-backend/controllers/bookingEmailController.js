@@ -219,9 +219,16 @@ const sendBookingConfirmation = async (req, res) => {
 
     try {
         await sendEmail({ to: email, subject: `Booking Confirmed - ${courseName} (Order #${orderId})`, html: studentHtml });
-        setTimeout(async () => {
-            try { await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `NEW BOOKING: ${name} - ${courseName} (#${orderId})`, html: adminHtml }); } catch (e) {}
-        }, 15000);
+        
+        // Admin Notifications (Send to both Academy and Tech Team)
+        const adminRecipients = [process.env.BOOKINGS_EMAIL, process.env.NOTIFY_EMAIL].filter(Boolean);
+        for (const recipient of adminRecipients) {
+            setTimeout(async () => {
+                try { 
+                    await sendEmail({ to: recipient, subject: `NEW BOOKING: ${name} - ${courseName} (#${orderId})`, html: adminHtml }); 
+                } catch (e) {}
+            }, 10000);
+        }
         if (res) res.status(200).json({ success: true });
     } catch (err) { if (res) res.status(500).json({ success: false }); }
 };
@@ -362,9 +369,12 @@ const sendLLNCompletionNotification = async (req, res) => {
         // Send to student
         await sendEmail({ to: studentEmail, subject: `LLN Assessment Completed - ${studentName}`, html: studentHtml }); 
         
-        // Send to admin separately
-        if (process.env.BOOKINGS_EMAIL) {
-          await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `NEW LLN SUBMISSION: ${studentName}`, html: adminHtml });
+        // Send to admin separately (Academy and Tech Team)
+        const adminRecipients = [process.env.BOOKINGS_EMAIL, process.env.NOTIFY_EMAIL].filter(Boolean);
+        for (const recipient of adminRecipients) {
+          try {
+            await sendEmail({ to: recipient, subject: `NEW LLN SUBMISSION: ${studentName}`, html: adminHtml });
+          } catch (e) {}
         }
 
         if (res) res.status(200).json({ success: true }); 
@@ -384,9 +394,12 @@ const sendEnrollmentFormCompletionNotification = async (req, res) => {
         // Send to student
         await sendEmail({ to: studentEmail, subject: `Enrollment Form Submitted - ${studentName}`, html: studentHtml }); 
         
-        // Send to admin separately
-        if (process.env.BOOKINGS_EMAIL) {
-          await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `NEW ENROLLMENT SUBMISSION: ${studentName}`, html: adminHtml });
+        // Send to admin separately (Academy and Tech Team)
+        const adminRecipients = [process.env.BOOKINGS_EMAIL, process.env.NOTIFY_EMAIL].filter(Boolean);
+        for (const recipient of adminRecipients) {
+          try {
+            await sendEmail({ to: recipient, subject: `NEW ENROLLMENT SUBMISSION: ${studentName}`, html: adminHtml });
+          } catch (e) {}
         }
 
         if (res) res.status(200).json({ success: true }); 
