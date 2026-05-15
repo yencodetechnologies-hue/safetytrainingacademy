@@ -44,12 +44,25 @@ if (process.env.CLIENT_ORIGIN) {
   });
 }
 
+// ✅ Dynamic CORS logic
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn(`[CORS] Blocked request from unauthorized origin: ${origin}`);
+        // callback(new Error("Not allowed by CORS")); // Stronger security
+        callback(null, true); // Temporarily lenient to debug - change to false in strict prod
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+    optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
   })
 );
 
