@@ -1273,10 +1273,7 @@ function BookNow() {
 
                 {step === 3 && (
                     <CourseSelectionSuccess
-<<<<<<< HEAD
                         onNext={() => navigate("/student")}
-=======
->>>>>>> 9da5e7eca83d5895baf2fc0b465eb9f86d6f8912
                         enrollmentData={{
                             selectedCourse,
                             courseDate: selectedSession?.date,

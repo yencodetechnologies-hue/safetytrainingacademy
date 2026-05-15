@@ -184,11 +184,7 @@ export default function EnrollmentSuccess({ enrollmentData, onBackToHome, onNext
 
         {/* Back to Home Button */}
         <button className="back-btn-enrl-wrap" onClick={handleGoToDashboard}>
-<<<<<<< HEAD
           {onNext ? "Continue to Dashboard" : "Go to Dashboard"}
-=======
-          {onNext ? "Continue to Enrollment Form" : "Continue to Dashboard"}
->>>>>>> 9da5e7eca83d5895baf2fc0b465eb9f86d6f8912
         </button>
 
       </div>
