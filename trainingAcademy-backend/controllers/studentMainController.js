@@ -170,19 +170,19 @@ exports.createStudent = async (req, res) => {
       // ✅ Notify Admin via Email
       try {
         const adminMailData = {
-          studentName: student.name,
-          studentEmail: student.email,
-          studentMobile: student.phone || "—",
+          contactName: student.name,
+          contactEmail: student.email,
+          contactPhone: student.phone || "—",
           courseName: course?.title || "Course",
-          courseDate: sessionData.sessionDate ? new Date(sessionData.sessionDate).toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Sydney" }) : "—",
+          courseCode: course?.courseCode || "—",
+          courseDate: sessionData.sessionDate ? new Date(sessionData.sessionDate).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Sydney" }) : "—",
           courseTime: (sessionData.startTime && sessionData.endTime) ? `${sessionData.startTime} - ${sessionData.endTime}` : "—",
-          courseLocation: "3/14-16 Marjorie Street, Sefton NSW 2162",
-          bookingId: formatBookingId(Date.now().toString()),
-          orderDate: new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Australia/Sydney" }),
-          quantity: 1,
-          subtotal: course?.sellingPrice ? `$${Number(course.sellingPrice).toFixed(2)}` : "—",
+          venue: "3/14-16 Marjorie Street, Sefton NSW 2162",
+          bookingId: formatBookingId(newFlow._id),
+          submittedAt: new Date().toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Sydney" }),
           paymentMethod: data.paymentMethod || "Manual",
-          total: course?.sellingPrice ? `$${Number(course.sellingPrice).toFixed(2)}` : "—"
+          transactionId: data.transactionId || "", 
+          totalAmount: course?.sellingPrice ? Number(course.sellingPrice).toFixed(2) : "0.00"
         };
 
         if (process.env.BOOKINGS_EMAIL) {
