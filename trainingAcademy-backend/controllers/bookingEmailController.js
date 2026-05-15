@@ -206,6 +206,8 @@ const sendBookingConfirmation = async (req, res) => {
     const studentHtml = studentBookingTemplate({ 
         bookingId: orderId, 
         name, 
+        email,
+        phone,
         courseName, 
         courseCode, 
         courseDate: formattedDate, 
