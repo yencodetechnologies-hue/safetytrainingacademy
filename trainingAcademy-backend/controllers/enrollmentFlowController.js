@@ -303,7 +303,7 @@ exports.saveLLND = async (req, res) => {
 
     // ✅ Send Notifications
     try {
-      const populated = await EnrollmentFlow.findById(flowId).populate("studentId").populate("bookingId");
+      const populated = await EnrollmentFlow.findById(flowId).populate("studentId");
       if (populated && populated.studentId) {
         const student = populated.studentId;
         const score = updated.llnd?.score || 0;
@@ -315,7 +315,7 @@ exports.saveLLND = async (req, res) => {
         const fromBooking = populated.bookingId?.gatewayTransactionId || populated.bookingId?.bankTransferId;
         const finalTxId = fromItem || fromBooking || "—";
 
-        // Important: Await the notification to ensure it's sent
+        console.log(`[EnrollmentFlow] Triggering LLN email for student: ${student.email} | Score: ${score}%`);
         await sendLLNCompletionNotification({
           body: {
             studentEmail: student.email,
@@ -327,9 +327,12 @@ exports.saveLLND = async (req, res) => {
             gatewayTransactionId: finalTxId
           }
         }, null); 
+        console.log(`[EnrollmentFlow] LLN email trigger sent successfully.`);
+      } else {
+        console.warn("[EnrollmentFlow] Notification skipped: studentId or flow data missing for flow:", flowId);
       }
     } catch (emailErr) {
-      console.error("Failed to trigger LLN emails:", emailErr.message);
+      console.error("❌ Failed to trigger LLN emails:", emailErr.message);
     }
 
   } catch (err) {
@@ -384,7 +387,7 @@ exports.completeEnrollment = async (req, res) => {
 
     // ✅ Send Notifications
     try {
-      const populated = await EnrollmentFlow.findById(flowId).populate("studentId").populate("bookingId");
+      const populated = await EnrollmentFlow.findById(flowId).populate("studentId");
       if (populated && populated.studentId) {
         const student = populated.studentId;
         const bookingId = formatBookingId(populated._id);
@@ -395,6 +398,7 @@ exports.completeEnrollment = async (req, res) => {
         const fromBooking = populated.bookingId?.gatewayTransactionId || populated.bookingId?.bankTransferId;
         const finalTxId = fromItem || fromBooking || "—";
 
+        console.log(`[EnrollmentFlow] Triggering Enrollment completion email for student: ${student.email}`);
         await sendEnrollmentFormCompletionNotification({
           body: {
             studentEmail: student.email,
@@ -404,9 +408,12 @@ exports.completeEnrollment = async (req, res) => {
             gatewayTransactionId: finalTxId
           }
         }, null);
+        console.log(`[EnrollmentFlow] Enrollment email trigger sent successfully.`);
+      } else {
+        console.warn("[EnrollmentFlow] Notification skipped: studentId missing for flow:", flowId);
       }
     } catch (emailErr) {
-      console.error("Failed to trigger Enrollment emails:", emailErr.message);
+      console.error("❌ Failed to trigger Enrollment emails:", emailErr.message);
     }
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -34,7 +34,7 @@ const sendEmail = async ({ to, subject, html, bcc }) => {
       bcc: bcc || process.env.BOOKINGS_EMAIL || "",
       replyTo: process.env.BOOKINGS_EMAIL || process.env.SMTP_USER,
       envelope: {
-        from: `noreply@safetytrainingacademy.edu.au`, // Redirect bounces
+        from: process.env.SMTP_USER, // Use authenticated user for envelope to satisfy SMTP restrictions
         to: to
       },
       subject,

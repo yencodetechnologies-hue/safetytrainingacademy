@@ -41,6 +41,7 @@ export default function StudentDashboard() {
 
   const paymentVerified = data?.paymentVerified ?? false;
   const assessmentPassed = data?.assessmentPassed ?? false;
+  const enrollmentFormSubmitted = data?.enrollmentFormSubmitted ?? false;
   const enrollmentFormApproved = data?.enrollmentFormApproved ?? false;
   const assessmentScore = data?.assessmentScore ?? null;
 
@@ -61,6 +62,11 @@ export default function StudentDashboard() {
         if (!res.ok) throw new Error("Failed to fetch data");
         const resData = await res.json();
         setData(resData);
+
+        // ✅ Auto-redirect to Enrollment Form if they just passed LLND
+        if (resData.assessmentPassed && !resData.enrollmentFormSubmitted) {
+          navigate("/student/enrollment-form");
+        }
       } catch (err) {
         console.error(err);
       }
@@ -132,7 +138,7 @@ export default function StudentDashboard() {
         )}
 
         {/* Enrollment Form Alert */}
-        {!enrollmentFormApproved ? (
+        {!enrollmentFormSubmitted ? (
           <div className="alert alert-danger">
             <div className="alert-icon-wrap">📄</div>
             <div className="alert-body">
@@ -154,6 +160,23 @@ export default function StudentDashboard() {
             >
               📋 Complete Form
             </button>
+          </div>
+        ) : !enrollmentFormApproved ? (
+          <div className="alert alert-warning">
+            <span className="alert-icon">⏳</span>
+            <div className="alert-body">
+              <span className="alert-badge" style={{ background: "#fef9c3", color: "#ca8a04" }}>Awaiting Review</span>
+              <p className="alert-title">Enrollment Form Submitted</p>
+              <p className="alert-desc">
+                Your form has been received and is currently being reviewed by our team.
+              </p>
+              <button
+                className="alert-link"
+                onClick={() => navigate("/student/enrollment-form")}
+              >
+                View Submitted Form
+              </button>
+            </div>
           </div>
         ) : (
           <div className="alert alert-success">

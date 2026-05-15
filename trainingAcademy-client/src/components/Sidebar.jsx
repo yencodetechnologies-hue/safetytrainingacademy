@@ -63,7 +63,8 @@ function Sidebar({ user }) {
     
     // Special case for Student My Courses vs Buy New Course
     if (user?.role === "Student" && location.pathname === "/student/my-courses") {
-      if (location.state?.tab === "browse") return "Buy New Course";
+      const searchParams = new URLSearchParams(location.search);
+      if (searchParams.get("tab") === "browse" || location.state?.tab === "browse") return "Buy New Course";
       return "My Courses";
     }
 

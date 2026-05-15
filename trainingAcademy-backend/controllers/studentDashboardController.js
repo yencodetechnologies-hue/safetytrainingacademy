@@ -102,6 +102,7 @@ exports.getStudentDashboard = async (req, res) => {
       assessmentScore: llndScore,
       paymentVerified,
       assessmentPassed,
+      enrollmentFormSubmitted: !!latestFlow.enrollmentFormId,
       enrollmentFormApproved,
       paymentMethod,
       enrollmentType,
