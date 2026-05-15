@@ -36,6 +36,57 @@ async function fetchOrGenerateCourseLinks(paymentId, companyId, coursesPayload, 
     return linksData.data || []
 }
 
+function toDateKey(d) {
+    if (!d) return ""
+    return new Date(d).toISOString().split("T")[0]
+}
+
+function buildSessionFromBookingLink(td) {
+    return {
+        _id: td.sessionId || "booking-link-session",
+        date: td.sessionDate,
+        startTime: td.startTime || "",
+        endTime: td.endTime || "",
+    }
+}
+
+/** Match company-purchased session from schedule slots or fall back to link snapshot. */
+function findSessionFromBookingLink(slots, td) {
+    if (td.sessionId) {
+        for (const slot of slots || []) {
+            for (const session of slot.sessions || []) {
+                if (String(session._id) === String(td.sessionId)) {
+                    return { ...session, date: slot.date }
+                }
+            }
+        }
+    }
+    const targetDate = toDateKey(td.sessionDate)
+    for (const slot of slots || []) {
+        if (toDateKey(slot.date) !== targetDate) continue
+        for (const session of slot.sessions || []) {
+            if (session.startTime === td.startTime && session.endTime === td.endTime) {
+                return { ...session, date: slot.date }
+            }
+        }
+    }
+    if (td.sessionDate) return buildSessionFromBookingLink(td)
+    return null
+}
+
+async function loadBookingLinkSelection(td, setSelectedCourse, setSelectedSession) {
+    if (!td?.courseId) return
+    const courseRes = await fetch(`${API_URL}/api/courses/${td.courseId}`)
+    if (!courseRes.ok) return
+    const course = await courseRes.json()
+    setSelectedCourse(course)
+
+    const slotRes = await fetch(`${API_URL}/api/schedules/course/${td.courseId}`)
+    const slots = slotRes.ok ? await slotRes.json() : []
+    const session = findSessionFromBookingLink(slots, td)
+    if (session) setSelectedSession(session)
+}
+
 function BookNow() {
     const location = useLocation()
     const navigate = useNavigate();
@@ -141,20 +192,14 @@ function BookNow() {
                     setIsCompanyEnroll(true)
                     setEnrollmentType("individual")
 
-                    if (data.data.courseId) {
-                        try {
-                            const courseRes = await fetch(`${API_URL}/api/courses/${data.data.courseId}`)
-                            if (courseRes.ok) {
-                                const course = await courseRes.json()
-                                // We no longer call setSelectedCourse(course)
-                            }
-                        } catch (err) {
-                            console.error("Failed to load token course details:", err)
-                        }
-                    }
-
-                    if (data.data.sessionId || data.data.sessionDate) {
-                        // We no longer call setSelectedSession(...)
+                    try {
+                        await loadBookingLinkSelection(
+                            data.data,
+                            setSelectedCourse,
+                            setSelectedSession,
+                        )
+                    } catch (err) {
+                        console.error("Failed to pre-select booking link course:", err)
                     }
                 } else if (data.expired) {
                     setTokenError("expired")
@@ -1169,7 +1214,7 @@ function BookNow() {
                         selectedCourses={selectedCourses}
                         setSelectedCourses={setSelectedCourses}
                         isCompanyEnroll={isCompanyEnroll}
-                        tokenData={tokenData}  // ✅ Pass token data to pre-select course
+                        bookingLinkData={searchParams.get("token") ? tokenData : null}
                     />
                 )}
 
