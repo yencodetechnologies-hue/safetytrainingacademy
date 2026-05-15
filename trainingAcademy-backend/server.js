@@ -22,6 +22,25 @@ const resultRoutes = require("./routes/resultRoutes");
 connectDB();
 
 const app = express();
+
+// ✅ 1. ULTIMATE CORS FIX (Highest Priority - Absolute Top)
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    
+    // We explicitly set the origin to the incoming origin to satisfy 'credentials: true'
+    // but if no origin is provided (like a direct server call), we use '*'
+    res.header("Access-Control-Allow-Origin", origin || "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+    res.header("Access-Control-Allow-Credentials", "true");
+
+    // Handle preflight immediately
+    if (req.method === "OPTIONS") {
+        return res.status(200).end();
+    }
+    next();
+});
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
@@ -44,35 +63,14 @@ if (process.env.CLIENT_ORIGIN) {
   });
 }
 
-// ✅ Trust proxy for headers if behind a load balancer
+// ✅ Trust proxy for headers
 app.set('trust proxy', 1);
 
-// ✅ 1. Manual Preflight Handler (Highest Priority)
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin) || !origin) {
-        res.header("Access-Control-Allow-Origin", origin || "*");
-    }
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
-    res.header("Access-Control-Allow-Credentials", "true");
-
-    if (req.method === "OPTIONS") {
-        return res.sendStatus(200);
-    }
-    next();
-});
-
-// ✅ 2. Standard CORS middleware
+// ✅ 2. Standard CORS middleware (as secondary backup)
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.warn(`[CORS] Blocked origin: ${origin}`);
-        callback(null, true); // Still lenient for debugging
-      }
+      callback(null, true); // Allow all origins through middleware for now
     },
     credentials: true,
     optionsSuccessStatus: 200,
