@@ -237,8 +237,8 @@ const buildCommonHeader = (title, subTitle, badgeText, bookingId) => {
             <p class="eb-hdr-sub" style="font-size:10px; color:#29b6e8; letter-spacing:0.8px; text-transform:uppercase; font-weight:600; margin:4px 0 0;">RTO #45234 &nbsp;·&nbsp; ${subTitle}</p>
           </td>
           <td align="right" valign="top">
-            <div style="display:inline-block; text-align:left;">
-              <div class="eb-badge-sky" style="background:#29b6e8; color:#ffffff; font-size:12px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; padding:4px 12px; border-radius:2px; display:inline-block; line-height:1; margin-bottom:8px;">${badgeText}</div>
+            <div style="display:inline-block; text-align:right;">
+              <div class="eb-badge-sky" style="background:#29b6e8; color:#ffffff; font-size:14px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; padding:4px 14px; border-radius:2px; display:inline-block; line-height:1; margin-bottom:8px;">${badgeText}</div>
               <p class="eb-booking-id-text" style="margin:0; font-size:24px; font-weight:700; color:#ffffff; line-height:1;">Booking ID: ${digits}</p>
             </div>
           </td>

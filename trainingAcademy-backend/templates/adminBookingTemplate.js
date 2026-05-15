@@ -120,8 +120,8 @@ const adminBookingTemplate = (data) => {
             <p class="eb-hdr-sub">RTO #45234 &nbsp;·&nbsp; Admin Notification</p>
           </td>
           <td align="right" valign="top">
-            <div style="display:inline-block; text-align:left;">
-              <span class="eb-badge" style="background:#29b6e8; color:#ffffff; font-size:12px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; padding:4px 12px; border-radius:2px; display:inline-block; line-height:1; margin-bottom:8px;">New Booking</span>
+            <div style="display:inline-block; text-align:right;">
+              <span class="eb-badge" style="background:#29b6e8; color:#ffffff; font-size:14px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; padding:4px 14px; border-radius:2px; display:inline-block; line-height:1; margin-bottom:8px;">New Booking</span>
               <p style="margin:0; font-size:24px; font-weight:700; color:#ffffff; line-height:1;">
                 Booking ID: ${orderNumber}
               </p>
