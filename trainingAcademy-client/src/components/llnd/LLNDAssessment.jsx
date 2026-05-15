@@ -10,7 +10,7 @@ import LLNAssessmentComplete from "../lln/LLNAssessmentComplete"
 const topics = ["Numeracy", "Literacy", "Language", "Digital"]
 
 function LLNAssessment(props) {
-    const { onComplete, userDetails } = props
+    const { onComplete, userDetails, courseId, courseName } = props
     const [attempt, setAttempt] = useState(1)
     const [topicIndex, setTopicIndex] = useState(0)
     const navigate = useNavigate()
@@ -228,8 +228,9 @@ function LLNAssessment(props) {
                 name: userDetails?.name || "Student",
                 email: userDetails?.email || "",
                 phone: userDetails?.phone || "",
-                date: new Date().toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
-                answers: answers
+                answers: answers,
+                courseId,
+                courseName
             }
 
             setResultData(forcedResult)
@@ -249,8 +250,9 @@ function LLNAssessment(props) {
             name: userDetails?.name || "Student",
             email: userDetails?.email || "",
             phone: userDetails?.phone || "",
-            date: new Date().toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
-            answers: answers
+            answers: answers,
+            courseId,
+            courseName
         }
 
         setResultData(result)

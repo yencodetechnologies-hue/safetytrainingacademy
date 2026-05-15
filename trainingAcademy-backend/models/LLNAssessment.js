@@ -14,6 +14,8 @@ const LLNSchema = new mongoose.Schema({
   name: String,
   email: String,
   phone: String,
+  courseName: String, // ✅ Added for fallback
+  bookingDate: String, // ✅ Added for display in results table
 
   total: Number,
   correct: Number,

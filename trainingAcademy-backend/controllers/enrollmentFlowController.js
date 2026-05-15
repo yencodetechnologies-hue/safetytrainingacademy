@@ -9,6 +9,7 @@ const { sendLLNCompletionNotification, sendEnrollmentFormCompletionNotification,
 const Company = require("../models/Company");
 const EnrollmentLink = require("../models/EnrollmentLink");
 const StudentMain = require("../models/student_main");
+const LLNModel = require("../models/LLNAssessment"); // ✅ Added standalone LLN model
 
 // ✅ Create new flow
 exports.createFlow = async (req, res) => {
@@ -296,6 +297,29 @@ exports.saveLLN = async (req, res) => {
       },
       { returnDocument: "after" }
     );
+
+    // 🔥 ALSO SAVE TO STANDALONE LLN COLLECTION
+    try {
+      const flow = existing;
+      await LLNModel.create({
+        student: flow.studentId,
+        course: rest.courseId || flow.items?.[0]?.course?.courseId,
+        courseName: rest.courseName || flow.items?.[0]?.course?.courseName,
+        bookingDate: rest.bookingDate || new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
+        name: rest.name || flow.studentId?.name,
+        email: rest.email || flow.studentId?.email,
+        phone: rest.phone || flow.studentId?.phone,
+        total: rest.total,
+        correct: rest.correct,
+        percentage: Number(rest.percentage),
+        status: rest.status === "Passed" ? "Passed" : "Failed",
+        sections: rest.sections || [],
+        approved: rest.status === "Passed"
+      });
+      console.log(`[saveLLN] Mirror record created in llndassessments for flow: ${flowId}`);
+    } catch (saveErr) {
+      console.error("❌ Failed to mirror LLN to standalone collection:", saveErr.message);
+    }
 
 
 

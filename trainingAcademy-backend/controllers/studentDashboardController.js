@@ -97,6 +97,8 @@ exports.getStudentDashboard = async (req, res) => {
 
     const response = {
       latestFlowId: latestFlow._id,
+      courseId: firstItem?.course?.courseId,
+      courseName: firstItem?.course?.courseName,
       studentName: latestFlow.studentId?.name,
       assessmentScore: llndScore,
       paymentVerified,

@@ -122,6 +122,8 @@ function CourseResult({ onRetry, onContinue, data, flowId: flowIdProp }) {
 
                             const payload = {
                                 flowId,
+                                course: data.courseId, // Use courseId as the 'course' ref
+                                courseName: data.courseName,
                                 ...data,
                                 answers: data.answers || []
                             }
