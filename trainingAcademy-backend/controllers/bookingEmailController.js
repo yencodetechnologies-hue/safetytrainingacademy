@@ -5,20 +5,30 @@ const studentBookingTemplate = require("../templates/studentBookingTemplate");
 const formatBookingId = (dateInput) => {
     if (!dateInput) return "0000000000";
     
-    // Convert dateInput to a Date object. 
-    // It could be a Date object, a timestamp string, or a MongoDB ObjectId string.
+    // 1. Idempotency: If already a 10-digit numeric string, return it
+    if (typeof dateInput === "string" && /^\d{10}$/.test(dateInput)) {
+        return dateInput;
+    }
+
     let date;
-    if (dateInput instanceof Date) {
-        date = dateInput;
+
+    // 2. Handle Mongoose ObjectId (object with .getTimestamp() or 24-char hex string)
+    if (dateInput && typeof dateInput === "object" && typeof dateInput.getTimestamp === "function") {
+        date = dateInput.getTimestamp();
+    } else if (dateInput && typeof dateInput === "object" && dateInput._id) {
+        // Handle case where the whole document is passed
+        return formatBookingId(dateInput._id);
     } else if (typeof dateInput === "string" && dateInput.length === 24) {
-        // If it's a MongoDB ObjectId, extract the timestamp
+        // Hex string ObjectId
         date = new Date(parseInt(dateInput.substring(0, 8), 16) * 1000);
+    } else if (dateInput instanceof Date) {
+        date = dateInput;
     } else {
         date = new Date(dateInput);
     }
 
     // Fallback to current date if invalid
-    if (isNaN(date.getTime())) date = new Date();
+    if (!date || isNaN(date.getTime())) date = new Date();
 
     const mm = String(date.getMonth() + 1).padStart(2, "0");
     const dd = String(date.getDate()).padStart(2, "0");
@@ -173,18 +183,19 @@ const sendBookingConfirmation = async (req, res) => {
     let studentStatus = "Paid";
     if (paymentMethod === "Bank Transfer") { adminStatus = "PLZ VERIFY"; studentStatus = "Awaiting Verification"; }
     else if (paymentMethod === "Pay Later") { adminStatus = "PENDING"; studentStatus = "Pending"; }
-    else if (paymentMethod === "Card Payments" && !gatewayTransactionId) { adminStatus = "PLZ VERIFY"; studentStatus = "Awaiting Verification"; }
+    else if (paymentMethod === "Card Payment" && !gatewayTransactionId) { adminStatus = "PLZ VERIFY"; studentStatus = "Awaiting Verification"; }
 
     const adminHtml = adminBookingTemplate({ 
-        bookingId: orderId, 
-        contactName: name, 
-        contactEmail: email, 
-        contactPhone: phone, 
+        bookingId: orderId,
+        contactName: name,
+        contactEmail: email,
+        contactPhone: phone,
         courseName, 
         courseCode, 
         courseDate: formattedDate, 
         courseTime: timeRange, 
         paymentMethod, 
+        paymentStatus: adminStatus,
         totalAmount: Number(coursePrice).toFixed(2), 
         submittedAt: submittedDate,
         gatewayId: gatewayTransactionId,
@@ -305,13 +316,25 @@ const sendLLNCompletionNotification = async (req, res) => {
     const { studentEmail, studentName, score, isPassed, bookingId, studentPhone, gatewayTransactionId } = req.body;
     const status = isPassed ? "Passed" : "Under Review";
     const html = buildLLNNotificationHtml({ bookingId, studentName, studentEmail, studentPhone, score, status, gatewayTransactionId });
-    try { await sendEmail({ to: studentEmail, subject: `LLN Assessment Completed - ${studentName}`, html, bcc: process.env.BOOKINGS_EMAIL }); if (res) res.status(200).json({ success: true }); } catch (err) { if (res) res.status(500).json({ success: false }); }
+    try { 
+        await sendEmail({ to: studentEmail, subject: `LLN Assessment Completed - ${studentName}`, html, bcc: process.env.BOOKINGS_EMAIL }); 
+        if (res) res.status(200).json({ success: true }); 
+    } catch (err) { 
+        console.error("❌ sendLLNCompletionNotification Error:", err.message);
+        if (res) res.status(500).json({ success: false, error: err.message }); 
+    }
 };
 
 const sendEnrollmentFormCompletionNotification = async (req, res) => {
     const { studentEmail, studentName, bookingId, studentPhone, gatewayTransactionId } = req.body;
     const html = buildEnrollmentNotificationHtml({ bookingId, studentName, studentEmail, studentPhone, gatewayTransactionId });
-    try { await sendEmail({ to: studentEmail, subject: `Enrollment Form Submitted - ${studentName}`, html, bcc: process.env.BOOKINGS_EMAIL }); if (res) res.status(200).json({ success: true }); } catch (err) { if (res) res.status(500).json({ success: false }); }
+    try { 
+        await sendEmail({ to: studentEmail, subject: `Enrollment Form Submitted - ${studentName}`, html, bcc: process.env.BOOKINGS_EMAIL }); 
+        if (res) res.status(200).json({ success: true }); 
+    } catch (err) { 
+        console.error("❌ sendEnrollmentFormCompletionNotification Error:", err.message);
+        if (res) res.status(500).json({ success: false, error: err.message }); 
+    }
 };
 
 module.exports = {

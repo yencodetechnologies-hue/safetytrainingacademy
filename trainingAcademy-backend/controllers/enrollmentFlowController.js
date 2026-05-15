@@ -311,9 +311,7 @@ exports.saveLLND = async (req, res) => {
         const bookingId = formatBookingId(populated._id);
 
         const firstItem = populated.items?.[0] || {};
-        const fromItem = firstItem.payment?.transactionId || firstItem.payment?.gatewayTransactionId;
-        const fromBooking = populated.bookingId?.gatewayTransactionId || populated.bookingId?.bankTransferId;
-        const finalTxId = fromItem || fromBooking || "—";
+        const finalTxId = firstItem.payment?.gatewayTransactionId || firstItem.payment?.transactionId || "—";
 
         console.log(`[EnrollmentFlow] Triggering LLN email for student: ${student.email} | Score: ${score}%`);
         await sendLLNCompletionNotification({
@@ -392,11 +390,8 @@ exports.completeEnrollment = async (req, res) => {
         const student = populated.studentId;
         const bookingId = formatBookingId(populated._id);
         
-        // Try to find transaction ID from various places
         const firstItem = populated.items?.[0] || {};
-        const fromItem = firstItem.payment?.transactionId || firstItem.payment?.gatewayTransactionId;
-        const fromBooking = populated.bookingId?.gatewayTransactionId || populated.bookingId?.bankTransferId;
-        const finalTxId = fromItem || fromBooking || "—";
+        const finalTxId = firstItem.payment?.gatewayTransactionId || firstItem.payment?.transactionId || "—";
 
         console.log(`[EnrollmentFlow] Triggering Enrollment completion email for student: ${student.email}`);
         await sendEnrollmentFormCompletionNotification({

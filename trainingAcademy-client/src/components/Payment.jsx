@@ -207,10 +207,11 @@ function Payment({
             paymentMethod,
             transactionId, paymentSlip,
             cardName, cardNumber,
-            expiryMonth, expiryYear, cvv
+            expiryMonth, expiryYear, cvv,
+            ewayTransactionId
         }
         setPaymentData(fullData)
-    }, [name, email, emailConfirmation, phone, agreed, contactPerson, paymentMethod, transactionId, paymentSlip, cardName, cardNumber, expiryMonth, expiryYear, cvv])
+    }, [name, email, emailConfirmation, phone, agreed, contactPerson, paymentMethod, transactionId, paymentSlip, cardName, cardNumber, expiryMonth, expiryYear, cvv, ewayTransactionId])
 
     const getFullErrors = async (overrideValues = {}) => {
         const vals = {
