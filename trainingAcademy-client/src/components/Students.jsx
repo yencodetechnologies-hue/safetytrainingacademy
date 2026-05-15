@@ -832,11 +832,13 @@ export default function Students() {
   const [statusFilter, setStatusFilter] = useState("All Status");
   
   // Get page from URL or default to 1
-  const currentPage = parseInt(searchParams.get("page") || "1");
+  const currentPage = parseInt(searchParams.get("page") || "1") || 1;
 
-  const setCurrentPage = (page) => {
+  const setCurrentPage = (pageOrFn) => {
     setSearchParams(prev => {
-      prev.set("page", page);
+      const currentPage = parseInt(prev.get("page") || "1") || 1;
+      const nextPage = typeof pageOrFn === "function" ? pageOrFn(currentPage) : pageOrFn;
+      prev.set("page", nextPage);
       return prev;
     });
   };
@@ -1045,6 +1047,7 @@ const handleToggleStatus = async (student) => {
                   <th>LLND Status</th>
                   <th>Enrollment Form</th>
                   <th>Payment Method</th>
+                  <th>Bank Transfer ID</th>
                   <th>Payment status</th>
                   <th>Status</th>
                   <th>Last Login</th>
@@ -1134,6 +1137,11 @@ const handleToggleStatus = async (student) => {
                       </td>
                        <td>
                         <PaymentBadge status={s.paymentMethod} />
+                      </td>
+                      <td>
+                        <div style={{ fontSize: "0.75rem", fontWeight: "600", color: "#6366f1" }}>
+                          {(s.paymentMethod === "Bank Transfer" || s.paymentMethod === "Manual") ? (s.transactionId || "—") : "-"}
+                        </div>
                       </td>
                       <td>
                         <PaymentBadge status={s.paymentStatus} />
