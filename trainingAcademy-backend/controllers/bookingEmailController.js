@@ -226,7 +226,7 @@ const sendBookingConfirmation = async (req, res) => {
     } catch (err) { if (res) res.status(500).json({ success: false }); }
 };
 
-const buildCommonHeader = (title, subTitle, badgeText, bookingId) => {
+const buildCommonHeader = (title, subTitle, badgeText, bookingId, isAdmin = false) => {
   const digits = formatBookingId(bookingId);
   return `
     <div class="eb-hdr" style="background:#0d2240; padding:24px 30px;">
@@ -237,31 +237,36 @@ const buildCommonHeader = (title, subTitle, badgeText, bookingId) => {
             <p class="eb-hdr-sub" style="font-size:10px; color:#29b6e8; letter-spacing:0.8px; text-transform:uppercase; font-weight:600; margin:4px 0 0;">RTO #45234 &nbsp;·&nbsp; ${subTitle}</p>
           </td>
           <td align="right" valign="top">
-            <div style="display:inline-block; text-align:right;">
-              <div class="eb-badge-sky" style="background:#29b6e8; color:#ffffff; font-size:14px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; padding:4px 14px; border-radius:2px; display:inline-block; line-height:1; margin-bottom:8px;">${badgeText}</div>
-              <p class="eb-booking-id-text" style="margin:0; font-size:24px; font-weight:700; color:#ffffff; line-height:1;">Booking ID: ${digits}</p>
+            <div style="display:inline-block; text-align:right; min-width: 200px;">
+              <div class="eb-badge-sky" style="background:#29b6e8; color:#ffffff; font-size:16px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:6px 0; border-radius:3px; display:block; text-align:center; line-height:1; margin-bottom:8px;">${badgeText}</div>
+              <p class="eb-booking-id-text" style="margin:0; font-size:24px; font-weight:700; color:#ffffff; line-height:1; white-space:nowrap;">Booking ID: ${digits}</p>
             </div>
           </td>
         </tr>
       </table>
     </div>
-    <div class="eb-confirm-banner" style="background:#0a1c33; padding:10px 24px; font-size:12px; color:#89c8e8; font-weight:700; text-align:center; border-bottom:3px solid #29b6e8;">Action Required</div>
+    ${isAdmin ? `<div class="eb-confirm-banner" style="background:#0a1c33; padding:10px 24px; font-size:12px; color:#89c8e8; font-weight:700; text-align:center; border-bottom:3px solid #29b6e8;">Action Required</div>` : ''}
   `;
 };
 
-const buildLLNNotificationHtml = (data) => {
+const buildLLNNotificationHtml = (data, isAdmin = false) => {
   const { bookingId, studentName, studentEmail, studentPhone, score, status, gatewayTransactionId } = data;
   const statusColor = status === "Passed" ? "#16a34a" : "#ca8a04";
   const cleanGatewayId = String(gatewayTransactionId || '').replace(/-/g, '');
+  const subTitle = isAdmin ? "LLN NOTIFICATION" : "ASSESSMENT CONFIRMATION";
   
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><style>${commonStyles}</style></head><body><div class="eb-body">${buildCommonHeader("Safety Training Academy", "LLN NOTIFICATION", "LLN SUBMITTED", bookingId)}<div class="eb-content"><div class="eb-section"><div class="eb-section-head"><span>STUDENT DETAILS</span></div><table class="eb-table"><tr><td class="lbl">Name</td><td class="val-bold">${studentName}</td></tr><tr><td class="lbl">Email</td><td class="val">${studentEmail}</td></tr><tr><td class="lbl">Phone Number</td><td class="val">${studentPhone}</td></tr></table></div><div class="eb-section"><div class="eb-section-head"><span>ASSESSMENT RESULT</span></div><table class="eb-table"><tr><td class="lbl">Booking ID</td><td class="val-bold">${formatBookingId(bookingId)}</td></tr><tr><td class="lbl">Score</td><td class="val-bold" style="font-size:18px;">${Number(score).toFixed(1)}%</td></tr><tr><td class="lbl">Status</td><td class="val-bold" style="color:${statusColor};">${status}</td></tr>${cleanGatewayId && cleanGatewayId !== '—' && cleanGatewayId !== '-' ? `<tr><td class="lbl">Transaction ID</td><td class="val">${cleanGatewayId}</td></tr>` : ''}</table></div></div><div class="eb-footer">&copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.</div></div></body></html>`;
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><style>${commonStyles}</style></head><body><div class="eb-body">${buildCommonHeader("Safety Training Academy", subTitle, "LLN SUBMITTED", bookingId, isAdmin)}<div class="eb-content"><div class="eb-section"><div class="eb-section-head"><span>STUDENT DETAILS</span></div><table class="eb-table"><tr><td class="lbl">Name</td><td class="val-bold">${studentName}</td></tr><tr><td class="lbl">Email</td><td class="val">${studentEmail}</td></tr><tr><td class="lbl">Phone Number</td><td class="val">${studentPhone}</td></tr></table></div><div class="eb-section"><div class="eb-section-head"><span>ASSESSMENT RESULT</span></div><table class="eb-table"><tr><td class="lbl">Booking ID</td><td class="val-bold">${formatBookingId(bookingId)}</td></tr><tr><td class="lbl">Score</td><td class="val-bold" style="font-size:18px;">${Number(score).toFixed(1)}%</td></tr><tr><td class="lbl">Status</td><td class="val-bold" style="color:${statusColor};">${status}</td></tr>${cleanGatewayId && cleanGatewayId !== '—' && cleanGatewayId !== '-' ? `<tr><td class="lbl">Transaction ID</td><td class="val">${cleanGatewayId}</td></tr>` : ''}</table></div></div><div class="eb-footer">&copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.</div></div></body></html>`;
 };
 
-const buildEnrollmentNotificationHtml = (data) => {
+const buildEnrollmentNotificationHtml = (data, isAdmin = false) => {
   const { bookingId, studentName, studentEmail, studentPhone, gatewayTransactionId } = data;
   const cleanGatewayId = String(gatewayTransactionId || '').replace(/-/g, '');
+  const subTitle = isAdmin ? "ENROLLMENT NOTIFICATION" : "ENROLLMENT CONFIRMATION";
+  const introText = isAdmin 
+    ? "A student has submitted their enrollment form and is awaiting review." 
+    : "Thank you for submitting your enrollment form. Our team will review your documents shortly.";
   
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><style>${commonStyles}</style></head><body><div class="eb-body">${buildCommonHeader("Safety Training Academy", "ENROLLMENT NOTIFICATION", "ENROLLMENT SUBMITTED", bookingId)}<div class="eb-content"><p style="color: #475569; font-size: 14px; margin: 0 0 24px;">A student has submitted their enrollment form and is awaiting review.</p><div class="eb-section"><div class="eb-section-head"><span>STUDENT DETAILS</span></div><table class="eb-table"><tr><td class="lbl">Student Name</td><td class="val-bold">${studentName}</td></tr><tr><td class="lbl">Email</td><td class="val" style="color:#2563eb;">${studentEmail}</td></tr><tr><td class="lbl">Phone Number</td><td class="val">${studentPhone}</td></tr><tr><td class="lbl">Booking ID</td><td class="val-bold">${formatBookingId(bookingId)}</td></tr><tr><td class="lbl">Transaction ID</td><td class="val">${cleanGatewayId && cleanGatewayId !== '-' ? cleanGatewayId : '—'}</td></tr></table></div><p style="margin-top:24px; color:#475569; font-size:14px;">Please log in to the admin portal to review the form and documents.</p></div><div class="eb-footer">&copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.</div></div></body></html>`;
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><style>${commonStyles}</style></head><body><div class="eb-body">${buildCommonHeader("Safety Training Academy", subTitle, "ENROLLMENT SUBMITTED", bookingId, isAdmin)}<div class="eb-content"><p style="color: #475569; font-size: 14px; margin: 0 0 24px;">${introText}</p><div class="eb-section"><div class="eb-section-head"><span>STUDENT DETAILS</span></div><table class="eb-table"><tr><td class="lbl">Student Name</td><td class="val-bold">${studentName}</td></tr><tr><td class="lbl">Email</td><td class="val" style="color:#2563eb;">${studentEmail}</td></tr><tr><td class="lbl">Phone Number</td><td class="val">${studentPhone}</td></tr><tr><td class="lbl">Booking ID</td><td class="val-bold">${formatBookingId(bookingId)}</td></tr><tr><td class="lbl">Transaction ID</td><td class="val">${cleanGatewayId && cleanGatewayId !== '-' ? cleanGatewayId : '—'}</td></tr></table></div>${isAdmin ? `<p style="margin-top:24px; color:#475569; font-size:14px;">Please log in to the admin portal to review the form and documents.</p>` : ''}</div><div class="eb-footer">&copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.</div></div></body></html>`;
 };
 
 const sendEnrollmentLinkConfirmation = async (req, res) => {
@@ -349,9 +354,19 @@ const sendCompanyCardPayment = async (req, res) => {
 const sendLLNCompletionNotification = async (req, res) => {
     const { studentEmail, studentName, score, isPassed, bookingId, studentPhone, gatewayTransactionId } = req.body;
     const status = isPassed ? "Passed" : "Under Review";
-    const html = buildLLNNotificationHtml({ bookingId, studentName, studentEmail, studentPhone, score, status, gatewayTransactionId });
+    
+    const studentHtml = buildLLNNotificationHtml({ bookingId, studentName, studentEmail, studentPhone, score, status, gatewayTransactionId }, false);
+    const adminHtml = buildLLNNotificationHtml({ bookingId, studentName, studentEmail, studentPhone, score, status, gatewayTransactionId }, true);
+
     try { 
-        await sendEmail({ to: studentEmail, subject: `LLN Assessment Completed - ${studentName}`, html, bcc: process.env.BOOKINGS_EMAIL }); 
+        // Send to student
+        await sendEmail({ to: studentEmail, subject: `LLN Assessment Completed - ${studentName}`, html: studentHtml }); 
+        
+        // Send to admin separately
+        if (process.env.BOOKINGS_EMAIL) {
+          await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `NEW LLN SUBMISSION: ${studentName}`, html: adminHtml });
+        }
+
         if (res) res.status(200).json({ success: true }); 
     } catch (err) { 
         console.error("❌ sendLLNCompletionNotification Error:", err.message);
@@ -361,9 +376,19 @@ const sendLLNCompletionNotification = async (req, res) => {
 
 const sendEnrollmentFormCompletionNotification = async (req, res) => {
     const { studentEmail, studentName, bookingId, studentPhone, gatewayTransactionId } = req.body;
-    const html = buildEnrollmentNotificationHtml({ bookingId, studentName, studentEmail, studentPhone, gatewayTransactionId });
+    
+    const studentHtml = buildEnrollmentNotificationHtml({ bookingId, studentName, studentEmail, studentPhone, gatewayTransactionId }, false);
+    const adminHtml = buildEnrollmentNotificationHtml({ bookingId, studentName, studentEmail, studentPhone, gatewayTransactionId }, true);
+
     try { 
-        await sendEmail({ to: studentEmail, subject: `Enrollment Form Submitted - ${studentName}`, html, bcc: process.env.BOOKINGS_EMAIL }); 
+        // Send to student
+        await sendEmail({ to: studentEmail, subject: `Enrollment Form Submitted - ${studentName}`, html: studentHtml }); 
+        
+        // Send to admin separately
+        if (process.env.BOOKINGS_EMAIL) {
+          await sendEmail({ to: process.env.BOOKINGS_EMAIL, subject: `NEW ENROLLMENT SUBMISSION: ${studentName}`, html: adminHtml });
+        }
+
         if (res) res.status(200).json({ success: true }); 
     } catch (err) { 
         console.error("❌ sendEnrollmentFormCompletionNotification Error:", err.message);
