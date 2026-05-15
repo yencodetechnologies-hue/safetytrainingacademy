@@ -44,25 +44,38 @@ if (process.env.CLIENT_ORIGIN) {
   });
 }
 
-// ✅ Dynamic CORS logic
+// ✅ Trust proxy for headers if behind a load balancer
+app.set('trust proxy', 1);
+
+// ✅ 1. Manual Preflight Handler (Highest Priority)
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin) || !origin) {
+        res.header("Access-Control-Allow-Origin", origin || "*");
+    }
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+    res.header("Access-Control-Allow-Credentials", "true");
+
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(200);
+    }
+    next();
+});
+
+// ✅ 2. Standard CORS middleware
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl)
-      if (!origin) return callback(null, true);
-      
-      if (allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.warn(`[CORS] Blocked request from unauthorized origin: ${origin}`);
-        // callback(new Error("Not allowed by CORS")); // Stronger security
-        callback(null, true); // Temporarily lenient to debug - change to false in strict prod
+        console.warn(`[CORS] Blocked origin: ${origin}`);
+        callback(null, true); // Still lenient for debugging
       }
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
-    optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
+    optionsSuccessStatus: 200,
   })
 );
 
