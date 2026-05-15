@@ -360,6 +360,7 @@ exports.getAllStudents = async (req, res) => {
               : "—",
         status: flow.status === "active" ? "Active" : "Inactive",
         lastLogin: student.lastLogin || "Never",
+        bookingId: formatBookingId(flow.createdAt || flow._id),
       };
     }));
 

@@ -671,6 +671,7 @@ exports.getAllPayments = async (req, res) => {
           method: payment.method,
           type: enroll.enrollmentType || "Individual",
           slipUrl: payment.slipUrl || null,
+          bookingId: formatBookingId(enroll.createdAt || enroll._id),
         });
 
         if (payment.status === "pending" || payment.status === "unpaid") stats.pending++;

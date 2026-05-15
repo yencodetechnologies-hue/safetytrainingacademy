@@ -2,12 +2,31 @@ const sendEmail = require("../config/sendEmail");
 const adminBookingTemplate = require("../templates/adminBookingTemplate");
 const studentBookingTemplate = require("../templates/studentBookingTemplate");
 
-const formatBookingId = (id) => {
-    if (!id) return "00000000";
-    const digits = String(id).replace(/\D/g, "");
-    if (digits.length >= 8) return digits.slice(-8);
-    if (digits.length > 0) return digits.padStart(8, "0");
-    return String(id).slice(-8).toUpperCase().padStart(8, "0");
+const formatBookingId = (dateInput) => {
+    if (!dateInput) return "0000000000";
+    
+    // Convert dateInput to a Date object. 
+    // It could be a Date object, a timestamp string, or a MongoDB ObjectId string.
+    let date;
+    if (dateInput instanceof Date) {
+        date = dateInput;
+    } else if (typeof dateInput === "string" && dateInput.length === 24) {
+        // If it's a MongoDB ObjectId, extract the timestamp
+        date = new Date(parseInt(dateInput.substring(0, 8), 16) * 1000);
+    } else {
+        date = new Date(dateInput);
+    }
+
+    // Fallback to current date if invalid
+    if (isNaN(date.getTime())) date = new Date();
+
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    const hh = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+    const ss = String(date.getSeconds()).padStart(2, "0");
+    
+    return `${mm}${dd}${hh}${min}${ss}`;
 };
 
 const commonStyles = `

@@ -88,6 +88,7 @@ function ViewModal({ student, onClose }) {
           <div className="modal-detail-row"><span>Course</span><span>{student.course || "—"}</span></div>
           <div className="modal-detail-row"><span>Type</span><span>{student.type || "—"}</span></div>
           <div className="modal-detail-row"><span>Booking Date</span><span>{student.courseBookingDate || "—"}</span></div>
+          <div className="modal-detail-row"><span>Booking ID</span><span style={{ fontWeight: '700', color: '#6366f1' }}>{student.bookingId || "—"}</span></div>
           <div className="modal-detail-row"><span>Register Date</span><span>{student.registerDate || "—"}</span></div>
           <div className="modal-detail-row"><span>Last Login</span><span>{student.lastLogin || "Never"}</span></div>
         </div>
@@ -1034,6 +1035,7 @@ const handleToggleStatus = async (student) => {
               <thead>
                 <tr>
                   <th>Register date</th>
+                  <th>Booking ID</th>
                   <th>Name</th>
                   <th>Type</th>
                   <th>Email</th>
@@ -1062,6 +1064,11 @@ const handleToggleStatus = async (student) => {
                       <td>
                         <div className="sm-date">{s.registerDate}</div>
                         <div className="sm-time">{s.registerTime}</div>
+                      </td>
+                      <td className="sm-booking-id">
+                        <div className="sm-date" style={{ fontWeight: '600', color: '#6366f1' }}>
+                          {s.bookingId || "—"}
+                        </div>
                       </td>
                       <td>
                         <div className="sm-student-cell">

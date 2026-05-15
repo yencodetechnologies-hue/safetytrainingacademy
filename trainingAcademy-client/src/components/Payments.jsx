@@ -280,8 +280,8 @@ const Payment = () => {
                       <div>{p.date}</div>
                       <div className="time-muted">{p.time || "—"}</div>
                     </td>
-                    <td className="td-mono">
-                      {p.transId ? String(p.transId).replace(/\D/g, "").slice(-8).padStart(8, "0") : "—"}
+                    <td className="td-mono" style={{ fontWeight: '600', color: '#6366f1' }}>
+                      {p.bookingId || "—"}
                     </td>
                     <td>
                       <div className="student-info">
@@ -405,6 +405,12 @@ const Payment = () => {
               <div className="transaction-section-v2">
                 <h4>Transaction Details</h4>
                 <div className="details-grid">
+                  <div className="detail-item">
+                    <div className="label">Booking ID:</div>
+                    <div className="value mono-box" style={{ fontWeight: '700', color: '#6366f1' }}>
+                      {selectedPayment.bookingId || "—"}
+                    </div>
+                  </div>
                   <div className="detail-item">
                     <div className="label">
                       {selectedPayment.method === "Bank Transfer" ? "Bank Transfer ID:" : "Gateway Transaction ID:"}
