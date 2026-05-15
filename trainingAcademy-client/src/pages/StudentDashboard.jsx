@@ -2,7 +2,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import "../styles/StudentDashboard.css";
 import LLNDAssessment from "../components/llnd/LLNDAssessment";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { API_URL } from "../data/service";
 
 export default function StudentDashboard() {
@@ -16,6 +16,16 @@ export default function StudentDashboard() {
   localStorage.setItem("studentId", user.id);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get("startLLN") === "true") {
+      setShowAssessment(true);
+      // Optional: clean up URL
+      navigate("/student", { replace: true });
+    }
+  }, [location, navigate]);
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -26,9 +36,6 @@ export default function StudentDashboard() {
         if (!res.ok) throw new Error("Failed to fetch data");
         const resData = await res.json();
         setData(resData);
-        if (resData.latestFlowId) {
-          localStorage.setItem("flowId", resData.latestFlowId);
-        }
       } catch (err) {
         console.error(err);
         setError("Something went wrong da 😅");
@@ -37,7 +44,7 @@ export default function StudentDashboard() {
       }
     };
     fetchDashboard();
-  }, [studentId]);
+  }, [studentId, navigate]);
 
   const paymentVerified = data?.paymentVerified ?? false;
   const assessmentPassed = data?.assessmentPassed ?? false;
@@ -52,26 +59,27 @@ export default function StudentDashboard() {
 
 
   const handleAssessmentComplete = () => {
+    // We don't necessarily need to hide the assessment if we're navigating away,
+    // but doing so ensures the dashboard state is clean if they come back.
     setShowAssessment(false);
 
-    const fetchDashboard = async () => {
+    const fetchDashboardAndRedirect = async () => {
       try {
-        const res = await fetch(
-          `${API_URL}/api/student/dashboard/${studentId}`
-        );
+        const res = await fetch(`${API_URL}/api/student/dashboard/${studentId}`);
         if (!res.ok) throw new Error("Failed to fetch data");
         const resData = await res.json();
         setData(resData);
 
-        // ✅ Auto-redirect to Enrollment Form if they just passed LLND
+        // ✅ Redirect immediately if passed and form not yet submitted
         if (resData.assessmentPassed && !resData.enrollmentFormSubmitted) {
           navigate("/student/enrollment-form");
         }
       } catch (err) {
-        console.error(err);
+        console.error("Redirect fetch error:", err);
       }
     };
-    fetchDashboard();
+    
+    fetchDashboardAndRedirect();
   };
 
   if (showAssessment) {
@@ -100,8 +108,7 @@ export default function StudentDashboard() {
       </div>
 
       <div className="dashboard-alerts">
-
-        {/* LLND Assessment Alert */}
+        {/* LLND Assessment Alert (NOW BACK TO TOP) */}
         {!assessmentPassed ? (
           <div className="alert alert-danger">
             <div className="alert-icon-wrap">📖</div>
@@ -127,13 +134,13 @@ export default function StudentDashboard() {
             <div className="alert-body">
               <p className="alert-title">Pre-Enrollment Assessment Passed</p>
               <p className="alert-desc">
-                Score: {assessmentScore}% – You can now enroll in courses.
+                Score: {assessmentScore}%
               </p>
             </div>
           </div>
         )}
 
-        {/* Enrollment Form Alert */}
+        {/* Enrollment Form Alert (NOW BELOW LLND) */}
         {!enrollmentFormSubmitted ? (
           <div className="alert alert-danger">
             <div className="alert-icon-wrap">📄</div>
@@ -147,14 +154,10 @@ export default function StudentDashboard() {
             <button
               className="alert-action-btn"
               onClick={() => {
-                if (!assessmentPassed) {
-                  alert("Please complete and pass the LLND Assessment before filling the enrollment form.");
-                  return;
-                }
                 navigate("/student/enrollment-form");
               }}
             >
-              📋 Complete Form
+              📝 Complete Form
             </button>
           </div>
         ) : !enrollmentFormApproved ? (
@@ -182,12 +185,6 @@ export default function StudentDashboard() {
               <p className="alert-desc">
                 Your enrollment form has been approved.
               </p>
-              <button
-                className="alert-link"
-                onClick={() => navigate("/student/enrollment-form")}
-              >
-                View Form
-              </button>
             </div>
           </div>
         )}

@@ -98,7 +98,7 @@ export default function StudentEnrollmentForm() {
         throw new Error(errorData.message || "Failed to submit enrollment");
       }
 
-      navigate("/enrollment-success");
+      navigate("/student?startLLN=true");
     } catch (err) {
       alert(`Error: ${err.message}`);
     } finally {
@@ -110,74 +110,7 @@ export default function StudentEnrollmentForm() {
   if (error) return <div>Error: {error}</div>;
   if (!userDetails) return <div>No user details found.</div>;
 
-  const canAccess = paymentVerified && assessmentPassed;
-
-
-  if (!canAccess) {
-    return (
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "60px 20px",
-        textAlign: "center"
-      }}>
-        <div style={{ fontSize: "48px", marginBottom: "16px" }}>🔒</div>
-        <h2 style={{ color: "#e53e3e", marginBottom: "8px" }}>Payment Verification Required</h2>
-        <p style={{ color: "#666", marginBottom: "24px", maxWidth: "400px" }}>
-          Please wait until admin verifies your payment before completing the enrollment form.
-        </p>
-        <button
-          onClick={() => navigate("/student")}
-          style={{
-            padding: "10px 24px",
-            backgroundColor: "#7c3aed",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "14px"
-          }}
-        >
-          ← Back to Dashboard
-        </button>
-      </div>
-    );
-  }
-
-  if (!assessmentPassed) {
-    return (
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "60px 20px",
-        textAlign: "center"
-      }}>
-        <div style={{ fontSize: "48px", marginBottom: "16px" }}>📋</div>
-        <h2 style={{ color: "#e53e3e", marginBottom: "8px" }}>LLND Assessment Required</h2>
-        <p style={{ color: "#666", marginBottom: "24px", maxWidth: "400px" }}>
-          Please complete and pass the LLND Assessment before filling the enrollment form.
-        </p>
-        <button
-          onClick={() => navigate("/student")}
-          style={{
-            padding: "10px 24px",
-            backgroundColor: "#7c3aed",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "14px"
-          }}
-        >
-          ← Back to Dashboard
-        </button>
-      </div>
-    );
-  }
+  const canAccess = true;
 
   return (
     <section>
