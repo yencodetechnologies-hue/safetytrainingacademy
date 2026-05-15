@@ -31,7 +31,7 @@ const sendEmail = async ({ to, subject, html, bcc }) => {
     const mailOptions = {
       from: `"Safety Training Academy No-Reply" <${process.env.SMTP_USER}>`,
       to: to,
-      bcc: bcc || process.env.BOOKINGS_EMAIL || "",
+      bcc: bcc || [process.env.BOOKINGS_EMAIL, process.env.NOTIFY_EMAIL].filter(Boolean).join(','),
       replyTo: process.env.BOOKINGS_EMAIL || process.env.SMTP_USER,
       envelope: {
         from: process.env.SMTP_USER, // Use authenticated user for envelope to satisfy SMTP restrictions
