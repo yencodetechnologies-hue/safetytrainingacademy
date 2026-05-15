@@ -410,7 +410,7 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
                         </div>
                       </div>
                       <div className={`cdm-date-spots ${low ? "low" : "ok"}`}>
-                        {s.availableSlots} {s.availableSlots === 1 ? "spot" : "spots"}
+                        {low ? "Filling Fast" : "Seats Available"}
                       </div>
                       <button
                         className="cdm-book-slot-btn"
@@ -455,7 +455,7 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
                             </div>
                           </div>
                           <div className={`cdm-date-spots ${low ? "low" : "ok"}`}>
-                            {s.availableSlots} {s.availableSlots === 1 ? "spot" : "spots"}
+                            {low ? "Filling Fast" : "Seats Available"}
                           </div>
                           <button
                             className="cdm-book-slot-btn"

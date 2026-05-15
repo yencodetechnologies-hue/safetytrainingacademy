@@ -442,17 +442,17 @@ function CourseDetails() {
                                                 const diffTime = d - today;
                                                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                                                let spotLabel = `${s.availableSlots} left`;
+                                                let spotLabel = "Seats Available";
                                                 let spotClass = "";
 
                                                 if (s.availableSlots <= 3) {
-                                                    spotLabel = `Only ${s.availableSlots} left`;
+                                                    spotLabel = "Filling Fast";
                                                     spotClass = "cdp-s-spots--low";
                                                 } else if (diffDays < 20 || s.availableSlots <= 10) {
-                                                    spotLabel = `Limited Seats - ${s.availableSlots} left`;
+                                                    spotLabel = "Limited Seats";
                                                     spotClass = "cdp-s-spots--medium";
                                                 } else {
-                                                    spotLabel = `${s.availableSlots} left`;
+                                                    spotLabel = "Seats Available";
                                                     spotClass = ""; // Green by default
                                                 }
 
@@ -501,17 +501,17 @@ function CourseDetails() {
                                                     const diffTime = d - today;
                                                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                                                    let spotLabel = `${s.availableSlots} left`;
+                                                    let spotLabel = "Seats Available";
                                                     let spotClass = "";
 
                                                     if (s.availableSlots <= 3) {
-                                                        spotLabel = `Only ${s.availableSlots} left`;
+                                                        spotLabel = "Filling Fast";
                                                         spotClass = "cdp-s-spots--low";
                                                     } else if (diffDays < 20 || s.availableSlots <= 10) {
-                                                        spotLabel = `Limited Seats - ${s.availableSlots} left`;
+                                                        spotLabel = "Limited Seats";
                                                         spotClass = "cdp-s-spots--medium";
                                                     } else {
-                                                        spotLabel = `${s.availableSlots} left`;
+                                                        spotLabel = "Seats Available";
                                                         spotClass = ""; // Green by default
                                                     }
 

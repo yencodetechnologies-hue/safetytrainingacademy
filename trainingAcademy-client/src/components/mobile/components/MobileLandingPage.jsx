@@ -404,7 +404,7 @@ export default function MobileLandingPage({ courses = [] }) {
                           Book now
                         </button>
                         <div className={`mlp-date-spots ${low ? "low" : ""}`}>
-                          {s.availableSlots} {s.availableSlots === 1 ? "spot" : "spots"}
+                          {low ? "Filling Fast" : "Seats Available"}
                         </div>
 
                       </div>
@@ -454,7 +454,7 @@ export default function MobileLandingPage({ courses = [] }) {
                                 Book now
                               </button>
                               <div className={`mlp-date-spots ${low ? "low" : ""}`}>
-                                {s.availableSlots} {s.availableSlots === 1 ? "spot" : "spots"}
+                                {low ? "Filling Fast" : "Seats Available"}
                               </div>
                             </div>
                           </div>

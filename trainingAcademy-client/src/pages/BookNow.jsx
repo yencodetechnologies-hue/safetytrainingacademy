@@ -389,7 +389,7 @@ function BookNow() {
     const effectiveStep = isCompanyEnroll ? step - 1 : step;
     const progress = (effectiveStep / totalSteps) * 100;
 
-    const createFlow = async (slipUrl = "") => {
+    const createFlow = async (slipUrl = "", txId = "") => {
         try {
             const studentId = localStorage.getItem("enrollId");
             if (!studentId) return;
@@ -409,7 +409,7 @@ function BookNow() {
             formData.append("endTime", selectedSession?.endTime);
             formData.append("sessionId", selectedSession?._id || "");
             formData.append("paymentMethod", paymentData.paymentMethod || "");
-            formData.append("transactionId", paymentData.transactionId || paymentData.ewayTransactionId || "");
+            formData.append("transactionId", txId || paymentData.transactionId || paymentData.ewayTransactionId || "");
             formData.append("slipUrl", slipUrl);
             if (isEnrollmentLink) {
                 formData.append("source", "Enrollment Link");
@@ -444,7 +444,7 @@ function BookNow() {
         }
     };
 
-    const sendBookingEmail = async () => {
+    const sendBookingEmail = async (txId = "") => {
         try {
             await fetch(`${API_URL}/api/booking-email/send-confirmation`, {
                 method: "POST",
@@ -460,7 +460,7 @@ function BookNow() {
                     coursePrice,
                     paymentMethod: paymentData.paymentMethod,
                     phone: paymentData.phone,
-                    gatewayTransactionId: paymentData.ewayTransactionId || paymentData.transactionId || "",
+                    gatewayTransactionId: txId || paymentData.ewayTransactionId || paymentData.transactionId || "",
                     bankTransferId: paymentData.transactionId || "",
                     bookingId: localStorage.getItem("flowId")
                 }),
@@ -546,7 +546,9 @@ function BookNow() {
                                 startTime: selectedSession?.startTime || "",
                                 endTime: selectedSession?.endTime || "",
                                 phone: paymentData.phone,
-                                bookingId: localStorage.getItem("flowId")
+                                bookingId: localStorage.getItem("flowId"),
+                                totalAmount: coursePrice,
+                                paymentMethod: "Pay Later"
                             })
                         });
                     } catch (emailErr) {
@@ -870,8 +872,10 @@ function BookNow() {
             if (cardPaymentRef.current.paymentMethod === "Card Payment" && !isCompanyEnroll) {
                 setIsProcessing(true)
                 try {
-                    const success = await cardPaymentRef.current.trigger()
-                    if (!success) return
+                    const paymentResult = await cardPaymentRef.current.trigger()
+                    if (!paymentResult || !paymentResult.success) return
+                    const txId = paymentResult.transactionId || ""
+                    
                     let studentId = localStorage.getItem("enrollId");
                     let slipUrl = "";
 
@@ -881,8 +885,8 @@ function BookNow() {
                         formData.append("email", paymentData.email);
                         formData.append("phone", paymentData.phone);
                         formData.append("paymentMethod", paymentData.paymentMethod);
-                        formData.append("transactionId", paymentData.transactionId || "");
-                        formData.append("ewayTransactionId", paymentData.ewayTransactionId || "");
+                        formData.append("transactionId", txId || "");
+                        formData.append("ewayTransactionId", txId || "");
                         formData.append("courseId", selectedCourse?._id);
                         formData.append("sessionDate", selectedSession?.date);
                         formData.append("startTime", selectedSession?.startTime);
@@ -912,8 +916,8 @@ function BookNow() {
                     }
 
                     const flowId = localStorage.getItem("flowId");
-                    if (!flowId) await createFlow(slipUrl);
-                    await sendBookingEmail();
+                    if (!flowId) await createFlow(slipUrl, txId);
+                    await sendBookingEmail(txId);
 
                     navigate("/booking-success", {
                         state: {

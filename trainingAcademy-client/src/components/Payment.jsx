@@ -286,12 +286,12 @@ function Payment({
     const handleCardPayment = async () => {
         if (emailExists) {
             setErrors(prev => ({ ...prev, email: "This email is already registered. Please login instead." }))
-            return false
+            return { success: false, message: "Email already registered" }
         }
         const newErrors = await getFullErrors()
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors)
-            return false
+            return { success: false, message: "Validation failed" }
         }
         setPaymentStatus("loading")
         setPaymentError("")
@@ -308,22 +308,23 @@ function Payment({
             const result = await response.json()
             if (result.success) {
                 setPaymentStatus("success")
-                setEwayTransactionId(result.transactionId)
+                const txId = result.gatewayTransactionId || result.transactionId || ""
+                setEwayTransactionId(txId)
                 setPaymentData(prev => ({
                     ...prev,
-                    ewayTransactionId: result.transactionId,
+                    ewayTransactionId: txId,
                     paymentConfirmed: true,
                 }))
-                return true
+                return { success: true, transactionId: txId }
             } else {
                 setPaymentStatus("error")
                 setPaymentError(result.message || "Your card was declined. Please contact your bank or try a different payment method.")
-                return false
+                return { success: false, message: result.message }
             }
         } catch (err) {
             setPaymentStatus("error")
             setPaymentError("Network error. Please check your connection and try again.")
-            return false
+            return { success: false, message: "Network error" }
         }
     }
 

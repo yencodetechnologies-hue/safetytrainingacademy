@@ -500,7 +500,8 @@ exports.getLLNDResults = async (req, res) => {
       status: "active",
       "llnd.status": "completed"
     })
-      .populate("studentId") // 🔥 IMPORTANT
+      .populate("studentId")
+      .sort({ "llnd.completedAt": -1, createdAt: -1 })
       .lean();
 
     const formatted = data.map((flow) => {
@@ -513,6 +514,8 @@ exports.getLLNDResults = async (req, res) => {
         date: flow.llnd?.completedAt 
           ? new Date(flow.llnd.completedAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }) 
           : new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
+
+        rawDate: flow.llnd?.completedAt || flow.createdAt,
 
         completedDate: flow.llnd?.completedAt 
           ? new Date(flow.llnd.completedAt).toLocaleString("en-AU", { 
@@ -685,7 +688,6 @@ exports.getAllPayments = async (req, res) => {
       stats: [
         { label: "Pending Verification", value: stats.pending, color: "#f39c12" },
         { label: "Verified Payments", value: stats.success, color: "#27ae60" },
-        { label: "Rejected", value: stats.failed, color: "#e74c3c" },
         { label: "Total Verified Amount", value: `$${stats.totalAmount}`, color: "#8e44ad" }
       ]
     });

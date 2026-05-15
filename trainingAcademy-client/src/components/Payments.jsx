@@ -524,35 +524,12 @@ const Payment = () => {
                 </div>
               ) : null}
 
-              {/* Rejection Input (only show if not verified) */}
-              {(selectedPayment.status !== "success" && selectedPayment.status !== "completed") && (
-                <div style={{ marginTop: '20px' }}>
-                  <label style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', marginBottom: '8px', display: 'block' }}>REJECTION REASON (IF REJECTING)</label>
-                  <input
-                    type="text"
-                    placeholder="Enter reason for rejection..."
-                    value={rejectionReason}
-                    onChange={(e) => setRejectionReason(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      borderRadius: '10px',
-                      border: '1px solid #e5e7eb',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-              )}
             </div>
 
             <div className="modal-footer-v2">
               <button className="btn-base btn-close" onClick={() => setShowModal(false)}>Close</button>
               {(selectedPayment.status !== "success" && selectedPayment.status !== "completed") && (
-                <>
-                  <button className="btn-base btn-reject" onClick={handleReject}>Reject</button>
-                  <button className="btn-base btn-confirm" onClick={handleVerify}>Confirm Payment</button>
-                </>
+                <button className="btn-base btn-confirm" onClick={handleVerify}>Confirm Payment</button>
               )}
             </div>
           </div>

@@ -201,10 +201,10 @@ export default function LlndResults() {
     fetch(`${API_URL}/api/flow/llnd-results`)
       .then(res => res.json())
       .then(res => {
-        // ✅ Sort by completedDate (or date) descending - Latest first
+        // ✅ Sort by rawDate descending - Latest first
         const sorted = [...res].sort((a, b) => {
-          const dateA = new Date(a.completedDate || a.date);
-          const dateB = new Date(b.completedDate || b.date);
+          const dateA = new Date(a.rawDate || a.completedDate || a.date);
+          const dateB = new Date(b.rawDate || b.completedDate || b.date);
           return dateB - dateA;
         });
 
@@ -446,8 +446,13 @@ export default function LlndResults() {
             fetch(`${API_URL}/api/flow/llnd-results`)
               .then(res => res.json())
               .then(res => {
-                setData(res);
-                setFilteredData(res);
+                const sorted = [...res].sort((a, b) => {
+                  const dateA = new Date(a.rawDate || a.completedDate || a.date);
+                  const dateB = new Date(b.rawDate || b.completedDate || b.date);
+                  return dateB - dateA;
+                });
+                setData(sorted);
+                setFilteredData(sorted);
               });
           }}
         />

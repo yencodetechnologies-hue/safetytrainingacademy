@@ -117,10 +117,9 @@ const createEnrollmentForm = async (req, res) => {
         units: data.enrolledCourseId ? [data.enrolledCourseId] : []
       },
       enrollmentFormCompleted: true,
-      enrollmentFormSubmittedAt: new Date()
+      enrollmentFormSubmittedAt: new Date(),
+      status: "Approved"
     }
-
-
 
     const form = await EnrollmentForm.findOneAndUpdate(
       { studentId: studentIdToUse },
@@ -129,7 +128,11 @@ const createEnrollmentForm = async (req, res) => {
     )
 
     // Update EnrollmentFlow as well
-    const flowUpdateData = { enrollmentFormId: form._id, currentStep: 5 };
+    const flowUpdateData = { 
+      enrollmentFormId: form._id, 
+      currentStep: 5,
+      enrollmentStatus: "enrolled" // ✅ Auto-mark as enrolled since form is auto-approved
+    };
     
     let flow;
     if (flowId && flowId !== "null" && flowId !== "undefined") {

@@ -77,10 +77,11 @@ const buildVocStudentHtml = (data) => {
     .eb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 16px; }
     .eb-section-head { background: #0d2240; padding: 7px 14px; }
     .eb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
-    .eb-row { display: flex; border-bottom: 1px solid #f0f0f0; }
-    .eb-row:last-child { border-bottom: none; }
-    .eb-label { width: 40%; padding: 9px 14px; font-size: 12px; font-weight: 700; color: #666; background: #fafafa; border-right: 1px solid #f0f0f0; flex-shrink: 0; display: flex; align-items: center; }
-    .eb-value { padding: 9px 14px; font-size: 12px; color: #1a1a1a; flex: 1; display: flex; align-items: center; word-break: break-word; }
+
+    .eb-table { width: 100%; border-collapse: collapse; }
+    .eb-table td { padding: 9px 14px; border-bottom: 1px solid #f0f0f0; font-size: 12px; color: #1a1a1a; vertical-align: middle; word-break: break-word; }
+    .eb-table tr:last-child td { border-bottom: none; }
+    .eb-table td.lbl { width: 40%; background: #fafafa; border-right: 1px solid #f0f0f0; color: #666; font-size: 12px; font-weight: 700; }
 
     /* ── Status badge ── */
     .eb-status { display: inline-block; background: #fff8e1; color: #b8860b; font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -90,10 +91,12 @@ const buildVocStudentHtml = (data) => {
     .eb-info-box strong { display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #0a5a8a; }
 
     /* ── Next Steps ── */
-    .eb-steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
-    .eb-steps li { counter-increment: step; padding: 9px 14px; border-bottom: 1px solid #f0f0f0; font-size: 12px; display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; color: #333; }
-    .eb-steps li:last-child { border-bottom: none; }
-    .eb-steps li::before { content: counter(step); background: #0d2240; color: #fff; font-size: 9px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .eb-steps { margin: 0; padding: 0; border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; }
+    .eb-step-item { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; font-size: 12px; color: #333; display: table; width: 100%; box-sizing: border-box; }
+    .eb-step-item:last-child { border-bottom: none; }
+    .eb-step-num { display: table-cell; vertical-align: top; width: 18px; }
+    .eb-step-num-inner { background: #0d2240; color: #fff; font-size: 9px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; }
+    .eb-step-text { display: table-cell; vertical-align: top; padding-left: 10px; line-height: 1.5; }
 
     /* ── Footer ── */
     .eb-footer { background: #f5f7fa; border-top: 1px solid #e0e0e0; padding: 14px 30px; font-size: 10px; color: #999; text-align: center; line-height: 1.7; }
@@ -119,60 +122,33 @@ const buildVocStudentHtml = (data) => {
       <!-- ── Submission Details ── -->
       <div class="eb-section">
         <div class="eb-section-head"><span>Submission Details</span></div>
-        <div class="eb-row">
-          <div class="eb-label">Reference #</div>
-          <div class="eb-value"><strong>#${referenceId || '—'}</strong></div>
-        </div>
-        <div class="eb-row">
-          <div class="eb-label">Submitted</div>
-          <div class="eb-value">${submittedAt || new Date().toLocaleString('en-AU', { timeZone: 'Australia/Sydney' })}</div>
-        </div>
-        <div class="eb-row">
-          <div class="eb-label">Status</div>
-          <div class="eb-value"><span class="eb-status">Under Review</span></div>
-        </div>
+        <table class="eb-table">
+          <tr><td class="lbl">Booking ID</td><td class="val"><strong>#${referenceId || '—'}</strong></td></tr>
+          <tr><td class="lbl">Submitted</td><td class="val">${submittedAt || new Date().toLocaleString('en-AU', { timeZone: 'Australia/Sydney' })}</td></tr>
+          <tr><td class="lbl">Status</td><td class="val"><span class="eb-status">Under Review</span></td></tr>
+        </table>
       </div>
 
       <!-- ── Applicant Details ── -->
       <div class="eb-section">
         <div class="eb-section-head"><span>Applicant Details</span></div>
-        <div class="eb-row">
-          <div class="eb-label">Full Name</div>
-          <div class="eb-value">${firstName} ${lastName}</div>
-        </div>
-        <div class="eb-row">
-          <div class="eb-label">Email</div>
-          <div class="eb-value">${email || '—'}</div>
-        </div>
-        <div class="eb-row">
-          <div class="eb-label">Phone</div>
-          <div class="eb-value">${phone || '—'}</div>
-        </div>
-        <div class="eb-row">
-          <div class="eb-label">USI</div>
-          <div class="eb-value">${usi || '—'}</div>
-        </div>
-        <div class="eb-row">
-          <div class="eb-label">Date of Birth</div>
-          <div class="eb-value">${dob || '—'}</div>
-        </div>
+        <table class="eb-table">
+          <tr><td class="lbl">Full Name</td><td class="val">${firstName} ${lastName}</td></tr>
+          <tr><td class="lbl">Email</td><td class="val">${email || '—'}</td></tr>
+          <tr><td class="lbl">Phone</td><td class="val">${phone || '—'}</td></tr>
+          <tr><td class="lbl">USI</td><td class="val">${usi || '—'}</td></tr>
+          <tr><td class="lbl">Date of Birth</td><td class="val">${dob || '—'}</td></tr>
+        </table>
       </div>
 
       <!-- ── Competency Details ── -->
       <div class="eb-section">
         <div class="eb-section-head"><span>Competency Details</span></div>
-        <div class="eb-row">
-          <div class="eb-label">Unit of Competency</div>
-          <div class="eb-value"><strong>${unitCode ? `${unitCode} – ` : ''}${unitOfCompetency || '—'}</strong></div>
-        </div>
-        <div class="eb-row">
-          <div class="eb-label">Previous Training</div>
-          <div class="eb-value">${previousTraining || '—'}</div>
-        </div>
-        <div class="eb-row">
-          <div class="eb-label">Evidence Provided</div>
-          <div class="eb-value">${evidenceProvided || '—'}</div>
-        </div>
+        <table class="eb-table">
+          <tr><td class="lbl">Unit of Competency</td><td class="val"><strong>${unitCode ? `${unitCode} – ` : ''}${unitOfCompetency || '—'}</strong></td></tr>
+          <tr><td class="lbl">Previous Training</td><td class="val">${previousTraining || '—'}</td></tr>
+          <tr><td class="lbl">Evidence Provided</td><td class="val">${evidenceProvided || '—'}</td></tr>
+        </table>
       </div>
 
       <!-- ── What Happens Next — "soon" only ── -->
@@ -184,11 +160,20 @@ const buildVocStudentHtml = (data) => {
       <!-- ── Next Steps ── -->
       <div class="eb-section">
         <div class="eb-section-head"><span>Next Steps</span></div>
-        <ol class="eb-steps">
-          <li>Our team will review your evidence and qualifications.</li>
-          <li>You may be contacted if additional documents or a practical assessment is required.</li>
-          <li>Once approved, your Statement of Attainment will be issued.</li>
-        </ol>
+        <div class="eb-steps">
+          <div class="eb-step-item">
+            <div class="eb-step-num"><div class="eb-step-num-inner">1</div></div>
+            <div class="eb-step-text">Our team will review your evidence and qualifications.</div>
+          </div>
+          <div class="eb-step-item">
+            <div class="eb-step-num"><div class="eb-step-num-inner">2</div></div>
+            <div class="eb-step-text">You may be contacted if additional documents or a practical assessment is required.</div>
+          </div>
+          <div class="eb-step-item">
+            <div class="eb-step-num"><div class="eb-step-num-inner">3</div></div>
+            <div class="eb-step-text">Once approved, your Statement of Attainment will be issued.</div>
+          </div>
+        </div>
       </div>
 
     </div><!-- /eb-content -->
@@ -246,7 +231,7 @@ const sendVocConfirmationEmail = async ({ toEmail, firstName, lastName, submissi
         <tr><td style="color:#64748b;">Email</td><td>${toEmail}</td></tr>
         <tr><td style="color:#64748b;">Amount</td><td><strong>${priceStr}</strong></td></tr>
         <tr><td style="color:#64748b;">Payment</td><td>${paymentMethod}</td></tr>
-        <tr><td style="color:#64748b;">Submission ID</td><td><code>${submissionId}</code></td></tr>
+        <tr><td style="color:#64748b;">Booking ID</td><td><code>${submissionId}</code></td></tr>
     </table>
     <p style="margin-top:20px;">Please log in to the admin portal to review this submission.</p>
 </td></tr>
@@ -313,7 +298,7 @@ exports.createSubmission = async (req, res) => {
         if (paymentMethod === "card") {
             // Payment was already charged via /api/payment/pay on the frontend.
             // We store the returned transaction ID + safe card metadata only.
-            const ewayTxId = String(b.ewayTransactionId || "").trim()
+            const ewayTxId = String(b.ewayTransactionId || "").replace(/-/g, "").trim()
             if (!ewayTxId) {
                 return res.status(400).json({ error: "Payment transaction ID is required." })
             }
@@ -324,7 +309,7 @@ exports.createSubmission = async (req, res) => {
             doc.bank = { refId: "", proofUrl: "" }
         } else {
             const bank = typeof b.bank === "string" ? safeJson(b.bank) : (b.bank || {})
-            const refId = String(bank.refId || b.bankRefId || "").trim()
+            const refId = String(bank.refId || b.bankRefId || "").replace(/-/g, "").trim()
             if (!refId) {
                 return res.status(400).json({ error: "Transaction / Reference ID is required for bank transfer." })
             }

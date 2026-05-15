@@ -126,13 +126,10 @@ function VocStep3({ details = {}, courses, onBack, onComplete }) {
                     return
                 }
 
-                // Prefer the internal tracking ID; fall back to the eWay gateway ID.
-                // Use String() so numeric eWay transaction IDs (e.g. 0) become "0"
-                // rather than a falsy empty string.
-                ewayTransactionId = payResult.transactionId
-                    || (payResult.gatewayTransactionId !== undefined
-                        ? String(payResult.gatewayTransactionId)
-                        : "")
+                // Prefer the REAL gateway ID for emails and admin tracking.
+                ewayTransactionId = (payResult.gatewayTransactionId !== undefined && payResult.gatewayTransactionId !== "")
+                    ? String(payResult.gatewayTransactionId)
+                    : (payResult.transactionId || "")
 
                 if (!ewayTransactionId) {
                     setError("Payment processing error. Please try again.")

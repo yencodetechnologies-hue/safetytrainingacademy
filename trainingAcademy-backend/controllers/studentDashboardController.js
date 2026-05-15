@@ -90,8 +90,8 @@ exports.getStudentDashboard = async (req, res) => {
     const existingForm = await EnrollmentForm.findOne({ studentId }).lean();
     console.log("[Dashboard] Form found:", existingForm ? "YES" : "NO", existingForm?._id);
     
-    // ✅ If flow status is 'completed', it means they finished the form submission flow
-    const enrollmentFormSubmitted = !!existingForm || latestFlow.enrollmentStatus === "completed";
+    // ✅ If enrollmentFormCompleted is true, it means they finished the final step
+    const enrollmentFormSubmitted = !!existingForm?.enrollmentFormCompleted || latestFlow.enrollmentStatus === "enrolled";
     const enrollmentFormApproved = existingForm?.status === "Approved";
 
     const response = {

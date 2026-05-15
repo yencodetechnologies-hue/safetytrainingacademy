@@ -229,36 +229,68 @@ const sendBookingConfirmation = async (req, res) => {
 const buildCommonHeader = (title, subTitle, badgeText, bookingId) => {
   const digits = formatBookingId(bookingId);
   return `
-    <div class="eb-hdr">
+    <div class="eb-hdr" style="background:#0d2240; padding:24px 30px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><p class="eb-hdr-title" style="font-size:16px; font-weight:700; color:#ffffff; margin:0;">Safety Training Academy</p><p class="eb-hdr-sub" style="font-size:10px; color:#29b6e8; letter-spacing:0.8px; text-transform:uppercase; font-weight:600; margin:0;">RTO #45234 &nbsp;·&nbsp; ${subTitle}</p></td>
-          <td align="right" valign="top"><div class="eb-badge-sky" style="background:#29b6e8; color:#ffffff; font-size:10px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; padding:3px 10px; border-radius:2px; display:inline-block; line-height:1;">${badgeText}</div></td>
+          <td valign="top">
+            <p class="eb-hdr-title" style="font-size:18px; font-weight:700; color:#ffffff; margin:0;">Safety Training Academy</p>
+            <p class="eb-hdr-sub" style="font-size:10px; color:#29b6e8; letter-spacing:0.8px; text-transform:uppercase; font-weight:600; margin:4px 0 0;">RTO #45234 &nbsp;·&nbsp; ${subTitle}</p>
+          </td>
+          <td align="right" valign="top">
+            <div style="display:inline-block; text-align:left;">
+              <div class="eb-badge-sky" style="background:#29b6e8; color:#ffffff; font-size:12px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; padding:4px 12px; border-radius:2px; display:inline-block; line-height:1; margin-bottom:8px;">${badgeText}</div>
+              <p class="eb-booking-id-text" style="margin:0; font-size:24px; font-weight:700; color:#ffffff; line-height:1;">Booking ID: ${digits}</p>
+            </div>
+          </td>
         </tr>
       </table>
-      <p class="eb-booking-id-text" style="margin:4px 0 0; font-size:20px; font-weight:700; color:#ffffff; text-align:right;">ID: ${digits}</p>
     </div>
-    <div class="eb-confirm-banner" style="background:#0d2240; border-top:1px solid rgba(255,255,255,0.1); padding:10px 24px; font-size:12px; color:#ffffff; font-weight:700; text-align:center;">Action Required</div>
+    <div class="eb-confirm-banner" style="background:#0a1c33; padding:10px 24px; font-size:12px; color:#89c8e8; font-weight:700; text-align:center; border-bottom:3px solid #29b6e8;">Action Required</div>
   `;
 };
 
 const buildLLNNotificationHtml = (data) => {
   const { bookingId, studentName, studentEmail, studentPhone, score, status, gatewayTransactionId } = data;
   const statusColor = status === "Passed" ? "#16a34a" : "#ca8a04";
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><style>${commonStyles}</style></head><body><div class="eb-body">${buildCommonHeader("Safety Training Academy", "LLN NOTIFICATION", "LLN SUBMITTED", bookingId)}<div class="eb-content"><div class="eb-section"><div class="eb-section-head"><span>STUDENT DETAILS</span></div><table class="eb-table"><tr><td class="lbl">Name</td><td class="val-bold">${studentName}</td></tr><tr><td class="lbl">Email</td><td class="val">${studentEmail}</td></tr><tr><td class="lbl">Phone Number</td><td class="val">${studentPhone}</td></tr></table></div><div class="eb-section"><div class="eb-section-head"><span>ASSESSMENT RESULT</span></div><table class="eb-table"><tr><td class="lbl">Booking ID</td><td class="val-bold">${formatBookingId(bookingId)}</td></tr><tr><td class="lbl">Score</td><td class="val-bold" style="font-size:18px;">${Number(score).toFixed(1)}%</td></tr><tr><td class="lbl">Status</td><td class="val-bold" style="color:${statusColor};">${status}</td></tr>${gatewayTransactionId && gatewayTransactionId !== '—' ? `<tr><td class="lbl">Transaction ID</td><td class="val">${gatewayTransactionId}</td></tr>` : ''}</table></div></div><div class="eb-footer">&copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.</div></div></body></html>`;
+  const cleanGatewayId = String(gatewayTransactionId || '').replace(/-/g, '');
+  
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><style>${commonStyles}</style></head><body><div class="eb-body">${buildCommonHeader("Safety Training Academy", "LLN NOTIFICATION", "LLN SUBMITTED", bookingId)}<div class="eb-content"><div class="eb-section"><div class="eb-section-head"><span>STUDENT DETAILS</span></div><table class="eb-table"><tr><td class="lbl">Name</td><td class="val-bold">${studentName}</td></tr><tr><td class="lbl">Email</td><td class="val">${studentEmail}</td></tr><tr><td class="lbl">Phone Number</td><td class="val">${studentPhone}</td></tr></table></div><div class="eb-section"><div class="eb-section-head"><span>ASSESSMENT RESULT</span></div><table class="eb-table"><tr><td class="lbl">Booking ID</td><td class="val-bold">${formatBookingId(bookingId)}</td></tr><tr><td class="lbl">Score</td><td class="val-bold" style="font-size:18px;">${Number(score).toFixed(1)}%</td></tr><tr><td class="lbl">Status</td><td class="val-bold" style="color:${statusColor};">${status}</td></tr>${cleanGatewayId && cleanGatewayId !== '—' && cleanGatewayId !== '-' ? `<tr><td class="lbl">Transaction ID</td><td class="val">${cleanGatewayId}</td></tr>` : ''}</table></div></div><div class="eb-footer">&copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.</div></div></body></html>`;
 };
 
 const buildEnrollmentNotificationHtml = (data) => {
   const { bookingId, studentName, studentEmail, studentPhone, gatewayTransactionId } = data;
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><style>${commonStyles}</style></head><body><div class="eb-body">${buildCommonHeader("Safety Training Academy", "ENROLLMENT NOTIFICATION", "ENROLLMENT SUBMITTED", bookingId)}<div class="eb-content"><p style="color: #475569; font-size: 14px; margin: 0 0 24px;">A student has submitted their enrollment form and is awaiting review.</p><div class="eb-section"><div class="eb-section-head"><span>STUDENT DETAILS</span></div><table class="eb-table"><tr><td class="lbl">Student Name</td><td class="val-bold">${studentName}</td></tr><tr><td class="lbl">Email</td><td class="val" style="color:#2563eb;">${studentEmail}</td></tr><tr><td class="lbl">Phone Number</td><td class="val">${studentPhone}</td></tr><tr><td class="lbl">Booking ID</td><td class="val-bold">${formatBookingId(bookingId)}</td></tr><tr><td class="lbl">Transaction ID</td><td class="val">${gatewayTransactionId || '—'}</td></tr></table></div><p style="margin-top:24px; color:#475569; font-size:14px;">Please log in to the admin portal to review the form and documents.</p></div><div class="eb-footer">&copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.</div></div></body></html>`;
+  const cleanGatewayId = String(gatewayTransactionId || '').replace(/-/g, '');
+  
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><style>${commonStyles}</style></head><body><div class="eb-body">${buildCommonHeader("Safety Training Academy", "ENROLLMENT NOTIFICATION", "ENROLLMENT SUBMITTED", bookingId)}<div class="eb-content"><p style="color: #475569; font-size: 14px; margin: 0 0 24px;">A student has submitted their enrollment form and is awaiting review.</p><div class="eb-section"><div class="eb-section-head"><span>STUDENT DETAILS</span></div><table class="eb-table"><tr><td class="lbl">Student Name</td><td class="val-bold">${studentName}</td></tr><tr><td class="lbl">Email</td><td class="val" style="color:#2563eb;">${studentEmail}</td></tr><tr><td class="lbl">Phone Number</td><td class="val">${studentPhone}</td></tr><tr><td class="lbl">Booking ID</td><td class="val-bold">${formatBookingId(bookingId)}</td></tr><tr><td class="lbl">Transaction ID</td><td class="val">${cleanGatewayId && cleanGatewayId !== '-' ? cleanGatewayId : '—'}</td></tr></table></div><p style="margin-top:24px; color:#475569; font-size:14px;">Please log in to the admin portal to review the form and documents.</p></div><div class="eb-footer">&copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.</div></div></body></html>`;
 };
 
 const sendEnrollmentLinkConfirmation = async (req, res) => {
-    const { toEmail, studentName, courseName, courseDate, startTime, endTime, bookingId } = req.body;
+    const { toEmail, studentName, courseName, courseCode, courseDate, startTime, endTime, bookingId, phone, totalAmount, paymentMethod } = req.body;
+    
+    const orderId = formatBookingId(bookingId || Date.now().toString());
     const dateStr = courseDate ? new Date(courseDate).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" }) : "TBC";
     const timeStr = (startTime && endTime) ? `${startTime} - ${endTime}` : "TBC";
-    const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><style>${commonStyles}</style></head><body><div class="eb-body">${buildCommonHeader("Safety Training Academy", "REGISTRATION NOTIFICATION", "REGISTRATION CONFIRMED", bookingId)}<div class="eb-content"><p style="color: #475569; font-size: 14px; margin: 0 0 24px;">Dear <strong>${studentName}</strong>, your registration is confirmed.</p><div class="eb-section"><div class="eb-section-head"><span>COURSE DETAILS</span></div><table class="eb-table"><tr><td class="lbl">Course</td><td class="val-bold">${courseName}</td></tr><tr><td class="lbl">Date</td><td class="val">${dateStr}</td></tr><tr><td class="lbl">Time</td><td class="val">${timeStr}</td></tr><tr><td class="lbl">Location</td><td class="val">3/14-16 Marjorie Street, Sefton NSW 2162</td></tr></table></div></div><div class="eb-footer">&copy; ${new Date().getFullYear()} Safety Training Academy. All rights reserved.</div></div></body></html>`;
-    try { await sendEmail({ to: toEmail, subject: `Registration Confirmed - ${courseName}`, html, bcc: process.env.BOOKINGS_EMAIL }); res.status(200).json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
+
+    const studentHtml = studentBookingTemplate({ 
+        bookingId: orderId, 
+        name: studentName, 
+        email: toEmail,
+        phone: phone || "—",
+        courseName, 
+        courseCode: courseCode || "—", 
+        courseDate: dateStr, 
+        courseTime: timeStr, 
+        paymentMethod: paymentMethod || "Pay Later", 
+        paymentStatus: "Pending", 
+        totalAmount: totalAmount || 0 
+    });
+
+    try { 
+        await sendEmail({ to: toEmail, subject: `Registration Confirmed - ${courseName}`, html: studentHtml, bcc: process.env.BOOKINGS_EMAIL }); 
+        res.status(200).json({ success: true }); 
+    } catch (err) { 
+        res.status(500).json({ success: false }); 
+    }
 };
 
 const sendCompanyOrderConfirmation = async (req, res) => {
@@ -274,7 +306,7 @@ const sendCompanyOrderConfirmation = async (req, res) => {
     
     const html = `
 <!DOCTYPE html><html><head><style>body{margin:0;padding:24px;background:#f0f2f5;font-family:sans-serif;}.card{max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e0e0e0;}.hdr{background:#0d2240;padding:20px 30px;color:#fff;}.hdr h2{margin:0;font-size:18px;text-transform:uppercase;letter-spacing:1px;}.content{padding:30px;}.footer{background:#f8fafc;padding:20px;text-align:center;font-size:11px;color:#999;border-top:1px solid #e0e0e0;}</style></head><body>
-<div class="card"><div class="hdr"><h2>Company Booking Confirmed</h2><p style="margin:4px 0 0; font-size:10px; color:#29b6e8;">ORDER #${orderId}</p></div><div class="content"><p style="font-size:15px; color:#1e293b;">Dear <strong>${companyName}</strong>,</p><p style="font-size:14px; color:#475569; line-height:1.6;">Thank you for your booking. Below are the registration links for your employees. Each link allows for the specific quantity purchased.</p><table width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0; border:1px solid #e0e0e0; border-radius:4px; overflow:hidden;">${linksHtml}</table><div style="background:#f0f9ff; padding:15px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:13px; font-weight:700; color:#0d2240;">Total Amount Paid</span><span style="font-size:16px; font-weight:700; color:#0d2240;">${priceStr}</span></div></div><div class="footer">&copy; ${new Date().getFullYear()} Safety Training Academy | RTO #45234</div></div></body></html>`;
+<div class="card"><div class="hdr"><h2>Company Booking Confirmed</h2><p style="margin:4px 0 0; font-size:10px; color:#29b6e8;">Booking ID: ${orderId}</p></div><div class="content"><p style="font-size:15px; color:#1e293b;">Dear <strong>${companyName}</strong>,</p><p style="font-size:14px; color:#475569; line-height:1.6;">Thank you for your booking. Below are the registration links for your employees. Each link allows for the specific quantity purchased.</p><table width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0; border:1px solid #e0e0e0; border-radius:4px; overflow:hidden;">${linksHtml}</table><div style="background:#f0f9ff; padding:15px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:13px; font-weight:700; color:#0d2240;">Total Amount Paid</span><span style="font-size:16px; font-weight:700; color:#0d2240;">${priceStr}</span></div></div><div class="footer">&copy; ${new Date().getFullYear()} Safety Training Academy | RTO #45234</div></div></body></html>`;
     try { await sendEmail({ to: toEmail, subject: `Company Booking Confirmed - Order #${orderId}`, html, bcc: process.env.BOOKINGS_EMAIL }); res.status(200).json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
 };
 
@@ -290,7 +322,7 @@ const sendVOCConfirmation = async (req, res) => {
     const { toEmail, firstName, submissionId, amountPaid } = req.body;
     const html = `
 <!DOCTYPE html><html><head><style>body{margin:0;padding:24px;background:#f0f2f5;font-family:sans-serif;}.card{max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e0e0e0;}.hdr{background:#0d2240;padding:20px 30px;color:#fff;}.content{padding:30px;}.footer{background:#f8fafc;padding:20px;text-align:center;font-size:11px;color:#999;border-top:1px solid #e0e0e0;}</style></head><body>
-<div class="card"><div class="hdr"><h2>VOC Submission Received</h2><p style="margin:4px 0 0; font-size:10px; color:#29b6e8;">SUBMISSION #${submissionId}</p></div><div class="content"><p style="font-size:15px; color:#1e293b;">Hi <strong>${firstName}</strong>,</p><p style="font-size:14px; color:#475569; line-height:1.6;">Thank you for your VOC submission. We have received your application and the payment of <strong>$${Number(amountPaid).toFixed(2)}</strong>. Our team will review the documents and get back to you shortly.</p></div><div class="footer">&copy; ${new Date().getFullYear()} Safety Training Academy | RTO #45234</div></div></body></html>`;
+<div class="card"><div class="hdr"><h2>VOC Submission Received</h2><p style="margin:4px 0 0; font-size:10px; color:#29b6e8;">Booking ID: ${submissionId}</p></div><div class="content"><p style="font-size:15px; color:#1e293b;">Hi <strong>${firstName}</strong>,</p><p style="font-size:14px; color:#475569; line-height:1.6;">Thank you for your VOC submission. We have received your application and the payment of <strong>$${Number(amountPaid).toFixed(2)}</strong>. Our team will review the documents and get back to you shortly.</p></div><div class="footer">&copy; ${new Date().getFullYear()} Safety Training Academy | RTO #45234</div></div></body></html>`;
     try { await sendEmail({ to: toEmail, subject: "VOC Submission Received", html, bcc: process.env.BOOKINGS_EMAIL }); res.status(200).json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
 };
 

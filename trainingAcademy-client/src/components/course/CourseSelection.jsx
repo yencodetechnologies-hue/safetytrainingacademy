@@ -329,7 +329,7 @@ function CalendarDatePicker({ groupedSlots, selectedSession, onSelectSession }) 
                                 >
                                     <div className="slot-time">🕒 {session.startTime} - {session.endTime}</div>
                                     <p className="spots">
-                                        {isFull ? "Full" : `${session.availableSlots ?? session.maxCapacity} slots`}
+                                        {isFull ? "Full" : (session.availableSlots <= 3 ? "Filling Fast" : "Seats Available")}
                                     </p>
                                 </div>
                             )

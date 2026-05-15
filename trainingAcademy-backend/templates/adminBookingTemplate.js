@@ -15,12 +15,15 @@ const adminBookingTemplate = (data) => {
   let gatewayIdValue     = '-';
   let bankTransferValue  = '-';
 
+  // Function to remove hyphens from IDs as per user request
+  const cleanId = (id) => String(id || '').replace(/-/g, '');
+
   if (pm === 'banktransfer') {
     paymentMethodLabel = 'Bank Transfer';
     paymentStatusLabel = 'PLZ VERIFY';
     paymentStatusColor = '#c0392b';
     paymentStatusBg    = '#fee2e2';
-    bankTransferValue  = data.bankTransferId || data.transactionId || '-';
+    bankTransferValue  = cleanId(data.bankTransferId || data.transactionId || '-');
     gatewayIdValue     = '-';
   }
   else if (pm === 'paylater') {
@@ -38,23 +41,23 @@ const adminBookingTemplate = (data) => {
     paymentStatusLabel = hasGateway ? 'Confirmed' : 'PLZ VERIFY';
     paymentStatusColor = hasGateway ? '#1e7e34' : '#c0392b';
     paymentStatusBg    = hasGateway ? '#dcfce7' : '#fee2e2';
-    gatewayIdValue     = data.gatewayId || data.gatewayTransactionId || '-';
+    gatewayIdValue     = cleanId(data.gatewayId || data.gatewayTransactionId || '-');
     bankTransferValue  = '-';
   }
 
   // Row for Gateway ID
-  const gatewayRow = `
-    <div class="eb-row">
-      <div class="eb-label">Gateway Transaction ID</div>
-      <div class="eb-value" style="color: #6366f1;"><strong>${gatewayIdValue}</strong></div>
-    </div>`;
+  const gatewayRow = gatewayIdValue !== '-' ? `
+    <tr>
+      <td class="lbl">Gateway Transaction ID</td>
+      <td class="val" style="color: #6366f1;"><strong>${gatewayIdValue}</strong></td>
+    </tr>` : '';
 
   // Row for Bank Transfer / Transaction ID
-  const transactionRow = `
-    <div class="eb-row">
-      <div class="eb-label">Transaction ID</div>
-      <div class="eb-value"><strong>${bankTransferValue}</strong></div>
-    </div>`;
+  const transactionRow = bankTransferValue !== '-' ? `
+    <tr>
+      <td class="lbl">Transaction ID</td>
+      <td class="val"><strong>${bankTransferValue}</strong></td>
+    </tr>` : '';
 
   // ✅ Pay Later-kku rendu rows-um hide pannuvom
   const extraPaymentRows = (pm === 'paylater') ? '' : (gatewayRow + transactionRow);
@@ -86,15 +89,17 @@ const adminBookingTemplate = (data) => {
     .eb-section { border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
     .eb-section-head { background: #0d2240; padding: 7px 14px; }
     .eb-section-head span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase; }
-    .eb-row { display: flex; border-bottom: 1px solid #f0f0f0; }
-    .eb-row:last-child { border-bottom: none; }
-    .eb-label { width: 38%; padding: 8px 14px; font-size: 11px; font-weight: 600; color: #666; background: #fafafa; border-right: 1px solid #f0f0f0; flex-shrink: 0; display: flex; align-items: center; }
-    .eb-value { padding: 8px 14px; font-size: 12px; color: #1a1a1a; flex: 1; display: flex; align-items: center; word-break: break-word; }
-    .eb-value a { color: #29b6e8; text-decoration: none; }
+    
+    .eb-table { width: 100%; border-collapse: collapse; }
+    .eb-table td { padding: 8px 14px; border-bottom: 1px solid #f0f0f0; font-size: 12px; color: #1a1a1a; vertical-align: middle; word-break: break-word; }
+    .eb-table tr:last-child td { border-bottom: none; }
+    .eb-table td.lbl { width: 38%; padding: 8px 14px; font-size: 11px; font-weight: 600; color: #666; background: #fafafa; border-right: 1px solid #f0f0f0; }
+    .eb-table td a { color: #29b6e8; text-decoration: none; }
 
     /* ── Total row ── */
-    .eb-total-row .eb-label { background: #f0f6ff; font-size: 13px; font-weight: 700; color: #0d2240; border-top: 2px solid #29b6e8; }
-    .eb-total-row .eb-value { font-size: 14px; font-weight: 700; color: #0d2240; background: #f0f6ff; border-top: 2px solid #29b6e8; }
+    .eb-total-row td { background: #f0f6ff !important; border-top: 2px solid #29b6e8; }
+    .eb-total-row .lbl { font-size: 13px; font-weight: 700; color: #0d2240; }
+    .eb-total-row .val { font-size: 14px; font-weight: 700; color: #0d2240; }
 
     /* ── Notes/Alert ── */
     .eb-alert-box { background: #fffbea; border: 1px solid #f5e28a; border-radius: 4px; padding: 12px 14px; font-size: 12px; color: #7a6500; line-height: 1.5; margin-bottom: 12px; }
@@ -115,10 +120,12 @@ const adminBookingTemplate = (data) => {
             <p class="eb-hdr-sub">RTO #45234 &nbsp;·&nbsp; Admin Notification</p>
           </td>
           <td align="right" valign="top">
-            <span class="eb-badge">New Booking</span>
-            <p style="margin: 4px 0 0; font-size: 25px; font-weight: 700; color: #ffffff; text-align: right;">
-              Booking ID: ${orderNumber}
-            </p>
+            <div style="display:inline-block; text-align:left;">
+              <span class="eb-badge" style="background:#29b6e8; color:#ffffff; font-size:12px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; padding:4px 12px; border-radius:2px; display:inline-block; line-height:1; margin-bottom:8px;">New Booking</span>
+              <p style="margin:0; font-size:24px; font-weight:700; color:#ffffff; line-height:1;">
+                Booking ID: ${orderNumber}
+              </p>
+            </div>
           </td>
         </tr>
       </table>
@@ -133,73 +140,42 @@ const adminBookingTemplate = (data) => {
       <!-- ── 1. Student Details ── -->
       <div class="eb-section">
         <div class="eb-section-head"><span>Student Details</span></div>
-        <div class="eb-row">
-          <div class="eb-label">Name</div>
-          <div class="eb-value">${data.contactName || '—'}</div>
-        </div>
-        <div class="eb-row">
-          <div class="eb-label">Email</div>
-          <div class="eb-value"><a href="mailto:${data.contactEmail}">${data.contactEmail || '—'}</a></div>
-        </div>
-        <div class="eb-row">
-          <div class="eb-label">Phone</div>
-          <div class="eb-value"><a href="tel:${data.contactPhone}">${data.contactPhone || '—'}</a></div>
-        </div>
+        <table class="eb-table">
+          <tr><td class="lbl">Name</td><td class="val">${data.contactName || '—'}</td></tr>
+          <tr><td class="lbl">Email</td><td class="val"><a href="mailto:${data.contactEmail}">${data.contactEmail || '—'}</a></td></tr>
+          <tr><td class="lbl">Phone</td><td class="val"><a href="tel:${data.contactPhone}">${data.contactPhone || '—'}</a></td></tr>
+        </table>
       </div>
 
       <!-- ── 2. Booking Summary ── -->
       <div class="eb-section">
         <div class="eb-section-head"><span>Booking Summary</span></div>
-        <div class="eb-row">
-          <div class="eb-label">Booking ID</div>
-          <div class="eb-value"><strong>${orderNumber}</strong></div>
-        </div>
-        <div class="eb-row">
-          <div class="eb-label">Submitted</div>
-          <div class="eb-value">${data.submittedAt || new Date().toLocaleString('en-AU', { timeZone: 'Australia/Sydney' })}</div>
-        </div>
-        <!-- Payment Method -->
-        <div class="eb-row">
-          <div class="eb-label">Payment Method</div>
-          <div class="eb-value">${paymentMethodLabel}</div>
-        </div>
-        <!-- Payment Status -->
-        <div class="eb-row">
-          <div class="eb-label">Payment Status</div>
-          <div class="eb-value">
+        <table class="eb-table">
+          <tr><td class="lbl">Booking ID</td><td class="val"><strong>${orderNumber}</strong></td></tr>
+          <tr><td class="lbl">Submitted</td><td class="val">${data.submittedAt || new Date().toLocaleString('en-AU', { timeZone: 'Australia/Sydney' })}</td></tr>
+          <tr><td class="lbl">Payment Method</td><td class="val">${paymentMethodLabel}</td></tr>
+          <tr><td class="lbl">Payment Status</td><td class="val">
             <span style="display:inline-block; font-size:10px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase; padding:2px 9px; border-radius:2px; background:${paymentStatusBg}; color:${paymentStatusColor};">
               ${paymentStatusLabel}
             </span>
-          </div>
-        </div>
-        <!-- Bank Transfer ID / Gateway ID (conditional) -->
-        ${extraPaymentRows}
-        <!-- Total Amount at the bottom -->
-        <div class="eb-row eb-total-row">
-          <div class="eb-label">Total Amount</div>
-          <div class="eb-value">$${data.totalAmount || '0.00'}</div>
-        </div>
+          </td></tr>
+          ${extraPaymentRows}
+          <tr class="eb-total-row">
+            <td class="lbl">Total Amount</td>
+            <td class="val">$${data.totalAmount || '0.00'}</td>
+          </tr>
+        </table>
       </div>
 
       <!-- ── 3. Course Details ── -->
       <div class="eb-section">
         <div class="eb-section-head"><span>Course Details</span></div>
-        <div class="eb-row">
-          <div class="eb-label">Course Name</div>
-          <div class="eb-value"><strong>${data.courseName || '—'}</strong></div>
-        </div>
-        <div class="eb-row">
-          <div class="eb-label">Course Code</div>
-          <div class="eb-value">${data.courseCode || '—'}</div>
-        </div>
-        <div class="eb-row">
-          <div class="eb-label">Date & Time</div>
-          <div class="eb-value">${data.courseDate || '—'} @ ${data.courseTime || '—'}</div>
-        </div>
-        <div class="eb-row">
-          <div class="eb-label">Location</div>
-          <div class="eb-value">${data.venue || '—'}</div>
-        </div>
+        <table class="eb-table">
+          <tr><td class="lbl">Course Name</td><td class="val"><strong>${data.courseName || '—'}</strong></td></tr>
+          <tr><td class="lbl">Course Code</td><td class="val">${data.courseCode || '—'}</td></tr>
+          <tr><td class="lbl">Date & Time</td><td class="val">${data.courseDate || '—'} @ ${data.courseTime || '—'}</td></tr>
+          <tr><td class="lbl">Location</td><td class="val">${data.venue || '—'}</td></tr>
+        </table>
       </div>
 
       ${data.notes ? `
