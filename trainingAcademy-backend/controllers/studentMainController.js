@@ -40,9 +40,16 @@ exports.createStudent = async (req, res) => {
     // Server-side payment verification for card payments.
     // If ewayTransactionId is provided it must match a completed Payment record —
     // this prevents registrations being created without a real charge.
-    const ewayTransactionId = data.ewayTransactionId || "";
+    const ewayTransactionId = String(data.ewayTransactionId || "").trim();
     if (data.paymentMethod === "Card Payment" && ewayTransactionId) {
-      const payment = await Payment.findOne({ transactionId: ewayTransactionId, status: "completed" });
+      // Client sends the eWAY gateway ID; internal Payment.transactionId is eway_<timestamp>.
+      const payment = await Payment.findOne({
+        status: "completed",
+        $or: [
+          { gatewayTransactionId: ewayTransactionId },
+          { transactionId: ewayTransactionId },
+        ],
+      });
       if (!payment) {
         return res.status(400).json({ message: "Card payment could not be verified. Please contact support." });
       }

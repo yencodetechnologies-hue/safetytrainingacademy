@@ -356,54 +356,6 @@ function Payment({
         handleBlur("paymentSlip", { paymentSlip: file })
     }
 
-    const handlePayAndContinue = async () => {
-        // ✅ Format courses array
-        const coursesPayload = selectedCourses.map(sc => ({
-            courseId: sc.course._id,
-            courseName: sc.course.title,
-            courseCode: sc.course.courseCode,
-            quantity: sc.quantity,
-            pricePerPerson: getCoursePrice(sc.course),
-            sessionId: sc.session?._id || "",
-            sessionDate: sc.session?.date || null,
-            startTime: sc.session?.startTime || "",
-            endTime: sc.session?.endTime || "",
-        }));
-
-        const paymentData = {
-            companyId: companyInfo.id,
-            flowId: existingFlowId,  // if any
-            amount: companyTotal,
-            paymentMethod: "Bank Transfer",  // or from UI
-            courseCount: selectedCourses.length,
-            courses: coursesPayload,  // ✅ SEND THIS
-            notes: "",
-        };
-
-        const formData = new FormData();
-        Object.keys(paymentData).forEach(key => {
-            if (key === "courses") {
-                formData.append(key, JSON.stringify(paymentData[key]));  // ✅ stringify array
-            } else {
-                formData.append(key, paymentData[key]);
-            }
-        });
-
-        if (receiptFile) {
-            formData.append("receipt", receiptFile);
-        }
-
-        try {
-            const res = await axios.post(`${API_URL}/api/company-payments`, formData, {
-                headers: { "Content-Type": "multipart/form-data" }
-            });
-            console.log("Payment created:", res.data);
-            // Navigate to success page
-        } catch (err) {
-            console.error("Payment error:", err);
-        }
-    };
-
     return (
         <div className="payment-wrapper">
 

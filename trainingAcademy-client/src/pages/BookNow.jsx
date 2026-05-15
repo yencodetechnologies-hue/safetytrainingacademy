@@ -409,7 +409,11 @@ function BookNow() {
             formData.append("endTime", selectedSession?.endTime);
             formData.append("sessionId", selectedSession?._id || "");
             formData.append("paymentMethod", paymentData.paymentMethod || "");
-            formData.append("transactionId", txId || paymentData.transactionId || paymentData.ewayTransactionId || "");
+            const resolvedTxId = txId || paymentData.ewayTransactionId || paymentData.transactionId || "";
+            formData.append("transactionId", resolvedTxId);
+            if (paymentData.paymentMethod === "Card Payment" && resolvedTxId) {
+                formData.append("ewayTransactionId", resolvedTxId);
+            }
             formData.append("slipUrl", slipUrl);
             if (isEnrollmentLink) {
                 formData.append("source", "Enrollment Link");
@@ -867,14 +871,35 @@ function BookNow() {
             }
 
             // ✅ ============================================================
-            // ✅ CARD PAYMENT FLOW (INDIVIDUAL)
+            // ✅ CARD PAYMENT FLOW (individual + company booking links)
             // ✅ ============================================================
-            if (cardPaymentRef.current.paymentMethod === "Card Payment" && !isCompanyEnroll) {
+            const isCardPayment =
+                paymentData.paymentMethod === "Card Payment" ||
+                cardPaymentRef.current.paymentMethod === "Card Payment"
+
+            if (isCardPayment) {
                 setIsProcessing(true)
                 try {
-                    const paymentResult = await cardPaymentRef.current.trigger()
-                    if (!paymentResult || !paymentResult.success) return
-                    const txId = paymentResult.transactionId || ""
+                    let paymentResult = { success: true, transactionId: paymentData.ewayTransactionId || "" }
+
+                    if (paymentData.paymentConfirmed && paymentData.ewayTransactionId) {
+                        // Card already charged — do not run payment again on Continue.
+                        paymentResult = {
+                            success: true,
+                            transactionId: paymentData.ewayTransactionId,
+                        }
+                    } else if (typeof cardPaymentRef.current.trigger === "function") {
+                        paymentResult = await cardPaymentRef.current.trigger()
+                    } else {
+                        throw new Error("Payment form is not ready. Please wait a moment and try again.")
+                    }
+
+                    if (!paymentResult?.success) {
+                        alert(paymentResult?.message || "Card payment failed. Please check your details and try again.")
+                        return
+                    }
+
+                    const txId = paymentResult.transactionId || paymentData.ewayTransactionId || ""
                     
                     let studentId = localStorage.getItem("enrollId");
                     let slipUrl = "";
@@ -919,20 +944,9 @@ function BookNow() {
                     if (!flowId) await createFlow(slipUrl, txId);
                     await sendBookingEmail(txId);
 
-                    navigate("/booking-success", {
-                        state: {
-                            selectedCourse,
-                            courseDate: selectedSession?.date,
-                            courseTime: `${selectedSession?.startTime} - ${selectedSession?.endTime}`,
-                            coursePrice,
-                            paymentMethod: paymentData.paymentMethod,
-                            email: paymentData.email,
-                            name: paymentData.name,
-                            enrollmentType: isCompanyEnroll ? "company" : "individual",
-                        }
-                    });
+                    setStep(3);
                 } catch (err) {
-                    alert(err.message);
+                    alert(err.message || "Something went wrong after payment. Please contact support.");
                 } finally {
                     setIsProcessing(false)
                 }
@@ -940,7 +954,7 @@ function BookNow() {
             }
 
             // ✅ ============================================================
-            // ✅ BANK TRANSFER FLOW (INDIVIDUAL / EXISTING COMPANY LINK)
+            // ✅ BANK TRANSFER / PAY LATER (INDIVIDUAL / COMPANY BOOKING LINK)
             // ✅ ============================================================
             setTriggerValidation(true);
             if (!isPaymentValid) return;
@@ -991,20 +1005,9 @@ function BookNow() {
                 if (!flowId) await createFlow(slipUrl);
                 await sendBookingEmail();
 
-                navigate("/booking-success", {
-                    state: {
-                        selectedCourse,
-                        courseDate: selectedSession?.date,
-                        courseTime: `${selectedSession?.startTime} - ${selectedSession?.endTime}`,
-                        coursePrice,
-                        paymentMethod: paymentData.paymentMethod,
-                        email: paymentData.email,
-                        name: paymentData.name,
-                        enrollmentType: isCompanyEnroll ? "company" : "individual",
-                    }
-                });
+                setStep(3);
             } catch (err) {
-                alert(err.message);
+                alert(err.message || "Enrollment could not be completed. Please try again.");
             } finally {
                 setIsProcessing(false)
             }
