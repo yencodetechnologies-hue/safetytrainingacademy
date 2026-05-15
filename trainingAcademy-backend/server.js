@@ -66,7 +66,7 @@ app.use("/api/enrollment-form", require("./routes/enrollmentFormRoutes"));
 app.use("/api/companies", companyRoutes);
 app.use("/api/book-now", companyEnrollRoutes);
 app.use("/api/enroll", studentRoutes);
-app.use("/api/llnd", require("./routes/llndRoutes"));
+app.use("/api/LLN", require("./routes/LLNRoutes"));
 app.use("/api/payment", paymentRouter);
 app.use("/api/flow", enrollmentRoutes);
 app.use("/api/students", studentRoutes);
@@ -97,7 +97,7 @@ app.get("/api/health", async (req, res) => {
 // GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
   console.error("GLOBAL ERROR:", err.stack);
-  
+
   // Ensure CORS headers are present on error responses
   const origin = req.headers.origin;
   const isAllowed = origin && allowedOrigins.some(allowed => {

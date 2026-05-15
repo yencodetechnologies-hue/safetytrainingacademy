@@ -1,4 +1,5 @@
 const EnrollmentLink = require("../models/EnrollmentLink");
+const { sendEnrollmentLinkConfirmation } = require("./bookingEmailController");
 
 // GET /api/enrollment-links
 const getAll = async (req, res) => {
@@ -101,6 +102,24 @@ const enroll = async (req, res) => {
     link.usage += 1;
     await link.save();
     res.json({ success: true, data: link });
+
+    // ✅ Trigger Confirmation Email
+    try {
+      console.log("[EnrollmentLink] Triggering registration email for:", email);
+      await sendEnrollmentLinkConfirmation({
+        body: {
+          toEmail: email,
+          studentName: name,
+          courseName: link.course || "General Course",
+          bookingId: link._id,
+          phone: "—", // Phone not collected in this simple form
+          totalAmount: 0,
+          paymentMethod: "Enrollment Link"
+        }
+      }, null);
+    } catch (notifErr) {
+      console.error("❌ Enrollment Link Notification error:", notifErr.message);
+    }
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

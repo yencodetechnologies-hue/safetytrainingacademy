@@ -7,35 +7,35 @@ const ITEMS_PER_PAGE = 10;
 // ─── Badge helpers ────────────────────────────────────────────────────────────
 function Badge({ type, label }) {
   const map = {
-    completed:       "ru-badge ru-badge--completed",
+    completed: "ru-badge ru-badge--completed",
     "not-completed": "ru-badge ru-badge--not-completed",
-    active:          "ru-badge ru-badge--active",
-    inactive:        "ru-badge ru-badge--inactive",
-    paid:            "ru-badge ru-badge--paid",
-    unpaid:          "ru-badge ru-badge--unpaid",
-    verified:        "ru-badge ru-badge--verified",
-    "not-verified":  "ru-badge ru-badge--not-verified",
+    active: "ru-badge ru-badge--active",
+    inactive: "ru-badge ru-badge--inactive",
+    paid: "ru-badge ru-badge--paid",
+    unpaid: "ru-badge ru-badge--unpaid",
+    verified: "ru-badge ru-badge--verified",
+    "not-verified": "ru-badge ru-badge--not-verified",
   };
   return <span className={map[type] || "ru-badge"}>{label}</span>;
 }
 
 function statusBadge(val) {
-  if (val === "Completed") return <Badge type="completed"     label="✓ Completed" />;
-  return                          <Badge type="not-completed" label="⊘ Not Completed" />;
+  if (val === "Completed") return <Badge type="completed" label="✓ Completed" />;
+  return <Badge type="not-completed" label="⊘ Not Completed" />;
 }
 function activeBadge(val) {
-  if (val === "Active") return <Badge type="active"   label="Active" />;
-  return                       <Badge type="inactive" label="Inactive" />;
+  if (val === "Active") return <Badge type="active" label="Active" />;
+  return <Badge type="inactive" label="Inactive" />;
 }
 function paymentBadge(val) {
-  if (val === "Paid")     return <Badge type="paid"         label="Paid" />;
-  if (val === "Verified") return <Badge type="verified"     label="Verified" />;
-  return                         <Badge type="not-verified" label={val || "—"} />;
+  if (val === "Paid") return <Badge type="paid" label="Paid" />;
+  if (val === "Verified") return <Badge type="verified" label="Verified" />;
+  return <Badge type="not-verified" label={val || "—"} />;
 }
 
 // ─── Warning Modal ────────────────────────────────────────────────────────────
 function WarningModal({ student, onClose }) {
-  const llndOk  = student.llndStatus     === "Completed";
+  const LLNOk = student.LLNStatus === "Completed";
   const enrollOk = student.enrollmentForm === "Completed";
   return (
     <div className="ru-overlay" onClick={onClose}>
@@ -46,9 +46,9 @@ function WarningModal({ student, onClose }) {
           <p>{student.name} has incomplete prerequisites</p>
         </div>
         <div className="ru-warn-checks">
-          <div className={`ru-warn-check-row ${llndOk ? "pass" : "fail"}`}>
-            <span className="wc-icon">{llndOk ? "✅" : "❌"}</span>
-            LLND Status — {llndOk ? "Completed" : "Not Completed"}
+          <div className={`ru-warn-check-row ${LLNOk ? "pass" : "fail"}`}>
+            <span className="wc-icon">{LLNOk ? "✅" : "❌"}</span>
+            LLN Status — {LLNOk ? "Completed" : "Not Completed"}
           </div>
           <div className={`ru-warn-check-row ${enrollOk ? "pass" : "fail"}`}>
             <span className="wc-icon">{enrollOk ? "✅" : "❌"}</span>
@@ -67,30 +67,30 @@ function WarningModal({ student, onClose }) {
 function UploadResultModal({ student, courses, onClose, onSaved }) {
   // Try to match course from courses list using every possible key
   const matchedCourse = courses.find(c =>
-    (student.courseId    && (c._id === student.courseId || c.id === student.courseId)) ||
-    (student.courseCode  && c.courseCode === student.courseCode) ||
-    (student.courseTitle && c.title      === student.courseTitle)
+    (student.courseId && (c._id === student.courseId || c.id === student.courseId)) ||
+    (student.courseCode && c.courseCode === student.courseCode) ||
+    (student.courseTitle && c.title === student.courseTitle)
   );
 
-  const resolvedCourseId   = matchedCourse?._id       || matchedCourse?.id
-                           || student.courseId         || student.course_id || "";
-  const resolvedCourseName = matchedCourse?.title      || student.courseTitle || student.course || "";
-  const resolvedCourseCode = matchedCourse?.courseCode || student.courseCode  || "";
+  const resolvedCourseId = matchedCourse?._id || matchedCourse?.id
+    || student.courseId || student.course_id || "";
+  const resolvedCourseName = matchedCourse?.title || student.courseTitle || student.course || "";
+  const resolvedCourseCode = matchedCourse?.courseCode || student.courseCode || "";
 
   const defaultForm = {
-    courseId:       resolvedCourseId,
-    courseName:     resolvedCourseName,
-    courseCode:     resolvedCourseCode,
-    unitName:       resolvedCourseCode || resolvedCourseName,
+    courseId: resolvedCourseId,
+    courseName: resolvedCourseName,
+    courseCode: resolvedCourseCode,
+    unitName: resolvedCourseCode || resolvedCourseName,
     assessmentType: "Theory",
-    score:          "",
-    status:         "Competent",
-    feedback:       "",
-    attempts:       1,
+    score: "",
+    status: "Competent",
+    feedback: "",
+    attempts: 1,
     assessmentDate: "",
   };
 
-  const [form, setForm]       = useState(defaultForm);
+  const [form, setForm] = useState(defaultForm);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [existingId, setExistingId] = useState(null); // _id if result already exists
@@ -104,29 +104,29 @@ function UploadResultModal({ student, courses, onClose, onSaved }) {
 
     const load = async () => {
       try {
-        const res  = await fetch(`${API_URL}/api/results/student/${studentId}`);
+        const res = await fetch(`${API_URL}/api/results/student/${studentId}`);
         const data = await res.json();
         // Find result that matches this course
         const existing = Array.isArray(data)
           ? data.find(r =>
-              r.courseId === resolvedCourseId ||
-              r.courseCode === resolvedCourseCode ||
-              r.courseName === resolvedCourseName
-            )
+            r.courseId === resolvedCourseId ||
+            r.courseCode === resolvedCourseCode ||
+            r.courseName === resolvedCourseName
+          )
           : null;
 
         if (existing) {
           setExistingId(existing._id);
           setForm({
-            courseId:       existing.courseId       || resolvedCourseId,
-            courseName:     existing.courseName     || resolvedCourseName,
-            courseCode:     existing.courseCode     || resolvedCourseCode,
-            unitName:       existing.unitName       || resolvedCourseCode || resolvedCourseName,
+            courseId: existing.courseId || resolvedCourseId,
+            courseName: existing.courseName || resolvedCourseName,
+            courseCode: existing.courseCode || resolvedCourseCode,
+            unitName: existing.unitName || resolvedCourseCode || resolvedCourseName,
             assessmentType: existing.assessmentType || "Theory",
-            score:          existing.score          ?? "",
-            status:         existing.status         || "Competent",
-            feedback:       existing.feedback       || "",
-            attempts:       existing.attempts       || 1,
+            score: existing.score ?? "",
+            status: existing.status || "Competent",
+            feedback: existing.feedback || "",
+            attempts: existing.attempts || 1,
             assessmentDate: existing.assessmentDate
               ? new Date(existing.assessmentDate).toISOString().split("T")[0]
               : "",
@@ -150,7 +150,7 @@ function UploadResultModal({ student, courses, onClose, onSaved }) {
     try {
       const payload = { ...form, studentId: student.id || student.flowId };
       // PATCH if existing, POST if new
-      const url    = existingId ? `${API_URL}/api/results/${existingId}` : `${API_URL}/api/results`;
+      const url = existingId ? `${API_URL}/api/results/${existingId}` : `${API_URL}/api/results`;
       const method = existingId ? "PATCH" : "POST";
 
       const res = await fetch(url, {
@@ -297,7 +297,7 @@ function UploadResultModal({ student, courses, onClose, onSaved }) {
         <div className="ru-modal-footer">
           <button className="ru-btn-cancel" onClick={onClose} disabled={loading}>Cancel</button>
           <button className="ru-btn-save" onClick={handleSubmit} disabled={loading}>
-{loading ? "Saving..." : existingId ? "Update Result" : "Save Result"}
+            {loading ? "Saving..." : existingId ? "Update Result" : "Save Result"}
           </button>
         </div>
       </div>
@@ -307,16 +307,16 @@ function UploadResultModal({ student, courses, onClose, onSaved }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function AdminResultsUpload() {
-  const [students,     setStudents]     = useState([]);
-  const [courses,      setCourses]      = useState([]);
-  const [loading,      setLoading]      = useState(true);
-  const [error,        setError]        = useState(null);
-  const [search,       setSearch]       = useState("");
+  const [students, setStudents] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
-  const [currentPage,  setCurrentPage]  = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [uploadStudent, setUploadStudent] = useState(null);
-  const [warnStudent,   setWarnStudent]   = useState(null);
-  const [modalKey,      setModalKey]      = useState(0);
+  const [warnStudent, setWarnStudent] = useState(null);
+  const [modalKey, setModalKey] = useState(0);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -345,10 +345,10 @@ export default function AdminResultsUpload() {
   });
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated  = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const paginated = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   const handleUploadClick = (student) => {
-    const ok = student.llndStatus === "Completed" && student.enrollmentForm === "Completed";
+    const ok = student.LLNStatus === "Completed" && student.enrollmentForm === "Completed";
     if (!ok) {
       setWarnStudent(student);
     } else {
@@ -392,11 +392,11 @@ export default function AdminResultsUpload() {
       <div className="ru-table-card">
         <div className="ru-table-head">
           <h3>Student Accounts ({filtered.length})</h3>
-          <p>LLND and Enrollment Form must be Completed before uploading a result</p>
+          <p>LLN and Enrollment Form must be Completed before uploading a result</p>
         </div>
 
         {loading && <p className="ru-loading">Loading students...</p>}
-        {error   && <p className="ru-loading ru-error">Error: {error}</p>}
+        {error && <p className="ru-loading ru-error">Error: {error}</p>}
 
         {!loading && !error && (
           <div className="ru-table-scroll">
@@ -410,7 +410,7 @@ export default function AdminResultsUpload() {
                   <th>Phone</th>
                   <th>Course</th>
                   <th>Course Schedule</th>
-                  <th>LLND Status</th>
+                  <th>LLN Status</th>
                   <th>Enrollment Form</th>
                   <th>Actions</th>
                 </tr>
@@ -419,7 +419,7 @@ export default function AdminResultsUpload() {
                 {paginated.length === 0 ? (
                   <tr><td colSpan={10} className="ru-empty">No students found.</td></tr>
                 ) : paginated.map(s => {
-                  const canUpload = s.llndStatus === "Completed" && s.enrollmentForm === "Completed";
+                  const canUpload = s.LLNStatus === "Completed" && s.enrollmentForm === "Completed";
                   return (
                     <tr key={s.flowId || s.id}>
                       <td>
@@ -448,14 +448,14 @@ export default function AdminResultsUpload() {
                         {s.courseCategory && <div className="ru-course-cat">{s.courseCategory}</div>}
                       </td>
                       <td className="ru-schedule">{s.courseBookingDate || "—"}</td>
-                      <td>{statusBadge(s.llndStatus)}</td>
+                      <td>{statusBadge(s.LLNStatus)}</td>
                       <td>{statusBadge(s.enrollmentForm)}</td>
                       <td>
                         <div className="ru-actions">
                           <button
                             className="ru-btn-upload"
                             onClick={() => handleUploadClick(s)}
-                            title={canUpload ? "Upload result" : "LLND or Enrollment not completed"}
+                            title={canUpload ? "Upload result" : "LLN or Enrollment not completed"}
                           >
                             {canUpload ? "📤 Upload Result" : "⚠️ Upload Result"}
                           </button>

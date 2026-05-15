@@ -1,6 +1,7 @@
 const EnrollmentForm = require("../models/EnrollmentForm");
 const EnrollmentFlow = require("../models/EnrollmentFlows");
 const cloudinary = require("../config/cloudinary")
+const { sendEnrollmentFormCompletionNotification } = require("./bookingEmailController");
 
 const createEnrollmentForm = async (req, res) => {
   try {
@@ -131,7 +132,7 @@ const createEnrollmentForm = async (req, res) => {
     const flowUpdateData = { 
       enrollmentFormId: form._id, 
       currentStep: 5,
-      enrollmentStatus: "pending" // Mark as pending until approved by admin
+      enrollmentStatus: "pending" // ✅ Admin must approve form before marking as 'enrolled'
     };
     
     let flow;
@@ -154,6 +155,30 @@ const createEnrollmentForm = async (req, res) => {
     }
 
     res.status(201).json({ message: "Enrollment form submitted successfully" })
+
+    // ✅ Trigger Notifications
+    try {
+      if (flow) {
+        const student = await EnrollmentFlow.findById(flow._id).populate("studentId");
+        if (student && student.studentId) {
+          const firstItem = student.items?.[0] || {};
+          const txId = firstItem.payment?.gatewayTransactionId || firstItem.payment?.transactionId || "—";
+          
+          console.log("[EnrollmentForm] Triggering completion email for:", student.studentId.email);
+          await sendEnrollmentFormCompletionNotification({
+            body: {
+              studentEmail: student.studentId.email,
+              studentName: student.studentId.name,
+              studentPhone: student.studentId.phone || student.studentId.mobile || "—",
+              bookingId: flow._id,
+              gatewayTransactionId: txId
+            }
+          }, null);
+        }
+      }
+    } catch (notifErr) {
+      console.error("❌ Notification error:", notifErr.message);
+    }
 
   } catch (err) {
     console.error(err)

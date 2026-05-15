@@ -67,7 +67,7 @@ const studentMainSchema = new mongoose.Schema(
     ],
     assessmentId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "LLNDAssessment"
+      ref: "LLNAssessment"
     },
 
     // 👤 Profile Data

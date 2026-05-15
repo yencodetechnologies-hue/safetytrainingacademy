@@ -45,8 +45,8 @@ exports.getStudentDashboard = async (req, res) => {
       return isAgent || hasSuccess;
     });
 
-    const llndScore = latestFlow.llnd?.score || 0;
-    const llndStatus = latestFlow.llnd?.status;
+    const llndScore = latestFlow.LLN?.score || 0;
+    const llndStatus = latestFlow.LLN?.status;
     const assessmentPassed = llndStatus === "completed";
 
     const firstItem = latestFlow.items?.[0];
@@ -78,7 +78,7 @@ exports.getStudentDashboard = async (req, res) => {
           startTime: f.startTime || null,
           endTime: f.endTime || null,
           status: f.status || "active",
-          llndStatus: f.llnd?.status || "pending",
+          llndStatus: f.LLN?.status || "pending",
           formStatus: f.enrollmentFormId ? "submitted" : "pending" // Changed from "approved" to "submitted"
         });
       }
@@ -93,6 +93,7 @@ exports.getStudentDashboard = async (req, res) => {
     // ✅ If enrollmentFormCompleted is true, it means they finished the final step
     const enrollmentFormSubmitted = !!existingForm?.enrollmentFormCompleted || latestFlow.enrollmentStatus === "enrolled";
     const enrollmentFormApproved = existingForm?.status === "Approved";
+    const enrollmentFormRejected = existingForm?.status === "Rejected";
 
     const response = {
       latestFlowId: latestFlow._id,
@@ -102,7 +103,7 @@ exports.getStudentDashboard = async (req, res) => {
       assessmentPassed,
       enrollmentFormSubmitted,
       enrollmentFormApproved,
-      enrollmentFormStatus: existingForm?.status || "Pending",
+      enrollmentFormRejected,
       paymentMethod,
       enrollmentType,
       enrolledCourses: allCourses

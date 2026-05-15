@@ -165,9 +165,9 @@ exports.getAllCompanies = async (req, res) => {
       ]),
       allTokens.length > 0
         ? EnrollmentFlow.aggregate([
-            { $match: { sourceToken: { $in: allTokens }, companyId: null } },
-            { $group: { _id: "$sourceToken", count: { $sum: 1 } } }
-          ])
+          { $match: { sourceToken: { $in: allTokens }, companyId: null } },
+          { $group: { _id: "$sourceToken", count: { $sum: 1 } } }
+        ])
         : Promise.resolve([])
     ]);
 
@@ -361,7 +361,7 @@ exports.getCompanyDetails = async (req, res) => {
       const item = flow.items?.[0];
       const payStatus = item?.payment?.status;
       const payLabel = payStatus === "success" ? "Paid" : payStatus === "failed" ? "Failed" : "Pending";
-      const llndStatus = flow.llnd?.status === "completed" ? "Completed" : "Not Started";
+      const LLNStatus = flow.LLN?.status === "completed" ? "Completed" : "Not Started";
       const formStatus = flow.enrollmentFormId ? "Submitted" : "Pending";
       const trainingStatus = flow.currentStep >= 4 ? "Completed" : flow.currentStep >= 2 ? "In Progress" : "Not Started";
       return {
@@ -371,7 +371,7 @@ exports.getCompanyDetails = async (req, res) => {
         course: item?.course?.courseName || "—",
         amount: item?.payment?.amount ? `$${item.payment.amount}` : "N/A",
         payment: payLabel,
-        llnd: llndStatus,
+        LLN: LLNStatus,
         form: formStatus,
         training: trainingStatus,
         enrolled: new Date(flow.createdAt).toLocaleDateString("en-GB"),

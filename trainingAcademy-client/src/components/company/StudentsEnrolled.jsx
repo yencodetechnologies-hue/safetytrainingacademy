@@ -4,9 +4,9 @@ import { API_URL } from "../../data/service";
 
 /* ── Badge helpers ── */
 function sourceLabel(source) {
-  if (source === "Booking Link")  return { text: "Booking Link",  color: "#6366f1" };
-  if (source === "Company Link")  return { text: "Company Link",  color: "#0891b2" };
-  return                                 { text: source || "—",   color: "#6b7280" };
+  if (source === "Booking Link") return { text: "Booking Link", color: "#6366f1" };
+  if (source === "Company Link") return { text: "Company Link", color: "#0891b2" };
+  return { text: source || "—", color: "#6b7280" };
 }
 
 /* ── Enrolments Table ── */
@@ -20,7 +20,7 @@ function EnrolmentsTable({ students }) {
             <th>Course</th>
             <th>Amount</th>
             <th>Source</th>
-            <th>LLND</th>
+            <th>LLN</th>
             <th>Form</th>
             <th>Training</th>
             <th>Enrolled</th>
@@ -48,8 +48,8 @@ function EnrolmentsTable({ students }) {
                     }}>{src.text}</span>
                   </td>
                   <td>
-                    <span className="se-badge" style={s.llnd === "Completed" ? { background: "#1f2937", color: "#fff", border: "none" } : {}}>
-                      {s.llnd}
+                    <span className="se-badge" style={s.LLN === "Completed" ? { background: "#1f2937", color: "#fff", border: "none" } : {}}>
+                      {s.LLN}
                     </span>
                   </td>
                   <td>

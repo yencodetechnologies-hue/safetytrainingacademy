@@ -115,24 +115,27 @@ function EnrollmentModal({ form, onClose, onStatusChange }) {
             </div>
           </div>
           <div className="modal-status-actions">
-            {form.status !== "Approved" && (
-              <button
-                className="modal-action-btn approve-btn"
-                onClick={() => handleStatus("Approved")}
-                disabled={updating}
-              >
-                <i className="fa-solid fa-check"></i> {updating ? "..." : "Approve"}
-              </button>
+            {form.status === "Pending" && (
+              <>
+                <button
+                  className="modal-action-btn approve-btn"
+                  onClick={() => handleStatus("Approved")}
+                  disabled={updating}
+                  style={{ background: "#16a34a", color: "#fff", border: "none" }}
+                >
+                  <i className="fa-solid fa-check"></i> {updating ? "Updating..." : "Approve"}
+                </button>
+                <button
+                  className="modal-action-btn reject-btn"
+                  onClick={() => handleStatus("Rejected")}
+                  disabled={updating}
+                  style={{ background: "#dc2626", color: "#fff", border: "none" }}
+                >
+                  <i className="fa-solid fa-xmark"></i> {updating ? "Updating..." : "Reject"}
+                </button>
+              </>
             )}
-            {form.status !== "Rejected" && (
-              <button
-                className="modal-action-btn reject-btn"
-                onClick={() => handleStatus("Rejected")}
-                disabled={updating}
-              >
-                <i className="fa-solid fa-xmark"></i> {updating ? "..." : "Reject"}
-              </button>
-            )}
+
             <button
               className="modal-action-btn"
               onClick={() => window.open(`/print.html?id=${form.id}`, "_blank")}

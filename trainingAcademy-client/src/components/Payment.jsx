@@ -170,7 +170,7 @@ function Payment({
             setPhone(initialPaymentData.phone || initialPaymentData.mobileNumber || initialPaymentData.mobile || "")
             setAgreed(true)
         }
-        
+
         // ✅ Set default payment method if Pay Later is enabled
         if (enrollmentLinkData?.payLater || tokenData?.payLater || initialPaymentData?.payLater) {
             setPaymentMethod("Pay Later")
@@ -255,10 +255,10 @@ function Payment({
                 return
             }
             if (setIsValid) setIsValid(Object.keys(errs).length === 0)
-            
+
             if (triggerValidation) {
                 setErrors(errs)
-                
+
                 // ✅ Auto-scroll to first error if exists
                 if (Object.keys(errs).length > 0) {
                     setTimeout(() => {
@@ -498,7 +498,7 @@ function Payment({
                         {enrollmentLinkData?.payLater ? "✓ Pay Later Enabled" : "✓ No Payment Required"}
                     </div>
                     <div style={{ fontSize: 12, color: "#6b21b6", marginTop: 4 }}>
-                        {enrollmentLinkData?.payLater 
+                        {enrollmentLinkData?.payLater
                             ? "Your enrollment will be processed now, and an invoice will be issued to your company."
                             : "Complete enrollment and assessment to activate your account."}
                     </div>
@@ -530,7 +530,7 @@ function Payment({
                             <p>Pay securely with your card online</p>
                         </div>
                     </div>
-                    
+
                     {/* Standalone Pay Later option - only if enabled */}
                     {(tokenData?.payLater || enrollmentLinkData?.payLater || initialPaymentData?.payLater) && (
                         <div
@@ -575,7 +575,7 @@ function Payment({
                             type="file"
                             accept="image/*,application/pdf"
                             ref={fileInputRef}
-                            onChange={handleFileChange}  
+                            onChange={handleFileChange}
                             className={errors.paymentSlip || fileSizeError ? "input-error" : ""}
                         />
                         {/* ✅ File size warning */}
@@ -773,7 +773,7 @@ function Payment({
             )}
 
             <div className="payment-warning">
-                Note: After completing the payment step, you will proceed to the LLND Assessment and then the Enrollment Form.
+                Note: After completing the payment step, you will proceed to the LLN Assessment and then the Enrollment Form.
             </div>
 
         </div>

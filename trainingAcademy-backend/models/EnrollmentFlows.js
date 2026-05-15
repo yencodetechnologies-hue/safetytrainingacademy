@@ -2,13 +2,13 @@ const mongoose = require("mongoose");
 
 const EnrollmentFlowSchema = new mongoose.Schema({
 
-studentId: {
+  studentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "StudentMain",
     required: false,  // ✅ required: true → false
     default: null,    // ✅ ADD
     index: true
-},
+  },
 
   companyId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -17,11 +17,11 @@ studentId: {
   },
 
   // ✅ ADD THIS FIELD
-enrollmentType: {
+  enrollmentType: {
     type: String,
     enum: ["Individual", "Company", "individual", "company", "agent", "Agent"],  // ✅ lowercase add
     default: "Individual"
-},
+  },
 
   source: {
     type: String,
@@ -64,7 +64,7 @@ enrollmentType: {
     }
   ],
 
-  llnd: {
+  LLN: {
     answers: [{
       questionId: String,
       answer: String
@@ -102,10 +102,10 @@ enrollmentType: {
   },
 
   // ✅ Enrollment Status tracking
-  enrollmentStatus: { 
-    type: String, 
-    enum: ["pending", "enrolled", "completed"], 
-    default: "pending" 
+  enrollmentStatus: {
+    type: String,
+    enum: ["pending", "enrolled", "completed"],
+    default: "pending"
   },
   enrolledAt: { type: Date },
 

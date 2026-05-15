@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import CourseSelection from "../components/course/CourseSelection";
 import "../styles/BookNow.css";
 import Payment from "../components/Payment";
-import LLNDAssessment from "../components/llnd/LLNDAssessment";
+import LLNAssessment from "../components/LLN/LLNAssessment";
 import EnrollmentRegister from "../components/enrollmrntRegister/EnrollmentRegister";
 import CourseSelectionSuccess from "../components/course/CourseSelectionSuccess";
 import { useNavigate, useSearchParams, useParams } from "react-router-dom";
@@ -32,11 +32,11 @@ function BookNow() {
     const fromPortal = searchParams.get("fromPortal") === "true";
 
     const isEnrollmentLink = location.pathname.startsWith('/enroll/');
-    const isCoursePath     = location.pathname.startsWith('/book-now/course/');
+    const isCoursePath = location.pathname.startsWith('/book-now/course/');
     // enrollId is the company id only — never the course slug.
-    const enrollId         = isEnrollmentLink || isCoursePath ? null : paramId;
+    const enrollId = isEnrollmentLink || isCoursePath ? null : paramId;
     const enrollmentLinkId = isEnrollmentLink ? paramId : null;
-    const courseSlug       = isCoursePath ? paramSlug : null;
+    const courseSlug = isCoursePath ? paramSlug : null;
 
     const [isLoading, setIsLoading] = useState(!!paramId || !!paramSlug);
 
@@ -69,7 +69,7 @@ function BookNow() {
 
     const { user: authUser } = useContext(AuthContext);
     const loggedInUser = authUser || JSON.parse(localStorage.getItem("user") || "{}");
-    const isStudentPortalAutofill = fromPortal && 
+    const isStudentPortalAutofill = fromPortal &&
         (String(loggedInUser?.role || "").toLowerCase() === "student");
 
     const cardPaymentRef = useRef({ trigger: null, paymentMethod: "bank", paymentStatus: null })
@@ -86,7 +86,7 @@ function BookNow() {
     const getIndividualCoursePrice = (course) => {
         if (!course) return 0
         const pt = course.pricingType || (course.experienceBasedBooking ? "experience" : "standard")
-        const v  = course.__variant || null
+        const v = course.__variant || null
 
         if (pt === "slbl") {
             if (v === "slbl" || (v == null && bookingType === "slbl")) return course.slblPrice || 0
@@ -94,7 +94,7 @@ function BookNow() {
         }
 
         if (pt === "experience") {
-            if (v === "with-experience"    || (v == null && bookingType === "with-experience"))    return course.withExperiencePrice || 0
+            if (v === "with-experience" || (v == null && bookingType === "with-experience")) return course.withExperiencePrice || 0
             if (v === "without-experience" || (v == null && bookingType === "without-experience")) return course.withoutExperiencePrice || 0
             return course.withoutExperiencePrice || course.withExperiencePrice || 0
         }
@@ -158,7 +158,7 @@ function BookNow() {
                     const link = data.data
                     setEnrollmentLinkData(link)
                     setIsCompanyEnroll(true)
-                    
+
                     // Set enrollment type based on agent flag
                     if (link.agent) {
                         setEnrollmentType("agent")
@@ -401,8 +401,8 @@ function BookNow() {
             formData.append("price", coursePrice);
             formData.append("enrollmentType",
                 isEnrollmentLink ? enrollmentType :
-                (isCompanyEnroll || isPublicCompanyLink) ? "company" :
-                enrollmentType
+                    (isCompanyEnroll || isPublicCompanyLink) ? "company" :
+                        enrollmentType
             );
             formData.append("sessionDate", selectedSession?.date);
             formData.append("startTime", selectedSession?.startTime);
@@ -456,21 +456,39 @@ function BookNow() {
                 body: JSON.stringify({
                     name: paymentData.name,
                     email: paymentData.email,
-                    courseName: selectedCourse?.title,
-                    courseCode: selectedCourse?.courseCode,
-                    courseDate: selectedSession?.date,
-                    startTime: selectedSession?.startTime,
-                    endTime: selectedSession?.endTime,
-                    coursePrice,
-                    paymentMethod: paymentData.paymentMethod,
                     phone: paymentData.phone,
+                    courseName: selectedCourse.title,
+                    courseCode: selectedCourse.courseCode,
+                    courseDate: selectedSession.date,
+                    startTime: selectedSession.startTime,
+                    endTime: selectedSession.endTime,
+                    coursePrice: coursePrice,
+                    paymentMethod: paymentData.paymentMethod,
                     gatewayTransactionId: txId || paymentData.ewayTransactionId || paymentData.transactionId || "",
                     bankTransferId: paymentData.transactionId || "",
                     bookingId: localStorage.getItem("flowId")
                 }),
             });
         } catch (err) {
-            console.error("Email send failed:", err.message);
+            console.error("Failed to send booking email:", err);
+        }
+    };
+
+    const sendCompanyBookingEmail = async (orderId, totalAmount, links) => {
+        try {
+            await fetch(`${API_URL}/api/booking-email/company-order`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    toEmail: paymentData.email,
+                    companyName: paymentData.name,
+                    orderId: orderId,
+                    totalAmount: totalAmount,
+                    links: links
+                })
+            });
+        } catch (err) {
+            console.error("Failed to send company booking email:", err);
         }
     };
 
@@ -594,15 +612,15 @@ function BookNow() {
                 try {
                     // ✅ 1. Build courses payload (no side effects)
                     const coursesPayload = selectedCourses.map(sc => ({
-                        courseId:      sc.course._id,
-                        courseName:    sc.course.title,
-                        courseCode:    sc.course.courseCode,
-                        quantity:      sc.quantity,
+                        courseId: sc.course._id,
+                        courseName: sc.course.title,
+                        courseCode: sc.course.courseCode,
+                        quantity: sc.quantity,
                         pricePerPerson: getIndividualCoursePrice(sc.course),
-                        sessionId:     sc.session?._id || "",
-                        sessionDate:   sc.session?.date || null,
-                        startTime:     sc.session?.startTime || "",
-                        endTime:       sc.session?.endTime || "",
+                        sessionId: sc.session?._id || "",
+                        sessionDate: sc.session?.date || null,
+                        startTime: sc.session?.startTime || "",
+                        endTime: sc.session?.endTime || "",
                     }))
 
                     // ✅ 2. Charge card via eWAY FIRST — before creating any account.
@@ -640,8 +658,8 @@ function BookNow() {
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             companyName: paymentData.name,
-                            email:       paymentData.email,
-                            password:    "123456",
+                            email: paymentData.email,
+                            password: "123456",
                             mobileNumber: paymentData.phone,
                             contactPerson: paymentData.contactPerson || "",
                         })
@@ -661,15 +679,15 @@ function BookNow() {
                     formData.append("notes", "")
 
                     coursesPayload.forEach((course, i) => {
-                        formData.append(`courses[${i}][courseId]`,      course.courseId)
-                        formData.append(`courses[${i}][courseName]`,    course.courseName)
-                        formData.append(`courses[${i}][courseCode]`,    course.courseCode)
-                        formData.append(`courses[${i}][quantity]`,      course.quantity)
-                        formData.append(`courses[${i}][pricePerPerson]`,course.pricePerPerson)
-                        formData.append(`courses[${i}][sessionId]`,     course.sessionId || "")
-                        formData.append(`courses[${i}][sessionDate]`,   course.sessionDate || "")
-                        formData.append(`courses[${i}][startTime]`,     course.startTime || "")
-                        formData.append(`courses[${i}][endTime]`,       course.endTime || "")
+                        formData.append(`courses[${i}][courseId]`, course.courseId)
+                        formData.append(`courses[${i}][courseName]`, course.courseName)
+                        formData.append(`courses[${i}][courseCode]`, course.courseCode)
+                        formData.append(`courses[${i}][quantity]`, course.quantity)
+                        formData.append(`courses[${i}][pricePerPerson]`, course.pricePerPerson)
+                        formData.append(`courses[${i}][sessionId]`, course.sessionId || "")
+                        formData.append(`courses[${i}][sessionDate]`, course.sessionDate || "")
+                        formData.append(`courses[${i}][startTime]`, course.startTime || "")
+                        formData.append(`courses[${i}][endTime]`, course.endTime || "")
                     })
 
                     if (paymentData.paymentSlip) {
@@ -704,22 +722,25 @@ function BookNow() {
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
                                 companyId,
-                                courseId:      sc.course._id,
+                                courseId: sc.course._id,
                                 courseCategory: sc.course.category,
-                                courseName:    sc.course.title,
-                                price:         getIndividualCoursePrice(sc.course) * sc.quantity,
+                                courseName: sc.course.title,
+                                price: getIndividualCoursePrice(sc.course) * sc.quantity,
                                 enrollmentType: "Company",
-                                sessionDate:   sc.session?.date,
-                                startTime:     sc.session?.startTime,
-                                endTime:       sc.session?.endTime,
-                                sessionId:     sc.session?._id || "",
-                                quantity:      sc.quantity,
+                                sessionDate: sc.session?.date,
+                                startTime: sc.session?.startTime,
+                                endTime: sc.session?.endTime,
+                                sessionId: sc.session?._id || "",
+                                quantity: sc.quantity,
                                 paymentMethod: paymentData.paymentMethod || "Bank Transfer",
                             })
                         })
                     ))
 
-                    // ✅ 7. Navigate with generated links
+                    // ✅ 7. Send confirmation email
+                    await sendCompanyBookingEmail(paymentResData.data._id, coursePrice, generatedLinks);
+
+                    // ✅ 8. Navigate with generated links
                     navigate("/booking-success", {
                         state: {
                             selectedCourses,
@@ -750,15 +771,15 @@ function BookNow() {
                 try {
                     const companyId = enrollId
                     const coursesPayload = selectedCourses.map(sc => ({
-                        courseId:      sc.course._id,
-                        courseName:    sc.course.title,
-                        courseCode:    sc.course.courseCode,
-                        quantity:      sc.quantity,
+                        courseId: sc.course._id,
+                        courseName: sc.course.title,
+                        courseCode: sc.course.courseCode,
+                        quantity: sc.quantity,
                         pricePerPerson: getIndividualCoursePrice(sc.course),
-                        sessionId:     sc.session?._id || "",
-                        sessionDate:   sc.session?.date || null,
-                        startTime:     sc.session?.startTime || "",
-                        endTime:       sc.session?.endTime || "",
+                        sessionId: sc.session?._id || "",
+                        sessionDate: sc.session?.date || null,
+                        startTime: sc.session?.startTime || "",
+                        endTime: sc.session?.endTime || "",
                     }))
 
                     // Charge card via eWAY if card payment (before recording anything)
@@ -796,15 +817,15 @@ function BookNow() {
                     formData.append("notes", "")
 
                     coursesPayload.forEach((course, i) => {
-                        formData.append(`courses[${i}][courseId]`,      course.courseId)
-                        formData.append(`courses[${i}][courseName]`,    course.courseName)
-                        formData.append(`courses[${i}][courseCode]`,    course.courseCode)
-                        formData.append(`courses[${i}][quantity]`,      course.quantity)
-                        formData.append(`courses[${i}][pricePerPerson]`,course.pricePerPerson)
-                        formData.append(`courses[${i}][sessionId]`,     course.sessionId || "")
-                        formData.append(`courses[${i}][sessionDate]`,   course.sessionDate || "")
-                        formData.append(`courses[${i}][startTime]`,     course.startTime || "")
-                        formData.append(`courses[${i}][endTime]`,       course.endTime || "")
+                        formData.append(`courses[${i}][courseId]`, course.courseId)
+                        formData.append(`courses[${i}][courseName]`, course.courseName)
+                        formData.append(`courses[${i}][courseCode]`, course.courseCode)
+                        formData.append(`courses[${i}][quantity]`, course.quantity)
+                        formData.append(`courses[${i}][pricePerPerson]`, course.pricePerPerson)
+                        formData.append(`courses[${i}][sessionId]`, course.sessionId || "")
+                        formData.append(`courses[${i}][sessionDate]`, course.sessionDate || "")
+                        formData.append(`courses[${i}][startTime]`, course.startTime || "")
+                        formData.append(`courses[${i}][endTime]`, course.endTime || "")
                     })
 
                     if (paymentData.paymentSlip) {
@@ -836,20 +857,23 @@ function BookNow() {
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
                                 companyId,
-                                courseId:      sc.course._id,
+                                courseId: sc.course._id,
                                 courseCategory: sc.course.category,
-                                courseName:    sc.course.title,
-                                price:         getIndividualCoursePrice(sc.course) * sc.quantity,
+                                courseName: sc.course.title,
+                                price: getIndividualCoursePrice(sc.course) * sc.quantity,
                                 enrollmentType: "Company",
-                                sessionDate:   sc.session?.date,
-                                startTime:     sc.session?.startTime,
-                                endTime:       sc.session?.endTime,
-                                sessionId:     sc.session?._id || "",
-                                quantity:      sc.quantity,
+                                sessionDate: sc.session?.date,
+                                startTime: sc.session?.startTime,
+                                endTime: sc.session?.endTime,
+                                sessionId: sc.session?._id || "",
+                                quantity: sc.quantity,
                                 paymentMethod: paymentData.paymentMethod || "Bank Transfer",
                             })
                         })
                     ))
+
+                    // ✅ Send confirmation email
+                    await sendCompanyBookingEmail(paymentResData.data._id, coursePrice, generatedLinks);
 
                     navigate("/booking-success", {
                         state: {
@@ -900,7 +924,7 @@ function BookNow() {
                     }
 
                     const txId = paymentResult.transactionId || paymentData.ewayTransactionId || ""
-                    
+
                     let studentId = localStorage.getItem("enrollId");
                     let slipUrl = "";
 
@@ -1194,17 +1218,17 @@ function BookNow() {
                 )}
 
                 {step === 3 && (
-                    <CourseSelectionSuccess 
-                        onNext={() => setStep(4)}
+                    <CourseSelectionSuccess
+                        onNext={() => navigate("/student")}
                         enrollmentData={{
-                        selectedCourse,
-                        courseDate: selectedSession?.date,
-                        courseTime: `${selectedSession?.startTime} - ${selectedSession?.endTime}`,
-                        coursePrice,
-                        paymentMethod: paymentData.paymentMethod,
-                        email: paymentData.email,
-                        name: paymentData.name,
-                    }} />
+                            selectedCourse,
+                            courseDate: selectedSession?.date,
+                            courseTime: `${selectedSession?.startTime} - ${selectedSession?.endTime}`,
+                            coursePrice,
+                            paymentMethod: paymentData.paymentMethod,
+                            email: paymentData.email,
+                            name: paymentData.name,
+                        }} />
                 )}
 
                 {step === 4 && (

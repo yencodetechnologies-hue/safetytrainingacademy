@@ -48,9 +48,9 @@ export default function StudentDashboard() {
 
   const paymentVerified = data?.paymentVerified ?? false;
   const assessmentPassed = data?.assessmentPassed ?? false;
-  const enrollmentFormStatus = data?.enrollmentFormStatus || "Pending";
   const enrollmentFormSubmitted = data?.enrollmentFormSubmitted ?? false;
   const enrollmentFormApproved = data?.enrollmentFormApproved ?? false;
+  const enrollmentFormRejected = data?.enrollmentFormRejected ?? false;
   const assessmentScore = data?.assessmentScore ?? null;
 
   const paymentMethod = data?.paymentMethod || "";
@@ -81,6 +81,15 @@ export default function StudentDashboard() {
     };
     
     fetchDashboardAndRedirect();
+  };
+
+  const handleRestrictedClick = (targetPath, state = {}) => {
+    if (assessmentPassed && (!enrollmentFormSubmitted || enrollmentFormRejected)) {
+      alert("Please complete or update your enrollment form before continuing.");
+      navigate("/student/enrollment-form");
+      return;
+    }
+    navigate(targetPath, state);
   };
 
   if (showAssessment) {
@@ -161,22 +170,24 @@ export default function StudentDashboard() {
               📝 Complete Form
             </button>
           </div>
-        ) : enrollmentFormStatus === "Rejected" ? (
+        ) : enrollmentFormRejected ? (
           <div className="alert alert-danger">
             <div className="alert-icon-wrap">❌</div>
             <div className="alert-body">
-              <span className="alert-badge" style={{ background: "#fee2e2", color: "#dc2626" }}>Form Rejected</span>
-              <p className="alert-title">Enrollment Form Rejected</p>
+              <span className="alert-badge" style={{ background: "#fee2e2", color: "#b91c1c" }}>Form Rejected</span>
+              <p className="alert-title">Enrollment Form Needs Update</p>
               <p className="alert-desc">
-                Your enrollment form was not approved. Please review and update your details.
+                Your enrollment form was rejected. Please review and update your details.
               </p>
-              <button
-                className="alert-action-btn"
-                onClick={() => navigate("/student/enrollment-form")}
-              >
-                📝 Update Form
-              </button>
             </div>
+            <button
+              className="alert-action-btn"
+              onClick={() => {
+                navigate("/student/enrollment-form");
+              }}
+            >
+              🔄 Resubmit Form
+            </button>
           </div>
         ) : !enrollmentFormApproved ? (
           <div className="alert alert-warning">
@@ -216,18 +227,18 @@ export default function StudentDashboard() {
           <button
             className="quick-action-btn"
             disabled={!canTakeAssessment}
-            onClick={() => navigate("/student/my-courses", { state: { tab: "browse" } })}
+            onClick={() => handleRestrictedClick("/student/my-courses", { state: { tab: "browse" } })}
           >
             <span className="qa-icon">📖</span>
             <span>Enroll in New Course</span>
           </button>
 
-          <button className="quick-action-btn" onClick={() => navigate("/student/certificates")}>
+          <button className="quick-action-btn" onClick={() => handleRestrictedClick("/student/certificates")}>
             <span className="qa-icon">🏅</span>
             <span>Download Certificates</span>
           </button>
 
-          <button className="quick-action-btn" onClick={() => navigate("/student/results")}>
+          <button className="quick-action-btn" onClick={() => handleRestrictedClick("/student/results")}>
             <span className="qa-icon">📈</span>
             <span>View Results</span>
           </button>

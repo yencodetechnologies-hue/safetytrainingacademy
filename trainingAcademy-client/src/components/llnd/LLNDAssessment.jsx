@@ -1,15 +1,15 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import Numeracy from "./Numeracy"
-import Literacy from "./Literacy"
-import Language from "./Language"
-import Digital from "./Digital"
+import Numeracy from "../lln/Numeracy"
+import Literacy from "../lln/Literacy"
+import Language from "../lln/Language"
+import Digital from "../lln/Digital"
 import CourseResult from "./CourseResult"
-import LLNDAssessmentComplete from "../llnd/LLNDAssessmentComplete"
+import LLNAssessmentComplete from "../lln/LLNAssessmentComplete"
 
 const topics = ["Numeracy", "Literacy", "Language", "Digital"]
 
-function LLNDAssessment(props) {
+function LLNAssessment(props) {
     const { onComplete, userDetails } = props
     const [attempt, setAttempt] = useState(1)
     const [topicIndex, setTopicIndex] = useState(0)
@@ -128,7 +128,7 @@ function LLNDAssessment(props) {
             "2-4": "First Aid",
             "3-0": "Hard hats, steel-capped boots, high-visibility vests",
             "4-0": "The site supervisor",
-            "5-0": "Follow all safety signs and instructions", 
+            "5-0": "Follow all safety signs and instructions",
         }
 
         let litCorrect = 0
@@ -259,17 +259,17 @@ function LLNDAssessment(props) {
 
     return (
 
-        <div className="llnd-card" style={{ margin: "0% 10%" }}>
+        <div className="LLN-card" style={{ margin: "0% 10%" }}>
 
-            <h3 className="llnd-h3"> LLND Assessment</h3>
+            <h3 className="LLN-h3"> LLN Assessment</h3>
 
             <p>
                 Section {topicIndex + 1} of 4 : {topics[topicIndex]}
             </p>
 
-            <div className="llnd-progress">
+            <div className="LLN-progress">
                 <div
-                    className="llnd-fill"
+                    className="LLN-fill"
                     style={{ width: `${progress}%` }}
                 ></div>
             </div>
@@ -293,7 +293,7 @@ function LLNDAssessment(props) {
                         onContinue={onComplete}
                     />
                 ) : (
-                    <LLNDAssessmentComplete
+                    <LLNAssessmentComplete
                         attempt={attempt}
                         data={resultData}
                         flowId={props.flowId}
@@ -313,4 +313,4 @@ function LLNDAssessment(props) {
     )
 }
 
-export default LLNDAssessment
+export default LLNAssessment

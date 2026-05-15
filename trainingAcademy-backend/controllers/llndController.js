@@ -1,12 +1,12 @@
-const LLND = require("../models/LLNDAssessment");
+const LLN = require("../models/LLNAssessment");
 const StudentMain = require("../models/student_main");
 
-exports.saveLLND = async (req, res) => {
+exports.saveLLN = async (req, res) => {
   try {
     const { studentId, courseId } = req.params;
 
-    // 🔥 create LLND
-    const llnd = await LLND.create({
+    // 🔥 create LLN
+    const LLN = await LLN.create({
       student: studentId,
       course: courseId,
       answers: req.body.answers,
@@ -22,21 +22,21 @@ exports.saveLLND = async (req, res) => {
       },
       {
         $set: {
-          "courses.$.assessmentId": llnd._id,
+          "courses.$.assessmentId": LLN._id,
           "courses.$.step": 3
         }
       }
     );
 
-    res.json(llnd);
+    res.json(LLN);
 
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-exports.getAllLLND = async (req, res) => {
+exports.getAllLLN = async (req, res) => {
   try {
-    const data = await LLND.find()
+    const data = await LLN.find()
       .populate("student", "name email phone")
       .populate("course", "title")
       .sort({ createdAt: -1 });
