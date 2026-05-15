@@ -197,6 +197,9 @@ const EnrollmentFormSchema = new mongoose.Schema({
   reviewedAt: Date,
 }, {
   timestamps: true,
+  collection: "enrollmenforms",
 });
 
-module.exports = mongoose.model("enrollmenforms", EnrollmentFormSchema);
+module.exports =
+  mongoose.models.enrollmenforms ||
+  mongoose.model("enrollmenforms", EnrollmentFormSchema);
