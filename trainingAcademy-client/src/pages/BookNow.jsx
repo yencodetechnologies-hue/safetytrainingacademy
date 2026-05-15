@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import CourseSelection from "../components/course/CourseSelection";
 import "../styles/BookNow.css";
 import Payment from "../components/Payment";
-import LLNAssessment from "../components/LLN/LLNAssessment";
+import LLNAssessment from "../components/lln/LLNAssessment";
 import EnrollmentRegister from "../components/enrollmrntRegister/EnrollmentRegister";
 import CourseSelectionSuccess from "../components/course/CourseSelectionSuccess";
 import { useNavigate, useSearchParams, useParams } from "react-router-dom";
