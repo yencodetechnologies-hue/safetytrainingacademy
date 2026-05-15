@@ -343,6 +343,53 @@ function CalendarDatePicker({ groupedSlots, selectedSession, onSelectSession }) 
 
 // Redundant: local groupCoursesByCategory moved inside CourseSelection for access to categoryList
 
+function LockedBookingSummary({ course, session, linkMeta }) {
+    const dateStr = session?.date
+        ? new Date(session.date).toLocaleDateString("en-AU", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        })
+        : "Date to be confirmed"
+
+    return (
+        <div className="cs-locked-booking">
+            <p className="cs-locked-booking__badge">Company booking link</p>
+            <p className="cs-locked-booking__hint">
+                Your company has already selected this course and session. Complete your details to enrol.
+            </p>
+            <div className="cs-locked-booking__card">
+                <p className="cs-locked-booking__label">Course</p>
+                <p className="cs-locked-booking__value">
+                    {course?.title || linkMeta?.courseName || "—"}
+                </p>
+                {(course?.courseCode || linkMeta?.courseCode) && (
+                    <p className="cs-locked-booking__meta">
+                        {course?.courseCode || linkMeta?.courseCode}
+                    </p>
+                )}
+            </div>
+            <div className="cs-locked-booking__card">
+                <p className="cs-locked-booking__label">Session</p>
+                <p className="cs-locked-booking__value">{dateStr}</p>
+                {(session?.startTime || linkMeta?.startTime) && (
+                    <p className="cs-locked-booking__meta">
+                        {session?.startTime || linkMeta?.startTime}
+                        {" – "}
+                        {session?.endTime || linkMeta?.endTime}
+                    </p>
+                )}
+            </div>
+            {linkMeta?.remaining != null && (
+                <p className="cs-locked-booking__slots">
+                    {linkMeta.remaining} of {linkMeta.maxUses} seat{linkMeta.maxUses !== 1 ? "s" : ""} remaining on this link
+                </p>
+            )}
+        </div>
+    )
+}
+
 function CourseSelection({
     enrollmentType,
     setEnrollmentType,
@@ -354,6 +401,7 @@ function CourseSelection({
     selectedCourses,
     setSelectedCourses,
     isCompanyEnroll,
+    bookingLinkData = null,
 }) {
 
     const [courses, setCourses] = useState([])
@@ -372,6 +420,7 @@ function CourseSelection({
 
     const isCompany = enrollmentType === "company"
     const useMultiCourseFlow = isCompany && !isCompanyEnroll
+    const isLockedBookingLink = !!(bookingLinkData?.token && bookingLinkData?.courseId)
 
     // Resolution order:
     //   1. course.__variant (the user's explicit pick from the new variant dropdown)
@@ -413,7 +462,7 @@ function CourseSelection({
                     setActiveCourseIds(null) // fallback: show all courses
                 }
 
-                if (paramCourseId) {
+                if (paramCourseId && !bookingLinkData?.courseId) {
                     const selected = fetchedCourses.find(c => c._id === paramCourseId)
                     if (selected) {
                         setSelectedCourse(selected)
@@ -665,6 +714,14 @@ function CourseSelection({
             {/* ─────────────────────────────────────────────────── */}
             {!useMultiCourseFlow && (
                 <>
+                    {isLockedBookingLink ? (
+                        <LockedBookingSummary
+                            course={selectedCourse}
+                            session={selectedSession}
+                            linkMeta={bookingLinkData}
+                        />
+                    ) : (
+                    <>
                     <div className="form-group">
                         <label>{isCompany ? "Add Courses" : "Select Course"}</label>
                         <CourseDropdown
@@ -701,6 +758,8 @@ function CourseSelection({
                                 </div>
                             )}
                         </div>
+                    )}
+                    </>
                     )}
                 </>
             )}

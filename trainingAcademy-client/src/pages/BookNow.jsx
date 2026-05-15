@@ -16,6 +16,77 @@ import { API_URL } from "../data/service";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
+/** Card payments already create links in createPayment; pending payments need generate. */
+async function fetchOrGenerateCourseLinks(paymentId, companyId, coursesPayload, paymentStatus) {
+    if (paymentStatus === "success") {
+        const linksRes = await fetch(`${API_URL}/api/course-links/payment/${paymentId}`)
+        const linksData = await linksRes.json()
+        return linksData.data || []
+    }
+    const linksRes = await fetch(`${API_URL}/api/course-links/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            companyPaymentId: paymentId,
+            companyId,
+            courses: coursesPayload,
+        }),
+    })
+    const linksData = await linksRes.json()
+    return linksData.data || []
+}
+
+function toDateKey(d) {
+    if (!d) return ""
+    return new Date(d).toISOString().split("T")[0]
+}
+
+function buildSessionFromBookingLink(td) {
+    return {
+        _id: td.sessionId || "booking-link-session",
+        date: td.sessionDate,
+        startTime: td.startTime || "",
+        endTime: td.endTime || "",
+    }
+}
+
+/** Match company-purchased session from schedule slots or fall back to link snapshot. */
+function findSessionFromBookingLink(slots, td) {
+    if (td.sessionId) {
+        for (const slot of slots || []) {
+            for (const session of slot.sessions || []) {
+                if (String(session._id) === String(td.sessionId)) {
+                    return { ...session, date: slot.date }
+                }
+            }
+        }
+    }
+    const targetDate = toDateKey(td.sessionDate)
+    for (const slot of slots || []) {
+        if (toDateKey(slot.date) !== targetDate) continue
+        for (const session of slot.sessions || []) {
+            if (session.startTime === td.startTime && session.endTime === td.endTime) {
+                return { ...session, date: slot.date }
+            }
+        }
+    }
+    if (td.sessionDate) return buildSessionFromBookingLink(td)
+    return null
+}
+
+async function loadBookingLinkSelection(td, setSelectedCourse, setSelectedSession) {
+    if (!td?.courseId) return
+    const courseRes = await fetch(`${API_URL}/api/courses/${td.courseId}`)
+    if (!courseRes.ok) return
+    const course = await courseRes.json()
+    setSelectedCourse(course)
+
+    const slotRes = await fetch(`${API_URL}/api/schedules/course/${td.courseId}`)
+    const slots = slotRes.ok ? await slotRes.json() : []
+    const session = findSessionFromBookingLink(slots, td)
+    if (session) setSelectedSession(session)
+}
+
 function BookNow() {
     const location = useLocation()
     const navigate = useNavigate();
@@ -121,20 +192,14 @@ function BookNow() {
                     setIsCompanyEnroll(true)
                     setEnrollmentType("individual")
 
-                    if (data.data.courseId) {
-                        try {
-                            const courseRes = await fetch(`${API_URL}/api/courses/${data.data.courseId}`)
-                            if (courseRes.ok) {
-                                const course = await courseRes.json()
-                                // We no longer call setSelectedCourse(course)
-                            }
-                        } catch (err) {
-                            console.error("Failed to load token course details:", err)
-                        }
-                    }
-
-                    if (data.data.sessionId || data.data.sessionDate) {
-                        // We no longer call setSelectedSession(...)
+                    try {
+                        await loadBookingLinkSelection(
+                            data.data,
+                            setSelectedCourse,
+                            setSelectedSession,
+                        )
+                    } catch (err) {
+                        console.error("Failed to pre-select booking link course:", err)
                     }
                 } else if (data.expired) {
                     setTokenError("expired")
@@ -702,18 +767,12 @@ function BookNow() {
                     const paymentResData = await paymentRes.json()
                     if (!paymentRes.ok) throw new Error(paymentResData.message || "Payment creation failed")
 
-                    // ✅ 5. Generate Course Links — one per course
-                    const linksRes = await fetch(`${API_URL}/api/course-links/generate`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            companyPaymentId: paymentResData.data._id,
-                            companyId,
-                            courses: coursesPayload,
-                        })
-                    })
-                    const linksData = await linksRes.json()
-                    const generatedLinks = linksData.data || []
+                    const generatedLinks = await fetchOrGenerateCourseLinks(
+                        paymentResData.data._id,
+                        companyId,
+                        coursesPayload,
+                        paymentResData.data.status,
+                    )
 
                     // ✅ 6. Create EnrollmentFlows for each course
                     await Promise.all(selectedCourses.map(sc =>
@@ -839,17 +898,12 @@ function BookNow() {
                     const paymentResData = await paymentRes.json()
                     if (!paymentRes.ok) throw new Error(paymentResData.message || "Payment creation failed")
 
-                    const linksRes = await fetch(`${API_URL}/api/course-links/generate`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            companyPaymentId: paymentResData.data._id,
-                            companyId,
-                            courses: coursesPayload,
-                        })
-                    })
-                    const linksData = await linksRes.json()
-                    const generatedLinks = linksData.data || []
+                    const generatedLinks = await fetchOrGenerateCourseLinks(
+                        paymentResData.data._id,
+                        companyId,
+                        coursesPayload,
+                        paymentResData.data.status,
+                    )
 
                     await Promise.all(selectedCourses.map(sc =>
                         fetch(`${API_URL}/api/flow/create`, {
@@ -1184,7 +1238,7 @@ function BookNow() {
                         selectedCourses={selectedCourses}
                         setSelectedCourses={setSelectedCourses}
                         isCompanyEnroll={isCompanyEnroll}
-                        tokenData={tokenData}  // ✅ Pass token data to pre-select course
+                        bookingLinkData={searchParams.get("token") ? tokenData : null}
                     />
                 )}
 
@@ -1219,7 +1273,10 @@ function BookNow() {
 
                 {step === 3 && (
                     <CourseSelectionSuccess
+<<<<<<< HEAD
                         onNext={() => navigate("/student")}
+=======
+>>>>>>> 9da5e7eca83d5895baf2fc0b465eb9f86d6f8912
                         enrollmentData={{
                             selectedCourse,
                             courseDate: selectedSession?.date,

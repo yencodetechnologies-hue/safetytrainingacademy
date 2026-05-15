@@ -1,5 +1,6 @@
 const Company = require("../models/Company");
 const CourseLink = require("../models/CourseLink");
+const { dedupeCourseLinks } = require("../utils/dedupeCourseLinks");
 const EnrollmentFlow = require("../models/EnrollmentFlows");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -343,7 +344,8 @@ exports.getCompanyDetails = async (req, res) => {
     const company = await Company.findById(req.params.id).select("-password");
     if (!company) return res.status(404).json({ success: false, message: "Company not found" });
 
-    const links = await CourseLink.find({ companyId: req.params.id }).sort({ createdAt: -1 }).lean();
+    const rawLinks = await CourseLink.find({ companyId: req.params.id }).sort({ createdAt: -1 }).lean();
+    const links = dedupeCourseLinks(rawLinks);
 
     const linkTokens = links.map(l => l.token);
     const flows = await EnrollmentFlow.find({
