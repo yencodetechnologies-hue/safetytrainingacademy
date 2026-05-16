@@ -1,8 +1,9 @@
 import "../../styles/EnrollmentComplete.css"
 import { useNavigate, useLocation } from "react-router-dom"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import { AuthContext } from "../../context/AuthContext"
 import { API_URL } from "../../data/service"
+import { trackPurchaseConversion } from "../../utils/googleAds"
 
 function EnrollmentComplete() {
 
@@ -13,6 +14,7 @@ function EnrollmentComplete() {
     const [countdown, setCountdown] = useState(10)
     const [copiedToken, setCopiedToken] = useState("")
     const [shouldRedirect, setShouldRedirect] = useState(false)
+    const conversionFired = useRef(false)
 
     const isCompany = enrollmentData.enrollmentType === "company"
     const generatedLinks = enrollmentData.generatedLinks || []
@@ -44,38 +46,32 @@ function EnrollmentComplete() {
         }
     }
 
-    // ============================================
-    // Google Ads conversion tracking
-    // Fires for individual bookings only.
-    // Reads coursePrice, selectedCourse, paymentMethod
-    // from React router state (passed by BookNow.jsx).
-    // ============================================
+    // Google Ads purchase + enhanced conversions (individual bookings only)
     useEffect(() => {
         if (!enrollmentData || enrollmentData.enrollmentType === "company") return
+        if (conversionFired.current) return
+        conversionFired.current = true
 
-        setTimeout(() => {
-            window.dataLayer = window.dataLayer || []
-            window.dataLayer.push({
-                event: "purchase",
-                transaction_id: `enrol_${Date.now()}`,
-                value: parseFloat(enrollmentData.coursePrice || 0),
+        const timer = setTimeout(() => {
+            trackPurchaseConversion({
+                email: enrollmentData.email,
+                phone: enrollmentData.phone,
+                name: enrollmentData.name,
+                value: enrollmentData.coursePrice,
                 currency: "AUD",
-                course_name: enrollmentData.selectedCourse?.title || "",
-                course_id: enrollmentData.selectedCourse?._id || "",
-                enrollment_type: enrollmentData.enrollmentType || "individual",
-                payment_method: enrollmentData.paymentMethod || "",
-                items: [{
-                    item_id: enrollmentData.selectedCourse?._id || "",
-                    item_name: enrollmentData.selectedCourse?.title || "",
-                    quantity: 1,
-                    price: parseFloat(enrollmentData.coursePrice || 0)
-                }]
+                transactionId:
+                    enrollmentData.bookingId ||
+                    localStorage.getItem("flowId") ||
+                    undefined,
+                courseName: enrollmentData.selectedCourse?.title,
+                courseId: enrollmentData.selectedCourse?._id,
+                paymentMethod: enrollmentData.paymentMethod,
+                enrollmentType: enrollmentData.enrollmentType || "individual",
             })
         }, 500)
-    }, [])
-    // ============================================
-    // END: Google Ads conversion tracking
-    // ============================================
+
+        return () => clearTimeout(timer)
+    }, [enrollmentData])
 
     // Countdown tick — pure state update, no side effects inside updater
     useEffect(() => {

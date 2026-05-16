@@ -102,6 +102,8 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
             vocPrice: editCourse?.vocPrice ?? 150,
             slblStrikePrice: editCourse?.slblStrikePrice || "",
             slblPrice: editCourse?.slblPrice || "",
+            metaTitle: editCourse?.metaTitle || "",
+            metaDescription: editCourse?.metaDescription || "",
 
         },
         onSubmit: async (values, { setFieldError }) => {
@@ -120,6 +122,8 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
             formData.append("certificateValidity", values.certificateValidity)
             formData.append("deliveryMethod", values.deliveryMethod)
             formData.append("location", values.location)
+            formData.append("metaTitle", values.metaTitle || "")
+            formData.append("metaDescription", values.metaDescription || "")
 
             formData.append("pricingType", pricingType)
             formData.append("originalPrice", values.originalPrice)
@@ -664,6 +668,46 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
                                         values={outcomePoint}
                                         setValues={setOutcomePoint}
                                     />
+                                </div>
+
+                                <div className="seo-section">
+                                    <h3 className="seo-section-title">SEO Settings</h3>
+
+                                    <div className="form-group">
+                                        <label>Meta title</label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. EWP Licence Over 11m | Boom Lift Course NSW | Safety Training Academy"
+                                            maxLength={60}
+                                            name="metaTitle"
+                                            value={formik.values.metaTitle}
+                                            onChange={formik.handleChange}
+                                        />
+                                        <small className="seo-char-count">
+                                            {formik.values.metaTitle?.length || 0} / 60
+                                        </small>
+                                        <small className="seo-hint">
+                                            Shown as the blue link title in Google search results. Keep under 60 characters.
+                                        </small>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Meta description</label>
+                                        <textarea
+                                            placeholder="e.g. Get your EWP over 11m licence in NSW. 3-day boom lift training & SafeWork NSW assessment in Sefton. RTO 45234 accredited. From $500. Book online today."
+                                            maxLength={160}
+                                            name="metaDescription"
+                                            value={formik.values.metaDescription}
+                                            onChange={formik.handleChange}
+                                            rows={3}
+                                        />
+                                        <small className="seo-char-count">
+                                            {formik.values.metaDescription?.length || 0} / 160
+                                        </small>
+                                        <small className="seo-hint">
+                                            Shown as the grey snippet text below the title in Google. Keep under 160 characters.
+                                        </small>
+                                    </div>
                                 </div>
 
                             </div>

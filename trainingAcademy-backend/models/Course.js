@@ -29,6 +29,10 @@ const courseSchema = new mongoose.Schema({
   slblStrikePrice: Number,
   slblPrice: Number,
 
+  // SEO (per-course Google title & snippet)
+  metaTitle: { type: String, maxlength: 60 },
+  metaDescription: { type: String, maxlength: 160 },
+
   // DETAILS
   description: [String],
   trainingOverview: [String],

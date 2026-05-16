@@ -127,6 +127,31 @@ function CourseDetails() {
             .finally(() => setLoadingSessions(false))
     }, [course?._id])
 
+    useEffect(() => {
+        if (!course) return
+
+        const defaultTitle = "Safety Training Academy | Sydney NSW"
+        const defaultDesc =
+            "Safety Training Academy — RTO 45234. Forklift, White Card, EWP, Working at Heights, Confined Space and more. Sydney NSW."
+
+        const prevTitle = document.title
+        const metaEl = document.querySelector('meta[name="description"]')
+        const prevDesc = metaEl?.getAttribute("content") ?? defaultDesc
+
+        const pageTitle = course.metaTitle?.trim() || course.title?.trim()
+        document.title = pageTitle || defaultTitle
+
+        const pageDesc =
+            course.metaDescription?.trim() ||
+            (Array.isArray(course.description) ? course.description[0] : course.description)?.trim()
+        if (pageDesc && metaEl) metaEl.setAttribute("content", pageDesc)
+
+        return () => {
+            document.title = prevTitle
+            if (metaEl) metaEl.setAttribute("content", prevDesc)
+        }
+    }, [course])
+
     if (isMobile) {
         return <ViewCourseDetailMobile course={course} courses={courses} fromPortal={fromPortal} />
     }

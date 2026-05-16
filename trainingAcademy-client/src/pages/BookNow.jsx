@@ -1079,10 +1079,13 @@ function BookNow() {
                 navigate("/booking-success", {
                     state: {
                         email: paymentData.email || userDetails.email,
+                        name: paymentData.name || userDetails.name,
+                        phone: paymentData.phone || userDetails.phone,
                         selectedCourse,
                         coursePrice,
                         paymentMethod: paymentData.paymentMethod,
                         enrollmentType: isCompanyEnroll ? "company" : "individual",
+                        bookingId: localStorage.getItem("flowId") || "",
                     }
                 });
                 return;

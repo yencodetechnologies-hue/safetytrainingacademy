@@ -80,6 +80,42 @@
     margin-bottom: 10px;
 }
 
+.seo-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.seo-section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 16px;
+}
+
+.seo-section input,
+.seo-section textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-top: 6px;
+}
+
+.seo-char-count {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.seo-hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #9ca3af;
+    line-height: 1.4;
+}
+
 .add-btn {
     background: #f3f3f3;
     border: none;
