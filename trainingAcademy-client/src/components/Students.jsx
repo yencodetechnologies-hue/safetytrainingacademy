@@ -856,20 +856,30 @@ export default function Students() {
   // ── Fetch ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     const fetchStudents = async () => {
+      console.log("[DEBUG] fetchStudents: Starting fetch from", `${API_URL}/api/students`);
       try {
         const res = await fetch(`${API_URL}/api/students`);
+        console.log("[DEBUG] fetchStudents: Response status =", res.status, res.statusText);
         if (!res.ok) throw new Error("Failed to fetch students");
         const data = await res.json();
+        console.log("[DEBUG] fetchStudents: Successfully fetched", data.length, "students");
         setStudents(data);
       } catch (err) {
+        console.error("[DEBUG] fetchStudents: Error caught =", err);
         setError(err.message);
       } finally {
+        console.log("[DEBUG] fetchStudents: Setting loading to false");
         setLoading(false);
       }
     };
     fetchStudents();
   }, []);
-
+useEffect(() => {
+  if (viewStudent) {
+    const updated = students.find(s => s.flowId === viewStudent.flowId);
+    if (updated) setViewStudent(updated);
+  }
+}, [students]);
   // ── Filter & Paginate ──────────────────────────────────────────────────────
   const filtered = students
     .filter((s) => {
@@ -927,7 +937,7 @@ const fetchStudents = async () => {
       prev.map((s) => (s.flowId === updated.flowId ? { ...s, ...updated } : s)  )
     );
     setEditStudent(null);
-    fetchStudents();
+  
   };
 
   // Deactivate / Activate toggle
@@ -952,7 +962,7 @@ const handleToggleStatus = async (student) => {
           : s
       )
     );
-    fetchStudents();
+  
 
   } catch (err) {
     alert("Error: " + err.message);
@@ -966,7 +976,7 @@ const handleToggleStatus = async (student) => {
       if (!res.ok) throw new Error("Failed to delete student");
       setStudents((prev) => prev.filter((s) => s.flowId !== flowId));
       setDeleteStudent(null);
-      fetchStudents();
+
     } catch (err) {
       alert("Error: " + err.message);
     }
@@ -1031,7 +1041,7 @@ const handleToggleStatus = async (student) => {
           <p className="sm-card-subtitle">Manage all student registrations and access</p>
         </div>
 
-        {loading && <p className="sm-loading">Loading students...</p>}
+       
         {error && <p className="sm-error">Error: {error}</p>}
 
         {!loading && !error && (

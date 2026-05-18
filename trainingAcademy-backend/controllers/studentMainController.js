@@ -286,7 +286,8 @@ exports.getAllStudents = async (req, res) => {
     const data = await EnrollmentFlow.find({
       studentId: { $ne: null }
     })
-      .populate("studentId")
+      .select("studentId companyId enrollmentType source sourceToken items llnd.status sessionDate startTime endTime enrollmentFormId status createdAt")
+      .populate("studentId", "name email phone lastLogin companyId")
       .sort({ createdAt: -1 })
       .lean();
 
