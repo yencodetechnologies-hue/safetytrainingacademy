@@ -19,8 +19,6 @@ function CourseResult({ onRetry, onContinue, data, flowId: flowIdProp }) {
     const [agree2, setAgree2] = useState(false)
     const [errors, setErrors] = useState({})
     const [isSaving, setIsSaving] = useState(false)
-    const [countdown, setCountdown] = useState(3)
-    const [autoStarted, setAutoStarted] = useState(false)
 
     const validate = async () => {
         try {
@@ -39,8 +37,6 @@ function CourseResult({ onRetry, onContinue, data, flowId: flowIdProp }) {
 
     const handleSaveAndContinue = async () => {
         setErrors({})
-        setAgree1(true)
-        setAgree2(true)
         setIsSaving(true)
         try {
             const flowId = flowIdProp || localStorage.getItem("flowId")
@@ -71,23 +67,6 @@ function CourseResult({ onRetry, onContinue, data, flowId: flowIdProp }) {
             setIsSaving(false)
         }
     }
-
-    useEffect(() => {
-        if (!isSaving && !autoStarted) {
-            const timer = setInterval(() => {
-                setCountdown((prev) => {
-                    if (prev <= 1) {
-                        clearInterval(timer)
-                        setAutoStarted(true)
-                        handleSaveAndContinue()
-                        return 0
-                    }
-                    return prev - 1
-                })
-            }, 1000)
-            return () => clearInterval(timer)
-        }
-    }, [isSaving, autoStarted])
 
     return (
         <div className="result-overlay">
@@ -124,7 +103,6 @@ function CourseResult({ onRetry, onContinue, data, flowId: flowIdProp }) {
                             onChange={(e) => {
                                 setAgree1(e.target.checked)
                                 setErrors((prev) => ({ ...prev, agree1: "" }))
-                                setAutoStarted(true) // Stop countdown if manually interacting
                             }}
                         />
                         I completed this quiz honestly and did not cheat in any way.
@@ -138,7 +116,6 @@ function CourseResult({ onRetry, onContinue, data, flowId: flowIdProp }) {
                             onChange={(e) => {
                                 setAgree2(e.target.checked)
                                 setErrors((prev) => ({ ...prev, agree2: "" }))
-                                setAutoStarted(true) // Stop countdown if manually interacting
                             }}
                         />
                         I understand that my score will be recorded under my name.
@@ -155,15 +132,10 @@ function CourseResult({ onRetry, onContinue, data, flowId: flowIdProp }) {
                     </div>
                 </div>
 
-                <div className="auto-redirect-info" style={{ textAlign: "center", marginBottom: "15px", color: "#6366f1", fontWeight: "600" }}>
-                    {countdown > 0 && !autoStarted && `Auto-continuing to Enrollment Form in ${countdown}s...`}
-                </div>
-
                 <button
                     className="continue-btn"
                     disabled={isSaving}
                     onClick={async () => {
-                        setAutoStarted(true)
                         const isValid = await validate()
                         if (!isValid) return
                         handleSaveAndContinue()
