@@ -834,11 +834,14 @@ function AddStudentModal({ onClose, onSave }) {
 export default function Students() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [students, setStudents] = useState([]);
+  const [total, setTotal] = useState(0);
+const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
+  
   
   // Get page from URL or default to 1
   const currentPage = parseInt(searchParams.get("page") || "1") || 1;
@@ -860,34 +863,34 @@ export default function Students() {
   const navigate = useNavigate();
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
-<<<<<<< HEAD
-  useEffect(() => {
-    const fetchStudents = async () => {
-      console.log("[DEBUG] fetchStudents: Starting fetch from", `${API_URL}/api/students`);
-      try {
-        const res = await fetch(`${API_URL}/api/students`);
-        console.log("[DEBUG] fetchStudents: Response status =", res.status, res.statusText);
-        if (!res.ok) throw new Error("Failed to fetch students");
-        const data = await res.json();
-        console.log("[DEBUG] fetchStudents: Successfully fetched", data.length, "students");
-        setStudents(data);
-      } catch (err) {
-        console.error("[DEBUG] fetchStudents: Error caught =", err);
-        setError(err.message);
-      } finally {
-        console.log("[DEBUG] fetchStudents: Setting loading to false");
-        setLoading(false);
-      }
-    };
-    fetchStudents();
-  }, []);
+  // useEffect(() => {
+  //   const fetchStudents = async () => {
+  //     console.log("[DEBUG] fetchStudents: Starting fetch from", `${API_URL}/api/students`);
+  //     try {
+  //       const res = await fetch(`${API_URL}/api/students`);
+  //       console.log("[DEBUG] fetchStudents: Response status =", res.status, res.statusText);
+  //       if (!res.ok) throw new Error("Failed to fetch students");
+  //       const data = await res.json();
+  //       console.log("[DEBUG] fetchStudents: Successfully fetched", data.length, "students");
+  //       setStudents(data);
+  //     } catch (err) {
+  //       console.error("[DEBUG] fetchStudents: Error caught =", err);
+  //       setError(err.message);
+  //     } finally {
+  //       console.log("[DEBUG] fetchStudents: Setting loading to false");
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchStudents();
+  // }, []);
+
+  
 useEffect(() => {
   if (viewStudent) {
     const updated = students.find(s => s.flowId === viewStudent.flowId);
     if (updated) setViewStudent(updated);
   }
 }, [students]);
-=======
   // useEffect(() => {
   //   const fetchStudents = async () => {
   //     try {
@@ -908,25 +911,36 @@ useEffect(() => {
   //   fetchStudents();
   // }, []);
 
-  const fetchStudents = async () => {
+ const fetchStudents = async () => {
   try {
-    setLoading(true); // ✅ add this
-    const res = await fetch(`${API_URL}/api/students`);
-    if (!res.ok) throw new Error("Failed to fetch students");
-    const data = await res.json();
+    setLoading(true);
 
-    setStudents(data);
+    const res = await fetch(
+      `${API_URL}/api/students?page=${currentPage}&limit=${ITEMS_PER_PAGE}`
+    );
+
+    if (!res.ok) throw new Error("Failed to fetch students");
+
+    const result = await res.json();
+
+    setStudents(result.data || []);
+    setTotal(result.total || 0);
+    setTotalPages(result.totalPages || 1);
+
   } catch (err) {
     setError(err.message);
   } finally {
     setLoading(false);
   }
 };
+// useEffect(() => {
+//   fetchStudents();
+// }, []);
+
 useEffect(() => {
   fetchStudents();
-}, []);
+}, [currentPage]);
 
->>>>>>> df4e323 (modified)
   // ── Filter & Paginate ──────────────────────────────────────────────────────
   // const filtered = students
   //   .filter((s) => {
@@ -963,7 +977,8 @@ useEffect(() => {
   //   });
 
   const filtered = useMemo(() => {
-  return students
+  // return students
+    return (students || [])
     .filter((s) => {
       const sSearch = search.toLowerCase();
 
@@ -1002,7 +1017,7 @@ useEffect(() => {
     });
 }, [students, search, statusFilter]);
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const totalPage = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
@@ -1019,15 +1034,13 @@ useEffect(() => {
 //   }
 // };
   // Edit: update student in list after save
-<<<<<<< HEAD
-  const handleEditSave = (updated) => {
-    setStudents((prev) =>
-      prev.map((s) => (s.flowId === updated.flowId ? { ...s, ...updated } : s)  )
-    );
-    setEditStudent(null);
+  // const handleEditSave = (updated) => {
+  //   setStudents((prev) =>
+  //     prev.map((s) => (s.flowId === updated.flowId ? { ...s, ...updated } : s)  )
+  //   );
+  //   setEditStudent(null);
   
-  };
-=======
+  // };
   // const handleEditSave = (updated) => {
   //   setStudents((prev) =>
   //     prev.map((s) => (s.flowId === updated.flowId ? { ...s, ...updated } : s)  )
@@ -1035,7 +1048,6 @@ useEffect(() => {
   //   setEditStudent(null);
   //   fetchStudents();
   // };
->>>>>>> df4e323 (modified)
 
   const handleEditSave = (updated) => {
   setStudents((prev) =>
@@ -1069,7 +1081,6 @@ const handleToggleStatus = async (student) => {
     // );
 
     setStudents((prev) =>
-<<<<<<< HEAD
       prev.map((s) =>
         s.flowId === student.flowId
           ? { ...s, status: updated.status } // ⚡ no fallback needed
@@ -1077,15 +1088,13 @@ const handleToggleStatus = async (student) => {
       )
     );
   
-=======
   prev.map((s) =>
     s.flowId === student.flowId
       ? { ...s, status: newStatus }
       : s
   )
-);
+
     // fetchStudents();
->>>>>>> df4e323 (modified)
 
   } catch (err) {
     alert("Error: " + err.message);
@@ -1101,13 +1110,10 @@ const handleToggleStatus = async (student) => {
       // setDeleteStudent(null);
 
       setStudents((prev) => prev.filter((s) => s.flowId !== flowId));
-<<<<<<< HEAD
       setDeleteStudent(null);
 
-=======
 setDeleteStudent(null);
       // fetchStudents();
->>>>>>> df4e323 (modified)
     } catch (err) {
       alert("Error: " + err.message);
     }
@@ -1200,14 +1206,14 @@ setDeleteStudent(null);
                 </tr>
               </thead>
               <tbody>
-                {paginated.length === 0 ? (
+                {students.length === 0 ? (
                   <tr>
                     <td colSpan={17} style={{ textAlign: "center", padding: "2rem", color: "#888" }}>
                       No students found.
                     </td>
                   </tr>
                 ) : (
-                  paginated.map((s) => (
+                  students.map((s) => (
                     <tr key={s.flowId}>
                       <td>
                         <div className="sm-date">{s.registerDate}</div>
@@ -1357,18 +1363,25 @@ setDeleteStudent(null);
             <div className="sm-pagination-controls">
               <button
                 className="sm-page-btn"
+                // onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                // disabled={currentPage === 1}
+
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
+disabled={currentPage === 1}
               >
                 Previous
               </button>
               <span className="sm-page-indicator">
+                {/* Page {currentPage} of {totalPage} */}
                 Page {currentPage} of {totalPages}
               </span>
               <button
                 className="sm-page-btn"
+                // onClick={() => setCurrentPage((p) => Math.min(totalPage, p + 1))}
+                // disabled={currentPage === totalPage}
+
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
+disabled={currentPage === totalPages}
               >
                 Next
               </button>
