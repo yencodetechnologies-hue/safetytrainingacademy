@@ -30,7 +30,7 @@ export default function AgentPayments() {
       const data = await res.json();
       
       // Filter for agent type students
-      const agents = data.filter(s => s.type === "Agent");
+      const agents = data.data.filter(s => s.type === "Agent");
       setAgentUsers(agents);
       setError("");
     } catch (err) {

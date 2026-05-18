@@ -595,9 +595,11 @@ function EnrollmentForms() {
         axios.get(`${API_URL}/api/enrollment-form`),
         axios.get(`${API_URL}/api/students`),
       ]);
+      console.log("studentsRes",studentsRes);
+      
 
       const studentMap = {};
-      studentsRes.data.forEach((s) => {
+      studentsRes.data.data.forEach((s) => {
         const sid = s.id?.toString() || s._id?.toString();
         if (sid) studentMap[sid] = s;
       });
