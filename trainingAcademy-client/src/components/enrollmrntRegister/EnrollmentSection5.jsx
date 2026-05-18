@@ -16,7 +16,7 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
     const canvasRef = useRef(null)
     const [isDrawing, setIsDrawing] = useState(false)
     const [hasSignature, setHasSignature] = useState(false)
-    const [showToast, setShowToast] = useState(false) // Success toast
+    const [submittingState, setSubmittingState] = useState("idle") // "idle" | "loading" | "success"
     const [showErrorToast, setShowErrorToast] = useState(false) // Validation toast
     const [missingFieldsNames, setMissingFieldsNames] = useState([])
     const [idFileError, setIdFileError] = useState("")
@@ -209,13 +209,26 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
         const error = handleValidation()
         if (error) return
 
+        setSubmittingState("loading")
+        const startTime = Date.now()
+
         const apiError = await validateAndSubmit()
         if (apiError) {
+            setSubmittingState("idle")
             setMissingFieldsNames([apiError])
             setShowErrorToast(true)
             return
         }
-        setShowToast(true)
+
+        const elapsedTime = Date.now() - startTime
+        const remainingTime = Math.max(0, 3000 - elapsedTime)
+        
+        if (remainingTime > 0) {
+            await new Promise(resolve => setTimeout(resolve, remainingTime))
+        }
+
+        setSubmittingState("success")
+        window.dispatchEvent(new Event("refreshStudentStatus"))
     }
 
     const handleDelete = async (fileUrl, fileType, clearKeys) => {
@@ -238,6 +251,41 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
         background: "red", color: "#fff", border: "none",
         borderRadius: "50%", width: 20, height: 20,
         cursor: "pointer", fontSize: 12, zIndex: 1
+    }
+    if (submittingState !== "idle") {
+        return (
+            <div className="s5-page">
+                <div className="s5-submit-container">
+                    {submittingState === "loading" ? (
+                        <>
+                            <div className="s5-submit-spinner"></div>
+                            <h3 className="s5-submit-title">Submitting Your Enrollment...</h3>
+                            <p className="s5-submit-sub">Please wait, we are processing and saving your application.</p>
+                        </>
+                    ) : (
+                        <>
+                            <div className="s5-submit-success-circle">
+                                <svg className="s5-submit-success-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.748-5.25z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <h2 className="s5-submit-title success">
+                                Enrollment Submitted Successfully!
+                            </h2>
+                            <p className="s5-submit-sub">
+                                Thank you. Your enrollment details have been submitted successfully.
+                            </p>
+                            <button
+                                className="s5-submit-dashboard-btn"
+                                onClick={() => navigate("/student")}
+                            >
+                                ← Back to Dashboard
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -573,19 +621,7 @@ function EnrollmentSection5({ data, setData, prev, validateAndSubmit }) {
                 </div>
             )}
 
-            {showToast && (
-                <div className="es5-toast">
-                    <p className="es5-toast-msg">
-                        ✅ Enrollment submitted successfully! Thank you.
-                    </p>
-                    <button
-                        className="es5-toast-btn"
-                        onClick={() => navigate("/enrollment-success")}
-                    >
-                        Finish Enrollment
-                    </button>
-                </div>
-            )}
+
 
             <div className="s5-footer">
                 <button className="s5-prev-btn" onClick={prev}>

@@ -290,56 +290,92 @@ exports.getAllStudents = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    const formatted = await Promise.all(data.map(async (flow) => {
+    // Extract all IDs to fetch them in bulk
+    const companyIds = [];
+    const enrollmentLinkIds = [];
+    const enrollmentFormIds = [];
+    const studentIds = [];
+
+    data.forEach((flow) => {
+      const student = flow.studentId || {};
+      const resolvedCompanyId = flow.companyId || student.companyId;
+      if (resolvedCompanyId) {
+        companyIds.push(resolvedCompanyId);
+      }
+      if (flow.source === "Enrollment Link" && flow.sourceToken) {
+        enrollmentLinkIds.push(flow.sourceToken);
+      }
+      if (flow.enrollmentFormId) {
+        enrollmentFormIds.push(flow.enrollmentFormId);
+      }
+      if (student._id) {
+        studentIds.push(student._id.toString());
+      }
+    });
+
+    // 1. Fetch companies in bulk
+    const uniqueCompanyIds = [...new Set(companyIds.map(id => id.toString()))].filter(id => mongoose.Types.ObjectId.isValid(id));
+    const companies = await Company.find({ _id: { $in: uniqueCompanyIds } }).lean();
+    const companyMap = new Map(companies.map(c => [c._id.toString(), c]));
+
+    // 2. Fetch enrollment links in bulk
+    const uniqueLinkIds = [...new Set(enrollmentLinkIds.map(id => id.toString()))].filter(id => mongoose.Types.ObjectId.isValid(id));
+    const enrollmentLinks = await EnrollmentLink.find({ _id: { $in: uniqueLinkIds } }).lean();
+    const linkMap = new Map(enrollmentLinks.map(l => [l._id.toString(), l]));
+
+    // 3. Fetch enrollment forms in bulk
+    const uniqueFormIds = [...new Set(enrollmentFormIds.map(id => id.toString()))].filter(id => mongoose.Types.ObjectId.isValid(id));
+    const uniqueStudentIds = [...new Set(studentIds)].filter(id => mongoose.Types.ObjectId.isValid(id));
+
+    const forms = await EnrollmentForm.find({
+      $or: [
+        { _id: { $in: uniqueFormIds } },
+        { studentId: { $in: uniqueStudentIds } }
+      ]
+    }).select("status studentId").lean();
+
+    const formMapById = new Map(forms.map(f => [f._id.toString(), f]));
+    const formMapByStudentId = new Map(
+      forms.filter(f => f.studentId).map(f => [f.studentId.toString(), f])
+    );
+
+    // Map the results in-memory
+    const formatted = data.map((flow) => {
       const student = flow.studentId || {};
       const item = flow.items?.[0] || {};
 
-      // The flow itself is the source of truth for which company an enrolment
-      // belongs to (the booking link / company link writes this). We prefer
-      // flow.companyId over student.companyId so the student card shows the
-      // company even when the student record was created earlier without a
-      // company tag (e.g. they first registered as an individual and later
-      // enrolled via a company link).
       const resolvedCompanyId = flow.companyId || student.companyId;
       let companyName = "";
       if (resolvedCompanyId) {
-        try {
-          const company = await Company.findById(resolvedCompanyId).lean();
-          companyName = company?.name || company?.companyName || "";
-        } catch (e) {}
+        const company = companyMap.get(resolvedCompanyId.toString());
+        companyName = company?.name || company?.companyName || "";
       }
 
       let agentName = "";
       let linkName = "";
       if (flow.source === "Enrollment Link" && flow.sourceToken) {
-        try {
-          const link = await EnrollmentLink.findById(flow.sourceToken).lean();
-          if (link?.agent) {
-            agentName = link?.name || "";
-          } else {
-            linkName = link?.name || "";
-          }
-        } catch (e) {}
+        const link = linkMap.get(flow.sourceToken.toString());
+        if (link?.agent) {
+          agentName = link?.name || "";
+        } else {
+          linkName = link?.name || "";
+        }
       }
 
       let formStatus = "Not Started";
       let formId = null;
       if (flow.enrollmentFormId) {
-        try {
-          const form = await EnrollmentForm.findById(flow.enrollmentFormId).select("status").lean();
-          if (form) {
-            formStatus = form.status || "Pending";
-            formId = form._id;
-          }
-        } catch (e) {}
+        const form = formMapById.get(flow.enrollmentFormId.toString());
+        if (form) {
+          formStatus = form.status || "Pending";
+          formId = form._id;
+        }
       } else if (student._id) {
-        try {
-          const form = await EnrollmentForm.findOne({ studentId: student._id.toString() }).select("status").lean();
-          if (form) {
-            formStatus = form.status || "Pending";
-            formId = form._id;
-          }
-        } catch (e) {}
+        const form = formMapByStudentId.get(student._id.toString());
+        if (form) {
+          formStatus = form.status || "Pending";
+          formId = form._id;
+        }
       }
 
       return {
@@ -391,7 +427,7 @@ exports.getAllStudents = async (req, res) => {
         lastLogin: student.lastLogin || "Never",
         bookingId: formatBookingId(flow.createdAt || flow._id),
       };
-    }));
+    });
 
     res.json(formatted);
   } catch (err) {
