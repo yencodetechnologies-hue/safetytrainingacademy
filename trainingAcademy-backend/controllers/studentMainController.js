@@ -514,6 +514,7 @@ exports.getAllStudents = async (req, res) => {
 
         paymentMethod: item.payment?.method || "—",
         transactionId: item.payment?.transactionId || "—",
+        gatewayTransactionId: item.payment?.gatewayTransactionId || "—",
         slipUrl: item.payment?.slipUrl || "—",
 
         courseBookingDate: flow.sessionDate
