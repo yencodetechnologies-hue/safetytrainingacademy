@@ -281,16 +281,148 @@ exports.updateStudent = async (req, res) => {
   }
 };
 
+// exports.getAllStudents = async (req, res) => {
+//   try {
+//     const data = await EnrollmentFlow.find({
+//       studentId: { $ne: null }
+//     })
+//       .populate("studentId")
+//       .sort({ createdAt: -1 })
+//       .lean();
+
+//     const formatted = await Promise.all(data.map(async (flow) => {
+//       const student = flow.studentId || {};
+//       const item = flow.items?.[0] || {};
+
+//       // The flow itself is the source of truth for which company an enrolment
+//       // belongs to (the booking link / company link writes this). We prefer
+//       // flow.companyId over student.companyId so the student card shows the
+//       // company even when the student record was created earlier without a
+//       // company tag (e.g. they first registered as an individual and later
+//       // enrolled via a company link).
+//       const resolvedCompanyId = flow.companyId || student.companyId;
+//       let companyName = "";
+//       if (resolvedCompanyId) {
+//         try {
+//           const company = await Company.findById(resolvedCompanyId).lean();
+//           companyName = company?.name || company?.companyName || "";
+//         } catch (e) {}
+//       }
+
+//       let agentName = "";
+//       let linkName = "";
+//       if (flow.source === "Enrollment Link" && flow.sourceToken) {
+//         try {
+//           const link = await EnrollmentLink.findById(flow.sourceToken).lean();
+//           if (link?.agent) {
+//             agentName = link?.name || "";
+//           } else {
+//             linkName = link?.name || "";
+//           }
+//         } catch (e) {}
+//       }
+
+//       let formStatus = "Not Started";
+//       let formId = null;
+//       if (flow.enrollmentFormId) {
+//         try {
+//           const form = await EnrollmentForm.findById(flow.enrollmentFormId).select("status").lean();
+//           if (form) {
+//             formStatus = form.status || "Pending";
+//             formId = form._id;
+//           }
+//         } catch (e) {}
+//       } else if (student._id) {
+//         try {
+//           const form = await EnrollmentForm.findOne({ studentId: student._id.toString() }).select("status").lean();
+//           if (form) {
+//             formStatus = form.status || "Pending";
+//             formId = form._id;
+//           }
+//         } catch (e) {}
+//       }
+
+//       return {
+//         id: student._id,
+//         flowId: flow._id,
+//         registerDate: flow.createdAt
+//           ? new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
+//           : "—",
+//         registerTime: flow.createdAt
+//           ? new Date(flow.createdAt).toLocaleTimeString("en-AU", { 
+//               timeZone: "Australia/Sydney", 
+//               hour: '2-digit', 
+//               minute: '2-digit', 
+//               hour12: true 
+//             })
+//           : "",
+//         name: student.name || "",
+//         email: student.email || "",
+//         phone: student.phone || "",
+//         type: flow.enrollmentType
+//           ? flow.enrollmentType.charAt(0).toUpperCase() + flow.enrollmentType.slice(1)
+//           : "Individual",
+//         companyName,
+//         agentName,
+//         linkName,
+//         courseCategory: item.course?.courseCategory || "",
+//         courseTitle: item.course?.courseName || "",
+//         course: item.course?.courseName || "",
+//         paymentMethod: item.payment?.method || "—",
+//         transactionId: item.payment?.transactionId || "—",
+//         slipUrl: item.payment?.slipUrl || "—",
+//         courseBookingDate: flow.sessionDate
+//           ? `${new Date(flow.sessionDate).toLocaleDateString("en-AU", {
+//               day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Sydney"
+//             })} | ${flow.startTime} - ${flow.endTime}`
+//           : "-",
+//         llndStatus: flow.llnd?.status === "completed" ? "Completed" : "Not Completed",
+//         enrollmentForm: flow.enrollmentFormId ? "Completed" : "Not Completed",
+//         enrollmentFormId: formId,
+//         enrollmentFormStatus: formStatus,
+//         paymentStatus: item.payment?.method === "Card Payment"
+//           ? (item.payment?.status === "success" || item.payment?.status === "completed") ? "Paid" : "Unpaid"
+//           : item.payment?.method === "Bank Transfer"
+//             ? item.payment?.status === "success" ? "Verified" : "Not Verified"
+//             : item.payment?.method === "Pay Later"
+//               ? "Unpaid"
+//               : "—",
+//         status: flow.status === "active" ? "Active" : "Inactive",
+//         lastLogin: student.lastLogin || "Never",
+//         bookingId: formatBookingId(flow.createdAt || flow._id),
+//       };
+//     }));
+
+//     res.json(formatted);
+//   } catch (err) {
+//     console.error("ERROR:", err);
+//     res.status(500).json({ error: err.message });
+//   }
+// };
+
 exports.getAllStudents = async (req, res) => {
   try {
+    // ✅ Pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // ✅ Fetch main data
     const data = await EnrollmentFlow.find({
       studentId: { $ne: null }
     })
+<<<<<<< HEAD
       .select("studentId companyId enrollmentType source sourceToken items llnd.status sessionDate startTime endTime enrollmentFormId status createdAt")
       .populate("studentId", "name email phone lastLogin companyId")
+=======
+      .populate("studentId", "name email phone lastLogin")
+>>>>>>> df4e323 (modified)
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .lean();
 
+<<<<<<< HEAD
     // Extract all IDs to fetch them in bulk
     const companyIds = [];
     const enrollmentLinkIds = [];
@@ -341,19 +473,64 @@ exports.getAllStudents = async (req, res) => {
     );
 
     // Map the results in-memory
+=======
+    // ✅ Collect IDs for bulk fetch
+    const companyIds = new Set();
+    const linkIds = new Set();
+    const formIds = new Set();
+
+    data.forEach(flow => {
+      if (flow.companyId) companyIds.add(flow.companyId.toString());
+      if (flow.sourceToken) linkIds.add(flow.sourceToken.toString());
+      if (flow.enrollmentFormId) formIds.add(flow.enrollmentFormId.toString());
+    });
+
+    // ✅ Bulk fetch (parallel)
+    const [companies, links, forms] = await Promise.all([
+      Company.find({ _id: { $in: [...companyIds] } }).lean(),
+      EnrollmentLink.find({ _id: { $in: [...linkIds] } }).lean(),
+      EnrollmentForm.find({ _id: { $in: [...formIds] } }).select("status").lean(),
+    ]);
+
+    // ✅ Convert to map (fast lookup)
+    const companyMap = Object.fromEntries(
+      companies.map(c => [c._id.toString(), c])
+    );
+
+    const linkMap = Object.fromEntries(
+      links.map(l => [l._id.toString(), l])
+    );
+
+    const formMap = Object.fromEntries(
+      forms.map(f => [f._id.toString(), f])
+    );
+
+    // ✅ Format response (NO DB calls inside loop)
+>>>>>>> df4e323 (modified)
     const formatted = data.map((flow) => {
       const student = flow.studentId || {};
       const item = flow.items?.[0] || {};
 
+<<<<<<< HEAD
       const resolvedCompanyId = flow.companyId || student.companyId;
       let companyName = "";
       if (resolvedCompanyId) {
         const company = companyMap.get(resolvedCompanyId.toString());
         companyName = company?.name || company?.companyName || "";
       }
+=======
+      // Company
+      const resolvedCompanyId =
+        (flow.companyId || student.companyId)?.toString();
+      const company = companyMap[resolvedCompanyId];
+      const companyName = company?.name || company?.companyName || "";
+>>>>>>> df4e323 (modified)
 
+      // Link / Agent
+      const link = linkMap[flow.sourceToken?.toString()];
       let agentName = "";
       let linkName = "";
+<<<<<<< HEAD
       if (flow.source === "Enrollment Link" && flow.sourceToken) {
         const link = linkMap.get(flow.sourceToken.toString());
         if (link?.agent) {
@@ -378,66 +555,125 @@ exports.getAllStudents = async (req, res) => {
           formId = form._id;
         }
       }
+=======
+
+      if (flow.source === "Enrollment Link" && link) {
+        if (link.agent) {
+          agentName = link.name || "";
+        } else {
+          linkName = link.name || "";
+        }
+      }
+
+      // Form
+      const form = formMap[flow.enrollmentFormId?.toString()];
+      const formStatus = form?.status || "Not Started";
+>>>>>>> df4e323 (modified)
 
       return {
         id: student._id,
         flowId: flow._id,
+
         registerDate: flow.createdAt
-          ? new Date(flow.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" })
+          ? new Date(flow.createdAt).toLocaleDateString("en-AU", {
+              timeZone: "Australia/Sydney",
+            })
           : "—",
+
         registerTime: flow.createdAt
-          ? new Date(flow.createdAt).toLocaleTimeString("en-AU", { 
-              timeZone: "Australia/Sydney", 
-              hour: '2-digit', 
-              minute: '2-digit', 
-              hour12: true 
+          ? new Date(flow.createdAt).toLocaleTimeString("en-AU", {
+              timeZone: "Australia/Sydney",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
             })
           : "",
+
         name: student.name || "",
         email: student.email || "",
         phone: student.phone || "",
+
         type: flow.enrollmentType
-          ? flow.enrollmentType.charAt(0).toUpperCase() + flow.enrollmentType.slice(1)
+          ? flow.enrollmentType.charAt(0).toUpperCase() +
+            flow.enrollmentType.slice(1)
           : "Individual",
+
         companyName,
         agentName,
         linkName,
+
         courseCategory: item.course?.courseCategory || "",
         courseTitle: item.course?.courseName || "",
         course: item.course?.courseName || "",
+
         paymentMethod: item.payment?.method || "—",
         transactionId: item.payment?.transactionId || "—",
         gatewayTransactionId: item.payment?.gatewayTransactionId || "—",
         slipUrl: item.payment?.slipUrl || "—",
+
         courseBookingDate: flow.sessionDate
           ? `${new Date(flow.sessionDate).toLocaleDateString("en-AU", {
-              day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Sydney"
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+              timeZone: "Australia/Sydney",
             })} | ${flow.startTime} - ${flow.endTime}`
           : "-",
-        llndStatus: flow.llnd?.status === "completed" ? "Completed" : "Not Completed",
-        enrollmentForm: flow.enrollmentFormId ? "Completed" : "Not Completed",
-        enrollmentFormId: formId,
+
+        llndStatus:
+          flow.llnd?.status === "completed"
+            ? "Completed"
+            : "Not Completed",
+
+        enrollmentForm: flow.enrollmentFormId
+          ? "Completed"
+          : "Not Completed",
+
+        enrollmentFormId: flow.enrollmentFormId,
         enrollmentFormStatus: formStatus,
-        paymentStatus: item.payment?.method === "Card Payment"
-          ? (item.payment?.status === "success" || item.payment?.status === "completed") ? "Paid" : "Unpaid"
-          : item.payment?.method === "Bank Transfer"
-            ? item.payment?.status === "success" ? "Verified" : "Not Verified"
+
+        paymentStatus:
+          item.payment?.method === "Card Payment"
+            ? item.payment?.status === "success" ||
+              item.payment?.status === "completed"
+              ? "Paid"
+              : "Unpaid"
+            : item.payment?.method === "Bank Transfer"
+            ? item.payment?.status === "success"
+              ? "Verified"
+              : "Not Verified"
             : item.payment?.method === "Pay Later"
-              ? "Unpaid"
-              : "—",
+            ? "Unpaid"
+            : "—",
+
         status: flow.status === "active" ? "Active" : "Inactive",
+
         lastLogin: student.lastLogin || "Never",
+
         bookingId: formatBookingId(flow.createdAt || flow._id),
       };
     });
+<<<<<<< HEAD
+=======
 
-    res.json(formatted);
+    // ✅ total count (for pagination UI)
+    const total = await EnrollmentFlow.countDocuments({
+      studentId: { $ne: null }
+    });
+
+    res.json({
+      data: formatted,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
+>>>>>>> df4e323 (modified)
+
   } catch (err) {
     console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
-
 exports.deleteStudent = async (req, res) => {
   try {
     const flow = await EnrollmentFlow.findById(req.params.id);

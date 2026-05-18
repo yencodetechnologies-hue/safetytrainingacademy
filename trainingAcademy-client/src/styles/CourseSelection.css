@@ -154,7 +154,8 @@ margin-bottom:25px;
 .cs-dropdown__placeholder { color: #999; }
 .cs-dropdown__value { color: #111; }
 .cs-dropdown__arrow { font-size: 10px; color: #888; margin-left: 8px; flex-shrink: 0; }
-.cs-dropdown__menu {
+
+/* .cs-dropdown__menu {
     position: absolute;
     top: 100%;
     left: 0;
@@ -168,6 +169,20 @@ margin-bottom:25px;
     overflow-y: auto;
     z-index: 999;
     box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+} */
+
+.cs-dropdown__menu {
+  position: absolute;
+  top: 100%;              /* input keela start aagum */
+  left: 0;
+  width: 100%;
+  max-height: 250px;      /* 🔥 IMPORTANT — height limit */
+  overflow-y: auto;       /* scroll varum */
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 .cs-dropdown__group-label {
     padding: 8px 12px 4px;

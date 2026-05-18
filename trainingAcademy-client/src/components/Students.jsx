@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import "../styles/Student.css";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { API_URL } from "../data/service";
-
+import { useMemo } from "react";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -860,6 +860,7 @@ export default function Students() {
   const navigate = useNavigate();
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
+<<<<<<< HEAD
   useEffect(() => {
     const fetchStudents = async () => {
       console.log("[DEBUG] fetchStudents: Starting fetch from", `${API_URL}/api/students`);
@@ -886,32 +887,111 @@ useEffect(() => {
     if (updated) setViewStudent(updated);
   }
 }, [students]);
+=======
+  // useEffect(() => {
+  //   const fetchStudents = async () => {
+  //     try {
+  //       const res = await fetch(`${API_URL}/api/students`);
+  //       console.log("studentsresponse",res );
+        
+  //       if (!res.ok) throw new Error("Failed to fetch students");
+  //       const data = await res.json();
+  //       console.log("studentdata",data);
+        
+  //       setStudents(data);
+  //     } catch (err) {
+  //       setError(err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchStudents();
+  // }, []);
+
+  const fetchStudents = async () => {
+  try {
+    setLoading(true); // ✅ add this
+    const res = await fetch(`${API_URL}/api/students`);
+    if (!res.ok) throw new Error("Failed to fetch students");
+    const data = await res.json();
+
+    setStudents(data);
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+useEffect(() => {
+  fetchStudents();
+}, []);
+
+>>>>>>> df4e323 (modified)
   // ── Filter & Paginate ──────────────────────────────────────────────────────
-  const filtered = students
+  // const filtered = students
+  //   .filter((s) => {
+  //     const sSearch = search.toLowerCase();
+  //     if (!sSearch) return statusFilter === "All Status" || s.status === statusFilter;
+
+  //     const matchSearch =
+  //       (s.name?.toLowerCase().startsWith(sSearch)) ||
+  //       (s.email?.toLowerCase().startsWith(sSearch)) ||
+  //       (s.phone?.toLowerCase().startsWith(sSearch)) ||
+  //       (s.nickname?.toLowerCase().startsWith(sSearch)) ||
+  //       (s.companyName?.toLowerCase().startsWith(sSearch)) ||
+  //       (s.transactionId?.toLowerCase().startsWith(sSearch)) ||
+  //       (s.courseCode?.toLowerCase().startsWith(sSearch)) ||
+  //       (s.courseTitle?.toLowerCase().startsWith(sSearch));
+
+  //     const matchStatus =
+  //       statusFilter === "All Status" || s.status === statusFilter;
+  //     return matchSearch && matchStatus;
+  //   })
+  //   .sort((a, b) => {
+  //     if (!search) return 0;
+  //     const sSearch = search.toLowerCase();
+  //     const aName = a.name?.toLowerCase() || "";
+  //     const bName = b.name?.toLowerCase() || "";
+      
+  //     const aStarts = aName.startsWith(sSearch);
+  //     const bStarts = bName.startsWith(sSearch);
+
+  //     if (aStarts && !bStarts) return -1;
+  //     if (!aStarts && bStarts) return 1;
+
+  //     return 0;
+  //   });
+
+  const filtered = useMemo(() => {
+  return students
     .filter((s) => {
       const sSearch = search.toLowerCase();
-      if (!sSearch) return statusFilter === "All Status" || s.status === statusFilter;
+
+      if (!sSearch)
+        return statusFilter === "All Status" || s.status === statusFilter;
 
       const matchSearch =
-        (s.name?.toLowerCase().startsWith(sSearch)) ||
-        (s.email?.toLowerCase().startsWith(sSearch)) ||
-        (s.phone?.toLowerCase().startsWith(sSearch)) ||
-        (s.nickname?.toLowerCase().startsWith(sSearch)) ||
-        (s.companyName?.toLowerCase().startsWith(sSearch)) ||
-        (s.transactionId?.toLowerCase().startsWith(sSearch)) ||
-        (s.courseCode?.toLowerCase().startsWith(sSearch)) ||
-        (s.courseTitle?.toLowerCase().startsWith(sSearch));
+        s.name?.toLowerCase().startsWith(sSearch) ||
+        s.email?.toLowerCase().startsWith(sSearch) ||
+        s.phone?.toLowerCase().startsWith(sSearch) ||
+        s.nickname?.toLowerCase().startsWith(sSearch) ||
+        s.companyName?.toLowerCase().startsWith(sSearch) ||
+        s.transactionId?.toLowerCase().startsWith(sSearch) ||
+        s.courseCode?.toLowerCase().startsWith(sSearch) ||
+        s.courseTitle?.toLowerCase().startsWith(sSearch);
 
       const matchStatus =
         statusFilter === "All Status" || s.status === statusFilter;
+
       return matchSearch && matchStatus;
     })
     .sort((a, b) => {
       if (!search) return 0;
+
       const sSearch = search.toLowerCase();
       const aName = a.name?.toLowerCase() || "";
       const bName = b.name?.toLowerCase() || "";
-      
+
       const aStarts = aName.startsWith(sSearch);
       const bStarts = bName.startsWith(sSearch);
 
@@ -920,6 +1000,7 @@ useEffect(() => {
 
       return 0;
     });
+}, [students, search, statusFilter]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice(
@@ -927,17 +1008,18 @@ useEffect(() => {
     currentPage * ITEMS_PER_PAGE
   );
 
-  // ── CRUD Handlers ──────────────────────────────────────────────────────────
-const fetchStudents = async () => {
-  try {
-    const res = await fetch(`${API_URL}/api/students`);
-    const data = await res.json();
-    setStudents(data);
-  } catch (err) {
-    console.error(err);
-  }
-};
+//   // ── CRUD Handlers ──────────────────────────────────────────────────────────
+// const fetchStudents = async () => {
+//   try {
+//     const res = await fetch(`${API_URL}/api/students`);
+//     const data = await res.json();
+//     setStudents(data);
+//   } catch (err) {
+//     console.error(err);
+//   }
+// };
   // Edit: update student in list after save
+<<<<<<< HEAD
   const handleEditSave = (updated) => {
     setStudents((prev) =>
       prev.map((s) => (s.flowId === updated.flowId ? { ...s, ...updated } : s)  )
@@ -945,7 +1027,24 @@ const fetchStudents = async () => {
     setEditStudent(null);
   
   };
+=======
+  // const handleEditSave = (updated) => {
+  //   setStudents((prev) =>
+  //     prev.map((s) => (s.flowId === updated.flowId ? { ...s, ...updated } : s)  )
+  //   );
+  //   setEditStudent(null);
+  //   fetchStudents();
+  // };
+>>>>>>> df4e323 (modified)
 
+  const handleEditSave = (updated) => {
+  setStudents((prev) =>
+    prev.map((s) =>
+      s.flowId === updated.flowId ? { ...s, ...updated } : s
+    )
+  );
+  setEditStudent(null);
+};
   // Deactivate / Activate toggle
 const handleToggleStatus = async (student) => {
   const newStatus = student.status === "Active" ? "Inactive" : "Active";
@@ -961,7 +1060,16 @@ const handleToggleStatus = async (student) => {
 
     const updated = await res.json();
 
+    // setStudents((prev) =>
+    //   prev.map((s) =>
+    //     s.flowId === student.flowId
+    //       ? { ...s, status: updated.status } // ⚡ no fallback needed
+    //       : s
+    //   )
+    // );
+
     setStudents((prev) =>
+<<<<<<< HEAD
       prev.map((s) =>
         s.flowId === student.flowId
           ? { ...s, status: updated.status } // ⚡ no fallback needed
@@ -969,6 +1077,15 @@ const handleToggleStatus = async (student) => {
       )
     );
   
+=======
+  prev.map((s) =>
+    s.flowId === student.flowId
+      ? { ...s, status: newStatus }
+      : s
+  )
+);
+    // fetchStudents();
+>>>>>>> df4e323 (modified)
 
   } catch (err) {
     alert("Error: " + err.message);
@@ -980,9 +1097,17 @@ const handleToggleStatus = async (student) => {
     try {
       const res = await fetch(`${API_URL}/api/students/${flowId}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete student");
+      // setStudents((prev) => prev.filter((s) => s.flowId !== flowId));
+      // setDeleteStudent(null);
+
       setStudents((prev) => prev.filter((s) => s.flowId !== flowId));
+<<<<<<< HEAD
       setDeleteStudent(null);
 
+=======
+setDeleteStudent(null);
+      // fetchStudents();
+>>>>>>> df4e323 (modified)
     } catch (err) {
       alert("Error: " + err.message);
     }

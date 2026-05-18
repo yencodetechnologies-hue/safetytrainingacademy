@@ -65,7 +65,23 @@ function CourseDropdown({ groupedCourses, value, onChange, placeholder = "Select
         : placeholder
 
     return (
+        
         <div className="cs-dropdown" ref={ref}>
+             {/* 🔍 SEARCH INPUT (ALWAYS VISIBLE) */}
+    <div className="cs-dropdown__trigger">
+        <input
+            type="text"
+            placeholder="Search course..."
+            value={searchTerm}
+            onChange={(e) => {
+                setSearchTerm(e.target.value)
+                setOpen(true) // typing → open dropdown
+            }}
+            onClick={() => setOpen(true)}
+            onBlur={() => setTimeout(() => setOpen(false), 200)}
+            className="cs-dropdown-search"
+        />
+    </div>
             <div
                 className={`cs-dropdown__trigger ${open ? "cs-dropdown__trigger--open" : ""}`}
                 onClick={() => setOpen(p => !p)}
@@ -102,20 +118,11 @@ function CourseDropdown({ groupedCourses, value, onChange, placeholder = "Select
                 </div>
             )} */}
 
-{open && (
-    <>
-        {/* 🔍 SEARCH BOX — OUTSIDE MENU */}
-        <div style={{ padding: "8px" }}>
-            <input
-                type="text"
-                placeholder="Search course..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="cs-dropdown-search"
-            />
-        </div>
+<>
+   
 
-        {/* 📋 DROPDOWN LIST */}
+    {/* 📋 DROPDOWN LIST */}
+    {open && (
         <div className="cs-dropdown__menu">
 
             {Object.entries(groupedCourses).map(([category, catCourses]) => {
@@ -156,9 +163,19 @@ function CourseDropdown({ groupedCourses, value, onChange, placeholder = "Select
                     </div>
                 )
             })}
+
+            {/* ❗ NO RESULTS */}
+            {Object.values(groupedCourses).flat().filter(c =>
+                c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                c.courseCode.toLowerCase().includes(searchTerm.toLowerCase())
+            ).length === 0 && (
+                <div style={{ padding: "10px", textAlign: "center", color: "#888" }}>
+                    No courses found
+                </div>
+            )}
         </div>
-    </>
-)}
+    )}
+</>
         </div>
     )
 }

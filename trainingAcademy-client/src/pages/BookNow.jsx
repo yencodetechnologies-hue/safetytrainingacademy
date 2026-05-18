@@ -8,7 +8,7 @@ import "../styles/BookNow.css";
 import Payment from "../components/Payment";
 import LLNDAssessment from "../components/llnd/LLNDAssessment";
 import EnrollmentRegister from "../components/enrollmrntRegister/EnrollmentRegister";
-import CourseSelectionSuccess from "../components/course/CourseSelectionSuccess";
+// import CourseSelectionSuccess from "../components/course/CourseSelectionSuccess";
 import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom"
 import Loading from "../components/Loading"
@@ -1192,8 +1192,8 @@ function BookNow() {
                             {(enrollmentType === "individual" || enrollmentType === "agent") && (
                                 <>
                                     <div className={`step ${step >= 2 ? "active" : ""}`}>{isEnrollmentLink ? "👤" : "💳"}</div>
-                                    <div className={`step ${step >= 3 ? "active" : ""}`}>📋</div>
-                                    <div className={`step ${step >= 4 ? "active" : ""}`}>📄</div>
+                                    {/* <div className={`step ${step >= 3 ? "active" : ""}`}>📋</div>
+                                    <div className={`step ${step >= 4 ? "active" : ""}`}>📄</div> */}
                                 </>
                             )}
                             {enrollmentType === "company" && (
@@ -1251,7 +1251,7 @@ function BookNow() {
                     />
                 )}
 
-                {step === 3 && (
+                {/* {step === 3 && (
                     <CourseSelectionSuccess
                         enrollmentData={{
                         selectedCourse,
@@ -1262,7 +1262,7 @@ function BookNow() {
                         email: paymentData.email,
                         name: paymentData.name,
                     }} />
-                )}
+                )} */}
 
                 {step === 4 && (
                     <EnrollmentRegister
