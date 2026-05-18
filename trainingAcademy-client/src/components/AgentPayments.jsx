@@ -143,7 +143,7 @@ export default function AgentPayments() {
                   <th style={{ padding: "12px", textAlign: "left", fontWeight: 600 }}>Phone</th>
                   <th style={{ padding: "12px", textAlign: "left", fontWeight: 600 }}>Agent Link</th>
                   <th style={{ padding: "12px", textAlign: "left", fontWeight: 600 }}>Course</th>
-                  <th style={{ padding: "12px", textAlign: "left", fontWeight: 600 }}>LLND Status</th>
+                  <th style={{ padding: "12px", textAlign: "left", fontWeight: 600 }}>LLN Status</th>
                   <th style={{ padding: "12px", textAlign: "left", fontWeight: 600 }}>Enrollment Status</th>
                 </tr>
               </thead>
@@ -285,7 +285,7 @@ export default function AgentPayments() {
                 <strong>Course:</strong> {viewedUser.course || "—"}
               </div>
               <div>
-                <strong>LLND Status:</strong> {viewedUser.llndStatus}
+                <strong>LLN Status:</strong> {viewedUser.llndStatus}
               </div>
               <div>
                 <strong>Enrollment Status:</strong> {viewedUser.enrollmentForm || "Pending"}

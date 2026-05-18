@@ -773,7 +773,7 @@ function Payment({
             )}
 
             <div className="payment-warning">
-                Note: After completing the payment step, you will proceed to the LLND Assessment and then the Enrollment Form.
+                Note: After completing the payment step, you will proceed to the LLN Assessment and then the Enrollment Form.
             </div>
 
         </div>

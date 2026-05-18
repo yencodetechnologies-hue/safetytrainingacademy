@@ -29,7 +29,7 @@ const menu = {
     { name: "Companies", path: "/admin/companies", icon: "fa-solid fa-users" },
     { name: "Schedule", path: "/admin/schedule", icon: "fa-solid fa-calendar" },
     { name: "Teachers", path: "/admin/teachers", icon: "fa-solid fa-chalkboard-user" },
-    { name: "LLND Results", path: "/admin/llnd-results", icon: "fa-solid fa-clipboard-check" },
+    { name: "LLN Results", path: "/admin/llnd-results", icon: "fa-solid fa-clipboard-check" },
     { name: "Enrollment Forms", path: "/admin/enrollment-forms", icon: "fa-solid fa-file-pen" },
     { name: "Enrollment Links", path: "/admin/enrollment-links", icon: "fa-solid fa-link" },
     { name: "Exams", path: "/admin/exams", icon: "fa-solid fa-file-lines" },
@@ -89,7 +89,7 @@ function Sidebar({ user }) {
         if (!assessmentPassed) {
           // Disallow navigating to any tab except Dashboard
           if (item.name !== "Dashboard") {
-            alert("Please complete your lln assessment before continuing");
+            alert("Please complete your LLN assessment before continuing");
             return;
           }
         }

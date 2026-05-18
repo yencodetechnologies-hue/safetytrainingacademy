@@ -645,7 +645,7 @@ function StudentsTable({ students, company, loading, onRefresh }) {
                 <th>Amount</th>
                 <th>Status</th>
                 <th>Source</th>
-                <th>LLND</th>
+                <th>LLN</th>
                 <th>Form</th>
                 <th>Enrolled</th>
               </tr>

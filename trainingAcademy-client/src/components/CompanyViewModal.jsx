@@ -141,7 +141,7 @@ function LinkCard({ link, students }) {
                                         <th>STUDENT</th>
                                         <th>COURSE</th>
                                         <th>PAYMENT</th>
-                                        <th>LLND</th>
+                                        <th>LLN</th>
                                         <th>FORM</th>
                                         <th>ENROLLED</th>
                                     </tr>
@@ -392,7 +392,7 @@ export default function CompanyViewModal({ company, onClose }) {
                                                     <th>COURSE</th>
                                                     <th>AMOUNT</th>
                                                     <th>PAYMENT</th>
-                                                    <th>LLND</th>
+                                                    <th>LLN</th>
                                                     <th>FORM</th>
                                                     <th>TRAINING</th>
                                                     <th>ENROLLED</th>

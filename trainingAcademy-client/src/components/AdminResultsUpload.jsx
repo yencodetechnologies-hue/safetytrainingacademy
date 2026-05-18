@@ -48,7 +48,7 @@ function WarningModal({ student, onClose }) {
         <div className="ru-warn-checks">
           <div className={`ru-warn-check-row ${llndOk ? "pass" : "fail"}`}>
             <span className="wc-icon">{llndOk ? "✅" : "❌"}</span>
-            LLND Status — {llndOk ? "Completed" : "Not Completed"}
+            LLN Status — {llndOk ? "Completed" : "Not Completed"}
           </div>
           <div className={`ru-warn-check-row ${enrollOk ? "pass" : "fail"}`}>
             <span className="wc-icon">{enrollOk ? "✅" : "❌"}</span>
@@ -392,7 +392,7 @@ export default function AdminResultsUpload() {
       <div className="ru-table-card">
         <div className="ru-table-head">
           <h3>Student Accounts ({filtered.length})</h3>
-          <p>LLND and Enrollment Form must be Completed before uploading a result</p>
+          <p>LLN and Enrollment Form must be Completed before uploading a result</p>
         </div>
 
         {loading && <p className="ru-loading">Loading students...</p>}
@@ -410,7 +410,7 @@ export default function AdminResultsUpload() {
                   <th>Phone</th>
                   <th>Course</th>
                   <th>Course Schedule</th>
-                  <th>LLND Status</th>
+                  <th>LLN Status</th>
                   <th>Enrollment Form</th>
                   <th>Actions</th>
                 </tr>
@@ -455,7 +455,7 @@ export default function AdminResultsUpload() {
                           <button
                             className="ru-btn-upload"
                             onClick={() => handleUploadClick(s)}
-                            title={canUpload ? "Upload result" : "LLND or Enrollment not completed"}
+                            title={canUpload ? "Upload result" : "LLN or Enrollment not completed"}
                           >
                             {canUpload ? "📤 Upload Result" : "⚠️ Upload Result"}
                           </button>

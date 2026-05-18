@@ -122,9 +122,9 @@ export default function StudentDashboard() {
             <div className="alert-icon-wrap">📖</div>
             <div className="alert-body">
               <span className="alert-badge">Action required</span>
-              <p className="alert-title">LLND Assessment Required</p>
+              <p className="alert-title">LLN Assessment Required</p>
               <p className="alert-desc">
-                Complete the LLND assessment to fully activate your enrollment
+                Complete the LLN assessment to fully activate your enrollment
               </p>
             </div>
             <button
@@ -163,7 +163,7 @@ export default function StudentDashboard() {
               className="alert-action-btn"
               onClick={() => {
                 if (!assessmentPassed) {
-                  alert("Please complete your lln assessment before continuing");
+                  alert("Please complete your LLN assessment before continuing");
                 } else {
                   navigate("/student/enrollment-form");
                 }
@@ -236,7 +236,7 @@ export default function StudentDashboard() {
             disabled={!canTakeAssessment}
             onClick={() => {
               if (!assessmentPassed) {
-                alert("Please complete your lln assessment before continuing");
+                alert("Please complete your LLN assessment before continuing");
               } else if (!enrollmentFormSubmitted) {
                 alert("Please complete your enrollment form before continuing");
               } else {
@@ -252,7 +252,7 @@ export default function StudentDashboard() {
             className="quick-action-btn"
             onClick={() => {
               if (!assessmentPassed) {
-                alert("Please complete your lln assessment before continuing");
+                alert("Please complete your LLN assessment before continuing");
               } else if (!enrollmentFormSubmitted) {
                 alert("Please complete your enrollment form before continuing");
               } else {
@@ -268,7 +268,7 @@ export default function StudentDashboard() {
             className="quick-action-btn"
             onClick={() => {
               if (!assessmentPassed) {
-                alert("Please complete your lln assessment before continuing");
+                alert("Please complete your LLN assessment before continuing");
               } else if (!enrollmentFormSubmitted) {
                 alert("Please complete your enrollment form before continuing");
               } else {

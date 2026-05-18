@@ -207,7 +207,7 @@ export default function StudentMyCourses() {
           <span className="mc-banner__icon">✓</span>
           <div>
             <strong>Pre-Enrollment Assessment Passed</strong>
-            <p>Score: {scoreDisplay}% – You can now enroll in courses. You can also retake LLND anytime if you want to improve your result.</p>
+            <p>Score: {scoreDisplay}% – You can now enroll in courses. You can also retake LLN anytime if you want to improve your result.</p>
           </div>
         </div>
       )}
@@ -239,7 +239,7 @@ export default function StudentMyCourses() {
           <div className="mc-banner__left">
             <span className="mc-optional-badge">Optional</span>
             <div>
-              <strong className="mc-banner__title--purple">LLND Assessment Retake Available</strong>
+              <strong className="mc-banner__title--purple">LLN Assessment Retake Available</strong>
               <p>You have already passed. Retake anytime if you want to improve your score.</p>
             </div>
           </div>

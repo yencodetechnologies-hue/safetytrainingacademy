@@ -407,6 +407,7 @@ exports.getAllStudents = async (req, res) => {
         course: item.course?.courseName || "",
         paymentMethod: item.payment?.method || "—",
         transactionId: item.payment?.transactionId || "—",
+        gatewayTransactionId: item.payment?.gatewayTransactionId || "—",
         slipUrl: item.payment?.slipUrl || "—",
         courseBookingDate: flow.sessionDate
           ? `${new Date(flow.sessionDate).toLocaleDateString("en-AU", {

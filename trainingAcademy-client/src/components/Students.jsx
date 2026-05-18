@@ -75,7 +75,7 @@ function ViewModal({ student, onClose, onRefresh, onUpdateStudent }) {
             <div className="modal-badges">
               <ActiveBadge status={student.status} />
               <span className={`status-badge ${student.llndStatus === "Completed" ? "badge-completed" : "badge-not-completed"}`}>
-                LLND: {student.llndStatus}
+                LLN: {student.llndStatus}
               </span>
               <span className={`status-badge ${student.enrollmentForm === "Completed" ? "badge-completed" : "badge-not-completed"}`}>
                 Form: {student.enrollmentForm}
@@ -110,6 +110,12 @@ function ViewModal({ student, onClose, onRefresh, onUpdateStudent }) {
             <span>Transaction ID</span>
             <PaymentBadge status={student.transactionId} />
           </div>
+          {student.gatewayTransactionId && student.gatewayTransactionId !== "—" && (
+            <div className="modal-detail-row">
+              <span>Gateway Transaction ID</span>
+              <span style={{ fontWeight: '600', color: '#10b981' }}>{student.gatewayTransactionId}</span>
+            </div>
+          )}
           <div className="modal-detail-row">
             <span>Transaction URL</span>
             <a href={student.slipUrl} target="_blank" rel="noopener noreferrer">View Transaction</a>
@@ -1057,10 +1063,11 @@ const handleToggleStatus = async (student) => {
                   <th>Phone</th>
                   <th>Course</th>
                   <th>Course schedule date</th>
-                  <th>LLND Status</th>
+                  <th>LLN Status</th>
                   <th>Enrollment Form</th>
                   <th>Payment Method</th>
                   <th>Bank Transfer ID</th>
+                  <th>Gateway Transaction ID</th>
                   <th>Payment status</th>
                   <th>Status</th>
                   <th>Last Login</th>
@@ -1070,7 +1077,7 @@ const handleToggleStatus = async (student) => {
               <tbody>
                 {paginated.length === 0 ? (
                   <tr>
-                    <td colSpan={13} style={{ textAlign: "center", padding: "2rem", color: "#888" }}>
+                    <td colSpan={17} style={{ textAlign: "center", padding: "2rem", color: "#888" }}>
                       No students found.
                     </td>
                   </tr>
@@ -1129,7 +1136,7 @@ const handleToggleStatus = async (student) => {
                           <StatusBadge status={s.llndStatus} />
                           <button
                             className="sm-icon-btn"
-                            title="View LLND"
+                            title="View LLN"
                             onClick={() => navigate(`/admin/llnd-results?studentId=${s.flowId}&openModal=true`)}
                           >
                             👁
@@ -1154,6 +1161,11 @@ const handleToggleStatus = async (student) => {
                       <td>
                         <div style={{ fontSize: "0.75rem", fontWeight: "600", color: "#6366f1" }}>
                           {(s.paymentMethod === "Bank Transfer" || s.paymentMethod === "Manual") ? (s.transactionId || "—") : "-"}
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ fontSize: "0.75rem", fontWeight: "600", color: "#10b981" }}>
+                          {s.gatewayTransactionId && s.gatewayTransactionId !== "—" ? s.gatewayTransactionId : (s.paymentMethod === "Card Payment" ? "—" : "-")}
                         </div>
                       </td>
                       <td>

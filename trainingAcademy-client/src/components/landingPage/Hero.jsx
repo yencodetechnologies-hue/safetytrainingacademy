@@ -83,17 +83,18 @@ function Hero() {
   }, [pubsearch])
 
   return (
-    <section
-      className="hero"
-      style={{ backgroundImage: `url(${cdnImage(images[currentIndex], { w: 1920 })})` }}
-    >
-
-      <div
-        className={`hero-next-layer ${animating ? "hero-next-animate" : ""}`}
-        style={{ backgroundImage: `url(${cdnImage(images[nextIndex], { w: 1920 })})` }}
-      />
-
-      <div className="hero-overlay"></div>
+    <section className="hero">
+      <div className="hero-bg-wrapper">
+        <div
+          className="hero-bg-layer"
+          style={{ backgroundImage: `url(${cdnImage(images[currentIndex], { w: 1920 })})` }}
+        />
+        <div
+          className={`hero-next-layer ${animating ? "hero-next-animate" : ""}`}
+          style={{ backgroundImage: `url(${cdnImage(images[nextIndex], { w: 1920 })})` }}
+        />
+        <div className="hero-overlay"></div>
+      </div>
       <div className="announcement-bar">
         <p>🔥 SUNDAY CLASSES AVAILABLE • ENROLL NOW • LIMITED SEATS 🔥     NATIONALLY RECOGNIZED CERTIFICATES •      GET CERTIFIED WITH CREDENTIALS THAT ARE RECOGNIZED ACROSS ALL STATES AND TERRITORIES </p>
       </div>
