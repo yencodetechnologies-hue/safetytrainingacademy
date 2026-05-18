@@ -8,7 +8,7 @@ import "../styles/BookNow.css";
 import Payment from "../components/Payment";
 import LLNDAssessment from "../components/llnd/LLNDAssessment";
 import EnrollmentRegister from "../components/enrollmrntRegister/EnrollmentRegister";
-// import CourseSelectionSuccess from "../components/course/CourseSelectionSuccess";
+import CourseSelectionSuccess from "../components/course/CourseSelectionSuccess";
 import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom"
 import Loading from "../components/Loading"
@@ -1251,18 +1251,19 @@ function BookNow() {
                     />
                 )}
 
-                {/* {step === 3 && (
+                {step === 3 && (
                     <CourseSelectionSuccess
                         enrollmentData={{
-                        selectedCourse,
-                        courseDate: selectedSession?.date,
-                        courseTime: `${selectedSession?.startTime} - ${selectedSession?.endTime}`,
-                        coursePrice,
-                        paymentMethod: paymentData.paymentMethod,
-                        email: paymentData.email,
-                        name: paymentData.name,
-                    }} />
-                )} */}
+                            selectedCourse,
+                            courseDate: selectedSession?.date,
+                            courseTime: `${selectedSession?.startTime} - ${selectedSession?.endTime}`,
+                            coursePrice,
+                            paymentMethod: paymentData.paymentMethod,
+                            email: paymentData.email,
+                            name: paymentData.name,
+                        }}
+                    />
+                )}
 
                 {step === 4 && (
                     <EnrollmentRegister
