@@ -168,6 +168,7 @@ function App() {
                     <Route path="gallery" element={<Gallery />} />
                     <Route path="courses" element={<Courses />} />
                     <Route path="companies" element={<Companies />} />
+                    
                     <Route path="results-upload" element={<AdminResultsUpload />} />
                     <Route path="reports" element={<Reports />} />
                     <Route path="voc-submissions" element={<VocSubmissions />} />

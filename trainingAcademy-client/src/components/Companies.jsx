@@ -437,20 +437,42 @@ export default function Companies() {
     const [linksModalCompany, setLinksModalCompany] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
 
+    // useEffect(() => {
+    //     const fetchCompanies = async () => {
+    //         try {
+    //             const token = localStorage.getItem("token");
+    //             const res = await axios.get(`${API_URL}/api/companies`, {
+    //                 headers: { Authorization: `Bearer ${token}` },
+    //             });
+    //             setCompanies(res.data.data);
+    //             console.log(res?.data?.data,"companies data");
+                
+    //         } catch (err) {
+    //             console.error(err);
+    //         }
+    //     };
+    //     fetchCompanies();
+    // }, []);
+
     useEffect(() => {
-        const fetchCompanies = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                const res = await axios.get(`${API_URL}/api/companies`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                setCompanies(res.data.data);
-            } catch (err) {
-                console.error(err);
-            }
-        };
-        fetchCompanies();
-    }, []);
+    const fetchCompanies = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return; // ⛔ important
+
+            const res = await axios.get(`${API_URL}/api/companies`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            setCompanies(res.data.data || []);
+        } catch (err) {
+            console.error("Fetch error:", err);
+            setCompanies([]); // fallback
+        }
+    };
+
+    fetchCompanies();
+}, []);
 
     const filtered = companies.filter((c) => {
         const name  = c.companyName || c.name || "";

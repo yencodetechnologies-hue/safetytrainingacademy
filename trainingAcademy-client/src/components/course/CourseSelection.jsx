@@ -36,7 +36,15 @@ const variantKey = (courseId, variant) => variant ? `${courseId}|${variant}` : S
 
 function CourseDropdown({ groupedCourses, value, onChange, placeholder = "Select Course", getCoursePrice, enrollmentType }) {
     const [open, setOpen] = useState(false)
+    const [searchTerm, setSearchTerm] = useState("")
     const ref = useRef(null)
+
+    const filterCourses = (courses) => {
+    return courses.filter(c =>
+        c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.courseCode.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+}
 
     useEffect(() => {
         const handler = (e) => {
@@ -65,7 +73,7 @@ function CourseDropdown({ groupedCourses, value, onChange, placeholder = "Select
                 <span className={selected ? "cs-dropdown__value" : "cs-dropdown__placeholder"}>{label}</span>
                 <span className="cs-dropdown__arrow">{open ? "▲" : "▼"}</span>
             </div>
-            {open && (
+            {/* {open && (
                 <div className="cs-dropdown__menu">
                     {Object.entries(groupedCourses).map(([category, catCourses]) => (
                         <div key={category}>
@@ -92,14 +100,136 @@ function CourseDropdown({ groupedCourses, value, onChange, placeholder = "Select
                         </div>
                     ))}
                 </div>
-            )}
+            )} */}
+
+{open && (
+    <>
+        {/* 🔍 SEARCH BOX — OUTSIDE MENU */}
+        <div style={{ padding: "8px" }}>
+            <input
+                type="text"
+                placeholder="Search course..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="cs-dropdown-search"
+            />
+        </div>
+
+        {/* 📋 DROPDOWN LIST */}
+        <div className="cs-dropdown__menu">
+
+            {Object.entries(groupedCourses).map(([category, catCourses]) => {
+
+                const filteredCourses = filterCourses(catCourses)
+
+                if (filteredCourses.length === 0) return null
+
+                return (
+                    <div key={category}>
+                        <div className="cs-dropdown__group-label">{category}</div>
+
+                        {filteredCourses.flatMap(course => {
+                            const variants = getCourseVariants(course)
+
+                            return variants.map(v => {
+                                const k = variantKey(course._id, v.variant)
+
+                                const optionLabel = v.label
+                                    ? `${course.courseCode} - ${course.title} (${v.label}) - $${v.price}`
+                                    : `${course.courseCode} - ${course.title} - $${v.price}`
+
+                                return (
+                                    <div
+                                        key={k}
+                                        className="cs-dropdown__option"
+                                        onClick={() => {
+                                            onChange(course._id, v.variant)
+                                            setOpen(false)
+                                            setSearchTerm("")
+                                        }}
+                                    >
+                                        {optionLabel}
+                                    </div>
+                                )
+                            })
+                        })}
+                    </div>
+                )
+            })}
+        </div>
+    </>
+)}
         </div>
     )
 }
 
-// ✅ Add Course Button — click to open inline dropdown, select to close
+// // ✅ Add Course Button — click to open inline dropdown, select to close
+// function AddCourseButton({ groupedCourses, onAdd, enrollmentType }) {
+//     const [open, setOpen] = useState(false)
+//     const [searchTerm, setSearchTerm] = useState("")
+//     const ref = useRef(null)
+
+//     useEffect(() => {
+//         const handler = (e) => {
+//             if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+//         }
+//         document.addEventListener("mousedown", handler)
+//         return () => document.removeEventListener("mousedown", handler)
+//     }, [])
+
+//     const isAgent = String(enrollmentType || "").toLowerCase() === "agent" || enrollmentType === "Agent"
+//     const handleSelect = (courseId, variant) => {
+//         onAdd(courseId, variant)
+//         setOpen(false)
+//     }
+
+//     return (
+//         <div className="form-group" ref={ref} style={{ position: "relative" }}>
+//             <button
+//                 type="button"
+//                 className="add-course-btn"
+//                 onClick={() => setOpen(p => !p)}
+//             >
+//                 {open ? "✕ Cancel" : "+ Add Course"}
+//             </button>
+
+//             {open && (
+//                 <div className="cs-dropdown__menu add-course-dropdown">
+//                     {Object.entries(groupedCourses).map(([category, catCourses]) => (
+//                         <div key={category}>
+//                             <div className="cs-dropdown__group-label">{category}</div>
+//                             {catCourses.flatMap(course => {
+//                                 const variants = getCourseVariants(course)
+//                                 return variants.map(v => {
+//                                     const k = variantKey(course._id, v.variant)
+//                                     const optionLabel = v.label
+//                                         ? `${course.courseCode} - ${course.title} (${v.label})${isAgent ? "" : ` - $${v.price}`}`
+//                                         : `${course.courseCode} - ${course.title}${isAgent ? "" : ` - $${v.price}`}`
+//                                     return (
+//                                         <div
+//                                             key={k}
+//                                             className="cs-dropdown__option"
+//                                             onClick={() => handleSelect(course._id, v.variant)}
+//                                         >
+//                                             {optionLabel}
+//                                         </div>
+//                                     )
+//                                 })
+//                             })}
+//                         </div>
+//                     ))}
+//                 </div>
+//             )}
+//         </div>
+//     )
+// }
+
 function AddCourseButton({ groupedCourses, onAdd, enrollmentType }) {
     const [open, setOpen] = useState(false)
+
+    // ✅ NEW: search state
+    const [searchTerm, setSearchTerm] = useState("")
+
     const ref = useRef(null)
 
     useEffect(() => {
@@ -110,10 +240,20 @@ function AddCourseButton({ groupedCourses, onAdd, enrollmentType }) {
         return () => document.removeEventListener("mousedown", handler)
     }, [])
 
+    // ✅ NEW: filter function
+    const filterCourses = (courses) => {
+        return courses.filter(c =>
+            c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.courseCode.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    }
+
     const isAgent = String(enrollmentType || "").toLowerCase() === "agent" || enrollmentType === "Agent"
+
     const handleSelect = (courseId, variant) => {
         onAdd(courseId, variant)
         setOpen(false)
+        setSearchTerm("") // ✅ reset search after select
     }
 
     return (
@@ -121,42 +261,79 @@ function AddCourseButton({ groupedCourses, onAdd, enrollmentType }) {
             <button
                 type="button"
                 className="add-course-btn"
-                onClick={() => setOpen(p => !p)}
+                onClick={() => {
+                    setOpen(p => !p)
+                    setSearchTerm("") // ✅ reset when open/close
+                }}
             >
                 {open ? "✕ Cancel" : "+ Add Course"}
             </button>
 
             {open && (
                 <div className="cs-dropdown__menu add-course-dropdown">
-                    {Object.entries(groupedCourses).map(([category, catCourses]) => (
-                        <div key={category}>
-                            <div className="cs-dropdown__group-label">{category}</div>
-                            {catCourses.flatMap(course => {
-                                const variants = getCourseVariants(course)
-                                return variants.map(v => {
-                                    const k = variantKey(course._id, v.variant)
-                                    const optionLabel = v.label
-                                        ? `${course.courseCode} - ${course.title} (${v.label})${isAgent ? "" : ` - $${v.price}`}`
-                                        : `${course.courseCode} - ${course.title}${isAgent ? "" : ` - $${v.price}`}`
-                                    return (
-                                        <div
-                                            key={k}
-                                            className="cs-dropdown__option"
-                                            onClick={() => handleSelect(course._id, v.variant)}
-                                        >
-                                            {optionLabel}
-                                        </div>
-                                    )
-                                })
-                            })}
-                        </div>
-                    ))}
+
+                    {/* ✅ 🔍 SEARCH BOX */}
+                    <div style={{ padding: "8px" }}>
+                        <input
+                            type="text"
+                            placeholder="Search course..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="cs-dropdown-search"
+                        />
+                    </div>
+
+                    {/* ✅ CATEGORY LOOP */}
+                    {Object.entries(groupedCourses).map(([category, catCourses]) => {
+
+                        const filteredCourses = filterCourses(catCourses)
+
+                        if (filteredCourses.length === 0) return null
+
+                        return (
+                            <div key={category}>
+                                <div className="cs-dropdown__group-label">{category}</div>
+
+                                {filteredCourses.flatMap(course => {
+                                    const variants = getCourseVariants(course)
+
+                                    return variants.map(v => {
+                                        const k = variantKey(course._id, v.variant)
+
+                                        const optionLabel = v.label
+                                            ? `${course.courseCode} - ${course.title} (${v.label})${isAgent ? "" : ` - $${v.price}`}`
+                                            : `${course.courseCode} - ${course.title}${isAgent ? "" : ` - $${v.price}`}`
+
+                                        return (
+                                            <div
+                                                key={k}
+                                                className="cs-dropdown__option"
+                                                onClick={() => handleSelect(course._id, v.variant)}
+                                            >
+                                                {optionLabel}
+                                            </div>
+                                        )
+                                    })
+                                })}
+                            </div>
+                        )
+                    })}
+
+                    {/* ✅ OPTIONAL: NO RESULTS */}
+                    {Object.values(groupedCourses).flat().length > 0 &&
+                        Object.values(groupedCourses).flat().filter(c =>
+                            c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            c.courseCode.toLowerCase().includes(searchTerm.toLowerCase())
+                        ).length === 0 && (
+                            <div style={{ padding: "10px", textAlign: "center", color: "#888" }}>
+                                No courses found
+                            </div>
+                        )}
                 </div>
             )}
         </div>
     )
 }
-
 // ✅ Calendar Date Picker Component
 function CalendarDatePicker({ groupedSlots, selectedSession, onSelectSession }) {
     const [calOpen, setCalOpen] = useState(false)
@@ -724,7 +901,7 @@ function CourseSelection({
                     <>
                     <div className="form-group">
                         <label>{isCompany ? "Add Courses" : "Select Course"}</label>
-                        <CourseDropdown
+                        <   CourseDropdown
                             groupedCourses={groupedCourses}
                             value={selectedCourse?._id ? { courseId: selectedCourse._id, variant: selectedCourse.__variant || null } : null}
                             onChange={handleCourseChange}
@@ -860,4 +1037,4 @@ function CourseSelection({
     )
 }
 
-export default CourseSelection
+export default CourseSelection  
