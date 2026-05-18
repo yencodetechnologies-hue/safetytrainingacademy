@@ -160,7 +160,6 @@ function CourseDetails() {
         return (
             <div className="cdp-loading">
                 <PublicNavbar courses={courses} />
-                <div className="cdp-loading-inner">Loading course...</div>
             </div>
         )
     }
@@ -176,7 +175,6 @@ function CourseDetails() {
 
     const relatedCourses = courses
         .filter(c => c._id !== course._id)
-        .slice(0, 4)
 
     const openBooking = (type, forceSkipModal = false) => {
         if ((isExperience || isSlbl) && !forceSkipModal) {
@@ -726,19 +724,23 @@ function CourseDetails() {
                     {relatedCourses.length > 0 && (
                         <div className="cdp-sb-card">
                             <div className="cdp-sb-title">Course of Practice</div>
-                            {relatedCourses.map((c, i) => (
-                                <div
-                                    className="cdp-related-course"
-                                    key={i}
-                                    onClick={() => window.location.href = `/course/${c.slug}`}
-                                >
-                                    <div className="cdp-src-icon">📋</div>
-                                    <div>
-                                        <div className="cdp-src-name">{c.title}</div>
-                                        <div className="cdp-src-price">From ${c.sellingPrice}</div>
-                                    </div>
+                            <div className="cdp-marquee-wrapper">
+                                <div className="cdp-marquee-track">
+                                    {[...relatedCourses, ...relatedCourses, ...relatedCourses].map((c, i) => (
+                                        <div
+                                            className="cdp-marquee-item"
+                                            key={i}
+                                            onClick={() => window.location.href = `/course/${c.slug}`}
+                                        >
+                                            <span className="cdp-marquee-icon">📋</span>
+                                            <div>
+                                                <div className="cdp-marquee-name">{c.title}</div>
+                                                <div className="cdp-marquee-price">From ${c.sellingPrice || c.withoutExperiencePrice || c.withExperiencePrice || c.slSinglePrice || c.slblPrice || 0}</div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
+                            </div>
                         </div>
                     )}
 

@@ -1,5 +1,6 @@
 const adminBookingTemplate = (data) => {
 
+  const isAgentLink = data.isAgent === true || String(data.isAgent).toLowerCase() === 'true';
   // Extract number only e.g. "BK-10042" → "10042"
   const digits = String(data.bookingId || '').replace(/[^0-9]/g, '');
   const orderNumber = digits !== '' ? digits : (data.bookingId || '—');
@@ -125,6 +126,10 @@ const adminBookingTemplate = (data) => {
               <p style="margin:0; font-size:24px; font-weight:700; color:#ffffff; line-height:1; white-space:nowrap;">
                 Booking ID: ${orderNumber}
               </p>
+              ${isAgentLink ? `
+              <p style="margin:6px 0 0; font-size:13px; font-weight:800; color:#facc15; letter-spacing:0.8px; text-transform:uppercase; line-height:1; white-space:nowrap;">
+                Agent Link
+              </p>` : ''}
             </div>
           </td>
         </tr>

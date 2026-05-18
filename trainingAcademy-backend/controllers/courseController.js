@@ -174,7 +174,7 @@ const createCourse = async (req, res) => {
         let handbookCardImage = req.body.handbookCardImage
         if (req.files?.handbookCardImage) handbookCardImage = req.files.handbookCardImage[0].path
 
-        let syllabusUrl = req.body.syllabusUrl
+        let syllabusUrl = req.body.syllabusUrl !== undefined ? req.body.syllabusUrl : req.body.syllabusPdf
         if (req.files?.syllabusPdf) syllabusUrl = req.files.syllabusPdf[0].path
         console.log("Saving Course with Syllabus URL:", syllabusUrl)
 
@@ -250,13 +250,13 @@ const updateCourse = async (req, res) => {
             handbookCardImage = req.files.handbookCardImage[0].path
         }
 
-        let syllabusUrl = req.body.syllabusUrl
+        let syllabusUrl = req.body.syllabusUrl !== undefined ? req.body.syllabusUrl : req.body.syllabusPdf
         if (req.files?.syllabusPdf) {
             syllabusUrl = req.files.syllabusPdf[0].path
         }
 
         let updateData = parseBody({ ...req.body, handbookPdf, handbookCardImage })
-        if (syllabusUrl) updateData.syllabusUrl = syllabusUrl
+        if (syllabusUrl !== undefined) updateData.syllabusUrl = syllabusUrl
 
         // Slug handling
         if (req.body.slug !== undefined) {

@@ -539,6 +539,36 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
         </div>
       </div>
 
+      {/* ── Course of Practice (Infinite Marquee) ── */}
+      {(() => {
+        const relatedCourses = courses
+          .filter(c => c._id !== course._id);
+
+        if (relatedCourses.length === 0) return null;
+
+        return (
+          <div className="cdm-section" style={{ padding: "0 16px" }}>
+            <div className="cdm-section-title" style={{ marginBottom: "10px" }}>Course of Practice</div>
+            <div className="cdp-marquee-wrapper" style={{ margin: "0 -16px", padding: "10px 16px" }}>
+              <div className="cdp-marquee-track">
+                {[...relatedCourses, ...relatedCourses, ...relatedCourses].map((c, i) => (
+                  <div
+                    className="cdp-marquee-item"
+                    key={i}
+                    onClick={() => window.location.href = `/course/${c.slug}`}
+                  >
+                    <span className="cdp-marquee-icon">📋</span>
+                    <div>
+                      <div className="cdp-marquee-name">{c.title}</div>
+                      <div className="cdp-marquee-price">From ${c.sellingPrice || c.withoutExperiencePrice || c.withExperiencePrice || c.slSinglePrice || c.slblPrice || 0}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Why Choose STA ── */}
       <div className="cdm-section">

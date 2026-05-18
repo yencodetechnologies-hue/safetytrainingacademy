@@ -247,6 +247,34 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
             setExistingHandbookPdf(editCourse.handbook?.pdf || "");
             setExistingHandbookCardImage(editCourse.handbook?.cardImage || "");
             setExistingSyllabusUrl(editCourse.syllabusUrl || "");
+        } else {
+            setDescriptions([""]);
+            setTrainingOverview([""]);
+            setVocationalOutcome([""]);
+            setFeesCharges([""]);
+            setOptionalCharges([""]);
+            setOutcomePoint([""]);
+            setRequirements([""]);
+            setPathways([""]);
+            setPricingType("standard");
+            setImageType("upload");
+            setWithExpPrice("");
+            setWithExpOriginal("");
+            setWithoutExpPrice("");
+            setWithoutExpOriginal("");
+            setSlSingleStrikePrice("");
+            setSlSinglePrice("");
+            setComboEnabled(false);
+            setComboDescription("");
+            setComboPrice("");
+            setComboDuration("");
+            setHandbookTitle("");
+            setHandbookUrl("");
+            setExistingHandbookPdf("");
+            setExistingHandbookCardImage("");
+            setExistingSyllabusUrl("");
+            setSyllabusFile(null);
+            setHandbookFile(null);
         }
     }, [editCourse]);
 
@@ -739,7 +767,7 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
                                     />
                                     <label>Upload Course of Practice</label>
                                     <div className="upload-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <div className="upload-btn" style={{ flex: 1 }}>
+                                        <label className="upload-btn" style={{ flex: 1, margin: 0, display: 'block' }}>
                                             <input
                                                 type="file"
                                                 accept="application/pdf"
@@ -751,7 +779,7 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
                                             <span>
                                                 {handbookFile ? handbookFile.name : (existingHandbookPdf ? "📄 Existing PDF" : "⬆ Choose PDF")}
                                             </span>
-                                        </div>
+                                        </label>
                                         {(handbookFile || existingHandbookPdf) && (
                                             <button
                                                 type="button"
@@ -784,7 +812,7 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
                                     </p>
                                     <label>Upload Syllabus PDF</label>
                                     <div className="upload-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <div className="upload-btn" style={{ flex: 1 }}>
+                                        <label className="upload-btn" style={{ flex: 1, margin: 0, display: 'block' }}>
                                             <input
                                                 type="file"
                                                 accept="application/pdf"
@@ -796,7 +824,7 @@ function CreateCourseModal({ close, categories, refreshCourses, editCourse }) {
                                             <span>
                                                 {syllabusFile ? syllabusFile.name : (existingSyllabusUrl ? "📄 Existing Syllabus" : "⬆ Choose Syllabus PDF")}
                                             </span>
-                                        </div>
+                                        </label>
                                         {(syllabusFile || existingSyllabusUrl) && (
                                             <button
                                                 type="button"

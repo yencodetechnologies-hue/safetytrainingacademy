@@ -314,7 +314,8 @@ const sendEnrollmentLinkConfirmation = async (req, res) => {
         submittedAt: submittedDate,
         gatewayId: "-",
         bankTransferId: "-",
-        venue: "3/14-16 Marjorie Street, Sefton NSW 2162"
+        venue: "3/14-16 Marjorie Street, Sefton NSW 2162",
+        isAgent: isAgent ? true : false
     });
 
     try { 
