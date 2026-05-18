@@ -67,21 +67,6 @@ function CourseDropdown({ groupedCourses, value, onChange, placeholder = "Select
     return (
         
         <div className="cs-dropdown" ref={ref}>
-             {/* 🔍 SEARCH INPUT (ALWAYS VISIBLE) */}
-    <div className="cs-dropdown__trigger">
-        <input
-            type="text"
-            placeholder="Search course..."
-            value={searchTerm}
-            onChange={(e) => {
-                setSearchTerm(e.target.value)
-                setOpen(true) // typing → open dropdown
-            }}
-            onClick={() => setOpen(true)}
-            onBlur={() => setTimeout(() => setOpen(false), 200)}
-            className="cs-dropdown-search"
-        />
-    </div>
             <div
                 className={`cs-dropdown__trigger ${open ? "cs-dropdown__trigger--open" : ""}`}
                 onClick={() => setOpen(p => !p)}
@@ -124,6 +109,26 @@ function CourseDropdown({ groupedCourses, value, onChange, placeholder = "Select
     {/* 📋 DROPDOWN LIST */}
     {open && (
         <div className="cs-dropdown__menu">
+            {/* 🔍 SEARCH BOX INSIDE DROPDOWN */}
+            <div style={{ padding: "8px", borderBottom: "1px solid #f1f5f9" }}>
+                <input
+                    type="text"
+                    placeholder="Search course..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        outline: "none",
+                        boxSizing: "border-box",
+                        background: "#f8fafc"
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                />
+            </div>
 
             {Object.entries(groupedCourses).map(([category, catCourses]) => {
 
