@@ -98,6 +98,9 @@ export default function StudentEnrollmentForm() {
         throw new Error(errorData.message || "Failed to submit enrollment");
       }
 
+      // Fire status refresh event to update Sidebar and Navbar lock states
+      window.dispatchEvent(new Event("refreshStudentStatus"));
+
       navigate("/student?startLLN=true");
     } catch (err) {
       alert(`Error: ${err.message}`);

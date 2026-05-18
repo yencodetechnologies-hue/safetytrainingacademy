@@ -322,6 +322,26 @@ exports.getAllStudents = async (req, res) => {
         } catch (e) {}
       }
 
+      let formStatus = "Not Started";
+      let formId = null;
+      if (flow.enrollmentFormId) {
+        try {
+          const form = await EnrollmentForm.findById(flow.enrollmentFormId).select("status").lean();
+          if (form) {
+            formStatus = form.status || "Pending";
+            formId = form._id;
+          }
+        } catch (e) {}
+      } else if (student._id) {
+        try {
+          const form = await EnrollmentForm.findOne({ studentId: student._id.toString() }).select("status").lean();
+          if (form) {
+            formStatus = form.status || "Pending";
+            formId = form._id;
+          }
+        } catch (e) {}
+      }
+
       return {
         id: student._id,
         flowId: flow._id,
@@ -358,6 +378,8 @@ exports.getAllStudents = async (req, res) => {
           : "-",
         llndStatus: flow.llnd?.status === "completed" ? "Completed" : "Not Completed",
         enrollmentForm: flow.enrollmentFormId ? "Completed" : "Not Completed",
+        enrollmentFormId: formId,
+        enrollmentFormStatus: formStatus,
         paymentStatus: item.payment?.method === "Card Payment"
           ? (item.payment?.status === "success" || item.payment?.status === "completed") ? "Paid" : "Unpaid"
           : item.payment?.method === "Bank Transfer"

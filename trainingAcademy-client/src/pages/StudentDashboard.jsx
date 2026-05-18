@@ -36,6 +36,12 @@ export default function StudentDashboard() {
         if (!res.ok) throw new Error("Failed to fetch data");
         const resData = await res.json();
         setData(resData);
+
+        // Store status in localStorage for Sidebar lock check
+        localStorage.setItem("assessmentPassed", resData.assessmentPassed);
+        localStorage.setItem("enrollmentFormSubmitted", resData.enrollmentFormSubmitted);
+        localStorage.setItem("enrollmentFormApproved", resData.enrollmentFormApproved);
+        localStorage.setItem("enrollmentFormStatus", resData.enrollmentFormStatus || "Pending");
       } catch (err) {
         console.error(err);
         setError("Something went wrong da 😅");
@@ -71,10 +77,11 @@ export default function StudentDashboard() {
         const resData = await res.json();
         setData(resData);
 
-        // ✅ Redirect immediately if passed and form not yet submitted
-        if (resData.assessmentPassed && !resData.enrollmentFormSubmitted) {
-          navigate("/student/enrollment-form");
-        }
+        // Store status in localStorage for Sidebar lock check
+        localStorage.setItem("assessmentPassed", resData.assessmentPassed);
+        localStorage.setItem("enrollmentFormSubmitted", resData.enrollmentFormSubmitted);
+        localStorage.setItem("enrollmentFormApproved", resData.enrollmentFormApproved);
+        localStorage.setItem("enrollmentFormStatus", resData.enrollmentFormStatus || "Pending");
       } catch (err) {
         console.error("Redirect fetch error:", err);
       }
@@ -155,7 +162,11 @@ export default function StudentDashboard() {
             <button
               className="alert-action-btn"
               onClick={() => {
-                navigate("/student/enrollment-form");
+                if (!assessmentPassed) {
+                  alert("Please complete your lln assessment before continuing");
+                } else {
+                  navigate("/student/enrollment-form");
+                }
               }}
             >
               📝 Complete Form
@@ -163,22 +174,39 @@ export default function StudentDashboard() {
           </div>
         ) : enrollmentFormStatus === "Rejected" ? (
           <div className="alert alert-danger">
-            <div className="alert-icon-wrap">❌</div>
+            <span className="alert-icon">❌</span>
             <div className="alert-body">
-              <span className="alert-badge" style={{ background: "#fee2e2", color: "#dc2626" }}>Form Rejected</span>
-              <p className="alert-title">Enrollment Form Rejected</p>
+              <span className="alert-badge" style={{ background: "#fee2e2", color: "#dc2626" }}>Rejected</span>
+              <p className="alert-title">Enrollment Form Submitted</p>
               <p className="alert-desc">
-                Your enrollment form was not approved. Please review and update your details.
+                Your form has been received and is currently being reviewed by our team.
               </p>
               <button
-                className="alert-action-btn"
+                className="alert-link"
                 onClick={() => navigate("/student/enrollment-form")}
               >
-                📝 Update Form
+                View Submitted Form
               </button>
             </div>
           </div>
-        ) : !enrollmentFormApproved ? (
+        ) : enrollmentFormStatus === "Approved" ? (
+          <div className="alert alert-success">
+            <span className="alert-icon">✅</span>
+            <div className="alert-body">
+              <span className="alert-badge" style={{ background: "#dcfce7", color: "#166534" }}>Approved</span>
+              <p className="alert-title">Enrollment Form Submitted</p>
+              <p className="alert-desc">
+                Your form has been received and is currently being reviewed by our team.
+              </p>
+              <button
+                className="alert-link"
+                onClick={() => navigate("/student/enrollment-form")}
+              >
+                View Submitted Form
+              </button>
+            </div>
+          </div>
+        ) : (
           <div className="alert alert-warning">
             <span className="alert-icon">⏳</span>
             <div className="alert-body">
@@ -195,16 +223,6 @@ export default function StudentDashboard() {
               </button>
             </div>
           </div>
-        ) : (
-          <div className="alert alert-success">
-            <span className="alert-icon">✅</span>
-            <div className="alert-body">
-              <p className="alert-title">Enrollment Form Approved</p>
-              <p className="alert-desc">
-                Your enrollment form has been approved.
-              </p>
-            </div>
-          </div>
         )}
       </div>
 
@@ -216,18 +234,48 @@ export default function StudentDashboard() {
           <button
             className="quick-action-btn"
             disabled={!canTakeAssessment}
-            onClick={() => navigate("/student/my-courses", { state: { tab: "browse" } })}
+            onClick={() => {
+              if (!assessmentPassed) {
+                alert("Please complete your lln assessment before continuing");
+              } else if (!enrollmentFormSubmitted) {
+                alert("Please complete your enrollment form before continuing");
+              } else {
+                navigate("/student/my-courses", { state: { tab: "browse" } });
+              }
+            }}
           >
             <span className="qa-icon">📖</span>
             <span>Enroll in New Course</span>
           </button>
 
-          <button className="quick-action-btn" onClick={() => navigate("/student/certificates")}>
+          <button
+            className="quick-action-btn"
+            onClick={() => {
+              if (!assessmentPassed) {
+                alert("Please complete your lln assessment before continuing");
+              } else if (!enrollmentFormSubmitted) {
+                alert("Please complete your enrollment form before continuing");
+              } else {
+                navigate("/student/certificates");
+              }
+            }}
+          >
             <span className="qa-icon">🏅</span>
             <span>Download Certificates</span>
           </button>
 
-          <button className="quick-action-btn" onClick={() => navigate("/student/results")}>
+          <button
+            className="quick-action-btn"
+            onClick={() => {
+              if (!assessmentPassed) {
+                alert("Please complete your lln assessment before continuing");
+              } else if (!enrollmentFormSubmitted) {
+                alert("Please complete your enrollment form before continuing");
+              } else {
+                navigate("/student/results");
+              }
+            }}
+          >
             <span className="qa-icon">📈</span>
             <span>View Results</span>
           </button>

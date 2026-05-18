@@ -191,15 +191,16 @@ const updateEnrollmentStatus = async (req, res) => {
       return res.status(404).json({ message: "Form not found" });
     }
 
-    // ✅ Also sync with EnrollmentFlow if Approved
-    if (status === "Approved" && updated.studentId) {
+    // ✅ Also sync with EnrollmentFlow based on status
+    if (updated.studentId) {
       try {
+        const flowStatus = status === "Approved" ? "enrolled" : "pending";
         await EnrollmentFlow.findOneAndUpdate(
           { studentId: updated.studentId },
-          { $set: { enrollmentStatus: "enrolled" } },
+          { $set: { enrollmentStatus: flowStatus } },
           { sort: { createdAt: -1 } }
         );
-        console.log("[EnrollmentForm] Linked EnrollmentFlow marked as 'enrolled' for student:", updated.studentId);
+        console.log(`[EnrollmentForm] Linked EnrollmentFlow marked as '${flowStatus}' for student:`, updated.studentId);
       } catch (flowErr) {
         console.error("[EnrollmentForm] Error syncing flow status:", flowErr);
       }

@@ -77,6 +77,33 @@ function Sidebar({ user }) {
   const active = getActiveFromPath()
 
   const handleNavigate = (item) => {
+    if (user?.role === "Student") {
+      const assessmentPassedVal = localStorage.getItem("assessmentPassed");
+      const enrollmentFormSubmittedVal = localStorage.getItem("enrollmentFormSubmitted");
+
+      if (assessmentPassedVal !== null) {
+        const assessmentPassed = assessmentPassedVal === "true";
+        const enrollmentFormSubmitted = enrollmentFormSubmittedVal === "true";
+
+        // Rule 1: LLN Assessment not passed yet
+        if (!assessmentPassed) {
+          // Disallow navigating to any tab except Dashboard
+          if (item.name !== "Dashboard") {
+            alert("Please complete your lln assessment before continuing");
+            return;
+          }
+        }
+
+        // Rule 2: LLN Assessment passed, but Enrollment Form not submitted yet
+        if (assessmentPassed && !enrollmentFormSubmitted) {
+          // Allow ONLY Dashboard, My Courses, and Enrollment Form
+          if (item.name !== "Dashboard" && item.name !== "My Courses" && item.name !== "Enrollment Form") {
+            alert("Please complete your enrollment form before continuing");
+            return;
+          }
+        }
+      }
+    }
     navigate(item.path, { state: item.state })
     setIsOpen(false)
   }

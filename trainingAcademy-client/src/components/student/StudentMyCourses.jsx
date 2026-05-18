@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./StudentMyCourses.css";
+import "../../styles/StudentDashboard.css";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import LLNDAssessment from "../llnd/LLNDAssessment";
 import Payment from "../../components/Payment";
@@ -186,6 +187,7 @@ export default function StudentMyCourses() {
   const paymentVerified = dashboardData?.paymentVerified ?? false;
   const enrollmentType = dashboardData?.enrollmentType || "";
   const isAgent = enrollmentType === "agent" || enrollmentType === "Agent";
+  const enrollmentFormSubmitted = dashboardData?.enrollmentFormSubmitted;
 
   return (
     <div className="mc-wrapper">
@@ -207,6 +209,28 @@ export default function StudentMyCourses() {
             <strong>Pre-Enrollment Assessment Passed</strong>
             <p>Score: {scoreDisplay}% – You can now enroll in courses. You can also retake LLND anytime if you want to improve your result.</p>
           </div>
+        </div>
+      )}
+
+      {/* Enrollment Form Alert */}
+      {assessmentPassed && !enrollmentFormSubmitted && (
+        <div className="alert alert-danger" style={{ marginBottom: "14px" }}>
+          <div className="alert-icon-wrap">📄</div>
+          <div className="alert-body">
+            <span className="alert-badge">Action required</span>
+            <p className="alert-title">Enrollment Form Required</p>
+            <p className="alert-desc">
+              Complete your enrollment form to finalize your course registration
+            </p>
+          </div>
+          <button
+            className="alert-action-btn"
+            onClick={() => {
+              navigate("/student/enrollment-form");
+            }}
+          >
+            📝 Complete Form
+          </button>
         </div>
       )}
 
@@ -234,7 +258,20 @@ export default function StudentMyCourses() {
           <div>
             <strong>Enrollment Form Approved</strong>
             <p>Your enrollment form has been approved.</p>
-            <a href="#" className="mc-link">View Form</a>
+            <button
+              onClick={() => navigate("/student/enrollment-form")}
+              className="mc-link"
+              style={{
+                background: "none",
+                border: "none",
+                padding: 0,
+                font: "inherit",
+                cursor: "pointer",
+                textAlign: "left"
+              }}
+            >
+              View Form
+            </button>
           </div>
         </div>
       )}

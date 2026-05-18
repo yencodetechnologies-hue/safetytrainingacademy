@@ -47,8 +47,9 @@ function ActiveBadge({ status }) {
 
 // ─── View Modal ──────────────────────────────────────────────────────────────
 
-function ViewModal({ student, onClose }) {
+function ViewModal({ student, onClose, onRefresh, onUpdateStudent }) {
   if (!student) return null;
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box" onClick={(e) => e.stopPropagation()}>
@@ -82,6 +83,8 @@ function ViewModal({ student, onClose }) {
             </div>
           </div>
         </div>
+
+
 
         <div className="modal-section">
           <h4 className="modal-section-title">📘 Course</h4>
