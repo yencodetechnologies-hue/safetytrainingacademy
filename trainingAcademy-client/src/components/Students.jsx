@@ -1197,9 +1197,9 @@ setDeleteStudent(null);
                   <th>LLN Status</th>
                   <th>Enrollment Form</th>
                   <th>Payment Method</th>
+                  <th>Payment status</th>
                   <th>Bank Transfer ID</th>
                   <th>Gateway Transaction ID</th>
-                  <th>Payment status</th>
                   <th>Status</th>
                   <th>Last Login</th>
                   <th>Actions</th>
@@ -1290,6 +1290,9 @@ setDeleteStudent(null);
                         <PaymentBadge status={s.paymentMethod} />
                       </td>
                       <td>
+                        <PaymentBadge status={s.paymentStatus} />
+                      </td>
+                      <td>
                         <div style={{ fontSize: "0.75rem", fontWeight: "600", color: "#6366f1" }}>
                           {(s.paymentMethod === "Bank Transfer" || s.paymentMethod === "Manual") ? (s.transactionId || "—") : "-"}
                         </div>
@@ -1298,9 +1301,6 @@ setDeleteStudent(null);
                         <div style={{ fontSize: "0.75rem", fontWeight: "600", color: "#10b981" }}>
                           {s.gatewayTransactionId && s.gatewayTransactionId !== "—" ? s.gatewayTransactionId : (s.paymentMethod === "Card Payment" ? "—" : "-")}
                         </div>
-                      </td>
-                      <td>
-                        <PaymentBadge status={s.paymentStatus} />
                       </td>
                       <td>
                         <ActiveBadge status={s.status} />
