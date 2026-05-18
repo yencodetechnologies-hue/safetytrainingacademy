@@ -115,7 +115,7 @@ function CourseDetails() {
                                 date: sched.date,
                                 startTime: s.startTime,
                                 endTime: s.endTime,
-                                location: s.location || course.location || "Sefton NSW",
+                                location: s.location || course.location || "NSW",
                                 availableSlots: s.availableSlots
                             })
                         })
@@ -455,50 +455,50 @@ function CourseDetails() {
                             <>
                                 {!showAllSessions ? (
                                     <div className="cdp-sessions-list">
-                                            {sessions.slice(0, 4).map((s, i) => {
-                                                const d = new Date(s.date)
-                                                const day = d.getDate()
-                                                const mon = d.toLocaleString("en-AU", { month: "short" }).toUpperCase()
-                                                const weekday = d.toLocaleString("en-AU", { weekday: "long" })
-                                                const cleanLoc = (s.location || "").replace(/Face to Face/gi, "").replace(/·\s*$/g, "").trim()
+                                                {sessions.slice(0, 4).map((s, i) => {
+                                                    const d = new Date(s.date)
+                                                    const day = d.getDate()
+                                                    const mon = d.toLocaleString("en-AU", { month: "short" }).toUpperCase()
+                                                    const weekday = d.toLocaleString("en-AU", { weekday: "long" })
+                                                    const cleanLoc = (s.location || "").replace(/Face to Face/gi, "").replace(/Sefton/gi, "").replace(/Safton/gi, "").replace(/·\s*$/g, "").trim()
 
-                                                // Urgency Logic
-                                                const today = new Date();
-                                                const diffTime = d - today;
-                                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                                    // Urgency Logic
+                                                    const today = new Date();
+                                                    const diffTime = d - today;
+                                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                                                let spotLabel = "Seats Available";
-                                                let spotClass = "";
+                                                    let spotLabel = "Seats Available";
+                                                    let spotClass = "";
 
-                                                if (s.availableSlots <= 3) {
-                                                    spotLabel = "Filling Fast";
-                                                    spotClass = "cdp-s-spots--low";
-                                                } else if (diffDays < 20 || s.availableSlots <= 10) {
-                                                    spotLabel = "Limited Seats";
-                                                    spotClass = "cdp-s-spots--medium";
-                                                } else {
-                                                    spotLabel = "Seats Available";
-                                                    spotClass = ""; // Green by default
-                                                }
+                                                    if (s.availableSlots <= 3) {
+                                                        spotLabel = "Filling Fast";
+                                                        spotClass = "cdp-s-spots--low";
+                                                    } else if (diffDays < 20 || s.availableSlots <= 10) {
+                                                        spotLabel = "Limited Seats";
+                                                        spotClass = "cdp-s-spots--medium";
+                                                    } else {
+                                                        spotLabel = "Seats Available";
+                                                        spotClass = ""; // Green by default
+                                                    }
 
-                                                return (
-                                                    <div className="cdp-session-row" key={i}>
-                                                        <div className="cdp-s-date">
-                                                            <div className="cdp-s-day">{day}</div>
-                                                            <div className="cdp-s-mon">{mon}</div>
-                                                        </div>
-                                                        <div className="cdp-s-info">
-                                                            <div className="cdp-s-title">{weekday}</div>
-                                                            <div className="cdp-s-meta">
-                                                                {s.startTime} – {s.endTime}
+                                                    return (
+                                                        <div className="cdp-session-row" key={i}>
+                                                            <div className="cdp-s-date">
+                                                                <div className="cdp-s-day">{day}</div>
+                                                                <div className="cdp-s-mon">{mon}</div>
                                                             </div>
-                                                        </div>
-                                                        <div className="cdp-s-meta-desktop">
-                                                            {cleanLoc}
-                                                        </div>
-                                                        <div className={`cdp-s-spots ${spotClass}`}>
-                                                            {spotLabel}
-                                                        </div>
+                                                            <div className="cdp-s-info">
+                                                                <div className="cdp-s-title">{weekday}</div>
+                                                                <div className="cdp-s-meta">
+                                                                    {s.startTime} – {s.endTime}
+                                                                </div>
+                                                            </div>
+                                                            <div className="cdp-s-meta-desktop">
+                                                                {cleanLoc}
+                                                            </div>
+                                                            <div className={`cdp-s-spots ${spotClass}`}>
+                                                                {spotLabel}
+                                                            </div>
                                                     <button
                                                         className="cdp-s-btn"
                                                         onClick={() => navigate(`/book-now/course/${course.slug}?scheduleId=${s.scheduleId}&sessionId=${s.id}${fromPortal ? "&fromPortal=true" : ""}`)}
@@ -518,7 +518,7 @@ function CourseDetails() {
                                                     const day = d.getDate()
                                                     const mon = d.toLocaleString("en-AU", { month: "short" }).toUpperCase()
                                                     const weekday = d.toLocaleString("en-AU", { weekday: "long" })
-                                                    const cleanLoc = (s.location || "").replace(/Face to Face/gi, "").replace(/·\s*$/g, "").trim()
+                                                    const cleanLoc = (s.location || "").replace(/Face to Face/gi, "").replace(/Sefton/gi, "").replace(/Safton/gi, "").replace(/·\s*$/g, "").trim()
                                                     const cleanTime = (s.startTime || "").replace(/Face to Face/gi, "").trim()
 
                                                     // Urgency Logic

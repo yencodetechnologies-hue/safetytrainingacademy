@@ -109,7 +109,7 @@ const studentBookingTemplate = (data) => {
       <div class="eb-section">
         <div class="eb-section-head"><span>Booking Summary</span></div>
         <table class="eb-table">
-          <tr><td class="lbl">Total Amount</td><td class="val val-bold">$${Number(data.totalAmount).toFixed(2)}</td></tr>
+          ${data.hideAmount ? '' : `<tr><td class="lbl">Total Amount</td><td class="val val-bold">$${Number(data.totalAmount).toFixed(2)}</td></tr>`}
           <tr><td class="lbl">Method</td><td class="val">${data.paymentMethod}</td></tr>
           <tr><td class="lbl">Status</td><td class="val">${data.paymentStatus}</td></tr>
         </table>

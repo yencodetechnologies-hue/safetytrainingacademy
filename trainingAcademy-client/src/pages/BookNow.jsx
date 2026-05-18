@@ -617,7 +617,8 @@ function BookNow() {
                                 phone: paymentData.phone,
                                 bookingId: localStorage.getItem("flowId"),
                                 totalAmount: coursePrice,
-                                paymentMethod: "Pay Later"
+                                paymentMethod: "Pay Later",
+                                isAgent: enrollmentLinkData?.agent || enrollmentType === "agent" || false
                             })
                         });
                     } catch (emailErr) {

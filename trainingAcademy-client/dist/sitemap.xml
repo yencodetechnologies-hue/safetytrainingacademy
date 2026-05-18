@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-  <!-- Core pages -->
+  <!-- ==================== CORE PAGES ==================== -->
   <url>
     <loc>https://www.safetytrainingacademy.edu.au/</loc>
     <lastmod>2026-05-12</lastmod>
@@ -39,21 +39,9 @@
     <priority>0.6</priority>
   </url>
 
-  <!-- Course pages -->
+  <!-- ==================== FORKLIFT & EWP ==================== -->
   <url>
     <loc>https://www.safetytrainingacademy.edu.au/course/licence-to-operate-a-forklift-truck-training-s</loc>
-    <lastmod>2026-05-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.safetytrainingacademy.edu.au/course/white-card-course-s</loc>
-    <lastmod>2026-05-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.safetytrainingacademy.edu.au/course/work-safely-at-heights-training-syd</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
@@ -76,20 +64,28 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- ==================== WHITE CARD & HEIGHTS ==================== -->
   <url>
-    <loc>https://www.safetytrainingacademy.edu.au/course/confined-space-combined-training-courses-1777437543042</loc>
+    <loc>https://www.safetytrainingacademy.edu.au/course/white-card-course-s</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.safetytrainingacademy.edu.au/course/enter-and-work-in-confined-space-training-syd</loc>
+    <loc>https://www.safetytrainingacademy.edu.au/course/work-safely-at-heights-training-syd</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.safetytrainingacademy.edu.au/course/demolition-safety-and-hazard-identification-course</loc>
+    <loc>https://www.safetytrainingacademy.edu.au/course/provide-telecommunications-services-safely-on-roofs-course-information</loc>
+    <lastmod>2026-05-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.safetytrainingacademy.edu.au/course/riiccm202e-identify-locate-and-protect-underground-services</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -100,12 +96,29 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- ==================== CONFINED SPACE ==================== -->
+  <!-- UPDATED: removed numeric suffix -1777437543042 -->
   <url>
-    <loc>https://www.safetytrainingacademy.edu.au/course/riiccm202e-identify-locate-and-protect-underground-services</loc>
+    <loc>https://www.safetytrainingacademy.edu.au/course/confined-space-combined-training-courses</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.safetytrainingacademy.edu.au/course/enter-and-work-in-confined-space-training-syd</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://www.safetytrainingacademy.edu.au/course/gas-test-atmospheres-course-information</loc>
+    <lastmod>2026-05-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- ==================== EARTHMOVING ==================== -->
   <url>
     <loc>https://www.safetytrainingacademy.edu.au/course/conduct-civil-construction-excavator-operations-training-syd</loc>
     <lastmod>2026-05-12</lastmod>
@@ -130,11 +143,13 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- ==================== DEMOLITION & ASBESTOS ==================== -->
   <url>
-    <loc>https://www.safetytrainingacademy.edu.au/course/gas-test-atmospheres-course-information</loc>
+    <loc>https://www.safetytrainingacademy.edu.au/course/demolition-safety-and-hazard-identification-course</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.safetytrainingacademy.edu.au/course/identify-hazards-on-demolition-sites-and-apply-risk-management-strategies-course-information</loc>
@@ -143,7 +158,35 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.safetytrainingacademy.edu.au/course/provide-telecommunications-services-safely-on-roofs-course-information</loc>
+    <loc>https://www.safetytrainingacademy.edu.au/course/remove-non-friable-asbestos</loc>
+    <lastmod>2026-05-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.safetytrainingacademy.edu.au/course/supervise-asbestos-removal</loc>
+    <lastmod>2026-05-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- ==================== TRAFFIC CONTROL ==================== -->
+  <url>
+    <loc>https://www.safetytrainingacademy.edu.au/course/traffic-controller</loc>
+    <lastmod>2026-05-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.safetytrainingacademy.edu.au/course/implement-traffic-control-plans</loc>
+    <lastmod>2026-05-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- ==================== FIRST AID ==================== -->
+  <url>
+    <loc>https://www.safetytrainingacademy.edu.au/course/provide-first-aid</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -160,24 +203,8 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
-  <url>
-    <loc>https://www.safetytrainingacademy.edu.au/course/provide-first-aid</loc>
-    <lastmod>2026-05-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.safetytrainingacademy.edu.au/course/implement-traffic-control-plans</loc>
-    <lastmod>2026-05-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.safetytrainingacademy.edu.au/course/traffic-controller</loc>
-    <lastmod>2026-05-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
+
+  <!-- ==================== CERTIFICATE COURSES ==================== -->
   <url>
     <loc>https://www.safetytrainingacademy.edu.au/course/certificate-iii-in-painting-and-decorating</loc>
     <lastmod>2026-05-12</lastmod>
@@ -196,20 +223,8 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
-  <url>
-    <loc>https://www.safetytrainingacademy.edu.au/course/remove-non-friable-asbestos</loc>
-    <lastmod>2026-05-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.safetytrainingacademy.edu.au/course/supervise-asbestos-removal</loc>
-    <lastmod>2026-05-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
 
-  <!-- Combo course pages -->
+  <!-- ==================== COMBO COURSES ==================== -->
   <url>
     <loc>https://www.safetytrainingacademy.edu.au/course/traffic-control-implement-traffic-control-plans-imp</loc>
     <lastmod>2026-05-12</lastmod>
@@ -246,9 +261,10 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  <!-- UPDATED: removed numeric suffix -1777439402253 -->
   <url>
-    <loc>https://www.safetytrainingacademy.edu.au/course/operate-elevating-work-platform-work-safely-at-heights-1777439402253</loc>
-    <lastmod>2026-05-12</lastmod>
+    <loc>https://www.safetytrainingacademy.edu.au/course/operate-elevating-work-platform-work-safely-at-heights</loc>
+    <lastmod>2026-05-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

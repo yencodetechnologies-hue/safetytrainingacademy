@@ -277,7 +277,7 @@ const buildEnrollmentNotificationHtml = (data, isAdmin = false) => {
 };
 
 const sendEnrollmentLinkConfirmation = async (req, res) => {
-    const { toEmail, studentName, courseName, courseCode, courseDate, startTime, endTime, bookingId, phone, totalAmount, paymentMethod } = req.body;
+    const { toEmail, studentName, courseName, courseCode, courseDate, startTime, endTime, bookingId, phone, totalAmount, paymentMethod, isAgent } = req.body;
     
     const orderId = formatBookingId(bookingId || Date.now().toString());
     const dateStr = courseDate ? new Date(courseDate).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" }) : "TBC";
@@ -294,11 +294,42 @@ const sendEnrollmentLinkConfirmation = async (req, res) => {
         courseTime: timeStr, 
         paymentMethod: paymentMethod || "Pay Later", 
         paymentStatus: "Pending", 
-        totalAmount: totalAmount || 0 
+        totalAmount: totalAmount || 0,
+        hideAmount: isAgent ? true : false
+    });
+
+    const submittedDate = new Date().toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    const adminHtml = adminBookingTemplate({
+        bookingId: orderId,
+        contactName: studentName,
+        contactEmail: toEmail,
+        contactPhone: phone || "—",
+        courseName,
+        courseCode: courseCode || "—",
+        courseDate: dateStr,
+        courseTime: timeStr,
+        paymentMethod: paymentMethod || "Pay Later",
+        paymentStatus: "PENDING",
+        totalAmount: Number(totalAmount || 0).toFixed(2),
+        submittedAt: submittedDate,
+        gatewayId: "-",
+        bankTransferId: "-",
+        venue: "3/14-16 Marjorie Street, Sefton NSW 2162"
     });
 
     try { 
-        await sendEmail({ to: toEmail, subject: `Registration Confirmed - ${courseName}`, html: studentHtml, bcc: process.env.BOOKINGS_EMAIL }); 
+        await sendEmail({ to: toEmail, subject: `Registration Confirmed - ${courseName}`, html: studentHtml }); 
+
+        // Admin Notifications (Send to both Academy and Tech Team)
+        const adminRecipients = [process.env.BOOKINGS_EMAIL, process.env.NOTIFY_EMAIL].filter(Boolean);
+        for (const recipient of adminRecipients) {
+            setTimeout(async () => {
+                try { 
+                    await sendEmail({ to: recipient, subject: `NEW BOOKING: ${studentName} - ${courseName} (#${orderId})`, html: adminHtml }); 
+                } catch (e) {}
+            }, 10000);
+        }
+
         res.status(200).json({ success: true }); 
     } catch (err) { 
         res.status(500).json({ success: false }); 
