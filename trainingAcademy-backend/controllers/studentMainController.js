@@ -411,69 +411,12 @@ exports.getAllStudents = async (req, res) => {
     const data = await EnrollmentFlow.find({
       studentId: { $ne: null }
     })
-<<<<<<< HEAD
-      .select("studentId companyId enrollmentType source sourceToken items llnd.status sessionDate startTime endTime enrollmentFormId status createdAt")
-      .populate("studentId", "name email phone lastLogin companyId")
-=======
       .populate("studentId", "name email phone lastLogin")
->>>>>>> df4e323 (modified)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
 
-<<<<<<< HEAD
-    // Extract all IDs to fetch them in bulk
-    const companyIds = [];
-    const enrollmentLinkIds = [];
-    const enrollmentFormIds = [];
-    const studentIds = [];
-
-    data.forEach((flow) => {
-      const student = flow.studentId || {};
-      const resolvedCompanyId = flow.companyId || student.companyId;
-      if (resolvedCompanyId) {
-        companyIds.push(resolvedCompanyId);
-      }
-      if (flow.source === "Enrollment Link" && flow.sourceToken) {
-        enrollmentLinkIds.push(flow.sourceToken);
-      }
-      if (flow.enrollmentFormId) {
-        enrollmentFormIds.push(flow.enrollmentFormId);
-      }
-      if (student._id) {
-        studentIds.push(student._id.toString());
-      }
-    });
-
-    // 1. Fetch companies in bulk
-    const uniqueCompanyIds = [...new Set(companyIds.map(id => id.toString()))].filter(id => mongoose.Types.ObjectId.isValid(id));
-    const companies = await Company.find({ _id: { $in: uniqueCompanyIds } }).lean();
-    const companyMap = new Map(companies.map(c => [c._id.toString(), c]));
-
-    // 2. Fetch enrollment links in bulk
-    const uniqueLinkIds = [...new Set(enrollmentLinkIds.map(id => id.toString()))].filter(id => mongoose.Types.ObjectId.isValid(id));
-    const enrollmentLinks = await EnrollmentLink.find({ _id: { $in: uniqueLinkIds } }).lean();
-    const linkMap = new Map(enrollmentLinks.map(l => [l._id.toString(), l]));
-
-    // 3. Fetch enrollment forms in bulk
-    const uniqueFormIds = [...new Set(enrollmentFormIds.map(id => id.toString()))].filter(id => mongoose.Types.ObjectId.isValid(id));
-    const uniqueStudentIds = [...new Set(studentIds)].filter(id => mongoose.Types.ObjectId.isValid(id));
-
-    const forms = await EnrollmentForm.find({
-      $or: [
-        { _id: { $in: uniqueFormIds } },
-        { studentId: { $in: uniqueStudentIds } }
-      ]
-    }).select("status studentId").lean();
-
-    const formMapById = new Map(forms.map(f => [f._id.toString(), f]));
-    const formMapByStudentId = new Map(
-      forms.filter(f => f.studentId).map(f => [f.studentId.toString(), f])
-    );
-
-    // Map the results in-memory
-=======
     // ✅ Collect IDs for bulk fetch
     const companyIds = new Set();
     const linkIds = new Set();
@@ -506,56 +449,20 @@ exports.getAllStudents = async (req, res) => {
     );
 
     // ✅ Format response (NO DB calls inside loop)
->>>>>>> df4e323 (modified)
     const formatted = data.map((flow) => {
       const student = flow.studentId || {};
       const item = flow.items?.[0] || {};
 
-<<<<<<< HEAD
-      const resolvedCompanyId = flow.companyId || student.companyId;
-      let companyName = "";
-      if (resolvedCompanyId) {
-        const company = companyMap.get(resolvedCompanyId.toString());
-        companyName = company?.name || company?.companyName || "";
-      }
-=======
       // Company
       const resolvedCompanyId =
         (flow.companyId || student.companyId)?.toString();
       const company = companyMap[resolvedCompanyId];
       const companyName = company?.name || company?.companyName || "";
->>>>>>> df4e323 (modified)
 
       // Link / Agent
       const link = linkMap[flow.sourceToken?.toString()];
       let agentName = "";
       let linkName = "";
-<<<<<<< HEAD
-      if (flow.source === "Enrollment Link" && flow.sourceToken) {
-        const link = linkMap.get(flow.sourceToken.toString());
-        if (link?.agent) {
-          agentName = link?.name || "";
-        } else {
-          linkName = link?.name || "";
-        }
-      }
-
-      let formStatus = "Not Started";
-      let formId = null;
-      if (flow.enrollmentFormId) {
-        const form = formMapById.get(flow.enrollmentFormId.toString());
-        if (form) {
-          formStatus = form.status || "Pending";
-          formId = form._id;
-        }
-      } else if (student._id) {
-        const form = formMapByStudentId.get(student._id.toString());
-        if (form) {
-          formStatus = form.status || "Pending";
-          formId = form._id;
-        }
-      }
-=======
 
       if (flow.source === "Enrollment Link" && link) {
         if (link.agent) {
@@ -568,7 +475,6 @@ exports.getAllStudents = async (req, res) => {
       // Form
       const form = formMap[flow.enrollmentFormId?.toString()];
       const formStatus = form?.status || "Not Started";
->>>>>>> df4e323 (modified)
 
       return {
         id: student._id,
@@ -608,7 +514,6 @@ exports.getAllStudents = async (req, res) => {
 
         paymentMethod: item.payment?.method || "—",
         transactionId: item.payment?.transactionId || "—",
-        gatewayTransactionId: item.payment?.gatewayTransactionId || "—",
         slipUrl: item.payment?.slipUrl || "—",
 
         courseBookingDate: flow.sessionDate
@@ -653,8 +558,6 @@ exports.getAllStudents = async (req, res) => {
         bookingId: formatBookingId(flow.createdAt || flow._id),
       };
     });
-<<<<<<< HEAD
-=======
 
     // ✅ total count (for pagination UI)
     const total = await EnrollmentFlow.countDocuments({
@@ -667,7 +570,6 @@ exports.getAllStudents = async (req, res) => {
       page,
       totalPages: Math.ceil(total / limit),
     });
->>>>>>> df4e323 (modified)
 
   } catch (err) {
     console.error("ERROR:", err);
