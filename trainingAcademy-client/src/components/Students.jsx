@@ -1293,12 +1293,12 @@ setDeleteStudent(null);
                         <PaymentBadge status={s.paymentStatus} />
                       </td>
                       <td>
-                        <div style={{ fontSize: "0.75rem", fontWeight: "600", color: "#6366f1" }}>
+                        <div style={{ fontFamily: "'Courier New', Courier, monospace", fontSize: "12px", fontWeight: "600", color: "#4b5563" }}>
                           {(s.paymentMethod === "Bank Transfer" || s.paymentMethod === "Manual") ? (s.transactionId || "—") : "-"}
                         </div>
                       </td>
                       <td>
-                        <div style={{ fontSize: "0.75rem", fontWeight: "600", color: "#10b981" }}>
+                        <div style={{ fontFamily: "'Courier New', Courier, monospace", fontSize: "12px", fontWeight: "600", color: "#6366f1" }}>
                           {s.gatewayTransactionId && s.gatewayTransactionId !== "—" ? s.gatewayTransactionId : (s.paymentMethod === "Card Payment" ? "—" : "-")}
                         </div>
                       </td>
