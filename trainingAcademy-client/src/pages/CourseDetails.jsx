@@ -458,7 +458,7 @@ function CourseDetails() {
                                                     const day = d.getDate()
                                                     const mon = d.toLocaleString("en-AU", { month: "short" }).toUpperCase()
                                                     const weekday = d.toLocaleString("en-AU", { weekday: "long" })
-                                                    const cleanLoc = (s.location || "").replace(/Face to Face/gi, "").replace(/Sefton/gi, "").replace(/Safton/gi, "").replace(/·\s*$/g, "").trim()
+                                                    const cleanLoc = (s.location || "").replace(/Face to Face/gi, "").replace(/Sefton/gi, "").replace(/Safton/gi, "Sefton").replace(/·\s*$/g, "").trim()
 
                                                     // Urgency Logic
                                                     const today = new Date();
@@ -516,7 +516,7 @@ function CourseDetails() {
                                                     const day = d.getDate()
                                                     const mon = d.toLocaleString("en-AU", { month: "short" }).toUpperCase()
                                                     const weekday = d.toLocaleString("en-AU", { weekday: "long" })
-                                                    const cleanLoc = (s.location || "").replace(/Face to Face/gi, "").replace(/Sefton/gi, "").replace(/Safton/gi, "").replace(/·\s*$/g, "").trim()
+                                                    const cleanLoc = (s.location || "").replace(/Face to Face/gi, "").replace(/Sefton/gi, "").replace(/Safton/gi, "Sefton").replace(/·\s*$/g, "").trim()
                                                     const cleanTime = (s.startTime || "").replace(/Face to Face/gi, "").trim()
 
                                                     // Urgency Logic

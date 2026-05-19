@@ -154,7 +154,7 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
                 date:           sched.date,
                 startTime:      s.startTime,
                 endTime:        s.endTime,
-                location:       (s.location || course.location || "Sefton NSW").replace(/Safton/gi, "").trim(),
+                location:       (s.location || course.location || "Sefton NSW").replace(/Safton/gi, "Sefton").trim(),
                 availableSlots: s.availableSlots,
               });
             });
@@ -280,7 +280,7 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
         </div>
         <div className="cdm-fact">
           <div className="cdm-fact-icon">📍</div>
-          <div className="cdm-fact-val">{(course.location || "Sefton").replace(/Safton/gi, "").trim()}</div>
+          <div className="cdm-fact-val">{(course.location || "Sefton").replace(/Safton/gi, "Sefton").trim()}</div>
           <div className="cdm-fact-label">Location</div>
         </div>
         <div className="cdm-fact">
@@ -405,8 +405,8 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
                         <div className="cdm-date-name">{formatWeekday(s.date)} — Full day</div>
                         <div className="cdm-date-time">
                           {s.startTime && s.endTime
-                            ? `${s.startTime} – ${s.endTime} · ${(s.location || "").replace(/Safton/gi, "").trim()}`
-                            : (s.location || "").replace(/Safton/gi, "").trim()}
+                            ? `${s.startTime} – ${s.endTime} · ${(s.location || "").replace(/Safton/gi, "Sefton").trim()}`
+                            : (s.location || "").replace(/Safton/gi, "Sefton").trim()}
                         </div>
                       </div>
                       <div className={`cdm-date-spots ${low ? "low" : "ok"}`}>
@@ -450,8 +450,8 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
                             <div className="cdm-date-name">{formatWeekday(s.date)} — Full day</div>
                             <div className="cdm-date-time">
                               {s.startTime && s.endTime
-                                ? `${s.startTime} – ${s.endTime} · ${(s.location || "").replace(/Safton/gi, "").trim()}`
-                                : (s.location || "").replace(/Safton/gi, "").trim()}
+                                ? `${s.startTime} – ${s.endTime} · ${(s.location || "").replace(/Safton/gi, "Sefton").trim()}`
+                                : (s.location || "").replace(/Safton/gi, "Sefton").trim()}
                             </div>
                           </div>
                           <div className={`cdm-date-spots ${low ? "low" : "ok"}`}>
