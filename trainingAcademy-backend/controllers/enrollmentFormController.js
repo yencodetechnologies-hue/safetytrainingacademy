@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const EnrollmentForm = require("../models/EnrollmentForm");
 const EnrollmentFlow = require("../models/EnrollmentFlows");
 const cloudinary = require("../config/cloudinary")
@@ -165,8 +166,57 @@ const getEnrollmentForms = async (req, res) => {
   try {
     const { studentId } = req.query;
     const query = studentId ? { studentId } : {};
-    const forms = await EnrollmentForm.find(query).sort({ createdAt: -1 });
-    res.status(200).json(forms);
+    const forms = await EnrollmentForm.find(query).sort({ createdAt: -1 }).lean();
+
+    const studentIds = [
+      ...new Set(
+        forms
+          .map((f) => f.studentId)
+          .filter((id) => id && mongoose.Types.ObjectId.isValid(id))
+      ),
+    ];
+
+    const objectIds = studentIds.map((id) => new mongoose.Types.ObjectId(id));
+    const flows = studentIds.length
+      ? await EnrollmentFlow.find({ studentId: { $in: objectIds } })
+          .sort({ createdAt: -1 })
+          .lean()
+      : [];
+
+    const flowMap = {};
+    flows.forEach((flow) => {
+      const sid = flow.studentId?.toString();
+      if (sid && !flowMap[sid]) flowMap[sid] = flow;
+    });
+
+    const enriched = forms.map((form) => {
+      const flow = flowMap[form.studentId?.toString()] || {};
+      const item = flow.items?.[0] || {};
+      const courseName = item.course?.courseName || "";
+
+      const courseBookingDate = flow.sessionDate
+        ? `${new Date(flow.sessionDate).toLocaleDateString("en-AU", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+            timeZone: "Australia/Sydney",
+          })} | ${flow.startTime || ""} - ${flow.endTime || ""}`
+        : "";
+
+      const enrollmentType = flow.enrollmentType
+        ? flow.enrollmentType.charAt(0).toUpperCase() +
+          flow.enrollmentType.slice(1).toLowerCase()
+        : "Individual";
+
+      return {
+        ...form,
+        courseTitle: courseName,
+        courseBookingDate,
+        enrollmentType,
+      };
+    });
+
+    res.status(200).json(enriched);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error fetching forms" });

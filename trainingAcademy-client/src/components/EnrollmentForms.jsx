@@ -588,39 +588,23 @@ function EnrollmentForms() {
   const approved = data.filter((r) => r.status === "Approved").length;
   const rejected = data.filter((r) => r.status === "Rejected").length;
 
-  // ✅ ONLY CHANGE: fetch students API to get course & booking date
   const fetchForms = async () => {
     try {
-      const [formsRes, studentsRes] = await Promise.all([
-        axios.get(`${API_URL}/api/enrollment-form`),
-        axios.get(`${API_URL}/api/students`),
-      ]);
-      console.log("studentsRes",studentsRes);
-      
+      const formsRes = await axios.get(`${API_URL}/api/enrollment-form`);
 
-      const studentMap = {};
-      studentsRes.data.data.forEach((s) => {
-        const sid = s.id?.toString() || s._id?.toString();
-        if (sid) studentMap[sid] = s;
-      });
-
-      const formatted = formsRes.data.map((item) => {
-        const sid = item.studentId?.toString();
-        const student = studentMap[sid] || {};
-        return {
-          id: item._id,
-          date: new Date(item.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
-          name: `${item.personalDetails?.givenName || ""} ${item.personalDetails?.surname || ""}`.trim(),
-          email: item.personalDetails?.email,
-          phone: item.personalDetails?.mobilePhone,
-          course: student.courseTitle || student.course || "N/A",
-          bookingDate: student.courseBookingDate || "N/A",
-          type: student.type || "Individual",
-          status: item.status,
-          enrollments: item.enrollment?.units?.length || 1,
-          raw: item,
-        };
-      });
+      const formatted = formsRes.data.map((item) => ({
+        id: item._id,
+        date: new Date(item.createdAt).toLocaleDateString("en-AU", { timeZone: "Australia/Sydney" }),
+        name: `${item.personalDetails?.givenName || ""} ${item.personalDetails?.surname || ""}`.trim(),
+        email: item.personalDetails?.email,
+        phone: item.personalDetails?.mobilePhone,
+        course: item.courseTitle || "N/A",
+        bookingDate: item.courseBookingDate || "N/A",
+        type: item.enrollmentType || "Individual",
+        status: item.status,
+        enrollments: item.enrollment?.units?.length || 1,
+        raw: item,
+      }));
       setData(formatted);
     } catch (err) {
       console.error(err);
