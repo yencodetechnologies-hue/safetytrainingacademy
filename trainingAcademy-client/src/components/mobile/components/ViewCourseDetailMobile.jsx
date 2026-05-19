@@ -12,6 +12,7 @@ import {
   getCourseVariants,
 } from "../../../utils/coursePrice";
 import BookingModal from "../../course/BookingModal";
+import { ORG_PHONE_1300 } from "../../../utils/organizationPhones";
 import logo from "../../../assets/SafetyTrainingAcademylogo.png";
 import PdfViewer from "../../common/PdfViewer";
 
@@ -625,7 +626,7 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
         >
           Book Now
         </button>
-           <a href="https://wa.me/611300976097" className="vac-sticky-wa"><span><i class="fa-brands fa-whatsapp"></i></span></a>
+           <a href={ORG_PHONE_1300.wa} className="vac-sticky-wa"><span><i class="fa-brands fa-whatsapp"></i></span></a>
       </div>
 
       {showModal && (

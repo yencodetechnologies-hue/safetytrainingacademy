@@ -6,6 +6,7 @@ import Footer from "../components/landingPage/Footer"
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import contactImg from "../assets/Contact-Us.jpg"  // replace with your image
+import { ORG_PHONE_1300, ORG_PHONE_MOBILE } from "../utils/organizationPhones"
 
 const TRAINING_LIST = [
     "Work Safely at Heights Training",
@@ -74,9 +75,9 @@ function ContactPage() {
                             <div>
                                 <p className="cp-contact-card-label">Contact Us</p>
                                 <span className="cp-contact-card-value">
-                                    <a href="tel:1300976097" style={{ textDecoration: "none", color: "inherit" }}>1300 976 097</a>
+                                    <a href={ORG_PHONE_1300.tel} style={{ textDecoration: "none", color: "inherit" }}>{ORG_PHONE_1300.display}</a>
                                     <br />
-                                    <a href="tel:0483878887" style={{ textDecoration: "none", color: "inherit", fontSize: "0.9em" }}>0483 878 887</a>
+                                    <a href={ORG_PHONE_MOBILE.tel} style={{ textDecoration: "none", color: "inherit", fontSize: "0.9em" }}>{ORG_PHONE_MOBILE.display}</a>
                                 </span>
                             </div>
                         </div>
@@ -207,10 +208,10 @@ function ContactPage() {
                         <div className="cp-info-icon cp-icon-blue">📞</div>
                         <h4 className="cp-info-title">Phone</h4>
                         <p className="cp-info-text">
-                            <a href="tel:1300976097" style={{ color: "inherit", textDecoration: "none" }}>1300 976 097</a>
+                            <a href={ORG_PHONE_1300.tel} style={{ color: "inherit", textDecoration: "none" }}>{ORG_PHONE_1300.display}</a>
                         </p>
                         <p className="cp-info-text">
-                            <a href="tel:0483878887" style={{ color: "inherit", textDecoration: "none" }}>0483 878 887</a>
+                            <a href={ORG_PHONE_MOBILE.tel} style={{ color: "inherit", textDecoration: "none" }}>{ORG_PHONE_MOBILE.display}</a>
                         </p>
                     </div>
                     <div className="cp-info-card">

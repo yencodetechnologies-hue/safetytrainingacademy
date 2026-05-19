@@ -1,5 +1,6 @@
 import "../styles/ViewDetailsRight.css"
 import { useNavigate } from "react-router-dom"
+import { ORG_PHONE_1300 } from "../utils/organizationPhones"
 
 function ViewDetailsRight({ course }) {
 
@@ -119,8 +120,8 @@ function ViewDetailsRight({ course }) {
                     </div>
                 </div>
 
-                <a href="tel:1300976097" style={{ textDecoration: "none" }}>
-                    <button className="help-btn">📞 Call: 1300 976 097</button>
+                <a href={ORG_PHONE_1300.tel} style={{ textDecoration: "none" }}>
+                    <button className="help-btn">📞 Call: {ORG_PHONE_1300.display}</button>
                 </a>
                 <a href="mailto:info@safetytrainingacademy.edu.au" style={{ textDecoration: "none" }}>
                     <button className="email-btn">✉ Email Support</button>

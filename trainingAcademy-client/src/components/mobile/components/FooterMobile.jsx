@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/FooterMobile.css";
 import logo from "../../../assets/Logo STA.jpeg"
+import { ORG_PHONE_1300, ORG_PHONE_MOBILE } from "../../../utils/organizationPhones"
 
 // Each label maps to an existing route in App.jsx so taps from mobile
 // always land on a real page. "Blog" was removed because no route exists.
@@ -85,13 +86,13 @@ function FooterMobile() {
             <i className="fa-solid fa-envelope info-icon"></i>
             <p>info@safetytrainingacademy.edu.au</p>
           </a>
-          <a href="tel:0483878887" className="row-info" style={{ color: "inherit", textDecoration: "none" }}>
+          <a href={ORG_PHONE_MOBILE.tel} className="row-info" style={{ color: "inherit", textDecoration: "none" }}>
             <i className="fa-solid fa-phone info-icon"></i>
-            <p>0483 878 887</p>
+            <p>{ORG_PHONE_MOBILE.display}</p>
           </a>
-          <a href="tel:1300976097" className="row-info" style={{ color: "inherit", textDecoration: "none" }}>
+          <a href={ORG_PHONE_1300.tel} className="row-info" style={{ color: "inherit", textDecoration: "none" }}>
             <i className="fa-solid fa-phone info-icon"></i>
-            <p>1300 976 097</p>
+            <p>{ORG_PHONE_1300.display}</p>
           </a>
         </div>
       </div>

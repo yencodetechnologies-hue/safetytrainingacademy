@@ -8,6 +8,7 @@ import {
   getCourseSavingDisplay,
 } from "../../../utils/coursePrice";
 import BookingModal, { getBookingType } from "../../course/BookingModal";
+import { ORG_PHONE_1300 } from "../../../utils/organizationPhones";
 
 const PREFERRED_ORDER = [
   "Combo Courses",
@@ -103,7 +104,7 @@ export default function ViewAllCoursesMobile({ courses = [] }) {
       {/* ── Top Bar ── */}
       <div className="vac-topbar">
         <span className="vac-logo-text">Safety Training Academy</span>
-        <a href="tel:1300976097" className="vac-topbar-phone">☎ Call Now</a>
+        <a href={ORG_PHONE_1300.tel} className="vac-topbar-phone">☎ Call Now</a>
       </div>
 
       <PublicNavbar courses={courses} />
@@ -224,7 +225,7 @@ export default function ViewAllCoursesMobile({ courses = [] }) {
       {/* ── Sticky Bottom Bar ── */}
       <div className="vac-sticky">
         <button href="tel:1300976097" className="vac-sticky-call" onClick={()=>{navigate(`/book-now`)}}>Enroll Now</button>
-        <a href="https://wa.me/611300976097" className="vac-sticky-wa"><span><i class="fa-brands fa-whatsapp"></i></span></a>
+        <a href={ORG_PHONE_1300.wa} className="vac-sticky-wa"><span><i class="fa-brands fa-whatsapp"></i></span></a>
       </div>
 
       {selectedCourse && (

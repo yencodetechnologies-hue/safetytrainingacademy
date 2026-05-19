@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import "../styles/CTABanner.css"
+import { ORG_PHONE_1300 } from "../utils/organizationPhones"
 
 function CTABanner() {
     const navigate = useNavigate()
@@ -21,8 +22,8 @@ function CTABanner() {
                 <button className="cta-btn-dark" onClick={() => setShowEnquire(true)}>
                     Submit Enquiry
                 </button>
-                <a href="tel:1300976097" className="cta-btn-white">
-                    ☎ Call 1300 976 097
+                <a href={ORG_PHONE_1300.tel} className="cta-btn-white">
+                    ☎ Call {ORG_PHONE_1300.display}
                 </a>
             </div>
             {showEnquire && (

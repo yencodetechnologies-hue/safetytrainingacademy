@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { API_URL } from "../../data/service";
+import { ORG_PHONE_1300, ORG_PHONE_MOBILE } from "../../utils/organizationPhones";
 
 export default function EnrollmentSuccess({ enrollmentData, onBackToHome, onNext }) {
   const [visible, setVisible] = useState(false);
@@ -130,11 +131,11 @@ export default function EnrollmentSuccess({ enrollmentData, onBackToHome, onNext
         }}>
           <p style={{ margin: "0 0 8px 0", fontWeight: "600" }}>Need help? Contact us:</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", justifyContent: "center" }}>
-            <a href="tel:1300976097" style={{ color: "inherit", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
-              <span>📞</span> 1300 976 097
+            <a href={ORG_PHONE_1300.tel} style={{ color: "inherit", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
+              <span>📞</span> {ORG_PHONE_1300.display}
             </a>
-            <a href="tel:0483878887" style={{ color: "inherit", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
-              <span>📱</span> 0483 878 887
+            <a href={ORG_PHONE_MOBILE.tel} style={{ color: "inherit", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
+              <span>📱</span> {ORG_PHONE_MOBILE.display}
             </a>
             <a href="mailto:info@safetytrainingacademy.edu.au" style={{ color: "inherit", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
               <span>✉️</span> info@safetytrainingacademy.edu.au

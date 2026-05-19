@@ -5,6 +5,7 @@ import "../../styles/Footer.css"
 import logo from "../../assets/Logo STA.jpeg"
 import FooterMobile from "../mobile/components/FooterMobile"
 import { API_URL } from "../../data/service"
+import { ORG_PHONE_1300, ORG_PHONE_MOBILE } from "../../utils/organizationPhones"
 
 // Quick-link routes that actually exist in App.jsx. We dropped the dead
 // /upcoming-dates, /voc-rpl, and /faqs paths and remapped to the closest
@@ -134,9 +135,9 @@ function Footer({ courses }) {
                         <div className="footer-contact-item">
                             <i className="fa-solid fa-phone" />
                             <span style={{ display: "flex", gap: "4px" }}>
-                                <a href="tel:0483878887" style={{ color: "inherit", textDecoration: "none" }}>0483 878 887</a>
+                                <a href={ORG_PHONE_MOBILE.tel} style={{ color: "inherit", textDecoration: "none" }}>{ORG_PHONE_MOBILE.display}</a>
                                 &nbsp;·&nbsp;
-                                <a href="tel:1300976097" style={{ color: "inherit", textDecoration: "none" }}>1300 976 097</a>
+                                <a href={ORG_PHONE_1300.tel} style={{ color: "inherit", textDecoration: "none" }}>{ORG_PHONE_1300.display}</a>
                             </span>
                         </div>
                     </div>

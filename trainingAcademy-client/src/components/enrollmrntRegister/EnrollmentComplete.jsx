@@ -4,6 +4,7 @@ import { useContext, useEffect, useRef, useState } from "react"
 import { AuthContext } from "../../context/AuthContext"
 import { API_URL } from "../../data/service"
 import { trackPurchaseConversion } from "../../utils/googleAds"
+import { ORG_PHONE_1300 } from "../../utils/organizationPhones"
 
 function EnrollmentComplete() {
 
@@ -248,8 +249,8 @@ function EnrollmentComplete() {
                         <p className="ec-regards">Kind regards,</p>
                         <p className="ec-org-name">Safety Training Academy</p>
                         <p className="ec-org-role">Training Team</p>
-                        <a href="tel:1300976097" style={{ color: "inherit", textDecoration: "none" }} className="ec-org-phone">
-                            1300 976 097
+                        <a href={ORG_PHONE_1300.tel} style={{ color: "inherit", textDecoration: "none" }} className="ec-org-phone">
+                            {ORG_PHONE_1300.display}
                         </a>
                         <a href="mailto:info@safetytrainingacademy.edu.au" className="ec-org-email">
                             info@safetytrainingacademy.edu.au

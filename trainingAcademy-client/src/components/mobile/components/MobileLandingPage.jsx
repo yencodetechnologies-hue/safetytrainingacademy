@@ -16,6 +16,7 @@ import {
   getCourseOriginalDisplay,
   getCourseVariants,
 } from "../../../utils/coursePrice";
+import { ORG_PHONE_1300, ORG_PHONE_MOBILE } from "../../../utils/organizationPhones";
 import ClientsSection from "../../landingPage/ClientsSection";
 
 // Order is now managed via Admin Dashboard (dbCategories.order)
@@ -268,9 +269,9 @@ export default function MobileLandingPage({ courses = [] }) {
       <div className="mlp-topbar">
         <span className="mlp-logo-text">Safety Training Academy</span>
         <div className="mlp-topbar-phones">
-          <a href="tel:1300976097" className="mlp-topbar-phone">1300 976097</a>
+          <a href={ORG_PHONE_1300.tel} className="mlp-topbar-phone">{ORG_PHONE_1300.display}</a>
           <span style={{ opacity: 0.5, color: "white" }}>|</span>
-          <a href="tel:0483878887" className="mlp-topbar-phone">0483 878887</a>
+          <a href={ORG_PHONE_MOBILE.tel} className="mlp-topbar-phone">{ORG_PHONE_MOBILE.display}</a>
         </div>
       </div>
       <PublicNavbar courses={courses} />
@@ -627,7 +628,7 @@ export default function MobileLandingPage({ courses = [] }) {
         >
           Enroll Now
         </button>
-        <a href="https://wa.me/611300976097" className="mlp-sticky-wa">
+        <a href={ORG_PHONE_1300.wa} className="mlp-sticky-wa">
           <span><i className="fa-brands fa-whatsapp"></i></span>
         </a>
       </div>

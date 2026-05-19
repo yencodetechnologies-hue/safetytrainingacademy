@@ -8,6 +8,7 @@ import ViewCourseDetailMobile from "../components/mobile/components/ViewCourseDe
 import { API_URL } from "../data/service"
 import { useNavigate, useLocation } from "react-router-dom"
 import { cdnImage } from "../utils/cdnImage"
+import { ORG_PHONE_1300 } from "../utils/organizationPhones"
 import BookingModal from "../components/course/BookingModal"
 import logo from "../assets/SafetyTrainingAcademylogo.png"
 import PdfViewer from '../components/common/PdfViewer';
@@ -749,7 +750,7 @@ function CourseDetails() {
                         <p className="cdp-sb-help-text">
                             Our team can answer questions about course suitability, dates, and group bookings.
                         </p>
-                        <a href="tel:1300976097" className="cdp-sb-btn-cyan">☎ 1300 976 097</a>
+                        <a href={ORG_PHONE_1300.tel} className="cdp-sb-btn-cyan">☎ {ORG_PHONE_1300.display}</a>
                         <a href="mailto:info@safetytrainingacademy.edu.au" className="cdp-sb-btn-ghost">✉ Email us</a>
                         <div className="cdp-sb-email">info@safetytrainingacademy.edu.au</div>
                     </div>
