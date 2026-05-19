@@ -387,7 +387,7 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
                   const sunday = isSunday(s.date);
                   const handleBook = (e) => {
                     e.stopPropagation();
-                    if (isVariantCourse && !shouldBypassModal) {
+                    if (isVariantCourse) {
                         setSelectedSession(s);
                         setShowModal(true);
                     } else {
@@ -434,7 +434,7 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
                       const sunday = isSunday(s.date);
                       return (
                         <div key={s.id} className="cdm-date-slot"  onClick={() => {
-                          if (isVariantCourse && !shouldBypassModal) {
+                          if (isVariantCourse) {
                               setSelectedSession(s);
                               setShowModal(true);
                           } else {
@@ -461,7 +461,7 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
                             className="cdm-book-slot-btn"
                             onClick={(e) => {
                               e.stopPropagation();
-                                if (isVariantCourse && !shouldBypassModal) {
+                                if (isVariantCourse) {
                                     setSelectedSession(s);
                                     setShowModal(true);
                                 } else {
@@ -614,7 +614,7 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
         <button
           className="cdm-sticky-book"
           onClick={() => {
-            if (isVariantCourse && !shouldBypassModal) {
+            if (isVariantCourse) {
               setShowModal(true);
             } else {
               const typePart = shouldBypassModal ? "?type=with-experience" : "";
@@ -623,7 +623,7 @@ export default function ViewCourseDetailMobile({ course, courses = [], fromPorta
             }
           }}
         >
-          Book Now — {price}
+          Book Now
         </button>
            <a href="https://wa.me/611300976097" className="vac-sticky-wa"><span><i class="fa-brands fa-whatsapp"></i></span></a>
       </div>

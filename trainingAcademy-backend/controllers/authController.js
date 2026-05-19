@@ -57,26 +57,24 @@ exports.login = async (req, res) => {
         isMatch = true;
       }
 
-      if (!isMatch) {
-        return res.status(400).json({ message: "Invalid Credentials" });
+      if (isMatch) {
+        const token = jwt.sign(
+          { id: student._id, role: "Student" },
+          process.env.JWT_SECRET,
+          { expiresIn: "1d" }
+        );
+
+        return res.json({
+          token,
+          user: {
+            id: student._id,
+            name: student.name,
+            email: student.email,
+            phone: student.phone,
+            role: "Student"
+          }
+        });
       }
-
-      const token = jwt.sign(
-        { id: student._id, role: "Student" },
-        process.env.JWT_SECRET,
-        { expiresIn: "1d" }
-      );
-
-      return res.json({
-        token,
-        user: {
-          id: student._id,
-          name: student.name,
-          email: student.email,
-          phone: student.phone,
-          role: "Student"
-        }
-      });
     }
 
     // 🔥 fallback → User (with case-insensitive fallback for legacy accounts)
@@ -87,45 +85,67 @@ exports.login = async (req, res) => {
       user = await User.findOne({ email: { $regex: new RegExp("^" + escapedEmail + "$", "i") } });
     }
 
-    if (!user) {
-      user = await Company.findOne({ email });
-      if (!user) {
-          const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-          user = await Company.findOne({ email: { $regex: new RegExp("^" + escapedEmail + "$", "i") } });
+    if (user) {
+      let isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch && user.role === "Student" && password === "123456") {
+        isMatch = true;
+      }
+
+      if (isMatch) {
+        const token = jwt.sign(
+          { id: user._id, role: user.role },
+          process.env.JWT_SECRET,
+          { expiresIn: "1d" }
+        );
+
+        return res.json({
+          token,
+          user: {
+            id: user._id,
+            name: user.name || user.email,
+            email: user.email,
+            phone: user.phone || user.mobileNumber || "",
+            mobileNumber: user.mobileNumber || user.phone || "",
+            role: user.role,
+            payLater: user.payLater || false
+          }
+        });
       }
     }
 
-    if (!user) {
-      return res.status(400).json({ message: "Invalid Credentials" });
+    // 🔥 fallback → Company (with case-insensitive fallback)
+    let company = await Company.findOne({ email });
+
+    if (!company) {
+      const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      company = await Company.findOne({ email: { $regex: new RegExp("^" + escapedEmail + "$", "i") } });
     }
 
-    let isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch && user.role === "Student" && password === "123456") {
-      isMatch = true;
-    }
+    if (company) {
+      let isMatch = await bcrypt.compare(password, company.password);
+      if (isMatch) {
+        const token = jwt.sign(
+          { id: company._id, role: company.role || "Company" },
+          process.env.JWT_SECRET,
+          { expiresIn: "1d" }
+        );
 
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid Credentials" });
-    }
-
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        name: user.name || user.companyName || user.email,
-        email: user.email,
-        phone: user.phone || user.mobileNumber || "", // ✅ added
-        mobileNumber: user.mobileNumber || user.phone || "", // ✅ added
-        role: user.role,
-        payLater: user.payLater || false // ✅ added
+        return res.json({
+          token,
+          user: {
+            id: company._id,
+            name: company.companyName || company.email,
+            email: company.email,
+            phone: company.phone || company.mobileNumber || "",
+            mobileNumber: company.mobileNumber || company.phone || "",
+            role: company.role || "Company",
+            payLater: company.payLater || false
+          }
+        });
       }
-    });
+    }
+
+    return res.status(400).json({ message: "Invalid Credentials" });
 
   } catch (err) {
     res.status(500).json({ message: "Server Error" });
