@@ -914,6 +914,7 @@ useEffect(() => {
  const fetchStudents = async () => {
   try {
     setLoading(true);
+    setError(null);
 
     const res = await fetch(
       `${API_URL}/api/students?page=${currentPage}&limit=${ITEMS_PER_PAGE}`
@@ -1017,11 +1018,7 @@ useEffect(() => {
     });
 }, [students, search, statusFilter]);
 
-  const totalPage = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const displayStudents = filtered;
 
 //   // ── CRUD Handlers ──────────────────────────────────────────────────────────
 // const fetchStudents = async () => {
@@ -1174,7 +1171,7 @@ setDeleteStudent(null);
       {/* Table */}
       <div className="sm-card sm-table-card">
         <div className="sm-table-header">
-          <h3 className="sm-card-title">Student Accounts ({filtered.length})</h3>
+          <h3 className="sm-card-title">Student Accounts ({total})</h3>
           <p className="sm-card-subtitle">Manage all student registrations and access</p>
         </div>
 
@@ -1206,14 +1203,14 @@ setDeleteStudent(null);
                 </tr>
               </thead>
               <tbody>
-                {students.length === 0 ? (
+                {displayStudents.length === 0 ? (
                   <tr>
                     <td colSpan={17} style={{ textAlign: "center", padding: "2rem", color: "#888" }}>
                       No students found.
                     </td>
                   </tr>
                 ) : (
-                  students.map((s) => (
+                  displayStudents.map((s) => (
                     <tr key={s.flowId}>
                       <td>
                         <div className="sm-date">{s.registerDate}</div>
@@ -1353,12 +1350,12 @@ setDeleteStudent(null);
         )}
 
         {/* Pagination */}
-        {!loading && !error && filtered.length > 0 && (
+        {!loading && !error && total > 0 && (
           <div className="sm-pagination">
             <span className="sm-pagination-info">
               Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{" "}
-              {Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)} of{" "}
-              {filtered.length} results
+              {Math.min(currentPage * ITEMS_PER_PAGE, total)} of{" "}
+              {total} results
             </span>
             <div className="sm-pagination-controls">
               <button

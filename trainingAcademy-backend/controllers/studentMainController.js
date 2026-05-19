@@ -423,9 +423,21 @@ exports.getAllStudents = async (req, res) => {
     const formIds = new Set();
 
     data.forEach(flow => {
-      if (flow.companyId) companyIds.add(flow.companyId.toString());
-      if (flow.sourceToken) linkIds.add(flow.sourceToken.toString());
-      if (flow.enrollmentFormId) formIds.add(flow.enrollmentFormId.toString());
+      const student = flow.studentId || {};
+      const resolvedCompanyId = flow.companyId || student.companyId;
+      if (resolvedCompanyId && mongoose.Types.ObjectId.isValid(resolvedCompanyId)) {
+        companyIds.add(resolvedCompanyId.toString());
+      }
+      if (
+        flow.source === "Enrollment Link" &&
+        flow.sourceToken &&
+        mongoose.Types.ObjectId.isValid(flow.sourceToken)
+      ) {
+        linkIds.add(flow.sourceToken.toString());
+      }
+      if (flow.enrollmentFormId && mongoose.Types.ObjectId.isValid(flow.enrollmentFormId)) {
+        formIds.add(flow.enrollmentFormId.toString());
+      }
     });
 
     // ✅ Bulk fetch (parallel)
